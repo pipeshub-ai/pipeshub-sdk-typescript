@@ -2,20 +2,20 @@
 
 ## Overview
 
+User group management operations
+
 ### Available Operations
 
-* [create](#create) - Create user group
-* [list](#list) - Get all user groups
-* [getById](#getbyid) - Get user group by ID
-* [update](#update) - Update user group
-* [delete](#delete) - Delete user group
-* [addUsers](#addusers) - Add users to group
-* [removeUsers](#removeusers) - Remove users from group
-* [getUsers](#getusers) - Get users in a group
-* [getUserGroups](#getusergroups) - Get groups for a user
-* [getStats](#getstats) - Get user group statistics
+* [createUserGroup](#createusergroup) - Create user group
+* [getAllUserGroups](#getallusergroups) - Get all user groups
+* [getUserGroupById](#getusergroupbyid) - Get user group by ID
+* [updateUserGroup](#updateusergroup) - Update user group
+* [deleteUserGroup](#deleteusergroup) - Delete user group
+* [addUsersToGroup](#adduserstogroup) - Add users to group
+* [removeUsersFromGroup](#removeusersfromgroup) - Remove users from group
+* [getGroupsForUser](#getgroupsforuser) - Get groups for a user
 
-## create
+## createUserGroup
 
 Create a new user group within the organization.<br><br>
 <b>Group Types:</b><br>
@@ -45,12 +45,13 @@ Create a new user group within the organization.<br><br>
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.userGroups.create({
+  const result = await pipeshub.userGroups.createUserGroup({
     name: "Engineering Team",
     type: "standard",
     description: "All engineering department members",
@@ -68,17 +69,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { userGroupsCreate } from "pipeshub/funcs/user-groups-create.js";
+import { userGroupsCreateUserGroup } from "pipeshub/funcs/user-groups-create-user-group.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await userGroupsCreate(pipeshub, {
+  const res = await userGroupsCreateUserGroup(pipeshub, {
     name: "Engineering Team",
     type: "standard",
     description: "All engineering department members",
@@ -87,7 +89,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("userGroupsCreate failed:", res.error);
+    console.log("userGroupsCreateUserGroup failed:", res.error);
   }
 }
 
@@ -113,7 +115,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## list
+## getAllUserGroups
 
 Retrieve all user groups in the organization.<br><br>
 <b>Response Details:</b><br>
@@ -137,12 +139,13 @@ Retrieve all user groups in the organization.<br><br>
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.userGroups.list();
+  const result = await pipeshub.userGroups.getAllUserGroups();
 
   console.log(result);
 }
@@ -156,22 +159,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { userGroupsList } from "pipeshub/funcs/user-groups-list.js";
+import { userGroupsGetAllUserGroups } from "pipeshub/funcs/user-groups-get-all-user-groups.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await userGroupsList(pipeshub);
+  const res = await userGroupsGetAllUserGroups(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("userGroupsList failed:", res.error);
+    console.log("userGroupsGetAllUserGroups failed:", res.error);
   }
 }
 
@@ -196,7 +200,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getById
+## getUserGroupById
 
 Retrieve detailed information about a specific user group.<br><br>
 <b>Response Includes:</b><br>
@@ -215,12 +219,13 @@ Retrieve detailed information about a specific user group.<br><br>
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.userGroups.getById({
+  const result = await pipeshub.userGroups.getUserGroupById({
     groupId: "507f1f77bcf86cd799439011",
   });
 
@@ -236,24 +241,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { userGroupsGetById } from "pipeshub/funcs/user-groups-get-by-id.js";
+import { userGroupsGetUserGroupById } from "pipeshub/funcs/user-groups-get-user-group-by-id.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await userGroupsGetById(pipeshub, {
+  const res = await userGroupsGetUserGroupById(pipeshub, {
     groupId: "507f1f77bcf86cd799439011",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("userGroupsGetById failed:", res.error);
+    console.log("userGroupsGetUserGroupById failed:", res.error);
   }
 }
 
@@ -279,7 +285,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## update
+## updateUserGroup
 
 Update an existing user group's information.<br><br>
 <b>Updatable Fields:</b><br>
@@ -297,12 +303,13 @@ Update an existing user group's information.<br><br>
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.userGroups.update({
+  const result = await pipeshub.userGroups.updateUserGroup({
     groupId: "507f1f77bcf86cd799439011",
     body: {
       name: "Engineering Team - Updated",
@@ -322,17 +329,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { userGroupsUpdate } from "pipeshub/funcs/user-groups-update.js";
+import { userGroupsUpdateUserGroup } from "pipeshub/funcs/user-groups-update-user-group.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await userGroupsUpdate(pipeshub, {
+  const res = await userGroupsUpdateUserGroup(pipeshub, {
     groupId: "507f1f77bcf86cd799439011",
     body: {
       name: "Engineering Team - Updated",
@@ -343,7 +351,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("userGroupsUpdate failed:", res.error);
+    console.log("userGroupsUpdateUserGroup failed:", res.error);
   }
 }
 
@@ -369,7 +377,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## delete
+## deleteUserGroup
 
 Soft delete a user group.<br><br>
 <b>Behavior:</b><br>
@@ -392,12 +400,13 @@ Soft delete a user group.<br><br>
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.userGroups.delete({
+  const result = await pipeshub.userGroups.deleteUserGroup({
     groupId: "507f1f77bcf86cd799439011",
   });
 
@@ -413,24 +422,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { userGroupsDelete } from "pipeshub/funcs/user-groups-delete.js";
+import { userGroupsDeleteUserGroup } from "pipeshub/funcs/user-groups-delete-user-group.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await userGroupsDelete(pipeshub, {
+  const res = await userGroupsDeleteUserGroup(pipeshub, {
     groupId: "507f1f77bcf86cd799439011",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("userGroupsDelete failed:", res.error);
+    console.log("userGroupsDeleteUserGroup failed:", res.error);
   }
 }
 
@@ -456,7 +466,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## addUsers
+## addUsersToGroup
 
 Add one or more users to a user group.<br><br>
 <b>Behavior:</b><br>
@@ -480,12 +490,13 @@ Add one or more users to a user group.<br><br>
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.userGroups.addUsers({
+  const result = await pipeshub.userGroups.addUsersToGroup({
     groupId: "507f1f77bcf86cd799439011",
     userIds: [
       "507f1f77bcf86cd799439012",
@@ -505,17 +516,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { userGroupsAddUsers } from "pipeshub/funcs/user-groups-add-users.js";
+import { userGroupsAddUsersToGroup } from "pipeshub/funcs/user-groups-add-users-to-group.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await userGroupsAddUsers(pipeshub, {
+  const res = await userGroupsAddUsersToGroup(pipeshub, {
     groupId: "507f1f77bcf86cd799439011",
     userIds: [
       "507f1f77bcf86cd799439012",
@@ -526,7 +538,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("userGroupsAddUsers failed:", res.error);
+    console.log("userGroupsAddUsersToGroup failed:", res.error);
   }
 }
 
@@ -552,7 +564,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## removeUsers
+## removeUsersFromGroup
 
 Remove one or more users from a user group.<br><br>
 <b>Behavior:</b><br>
@@ -574,12 +586,13 @@ Remove one or more users from a user group.<br><br>
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.userGroups.removeUsers({
+  const result = await pipeshub.userGroups.removeUsersFromGroup({
     groupId: "507f1f77bcf86cd799439011",
     userIds: [
       "507f1f77bcf86cd799439012",
@@ -598,17 +611,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { userGroupsRemoveUsers } from "pipeshub/funcs/user-groups-remove-users.js";
+import { userGroupsRemoveUsersFromGroup } from "pipeshub/funcs/user-groups-remove-users-from-group.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await userGroupsRemoveUsers(pipeshub, {
+  const res = await userGroupsRemoveUsersFromGroup(pipeshub, {
     groupId: "507f1f77bcf86cd799439011",
     userIds: [
       "507f1f77bcf86cd799439012",
@@ -618,7 +632,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("userGroupsRemoveUsers failed:", res.error);
+    console.log("userGroupsRemoveUsersFromGroup failed:", res.error);
   }
 }
 
@@ -644,89 +658,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getUsers
-
-Retrieve all users that belong to a specific user group.<br><br>
-<b>Response Details:</b><br>
-<ul>
-<li>Returns user profiles with basic information</li>
-<li>Supports pagination for large groups</li>
-<li>Excludes deleted users</li>
-</ul>
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="getUsersInGroup" method="get" path="/user-groups/{groupId}/users" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.userGroups.getUsers({
-    groupId: "507f1f77bcf86cd799439011",
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { userGroupsGetUsers } from "pipeshub/funcs/user-groups-get-users.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await userGroupsGetUsers(pipeshub, {
-    groupId: "507f1f77bcf86cd799439011",
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("userGroupsGetUsers failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.GetUsersInGroupRequest](../../models/operations/get-users-in-group-request.md)                                                                                     | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.GetUsersInGroupResponse](../../models/operations/get-users-in-group-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## getUserGroups
+## getGroupsForUser
 
 Retrieve all user groups that a specific user belongs to.<br><br>
 <b>Response Details:</b><br>
@@ -749,12 +681,13 @@ Retrieve all user groups that a specific user belongs to.<br><br>
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.userGroups.getUserGroups({
+  const result = await pipeshub.userGroups.getGroupsForUser({
     userId: "507f1f77bcf86cd799439012",
   });
 
@@ -770,24 +703,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { userGroupsGetUserGroups } from "pipeshub/funcs/user-groups-get-user-groups.js";
+import { userGroupsGetGroupsForUser } from "pipeshub/funcs/user-groups-get-groups-for-user.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await userGroupsGetUserGroups(pipeshub, {
+  const res = await userGroupsGetGroupsForUser(pipeshub, {
     userId: "507f1f77bcf86cd799439012",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("userGroupsGetUserGroups failed:", res.error);
+    console.log("userGroupsGetGroupsForUser failed:", res.error);
   }
 }
 
@@ -806,90 +740,6 @@ run();
 ### Response
 
 **Promise\<[operations.GetGroupsForUserResponse](../../models/operations/get-groups-for-user-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## getStats
-
-Retrieve statistics for all user groups in the organization.<br><br>
-<b>Statistics Include:</b><br>
-<ul>
-<li>Total number of groups by type</li>
-<li>Member counts per group</li>
-<li>Active vs deleted groups</li>
-<li>Recently created/modified groups</li>
-</ul>
-<b>Use Cases:</b><br>
-<ul>
-<li>Admin dashboard displays</li>
-<li>Organization analytics</li>
-<li>Capacity planning</li>
-</ul>
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="getUserGroupStats" method="get" path="/user-groups/stats/list" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.userGroups.getStats();
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { userGroupsGetStats } from "pipeshub/funcs/user-groups-get-stats.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await userGroupsGetStats(pipeshub);
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("userGroupsGetStats failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.GetUserGroupStatsResponse](../../models/operations/get-user-group-stats-response.md)\>**
 
 ### Errors
 

@@ -16,7 +16,7 @@ let value: Folder = {
 
 | Field                         | Type                          | Required                      | Description                   |
 | ----------------------------- | ----------------------------- | ----------------------------- | ----------------------------- |
-| `key`                         | *string*                      | :heavy_minus_sign:            | Unique folder identifier      |
+| `id`                          | *string*                      | :heavy_minus_sign:            | Unique folder identifier      |
 | `name`                        | *string*                      | :heavy_check_mark:            | Name of the folder            |
 | `parentId`                    | *string*                      | :heavy_minus_sign:            | Parent folder or KB ID        |
 | `kbId`                        | *string*                      | :heavy_check_mark:            | Knowledge base ID             |

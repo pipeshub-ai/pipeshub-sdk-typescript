@@ -3,6 +3,11 @@
  */
 
 import * as z from "zod/v4-mini";
+import { safeParse } from "../../lib/schemas.js";
+import { Result as SafeParseResult } from "../../types/fp.js";
+import * as types from "../../types/primitives.js";
+import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
 
 export type GetRecordByIdRequest = {
   /**
@@ -13,6 +18,54 @@ export type GetRecordByIdRequest = {
    * Optional format to convert the file to
    */
   convertTo?: string | undefined;
+};
+
+export type KnowledgeBase = {
+  id?: string | undefined;
+  name?: string | undefined;
+  orgId?: string | undefined;
+};
+
+export type Folder = {};
+
+export type Department = {};
+
+export type Category = {};
+
+export type Topic = {};
+
+export type Language = {};
+
+export type Metadata = {
+  departments?: Array<Department> | undefined;
+  categories?: Array<Category> | undefined;
+  topics?: Array<Topic> | undefined;
+  languages?: Array<Language> | undefined;
+};
+
+export type Permission = {
+  id?: string | undefined;
+  name?: string | undefined;
+  type?: string | undefined;
+  relationship?: string | undefined;
+  accessType?: string | undefined;
+};
+
+/**
+ * Successful operation
+ */
+export type GetRecordByIdResponse = {
+  /**
+   * A record represents a single document, file, or content item within a knowledge base.
+   *
+   * @remarks
+   * Records can originate from file uploads or external connectors (Google Drive, OneDrive, etc.).
+   */
+  record?: models.RecordT | undefined;
+  knowledgeBase?: KnowledgeBase | undefined;
+  folder?: Folder | null | undefined;
+  metadata?: Metadata | undefined;
+  permissions?: Array<Permission> | undefined;
 };
 
 /** @internal */
@@ -35,5 +88,158 @@ export function getRecordByIdRequestToJSON(
 ): string {
   return JSON.stringify(
     GetRecordByIdRequest$outboundSchema.parse(getRecordByIdRequest),
+  );
+}
+
+/** @internal */
+export const KnowledgeBase$inboundSchema: z.ZodMiniType<
+  KnowledgeBase,
+  unknown
+> = z.object({
+  id: types.optional(types.string()),
+  name: types.optional(types.string()),
+  orgId: types.optional(types.string()),
+});
+
+export function knowledgeBaseFromJSON(
+  jsonString: string,
+): SafeParseResult<KnowledgeBase, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => KnowledgeBase$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'KnowledgeBase' from JSON`,
+  );
+}
+
+/** @internal */
+export const Folder$inboundSchema: z.ZodMiniType<Folder, unknown> = z.object(
+  {},
+);
+
+export function folderFromJSON(
+  jsonString: string,
+): SafeParseResult<Folder, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Folder$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Folder' from JSON`,
+  );
+}
+
+/** @internal */
+export const Department$inboundSchema: z.ZodMiniType<Department, unknown> = z
+  .object({});
+
+export function departmentFromJSON(
+  jsonString: string,
+): SafeParseResult<Department, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Department$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Department' from JSON`,
+  );
+}
+
+/** @internal */
+export const Category$inboundSchema: z.ZodMiniType<Category, unknown> = z
+  .object({});
+
+export function categoryFromJSON(
+  jsonString: string,
+): SafeParseResult<Category, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Category$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Category' from JSON`,
+  );
+}
+
+/** @internal */
+export const Topic$inboundSchema: z.ZodMiniType<Topic, unknown> = z.object({});
+
+export function topicFromJSON(
+  jsonString: string,
+): SafeParseResult<Topic, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Topic$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Topic' from JSON`,
+  );
+}
+
+/** @internal */
+export const Language$inboundSchema: z.ZodMiniType<Language, unknown> = z
+  .object({});
+
+export function languageFromJSON(
+  jsonString: string,
+): SafeParseResult<Language, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Language$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Language' from JSON`,
+  );
+}
+
+/** @internal */
+export const Metadata$inboundSchema: z.ZodMiniType<Metadata, unknown> = z
+  .object({
+    departments: types.optional(
+      z.array(z.lazy(() => Department$inboundSchema)),
+    ),
+    categories: types.optional(z.array(z.lazy(() => Category$inboundSchema))),
+    topics: types.optional(z.array(z.lazy(() => Topic$inboundSchema))),
+    languages: types.optional(z.array(z.lazy(() => Language$inboundSchema))),
+  });
+
+export function metadataFromJSON(
+  jsonString: string,
+): SafeParseResult<Metadata, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Metadata$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Metadata' from JSON`,
+  );
+}
+
+/** @internal */
+export const Permission$inboundSchema: z.ZodMiniType<Permission, unknown> = z
+  .object({
+    id: types.optional(types.string()),
+    name: types.optional(types.string()),
+    type: types.optional(types.string()),
+    relationship: types.optional(types.string()),
+    accessType: types.optional(types.string()),
+  });
+
+export function permissionFromJSON(
+  jsonString: string,
+): SafeParseResult<Permission, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Permission$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Permission' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetRecordByIdResponse$inboundSchema: z.ZodMiniType<
+  GetRecordByIdResponse,
+  unknown
+> = z.object({
+  record: types.optional(models.RecordT$inboundSchema),
+  knowledgeBase: types.optional(z.lazy(() => KnowledgeBase$inboundSchema)),
+  folder: z.optional(z.nullable(z.lazy(() => Folder$inboundSchema))),
+  metadata: types.optional(z.lazy(() => Metadata$inboundSchema)),
+  permissions: types.optional(z.array(z.lazy(() => Permission$inboundSchema))),
+});
+
+export function getRecordByIdResponseFromJSON(
+  jsonString: string,
+): SafeParseResult<GetRecordByIdResponse, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetRecordByIdResponse$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetRecordByIdResponse' from JSON`,
   );
 }

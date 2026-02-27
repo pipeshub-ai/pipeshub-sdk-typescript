@@ -10,9 +10,6 @@ import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
-/**
- * Permission role
- */
 export const KBPermissionRole = {
   Owner: "OWNER",
   Organizer: "ORGANIZER",
@@ -21,36 +18,44 @@ export const KBPermissionRole = {
   Commenter: "COMMENTER",
   Reader: "READER",
 } as const;
-/**
- * Permission role
- */
 export type KBPermissionRole = OpenEnum<typeof KBPermissionRole>;
 
+/**
+ * Whether permission is for a user or team
+ */
+export const KBPermissionType = {
+  User: "USER",
+  Team: "TEAM",
+} as const;
+/**
+ * Whether permission is for a user or team
+ */
+export type KBPermissionType = OpenEnum<typeof KBPermissionType>;
+
 export type KBPermission = {
+  /**
+   * Permission entry ID
+   */
+  id?: string | undefined;
   /**
    * User ID
    */
   userId?: string | undefined;
   /**
-   * Team ID
+   * User email
    */
-  teamId?: string | undefined;
+  email?: string | undefined;
   /**
-   * Permission role
+   * User display name
    */
+  name?: string | undefined;
   role?: KBPermissionRole | undefined;
   /**
-   * Knowledge base ID
+   * Whether permission is for a user or team
    */
-  kbId?: string | undefined;
-  /**
-   * User ID who granted the permission
-   */
-  grantedBy?: string | undefined;
-  /**
-   * Timestamp when permission was granted
-   */
-  grantedAt?: number | undefined;
+  type?: KBPermissionType | undefined;
+  createdAtTimestamp?: number | undefined;
+  updatedAtTimestamp?: number | undefined;
 };
 
 /** @internal */
@@ -60,14 +65,22 @@ export const KBPermissionRole$inboundSchema: z.ZodMiniType<
 > = openEnums.inboundSchema(KBPermissionRole);
 
 /** @internal */
+export const KBPermissionType$inboundSchema: z.ZodMiniType<
+  KBPermissionType,
+  unknown
+> = openEnums.inboundSchema(KBPermissionType);
+
+/** @internal */
 export const KBPermission$inboundSchema: z.ZodMiniType<KBPermission, unknown> =
   z.object({
+    id: types.optional(types.string()),
     userId: types.optional(types.string()),
-    teamId: types.optional(types.string()),
+    email: types.optional(types.string()),
+    name: types.optional(types.string()),
     role: types.optional(KBPermissionRole$inboundSchema),
-    kbId: types.optional(types.string()),
-    grantedBy: types.optional(types.string()),
-    grantedAt: types.optional(types.number()),
+    type: types.optional(KBPermissionType$inboundSchema),
+    createdAtTimestamp: types.optional(types.number()),
+    updatedAtTimestamp: types.optional(types.number()),
   });
 
 export function kbPermissionFromJSON(

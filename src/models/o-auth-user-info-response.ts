@@ -17,9 +17,9 @@ import { SDKValidationError } from "./errors/sdk-validation-error.js";
  */
 export type OAuthUserInfoResponse = {
   /**
-   * Subject identifier (user ID)
+   * User ID
    */
-  sub: string;
+  userId: string;
   /**
    * Full name
    */
@@ -56,7 +56,7 @@ export const OAuthUserInfoResponse$inboundSchema: z.ZodMiniType<
   unknown
 > = z.pipe(
   z.object({
-    sub: types.string(),
+    user_id: types.string(),
     name: types.optional(types.string()),
     given_name: types.optional(types.string()),
     family_name: types.optional(types.string()),
@@ -67,6 +67,7 @@ export const OAuthUserInfoResponse$inboundSchema: z.ZodMiniType<
   }),
   z.transform((v) => {
     return remap$(v, {
+      "user_id": "userId",
       "given_name": "givenName",
       "family_name": "familyName",
       "email_verified": "emailVerified",

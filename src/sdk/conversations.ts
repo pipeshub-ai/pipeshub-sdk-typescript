@@ -4,19 +4,18 @@
 
 import { conversationsAddMessageStream } from "../funcs/conversations-add-message-stream.js";
 import { conversationsAddMessage } from "../funcs/conversations-add-message.js";
-import { conversationsCreate } from "../funcs/conversations-create.js";
-import { conversationsDelete } from "../funcs/conversations-delete.js";
-import { conversationsGet } from "../funcs/conversations-get.js";
-import { conversationsListArchived } from "../funcs/conversations-list-archived.js";
-import { conversationsList } from "../funcs/conversations-list.js";
-import { conversationsPatchArchive } from "../funcs/conversations-patch-archive.js";
+import { conversationsArchiveConversation } from "../funcs/conversations-archive-conversation.js";
+import { conversationsCreateConversation } from "../funcs/conversations-create-conversation.js";
+import { conversationsDeleteConversationById } from "../funcs/conversations-delete-conversation-by-id.js";
+import { conversationsGetAllConversations } from "../funcs/conversations-get-all-conversations.js";
+import { conversationsGetArchivedConversations } from "../funcs/conversations-get-archived-conversations.js";
+import { conversationsGetConversationById } from "../funcs/conversations-get-conversation-by-id.js";
 import { conversationsRegenerateAnswer } from "../funcs/conversations-regenerate-answer.js";
-import { conversationsShare } from "../funcs/conversations-share.js";
-import { conversationsStream } from "../funcs/conversations-stream.js";
-import { conversationsUnarchive } from "../funcs/conversations-unarchive.js";
-import { conversationsUnshare } from "../funcs/conversations-unshare.js";
+import { conversationsShareConversation } from "../funcs/conversations-share-conversation.js";
+import { conversationsStreamChat } from "../funcs/conversations-stream-chat.js";
+import { conversationsUnarchiveConversation } from "../funcs/conversations-unarchive-conversation.js";
+import { conversationsUpdateConversationTitle } from "../funcs/conversations-update-conversation-title.js";
 import { conversationsUpdateMessageFeedback } from "../funcs/conversations-update-message-feedback.js";
-import { conversationsUpdateTitle } from "../funcs/conversations-update-title.js";
 import { EventStream } from "../lib/event-streams.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
 import * as models from "../models/index.js";
@@ -51,11 +50,11 @@ export class Conversations extends ClientSDK {
    * Use <code>modelKey</code> to select different AI models configured for your organization.
    * Each model may have different capabilities, speed, and accuracy trade-offs.
    */
-  async create(
+  async createConversation(
     request: models.CreateConversationRequest,
     options?: RequestOptions,
   ): Promise<models.Conversation> {
-    return unwrapAsync(conversationsCreate(
+    return unwrapAsync(conversationsCreateConversation(
       this,
       request,
       options,
@@ -90,11 +89,11 @@ export class Conversations extends ClientSDK {
    * If an error occurs mid-stream, an <code>error</code> event is sent and the stream closes.
    * The conversation is marked as FAILED with the error reason stored.
    */
-  async stream(
+  async streamChat(
     request: models.CreateConversationRequest,
     options?: RequestOptions,
   ): Promise<EventStream<models.SSEEvent>> {
-    return unwrapAsync(conversationsStream(
+    return unwrapAsync(conversationsStreamChat(
       this,
       request,
       options,
@@ -117,10 +116,10 @@ export class Conversations extends ClientSDK {
    * <b>Sorting:</b><br>
    * Conversations are sorted by last activity timestamp (most recent first).
    */
-  async list(
+  async getAllConversations(
     options?: RequestOptions,
-  ): Promise<Array<models.Conversation>> {
-    return unwrapAsync(conversationsList(
+  ): Promise<operations.GetAllConversationsResponse> {
+    return unwrapAsync(conversationsGetAllConversations(
       this,
       options,
     ));
@@ -138,10 +137,10 @@ export class Conversations extends ClientSDK {
    * Use <code>PATCH /conversations/{id}/unarchive</code> to restore a conversation
    * to the active list.
    */
-  async listArchived(
+  async getArchivedConversations(
     options?: RequestOptions,
-  ): Promise<Array<models.Conversation>> {
-    return unwrapAsync(conversationsListArchived(
+  ): Promise<operations.GetArchivedConversationsResponse> {
+    return unwrapAsync(conversationsGetArchivedConversations(
       this,
       options,
     ));
@@ -166,11 +165,11 @@ export class Conversations extends ClientSDK {
    * <b>Access Control:</b><br>
    * Users can access conversations they own or that have been shared with them.
    */
-  async get(
+  async getConversationById(
     request: operations.GetConversationByIdRequest,
     options?: RequestOptions,
   ): Promise<operations.GetConversationByIdResponse> {
-    return unwrapAsync(conversationsGet(
+    return unwrapAsync(conversationsGetConversationById(
       this,
       request,
       options,
@@ -189,11 +188,11 @@ export class Conversations extends ClientSDK {
    * Only the conversation owner (initiator) can delete it.
    * Shared users cannot delete conversations.
    */
-  async delete(
+  async deleteConversationById(
     request: operations.DeleteConversationByIdRequest,
     options?: RequestOptions,
   ): Promise<operations.DeleteConversationByIdResponse> {
-    return unwrapAsync(conversationsDelete(
+    return unwrapAsync(conversationsDeleteConversationById(
       this,
       request,
       options,
@@ -268,33 +267,11 @@ export class Conversations extends ClientSDK {
    * Only the conversation initiator (owner) can share. Users must belong
    * to the same organization.
    */
-  async share(
+  async shareConversation(
     request: operations.ShareConversationRequest,
     options?: RequestOptions,
   ): Promise<models.Conversation> {
-    return unwrapAsync(conversationsShare(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
-   * Revoke conversation access
-   *
-   * @remarks
-   * Remove sharing access from users.<br><br>
-   * <b>Overview:</b><br>
-   * Removes specified users from the conversation's sharedWith list.
-   * Those users will no longer be able to access the conversation.<br><br>
-   * <b>Permissions:</b><br>
-   * Only the conversation owner can revoke access.
-   */
-  async unshare(
-    request: operations.UnshareConversationRequest,
-    options?: RequestOptions,
-  ): Promise<models.Conversation> {
-    return unwrapAsync(conversationsUnshare(
+    return unwrapAsync(conversationsShareConversation(
       this,
       request,
       options,
@@ -315,11 +292,11 @@ export class Conversations extends ClientSDK {
    * <li>Maximum: 200 characters</li>
    * </ul>
    */
-  async updateTitle(
+  async updateConversationTitle(
     request: operations.UpdateConversationTitleRequest,
     options?: RequestOptions,
   ): Promise<models.Conversation> {
-    return unwrapAsync(conversationsUpdateTitle(
+    return unwrapAsync(conversationsUpdateConversationTitle(
       this,
       request,
       options,
@@ -337,11 +314,11 @@ export class Conversations extends ClientSDK {
    * <b>Retrieval:</b><br>
    * View archived conversations using <code>GET /conversations/show/archives</code>.
    */
-  async patchArchive(
+  async archiveConversation(
     request: operations.ArchiveConversationRequest,
     options?: RequestOptions,
   ): Promise<models.Conversation> {
-    return unwrapAsync(conversationsPatchArchive(
+    return unwrapAsync(conversationsArchiveConversation(
       this,
       request,
       options,
@@ -356,11 +333,11 @@ export class Conversations extends ClientSDK {
    * <b>Overview:</b><br>
    * Removes the archived flag, making the conversation visible in the main list again.
    */
-  async unarchive(
+  async unarchiveConversation(
     request: operations.UnarchiveConversationRequest,
     options?: RequestOptions,
   ): Promise<models.Conversation> {
-    return unwrapAsync(conversationsUnarchive(
+    return unwrapAsync(conversationsUnarchiveConversation(
       this,
       request,
       options,

@@ -4,7 +4,7 @@
 
 import * as z from "zod/v4-mini";
 
-export type UpdateAgentLlmConfig = {};
+export type UpdateAgentModelConfig = {};
 
 /**
  * Request body for Update agent
@@ -15,7 +15,7 @@ export type UpdateAgentRequestBody = {
   systemPrompt?: string | undefined;
   tools?: Array<string> | undefined;
   knowledgeBases?: Array<string> | undefined;
-  llmConfig?: UpdateAgentLlmConfig | undefined;
+  modelConfig?: UpdateAgentModelConfig | undefined;
   isPublic?: boolean | undefined;
 };
 
@@ -28,19 +28,19 @@ export type UpdateAgentRequest = {
 };
 
 /** @internal */
-export type UpdateAgentLlmConfig$Outbound = {};
+export type UpdateAgentModelConfig$Outbound = {};
 
 /** @internal */
-export const UpdateAgentLlmConfig$outboundSchema: z.ZodMiniType<
-  UpdateAgentLlmConfig$Outbound,
-  UpdateAgentLlmConfig
+export const UpdateAgentModelConfig$outboundSchema: z.ZodMiniType<
+  UpdateAgentModelConfig$Outbound,
+  UpdateAgentModelConfig
 > = z.object({});
 
-export function updateAgentLlmConfigToJSON(
-  updateAgentLlmConfig: UpdateAgentLlmConfig,
+export function updateAgentModelConfigToJSON(
+  updateAgentModelConfig: UpdateAgentModelConfig,
 ): string {
   return JSON.stringify(
-    UpdateAgentLlmConfig$outboundSchema.parse(updateAgentLlmConfig),
+    UpdateAgentModelConfig$outboundSchema.parse(updateAgentModelConfig),
   );
 }
 
@@ -51,7 +51,7 @@ export type UpdateAgentRequestBody$Outbound = {
   systemPrompt?: string | undefined;
   tools?: Array<string> | undefined;
   knowledgeBases?: Array<string> | undefined;
-  llmConfig?: UpdateAgentLlmConfig$Outbound | undefined;
+  modelConfig?: UpdateAgentModelConfig$Outbound | undefined;
   isPublic?: boolean | undefined;
 };
 
@@ -65,7 +65,7 @@ export const UpdateAgentRequestBody$outboundSchema: z.ZodMiniType<
   systemPrompt: z.optional(z.string()),
   tools: z.optional(z.array(z.string())),
   knowledgeBases: z.optional(z.array(z.string())),
-  llmConfig: z.optional(z.lazy(() => UpdateAgentLlmConfig$outboundSchema)),
+  modelConfig: z.optional(z.lazy(() => UpdateAgentModelConfig$outboundSchema)),
   isPublic: z.optional(z.boolean()),
 });
 

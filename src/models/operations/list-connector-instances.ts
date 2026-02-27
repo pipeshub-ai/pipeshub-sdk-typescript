@@ -13,7 +13,7 @@ export type ListConnectorInstancesRequest = {
   /**
    * Filter by scope (team or personal)
    */
-  scope?: models.ConnectorScope | undefined;
+  scope: models.ConnectorScope;
   page?: number | undefined;
   limit?: number | undefined;
   /**
@@ -36,7 +36,7 @@ export type ListConnectorInstancesResponse = {
 
 /** @internal */
 export type ListConnectorInstancesRequest$Outbound = {
-  scope?: string | undefined;
+  scope: string;
   page: number;
   limit: number;
   search?: string | undefined;
@@ -47,7 +47,7 @@ export const ListConnectorInstancesRequest$outboundSchema: z.ZodMiniType<
   ListConnectorInstancesRequest$Outbound,
   ListConnectorInstancesRequest
 > = z.object({
-  scope: z.optional(models.ConnectorScope$outboundSchema),
+  scope: models.ConnectorScope$outboundSchema,
   page: z._default(z.int(), 1),
   limit: z._default(z.int(), 20),
   search: z.optional(z.string()),

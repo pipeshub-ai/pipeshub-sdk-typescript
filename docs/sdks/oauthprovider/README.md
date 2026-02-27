@@ -1,16 +1,35 @@
-# OauthProvider
+# OAuthProvider
 
 ## Overview
 
+PipesHub OAuth 2.0 Authorization Server implementing RFC 6749, RFC 7636 (PKCE), and OpenID Connect.
+
+**Supported Grant Types:**
+- `authorization_code` - Standard OAuth flow with PKCE support
+- `client_credentials` - Machine-to-machine authentication
+- `refresh_token` - Token refresh for long-lived access
+
+**Security Features:**
+- PKCE (Proof Key for Code Exchange) for public clients
+- State parameter for CSRF protection
+- Configurable token lifetimes
+- Token revocation and introspection
+
+**OpenID Connect:**
+- ID tokens with standard claims
+- UserInfo endpoint for profile data
+- Discovery endpoint for automatic configuration
+
+
 ### Available Operations
 
-* [authorize](#authorize) - Initiate OAuth authorization flow
-* [submitConsent](#submitconsent) - Submit authorization consent
-* [exchange](#exchange) - Exchange authorization code for tokens
-* [revokeToken](#revoketoken) - Revoke an access or refresh token
-* [introspect](#introspect) - Introspect a token
+* [oauthAuthorize](#oauthauthorize) - Initiate OAuth authorization flow
+* [oauthAuthorizeConsent](#oauthauthorizeconsent) - Submit authorization consent
+* [oauthToken](#oauthtoken) - Exchange authorization code for tokens
+* [oauthRevoke](#oauthrevoke) - Revoke an access or refresh token
+* [oauthIntrospect](#oauthintrospect) - Introspect a token
 
-## authorize
+## oauthAuthorize
 
 OAuth 2.0 Authorization Endpoint (RFC 6749 Section 4.1.1).
 <br><br>
@@ -41,12 +60,10 @@ to authorize access to their account.
 ```typescript
 import { Pipeshub } from "pipeshub";
 
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new Pipeshub();
 
 async function run() {
-  const result = await pipeshub.oauthProvider.authorize({
+  const result = await pipeshub.oAuthProvider.oauthAuthorize({
     responseType: "code",
     clientId: "<id>",
     redirectUri: "https://coordinated-dime.biz/",
@@ -66,16 +83,14 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { oauthProviderAuthorize } from "pipeshub/funcs/oauth-provider-authorize.js";
+import { oAuthProviderOauthAuthorize } from "pipeshub/funcs/o-auth-provider-oauth-authorize.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new PipeshubCore();
 
 async function run() {
-  const res = await oauthProviderAuthorize(pipeshub, {
+  const res = await oAuthProviderOauthAuthorize(pipeshub, {
     responseType: "code",
     clientId: "<id>",
     redirectUri: "https://coordinated-dime.biz/",
@@ -86,7 +101,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("oauthProviderAuthorize failed:", res.error);
+    console.log("oAuthProviderOauthAuthorize failed:", res.error);
   }
 }
 
@@ -113,7 +128,7 @@ run();
 | errors.OAuthErrorResponse   | 400                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## submitConsent
+## oauthAuthorizeConsent
 
 Submit user's consent decision for OAuth authorization.
 <br><br>
@@ -132,12 +147,13 @@ This endpoint generates an authorization code if consent is granted.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.oauthProvider.submitConsent({
+  const result = await pipeshub.oAuthProvider.oauthAuthorizeConsent({
     clientId: "<id>",
     redirectUri: "https://excellent-license.com",
     scope: "<value>",
@@ -157,17 +173,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { oauthProviderSubmitConsent } from "pipeshub/funcs/oauth-provider-submit-consent.js";
+import { oAuthProviderOauthAuthorizeConsent } from "pipeshub/funcs/o-auth-provider-oauth-authorize-consent.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await oauthProviderSubmitConsent(pipeshub, {
+  const res = await oAuthProviderOauthAuthorizeConsent(pipeshub, {
     clientId: "<id>",
     redirectUri: "https://excellent-license.com",
     scope: "<value>",
@@ -178,7 +195,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("oauthProviderSubmitConsent failed:", res.error);
+    console.log("oAuthProviderOauthAuthorizeConsent failed:", res.error);
   }
 }
 
@@ -205,7 +222,7 @@ run();
 | errors.OAuthErrorResponse   | 400                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## exchange
+## oauthToken
 
 OAuth 2.0 Token Endpoint (RFC 6749 Section 4.1.3).
 <br><br>
@@ -232,12 +249,10 @@ verified against the stored code challenge.
 ```typescript
 import { Pipeshub } from "pipeshub";
 
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new Pipeshub();
 
 async function run() {
-  const result = await pipeshub.oauthProvider.exchange({
+  const result = await pipeshub.oAuthProvider.oauthToken({
     grantType: "client_credentials",
   });
 
@@ -253,23 +268,21 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { oauthProviderExchange } from "pipeshub/funcs/oauth-provider-exchange.js";
+import { oAuthProviderOauthToken } from "pipeshub/funcs/o-auth-provider-oauth-token.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new PipeshubCore();
 
 async function run() {
-  const res = await oauthProviderExchange(pipeshub, {
+  const res = await oAuthProviderOauthToken(pipeshub, {
     grantType: "client_credentials",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("oauthProviderExchange failed:", res.error);
+    console.log("oAuthProviderOauthToken failed:", res.error);
   }
 }
 
@@ -296,7 +309,7 @@ run();
 | errors.OAuthErrorResponse   | 400, 401                    | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## revokeToken
+## oauthRevoke
 
 OAuth 2.0 Token Revocation Endpoint (RFC 7009).
 <br><br>
@@ -318,12 +331,10 @@ Revoking a refresh token also invalidates associated access tokens.
 ```typescript
 import { Pipeshub } from "pipeshub";
 
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new Pipeshub();
 
 async function run() {
-  await pipeshub.oauthProvider.revokeToken({
+  await pipeshub.oAuthProvider.oauthRevoke({
     token: "<value>",
     clientId: "<id>",
   });
@@ -340,16 +351,14 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { oauthProviderRevokeToken } from "pipeshub/funcs/oauth-provider-revoke-token.js";
+import { oAuthProviderOauthRevoke } from "pipeshub/funcs/o-auth-provider-oauth-revoke.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new PipeshubCore();
 
 async function run() {
-  const res = await oauthProviderRevokeToken(pipeshub, {
+  const res = await oAuthProviderOauthRevoke(pipeshub, {
     token: "<value>",
     clientId: "<id>",
   });
@@ -357,7 +366,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("oauthProviderRevokeToken failed:", res.error);
+    console.log("oAuthProviderOauthRevoke failed:", res.error);
   }
 }
 
@@ -384,7 +393,7 @@ run();
 | errors.OAuthErrorResponse   | 401                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## introspect
+## oauthIntrospect
 
 OAuth 2.0 Token Introspection Endpoint (RFC 7662).
 <br><br>
@@ -406,12 +415,10 @@ Check if a token is active and retrieve its metadata.
 ```typescript
 import { Pipeshub } from "pipeshub";
 
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new Pipeshub();
 
 async function run() {
-  const result = await pipeshub.oauthProvider.introspect({
+  const result = await pipeshub.oAuthProvider.oauthIntrospect({
     token: "<value>",
     clientId: "<id>",
   });
@@ -428,16 +435,14 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { oauthProviderIntrospect } from "pipeshub/funcs/oauth-provider-introspect.js";
+import { oAuthProviderOauthIntrospect } from "pipeshub/funcs/o-auth-provider-oauth-introspect.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new PipeshubCore();
 
 async function run() {
-  const res = await oauthProviderIntrospect(pipeshub, {
+  const res = await oAuthProviderOauthIntrospect(pipeshub, {
     token: "<value>",
     clientId: "<id>",
   });
@@ -445,7 +450,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("oauthProviderIntrospect failed:", res.error);
+    console.log("oAuthProviderOauthIntrospect failed:", res.error);
   }
 }
 
@@ -457,12 +462,10 @@ run();
 ```typescript
 import { Pipeshub } from "pipeshub";
 
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new Pipeshub();
 
 async function run() {
-  const result = await pipeshub.oauthProvider.introspect({
+  const result = await pipeshub.oAuthProvider.oauthIntrospect({
     token: "<value>",
     clientId: "<id>",
   });
@@ -479,16 +482,14 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { oauthProviderIntrospect } from "pipeshub/funcs/oauth-provider-introspect.js";
+import { oAuthProviderOauthIntrospect } from "pipeshub/funcs/o-auth-provider-oauth-introspect.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new PipeshubCore();
 
 async function run() {
-  const res = await oauthProviderIntrospect(pipeshub, {
+  const res = await oAuthProviderOauthIntrospect(pipeshub, {
     token: "<value>",
     clientId: "<id>",
   });
@@ -496,7 +497,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("oauthProviderIntrospect failed:", res.error);
+    console.log("oAuthProviderOauthIntrospect failed:", res.error);
   }
 }
 

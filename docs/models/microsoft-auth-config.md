@@ -16,5 +16,5 @@ let value: MicrosoftAuthConfig = {
 
 | Field                                | Type                                 | Required                             | Description                          | Example                              |
 | ------------------------------------ | ------------------------------------ | ------------------------------------ | ------------------------------------ | ------------------------------------ |
-| `clientId`                           | *string*                             | :heavy_check_mark:                   | Microsoft application client ID      | 12345678-1234-1234-1234-123456789abc |
+| `clientId`                           | *string*                             | :heavy_minus_sign:                   | Microsoft application client ID      | 12345678-1234-1234-1234-123456789abc |
 | `tenantId`                           | *string*                             | :heavy_minus_sign:                   | Microsoft tenant ID                  |                                      |

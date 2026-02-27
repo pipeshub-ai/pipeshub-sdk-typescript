@@ -27,6 +27,8 @@ export type Model = {
  * Available models retrieved
  */
 export type GetAvailableModelsByTypeResponse = {
+  status?: string | undefined;
+  message?: string | undefined;
   models?: Array<Model> | undefined;
 };
 
@@ -76,6 +78,8 @@ export const GetAvailableModelsByTypeResponse$inboundSchema: z.ZodMiniType<
   GetAvailableModelsByTypeResponse,
   unknown
 > = z.object({
+  status: types.optional(types.string()),
+  message: types.optional(types.string()),
   models: types.optional(z.array(z.lazy(() => Model$inboundSchema))),
 });
 

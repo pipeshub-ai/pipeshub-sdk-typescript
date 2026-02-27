@@ -7,8 +7,5 @@ export * from "./http-client-errors.js";
 export * from "./o-auth-error-response.js";
 export * from "./pipeshub-default-error.js";
 export * from "./pipeshub-error.js";
-export * from "./query-service-health-check.js";
-export * from "./query-service-health.js";
 export * from "./response-validation-error.js";
 export * from "./sdk-validation-error.js";
-export * from "./send-email.js";

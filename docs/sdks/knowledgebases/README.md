@@ -2,17 +2,19 @@
 
 ## Overview
 
+Knowledge base management operations
+
 ### Available Operations
 
-* [create](#create) - Create a new knowledge base
-* [list](#list) - List all knowledge bases
-* [get](#get) - Get knowledge base by ID
-* [update](#update) - Update knowledge base
-* [delete](#delete) - Delete knowledge base
-* [getRootNodes](#getrootnodes) - Get knowledge hub root nodes
-* [getHubChildNodes](#gethubchildnodes) - Get knowledge hub child nodes
+* [createKnowledgeBase](#createknowledgebase) - Create a new knowledge base
+* [listKnowledgeBases](#listknowledgebases) - List all knowledge bases
+* [getKnowledgeBase](#getknowledgebase) - Get knowledge base by ID
+* [updateKnowledgeBase](#updateknowledgebase) - Update knowledge base
+* [deleteKnowledgeBase](#deleteknowledgebase) - Delete knowledge base
+* [getKnowledgeHubRootNodes](#getknowledgehubrootnodes) - Get knowledge hub root nodes
+* [getKnowledgeHubChildNodes](#getknowledgehubchildnodes) - Get knowledge hub child nodes
 
-## create
+## createKnowledgeBase
 
 Create a new knowledge base for organizing and managing documents within your organization.<br><br>
 <b>Overview:</b><br>
@@ -42,12 +44,13 @@ The user creating the KB automatically becomes the OWNER with full administrativ
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.knowledgeBases.create({
+  const result = await pipeshub.knowledgeBases.createKnowledgeBase({
     kbName: "Product Documentation",
   });
 
@@ -63,24 +66,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { knowledgeBasesCreate } from "pipeshub/funcs/knowledge-bases-create.js";
+import { knowledgeBasesCreateKnowledgeBase } from "pipeshub/funcs/knowledge-bases-create-knowledge-base.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await knowledgeBasesCreate(pipeshub, {
+  const res = await knowledgeBasesCreateKnowledgeBase(pipeshub, {
     kbName: "Product Documentation",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("knowledgeBasesCreate failed:", res.error);
+    console.log("knowledgeBasesCreateKnowledgeBase failed:", res.error);
   }
 }
 
@@ -106,7 +110,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## list
+## listKnowledgeBases
 
 Retrieve a paginated list of all knowledge bases accessible to the authenticated user.<br><br>
 <b>Overview:</b><br>
@@ -134,12 +138,13 @@ Uses efficient pagination with limit/offset. For large result sets, use smaller 
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.knowledgeBases.list({
+  const result = await pipeshub.knowledgeBases.listKnowledgeBases({
     permissions: "OWNER,ORGANIZER,WRITER",
   });
 
@@ -155,24 +160,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { knowledgeBasesList } from "pipeshub/funcs/knowledge-bases-list.js";
+import { knowledgeBasesListKnowledgeBases } from "pipeshub/funcs/knowledge-bases-list-knowledge-bases.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await knowledgeBasesList(pipeshub, {
+  const res = await knowledgeBasesListKnowledgeBases(pipeshub, {
     permissions: "OWNER,ORGANIZER,WRITER",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("knowledgeBasesList failed:", res.error);
+    console.log("knowledgeBasesListKnowledgeBases failed:", res.error);
   }
 }
 
@@ -198,7 +204,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## get
+## getKnowledgeBase
 
 Retrieve detailed information about a specific knowledge base.<br><br>
 <b>Overview:</b><br>
@@ -214,12 +220,13 @@ User must have at least READER permission to view KB details.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.knowledgeBases.get({
+  const result = await pipeshub.knowledgeBases.getKnowledgeBase({
     kbId: "kb_550e8400-e29b-41d4-a716",
   });
 
@@ -235,24 +242,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { knowledgeBasesGet } from "pipeshub/funcs/knowledge-bases-get.js";
+import { knowledgeBasesGetKnowledgeBase } from "pipeshub/funcs/knowledge-bases-get-knowledge-base.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await knowledgeBasesGet(pipeshub, {
+  const res = await knowledgeBasesGetKnowledgeBase(pipeshub, {
     kbId: "kb_550e8400-e29b-41d4-a716",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("knowledgeBasesGet failed:", res.error);
+    console.log("knowledgeBasesGetKnowledgeBase failed:", res.error);
   }
 }
 
@@ -278,7 +286,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## update
+## updateKnowledgeBase
 
 Update a knowledge base's name.<br><br>
 <b>Required Permission:</b> OWNER or ORGANIZER<br><br>
@@ -296,12 +304,13 @@ Update a knowledge base's name.<br><br>
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.knowledgeBases.update({
+  const result = await pipeshub.knowledgeBases.updateKnowledgeBase({
     kbId: "<id>",
     body: {
       kbName: "Updated Documentation Hub",
@@ -320,17 +329,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { knowledgeBasesUpdate } from "pipeshub/funcs/knowledge-bases-update.js";
+import { knowledgeBasesUpdateKnowledgeBase } from "pipeshub/funcs/knowledge-bases-update-knowledge-base.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await knowledgeBasesUpdate(pipeshub, {
+  const res = await knowledgeBasesUpdateKnowledgeBase(pipeshub, {
     kbId: "<id>",
     body: {
       kbName: "Updated Documentation Hub",
@@ -340,7 +350,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("knowledgeBasesUpdate failed:", res.error);
+    console.log("knowledgeBasesUpdateKnowledgeBase failed:", res.error);
   }
 }
 
@@ -366,7 +376,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## delete
+## deleteKnowledgeBase
 
 Permanently delete a knowledge base and all its contents.<br><br>
 <b>Required Permission:</b> OWNER only<br><br>
@@ -387,12 +397,13 @@ Permanently delete a knowledge base and all its contents.<br><br>
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.knowledgeBases.delete({
+  const result = await pipeshub.knowledgeBases.deleteKnowledgeBase({
     kbId: "<id>",
   });
 
@@ -408,24 +419,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { knowledgeBasesDelete } from "pipeshub/funcs/knowledge-bases-delete.js";
+import { knowledgeBasesDeleteKnowledgeBase } from "pipeshub/funcs/knowledge-bases-delete-knowledge-base.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await knowledgeBasesDelete(pipeshub, {
+  const res = await knowledgeBasesDeleteKnowledgeBase(pipeshub, {
     kbId: "<id>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("knowledgeBasesDelete failed:", res.error);
+    console.log("knowledgeBasesDeleteKnowledgeBase failed:", res.error);
   }
 }
 
@@ -451,7 +463,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getRootNodes
+## getKnowledgeHubRootNodes
 
 Retrieve root-level nodes for unified knowledge hub browsing.<br><br>
 <b>Overview:</b><br>
@@ -471,12 +483,13 @@ Provides a unified view across all knowledge sources - KBs, connectors, and apps
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.knowledgeBases.getRootNodes();
+  const result = await pipeshub.knowledgeBases.getKnowledgeHubRootNodes();
 
   console.log(result);
 }
@@ -490,22 +503,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { knowledgeBasesGetRootNodes } from "pipeshub/funcs/knowledge-bases-get-root-nodes.js";
+import { knowledgeBasesGetKnowledgeHubRootNodes } from "pipeshub/funcs/knowledge-bases-get-knowledge-hub-root-nodes.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await knowledgeBasesGetRootNodes(pipeshub);
+  const res = await knowledgeBasesGetKnowledgeHubRootNodes(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("knowledgeBasesGetRootNodes failed:", res.error);
+    console.log("knowledgeBasesGetKnowledgeHubRootNodes failed:", res.error);
   }
 }
 
@@ -531,7 +545,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getHubChildNodes
+## getKnowledgeHubChildNodes
 
 Retrieve child nodes under a specific parent in the knowledge hub tree.<br><br>
 <b>Navigation:</b><br>
@@ -545,12 +559,13 @@ Use this to drill down into KBs, folders, and connector hierarchies.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.knowledgeBases.getHubChildNodes({
+  const result = await pipeshub.knowledgeBases.getKnowledgeHubChildNodes({
     parentType: "<value>",
     parentId: "<id>",
   });
@@ -567,17 +582,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { knowledgeBasesGetHubChildNodes } from "pipeshub/funcs/knowledge-bases-get-hub-child-nodes.js";
+import { knowledgeBasesGetKnowledgeHubChildNodes } from "pipeshub/funcs/knowledge-bases-get-knowledge-hub-child-nodes.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await knowledgeBasesGetHubChildNodes(pipeshub, {
+  const res = await knowledgeBasesGetKnowledgeHubChildNodes(pipeshub, {
     parentType: "<value>",
     parentId: "<id>",
   });
@@ -585,7 +601,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("knowledgeBasesGetHubChildNodes failed:", res.error);
+    console.log("knowledgeBasesGetKnowledgeHubChildNodes failed:", res.error);
   }
 }
 

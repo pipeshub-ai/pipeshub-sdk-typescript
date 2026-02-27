@@ -3,6 +3,12 @@
  */
 
 import * as z from "zod/v4-mini";
+import * as models from "../index.js";
+
+export type GetConnectorStatsSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export type GetConnectorStatsRequest = {
   /**
@@ -10,6 +16,29 @@ export type GetConnectorStatsRequest = {
    */
   connectorId: string;
 };
+
+/** @internal */
+export type GetConnectorStatsSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const GetConnectorStatsSecurity$outboundSchema: z.ZodMiniType<
+  GetConnectorStatsSecurity$Outbound,
+  GetConnectorStatsSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function getConnectorStatsSecurityToJSON(
+  getConnectorStatsSecurity: GetConnectorStatsSecurity,
+): string {
+  return JSON.stringify(
+    GetConnectorStatsSecurity$outboundSchema.parse(getConnectorStatsSecurity),
+  );
+}
 
 /** @internal */
 export type GetConnectorStatsRequest$Outbound = {

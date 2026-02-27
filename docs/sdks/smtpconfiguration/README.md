@@ -1,13 +1,15 @@
-# SmtpConfiguration
+# SMTPConfiguration
 
 ## Overview
 
+Configure SMTP email server for sending notifications and invitations.
+
 ### Available Operations
 
-* [createOrUpdate](#createorupdate) - Create or update SMTP configuration
-* [get](#get) - Get SMTP configuration
+* [createSMTPConfig](#createsmtpconfig) - Create or update SMTP configuration
+* [getSMTPConfig](#getsmtpconfig) - Get SMTP configuration
 
-## createOrUpdate
+## createSMTPConfig
 
 Configure SMTP email server for sending system emails including user invitations, notifications, and password resets.
 
@@ -28,11 +30,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  await pipeshub.smtpConfiguration.createOrUpdate({
+  await pipeshub.smtpConfiguration.createSMTPConfig({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     host: "email-smtp.us-east-1.amazonaws.com",
     port: 587,
     username: "AKIAIOSFODNN7EXAMPLE",
@@ -52,17 +55,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { smtpConfigurationCreateOrUpdate } from "pipeshub/funcs/smtp-configuration-create-or-update.js";
+import { smtpConfigurationCreateSMTPConfig } from "pipeshub/funcs/smtp-configuration-create-smtp-config.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await smtpConfigurationCreateOrUpdate(pipeshub, {
+  const res = await smtpConfigurationCreateSMTPConfig(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     host: "email-smtp.us-east-1.amazonaws.com",
     port: 587,
     username: "AKIAIOSFODNN7EXAMPLE",
@@ -73,7 +77,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("smtpConfigurationCreateOrUpdate failed:", res.error);
+    console.log("smtpConfigurationCreateSMTPConfig failed:", res.error);
   }
 }
 
@@ -87,11 +91,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  await pipeshub.smtpConfiguration.createOrUpdate({
+  await pipeshub.smtpConfiguration.createSMTPConfig({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     host: "smtp.gmail.com",
     port: 587,
     username: "notifications@yourcompany.com",
@@ -111,17 +116,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { smtpConfigurationCreateOrUpdate } from "pipeshub/funcs/smtp-configuration-create-or-update.js";
+import { smtpConfigurationCreateSMTPConfig } from "pipeshub/funcs/smtp-configuration-create-smtp-config.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await smtpConfigurationCreateOrUpdate(pipeshub, {
+  const res = await smtpConfigurationCreateSMTPConfig(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     host: "smtp.gmail.com",
     port: 587,
     username: "notifications@yourcompany.com",
@@ -132,7 +138,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("smtpConfigurationCreateOrUpdate failed:", res.error);
+    console.log("smtpConfigurationCreateSMTPConfig failed:", res.error);
   }
 }
 
@@ -146,11 +152,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  await pipeshub.smtpConfiguration.createOrUpdate({
+  await pipeshub.smtpConfiguration.createSMTPConfig({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     host: "smtp.office365.com",
     port: 587,
     username: "notifications@yourcompany.onmicrosoft.com",
@@ -170,17 +177,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { smtpConfigurationCreateOrUpdate } from "pipeshub/funcs/smtp-configuration-create-or-update.js";
+import { smtpConfigurationCreateSMTPConfig } from "pipeshub/funcs/smtp-configuration-create-smtp-config.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await smtpConfigurationCreateOrUpdate(pipeshub, {
+  const res = await smtpConfigurationCreateSMTPConfig(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     host: "smtp.office365.com",
     port: 587,
     username: "notifications@yourcompany.onmicrosoft.com",
@@ -191,7 +199,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("smtpConfigurationCreateOrUpdate failed:", res.error);
+    console.log("smtpConfigurationCreateSMTPConfig failed:", res.error);
   }
 }
 
@@ -205,11 +213,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  await pipeshub.smtpConfiguration.createOrUpdate({
+  await pipeshub.smtpConfiguration.createSMTPConfig({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     host: "smtp.sendgrid.net",
     port: 587,
     username: "apikey",
@@ -229,17 +238,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { smtpConfigurationCreateOrUpdate } from "pipeshub/funcs/smtp-configuration-create-or-update.js";
+import { smtpConfigurationCreateSMTPConfig } from "pipeshub/funcs/smtp-configuration-create-smtp-config.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await smtpConfigurationCreateOrUpdate(pipeshub, {
+  const res = await smtpConfigurationCreateSMTPConfig(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     host: "smtp.sendgrid.net",
     port: 587,
     username: "apikey",
@@ -250,7 +260,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("smtpConfigurationCreateOrUpdate failed:", res.error);
+    console.log("smtpConfigurationCreateSMTPConfig failed:", res.error);
   }
 }
 
@@ -262,6 +272,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [models.SMTPConfig](../../models/smtp-config.md)                                                                                                                               | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.CreateSMTPConfigSecurity](../../models/operations/create-smtp-config-security.md)                                                                                  | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -276,7 +287,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## get
+## getSMTPConfig
 
 Retrieve the current SMTP server configuration. Password is included in the response for admin users.
 
@@ -288,11 +299,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.smtpConfiguration.get();
+  const result = await pipeshub.smtpConfiguration.getSMTPConfig({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  });
 
   console.log(result);
 }
@@ -306,22 +318,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { smtpConfigurationGet } from "pipeshub/funcs/smtp-configuration-get.js";
+import { smtpConfigurationGetSMTPConfig } from "pipeshub/funcs/smtp-configuration-get-smtp-config.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await smtpConfigurationGet(pipeshub);
+  const res = await smtpConfigurationGetSMTPConfig(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("smtpConfigurationGet failed:", res.error);
+    console.log("smtpConfigurationGetSMTPConfig failed:", res.error);
   }
 }
 
@@ -332,6 +345,7 @@ run();
 
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `security`                                                                                                                                                                     | [operations.GetSMTPConfigSecurity](../../models/operations/get-smtp-config-security.md)                                                                                        | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |

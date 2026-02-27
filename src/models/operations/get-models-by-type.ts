@@ -9,6 +9,11 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
+export type GetModelsByTypeSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 export type GetModelsByTypeRequest = {
   /**
    * Type of AI model
@@ -22,6 +27,29 @@ export type GetModelsByTypeRequest = {
 export type GetModelsByTypeResponse = {
   models?: Array<models.AIModelProviderConfig> | undefined;
 };
+
+/** @internal */
+export type GetModelsByTypeSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const GetModelsByTypeSecurity$outboundSchema: z.ZodMiniType<
+  GetModelsByTypeSecurity$Outbound,
+  GetModelsByTypeSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function getModelsByTypeSecurityToJSON(
+  getModelsByTypeSecurity: GetModelsByTypeSecurity,
+): string {
+  return JSON.stringify(
+    GetModelsByTypeSecurity$outboundSchema.parse(getModelsByTypeSecurity),
+  );
+}
 
 /** @internal */
 export type GetModelsByTypeRequest$Outbound = {

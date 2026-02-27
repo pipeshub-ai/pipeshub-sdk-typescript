@@ -9,6 +9,11 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
+export type SearchHistorySecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 export type SearchHistoryRequest = {
   /**
    * Number of results per page
@@ -32,6 +37,29 @@ export type SearchHistoryResponse = {
   page?: number | undefined;
   limit?: number | undefined;
 };
+
+/** @internal */
+export type SearchHistorySecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const SearchHistorySecurity$outboundSchema: z.ZodMiniType<
+  SearchHistorySecurity$Outbound,
+  SearchHistorySecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function searchHistorySecurityToJSON(
+  searchHistorySecurity: SearchHistorySecurity,
+): string {
+  return JSON.stringify(
+    SearchHistorySecurity$outboundSchema.parse(searchHistorySecurity),
+  );
+}
 
 /** @internal */
 export type SearchHistoryRequest$Outbound = {

@@ -9,6 +9,11 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
+export type GetKnowledgeHubRootNodesSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 export type GetKnowledgeHubRootNodesRequest = {
   /**
    * View mode
@@ -32,6 +37,31 @@ export type GetKnowledgeHubRootNodesRequest = {
 export type GetKnowledgeHubRootNodesResponse = {
   nodes?: Array<models.KnowledgeHubNode> | undefined;
 };
+
+/** @internal */
+export type GetKnowledgeHubRootNodesSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const GetKnowledgeHubRootNodesSecurity$outboundSchema: z.ZodMiniType<
+  GetKnowledgeHubRootNodesSecurity$Outbound,
+  GetKnowledgeHubRootNodesSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function getKnowledgeHubRootNodesSecurityToJSON(
+  getKnowledgeHubRootNodesSecurity: GetKnowledgeHubRootNodesSecurity,
+): string {
+  return JSON.stringify(
+    GetKnowledgeHubRootNodesSecurity$outboundSchema.parse(
+      getKnowledgeHubRootNodesSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type GetKnowledgeHubRootNodesRequest$Outbound = {

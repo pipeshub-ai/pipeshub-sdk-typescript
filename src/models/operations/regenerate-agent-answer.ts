@@ -5,6 +5,11 @@
 import * as z from "zod/v4-mini";
 import * as models from "../index.js";
 
+export type RegenerateAgentAnswerSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 /**
  * Request payload
  */
@@ -23,6 +28,31 @@ export type RegenerateAgentAnswerRequest = {
    */
   body?: RegenerateAgentAnswerRequestBody | undefined;
 };
+
+/** @internal */
+export type RegenerateAgentAnswerSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const RegenerateAgentAnswerSecurity$outboundSchema: z.ZodMiniType<
+  RegenerateAgentAnswerSecurity$Outbound,
+  RegenerateAgentAnswerSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function regenerateAgentAnswerSecurityToJSON(
+  regenerateAgentAnswerSecurity: RegenerateAgentAnswerSecurity,
+): string {
+  return JSON.stringify(
+    RegenerateAgentAnswerSecurity$outboundSchema.parse(
+      regenerateAgentAnswerSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type RegenerateAgentAnswerRequestBody$Outbound = {

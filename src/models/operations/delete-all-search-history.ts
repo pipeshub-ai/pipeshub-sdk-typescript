@@ -7,6 +7,12 @@ import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
+
+export type DeleteAllSearchHistorySecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 /**
  * Search history cleared
@@ -14,6 +20,31 @@ import { SDKValidationError } from "../errors/sdk-validation-error.js";
 export type DeleteAllSearchHistoryResponse = {
   message?: string | undefined;
 };
+
+/** @internal */
+export type DeleteAllSearchHistorySecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const DeleteAllSearchHistorySecurity$outboundSchema: z.ZodMiniType<
+  DeleteAllSearchHistorySecurity$Outbound,
+  DeleteAllSearchHistorySecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function deleteAllSearchHistorySecurityToJSON(
+  deleteAllSearchHistorySecurity: DeleteAllSearchHistorySecurity,
+): string {
+  return JSON.stringify(
+    DeleteAllSearchHistorySecurity$outboundSchema.parse(
+      deleteAllSearchHistorySecurity,
+    ),
+  );
+}
 
 /** @internal */
 export const DeleteAllSearchHistoryResponse$inboundSchema: z.ZodMiniType<

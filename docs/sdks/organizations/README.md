@@ -6,18 +6,18 @@ Organization management operations
 
 ### Available Operations
 
-* [checkExists](#checkexists) - Check if organization exists
-* [create](#create) - Create organization
-* [getCurrent](#getcurrent) - Get current organization
-* [update](#update) - Update organization
-* [delete](#delete) - Delete organization
-* [uploadLogo](#uploadlogo) - Upload organization logo
-* [getLogo](#getlogo) - Get organization logo
-* [deleteLogo](#deletelogo) - Delete organization logo
+* [checkOrgExists](#checkorgexists) - Check if organization exists
+* [createOrganization](#createorganization) - Create organization
+* [getCurrentOrganization](#getcurrentorganization) - Get current organization
+* [updateOrganization](#updateorganization) - Update organization
+* [deleteOrganization](#deleteorganization) - Delete organization
+* [uploadOrganizationLogo](#uploadorganizationlogo) - Upload organization logo
+* [getOrganizationLogo](#getorganizationlogo) - Get organization logo
+* [deleteOrganizationLogo](#deleteorganizationlogo) - Delete organization logo
 * [getOnboardingStatus](#getonboardingstatus) - Get onboarding status
 * [updateOnboardingStatus](#updateonboardingstatus) - Update onboarding status
 
-## checkExists
+## checkOrgExists
 
 Check if any organization has been created in the system. This is typically the first API call made during initial setup.<br><br>
 <b>Overview:</b><br>
@@ -47,7 +47,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.organizations.checkExists();
+  const result = await pipeshub.organizations.checkOrgExists();
 
   console.log(result);
 }
@@ -61,7 +61,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { organizationsCheckExists } from "pipeshub/funcs/organizations-check-exists.js";
+import { organizationsCheckOrgExists } from "pipeshub/funcs/organizations-check-org-exists.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -70,12 +70,12 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await organizationsCheckExists(pipeshub);
+  const res = await organizationsCheckOrgExists(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("organizationsCheckExists failed:", res.error);
+    console.log("organizationsCheckOrgExists failed:", res.error);
   }
 }
 
@@ -100,7 +100,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## create
+## createOrganization
 
 Create a new organization and its first admin user. This is the initial setup endpoint for new PipesHub installations.<br><br>
 <b>Overview:</b><br>
@@ -145,7 +145,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.organizations.create({
+  const result = await pipeshub.organizations.createOrganization({
     accountType: "business",
     shortName: "Acme",
     registeredName: "Acme Corporation Inc.",
@@ -166,7 +166,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { organizationsCreate } from "pipeshub/funcs/organizations-create.js";
+import { organizationsCreateOrganization } from "pipeshub/funcs/organizations-create-organization.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -175,7 +175,7 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await organizationsCreate(pipeshub, {
+  const res = await organizationsCreateOrganization(pipeshub, {
     accountType: "business",
     shortName: "Acme",
     registeredName: "Acme Corporation Inc.",
@@ -187,7 +187,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("organizationsCreate failed:", res.error);
+    console.log("organizationsCreateOrganization failed:", res.error);
   }
 }
 
@@ -213,7 +213,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getCurrent
+## getCurrentOrganization
 
 Retrieve details about the authenticated user's organization.<br><br>
 <b>Overview:</b><br>
@@ -245,11 +245,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.organizations.getCurrent();
+  const result = await pipeshub.organizations.getCurrentOrganization({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  });
 
   console.log(result);
 }
@@ -263,22 +264,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { organizationsGetCurrent } from "pipeshub/funcs/organizations-get-current.js";
+import { organizationsGetCurrentOrganization } from "pipeshub/funcs/organizations-get-current-organization.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await organizationsGetCurrent(pipeshub);
+  const res = await organizationsGetCurrentOrganization(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("organizationsGetCurrent failed:", res.error);
+    console.log("organizationsGetCurrentOrganization failed:", res.error);
   }
 }
 
@@ -289,6 +291,7 @@ run();
 
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `security`                                                                                                                                                                     | [operations.GetCurrentOrganizationSecurity](../../models/operations/get-current-organization-security.md)                                                                      | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -303,7 +306,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## update
+## updateOrganization
 
 Update organization profile and settings information.<br><br>
 <b>Overview:</b><br>
@@ -343,11 +346,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.organizations.update({
+  const result = await pipeshub.organizations.updateOrganization({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     registeredName: "Acme Corporation Inc.",
     shortName: "Acme Corp",
     phoneNumber: "+15551234567",
@@ -365,17 +369,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { organizationsUpdate } from "pipeshub/funcs/organizations-update.js";
+import { organizationsUpdateOrganization } from "pipeshub/funcs/organizations-update-organization.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await organizationsUpdate(pipeshub, {
+  const res = await organizationsUpdateOrganization(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     registeredName: "Acme Corporation Inc.",
     shortName: "Acme Corp",
     phoneNumber: "+15551234567",
@@ -384,7 +389,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("organizationsUpdate failed:", res.error);
+    console.log("organizationsUpdateOrganization failed:", res.error);
   }
 }
 
@@ -396,6 +401,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.UpdateOrganizationRequest](../../models/operations/update-organization-request.md)                                                                                 | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.UpdateOrganizationSecurity](../../models/operations/update-organization-security.md)                                                                               | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -410,7 +416,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## delete
+## deleteOrganization
 
 Permanently delete an organization and all associated data.<br><br>
 <b>WARNING:</b> This action is <b>irreversible</b>.<br><br>
@@ -437,11 +443,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.organizations.delete({
+  const result = await pipeshub.organizations.deleteOrganization({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     confirm: "DELETE",
   });
 
@@ -457,24 +464,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { organizationsDelete } from "pipeshub/funcs/organizations-delete.js";
+import { organizationsDeleteOrganization } from "pipeshub/funcs/organizations-delete-organization.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await organizationsDelete(pipeshub, {
+  const res = await organizationsDeleteOrganization(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     confirm: "DELETE",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("organizationsDelete failed:", res.error);
+    console.log("organizationsDeleteOrganization failed:", res.error);
   }
 }
 
@@ -486,6 +494,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.DeleteOrganizationRequest](../../models/operations/delete-organization-request.md)                                                                                 | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.DeleteOrganizationSecurity](../../models/operations/delete-organization-security.md)                                                                               | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -500,7 +509,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## uploadLogo
+## uploadOrganizationLogo
 
 Upload or update the organization's logo image.<br><br>
 <b>Supported Formats:</b><br>
@@ -532,11 +541,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.organizations.uploadLogo({
+  const result = await pipeshub.organizations.uploadOrganizationLogo({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     logo: await openAsBlob("example.file"),
   });
 
@@ -553,24 +563,25 @@ The standalone function version of this method:
 ```typescript
 import { openAsBlob } from "node:fs";
 import { PipeshubCore } from "pipeshub/core.js";
-import { organizationsUploadLogo } from "pipeshub/funcs/organizations-upload-logo.js";
+import { organizationsUploadOrganizationLogo } from "pipeshub/funcs/organizations-upload-organization-logo.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await organizationsUploadLogo(pipeshub, {
+  const res = await organizationsUploadOrganizationLogo(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     logo: await openAsBlob("example.file"),
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("organizationsUploadLogo failed:", res.error);
+    console.log("organizationsUploadOrganizationLogo failed:", res.error);
   }
 }
 
@@ -582,6 +593,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.UploadOrganizationLogoRequest](../../models/operations/upload-organization-logo-request.md)                                                                        | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.UploadOrganizationLogoSecurity](../../models/operations/upload-organization-logo-security.md)                                                                      | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -596,7 +608,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getLogo
+## getOrganizationLogo
 
 Retrieve the organization's logo image or URL.<br><br>
 <b>Response Formats:</b><br>
@@ -620,11 +632,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.organizations.getLogo();
+  const result = await pipeshub.organizations.getOrganizationLogo({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  });
 
   console.log(result);
 }
@@ -638,22 +651,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { organizationsGetLogo } from "pipeshub/funcs/organizations-get-logo.js";
+import { organizationsGetOrganizationLogo } from "pipeshub/funcs/organizations-get-organization-logo.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await organizationsGetLogo(pipeshub);
+  const res = await organizationsGetOrganizationLogo(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("organizationsGetLogo failed:", res.error);
+    console.log("organizationsGetOrganizationLogo failed:", res.error);
   }
 }
 
@@ -664,6 +678,7 @@ run();
 
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `security`                                                                                                                                                                     | [operations.GetOrganizationLogoSecurity](../../models/operations/get-organization-logo-security.md)                                                                            | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -678,7 +693,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## deleteLogo
+## deleteOrganizationLogo
 
 Remove the organization's custom logo.<br><br>
 <b>Behavior:</b><br>
@@ -696,11 +711,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.organizations.deleteLogo();
+  const result = await pipeshub.organizations.deleteOrganizationLogo({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  });
 
   console.log(result);
 }
@@ -714,22 +730,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { organizationsDeleteLogo } from "pipeshub/funcs/organizations-delete-logo.js";
+import { organizationsDeleteOrganizationLogo } from "pipeshub/funcs/organizations-delete-organization-logo.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await organizationsDeleteLogo(pipeshub);
+  const res = await organizationsDeleteOrganizationLogo(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("organizationsDeleteLogo failed:", res.error);
+    console.log("organizationsDeleteOrganizationLogo failed:", res.error);
   }
 }
 
@@ -740,6 +757,7 @@ run();
 
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `security`                                                                                                                                                                     | [operations.DeleteOrganizationLogoSecurity](../../models/operations/delete-organization-logo-security.md)                                                                      | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |

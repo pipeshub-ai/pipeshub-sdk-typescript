@@ -2,13 +2,34 @@
 
 ## Overview
 
+Configure telemetry and metrics collection for application monitoring and analytics.
+
+PipesHub collects anonymized usage metrics to help improve the product. Metrics are pushed
+to a configurable remote server at regular intervals.
+
+**Collected Metrics:**
+- API request counts and response times
+- User activity patterns (anonymized)
+- Feature usage statistics
+- Error rates and types
+
+**Configuration Options:**
+- Enable/disable metrics collection entirely
+- Configure push interval (minimum 1 second, default 60 seconds)
+- Set custom metrics server URL for self-hosted analytics
+
+**Privacy:**
+- All metrics are anonymized before collection
+- No personally identifiable information (PII) is collected
+- Organization can disable collection at any time
+
+
 ### Available Operations
 
-* [getConfiguration](#getconfiguration) - Get metrics collection configuration
-* [setPushInterval](#setpushinterval) - Configure metrics push interval
-* [setServerUrl](#setserverurl) - Configure metrics server URL
+* [getMetricsCollection](#getmetricscollection) - Get metrics collection configuration
+* [toggleMetricsCollection](#togglemetricscollection) - Enable or disable metrics collection
 
-## getConfiguration
+## getMetricsCollection
 
 Retrieve the current metrics collection configuration including:
 - Whether collection is enabled
@@ -27,11 +48,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.metricsCollection.getConfiguration();
+  const result = await pipeshub.metricsCollection.getMetricsCollection({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  });
 
   console.log(result);
 }
@@ -45,22 +67,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { metricsCollectionGetConfiguration } from "pipeshub/funcs/metrics-collection-get-configuration.js";
+import { metricsCollectionGetMetricsCollection } from "pipeshub/funcs/metrics-collection-get-metrics-collection.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await metricsCollectionGetConfiguration(pipeshub);
+  const res = await metricsCollectionGetMetricsCollection(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("metricsCollectionGetConfiguration failed:", res.error);
+    console.log("metricsCollectionGetMetricsCollection failed:", res.error);
   }
 }
 
@@ -71,6 +94,7 @@ run();
 
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `security`                                                                                                                                                                     | [operations.GetMetricsCollectionSecurity](../../models/operations/get-metrics-collection-security.md)                                                                          | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -85,37 +109,38 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## setPushInterval
+## toggleMetricsCollection
 
-Set how frequently collected metrics are pushed to the remote server.
+Toggle the master switch for metrics collection.
 
-**Interval Guidelines:**
-- Minimum: 1000ms (1 second) - for real-time monitoring
-- Recommended: 60000ms (1 minute) - balanced performance
-- Maximum: No hard limit, but longer intervals may delay insights
+**When Enabled:**
+- Application metrics are collected in the background
+- Metrics are pushed to the configured server at regular intervals
+- Activity counters track API usage patterns
 
-**Performance Considerations:**
-- Shorter intervals provide more real-time data but increase network traffic
-- Longer intervals reduce overhead but delay metric visibility
-- Changes take effect on the next push cycle
+**When Disabled:**
+- No metrics are collected or stored
+- No data is sent to the metrics server
+- Existing scheduled push jobs are stopped
 
 **Admin Access Required:** This endpoint requires administrator privileges.
 
 
-### Example Usage: default
+### Example Usage: disable
 
-<!-- UsageSnippet language="typescript" operationID="setMetricsPushInterval" method="patch" path="/configurationManager/metricsCollection/pushInterval" example="default" -->
+<!-- UsageSnippet language="typescript" operationID="toggleMetricsCollection" method="put" path="/configurationManager/metricsCollection/toggle" example="disable" -->
 ```typescript
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.metricsCollection.setPushInterval({
-    pushIntervalMs: 60000,
+  const result = await pipeshub.metricsCollection.toggleMetricsCollection({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
+    enableMetricCollection: false,
   });
 
   console.log(result);
@@ -130,43 +155,45 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { metricsCollectionSetPushInterval } from "pipeshub/funcs/metrics-collection-set-push-interval.js";
+import { metricsCollectionToggleMetricsCollection } from "pipeshub/funcs/metrics-collection-toggle-metrics-collection.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await metricsCollectionSetPushInterval(pipeshub, {
-    pushIntervalMs: 60000,
+  const res = await metricsCollectionToggleMetricsCollection(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
+    enableMetricCollection: false,
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("metricsCollectionSetPushInterval failed:", res.error);
+    console.log("metricsCollectionToggleMetricsCollection failed:", res.error);
   }
 }
 
 run();
 ```
-### Example Usage: lowFrequency
+### Example Usage: enable
 
-<!-- UsageSnippet language="typescript" operationID="setMetricsPushInterval" method="patch" path="/configurationManager/metricsCollection/pushInterval" example="lowFrequency" -->
+<!-- UsageSnippet language="typescript" operationID="toggleMetricsCollection" method="put" path="/configurationManager/metricsCollection/toggle" example="enable" -->
 ```typescript
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.metricsCollection.setPushInterval({
-    pushIntervalMs: 300000,
+  const result = await pipeshub.metricsCollection.toggleMetricsCollection({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
+    enableMetricCollection: true,
   });
 
   console.log(result);
@@ -181,75 +208,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { metricsCollectionSetPushInterval } from "pipeshub/funcs/metrics-collection-set-push-interval.js";
+import { metricsCollectionToggleMetricsCollection } from "pipeshub/funcs/metrics-collection-toggle-metrics-collection.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await metricsCollectionSetPushInterval(pipeshub, {
-    pushIntervalMs: 300000,
+  const res = await metricsCollectionToggleMetricsCollection(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
+    enableMetricCollection: true,
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("metricsCollectionSetPushInterval failed:", res.error);
-  }
-}
-
-run();
-```
-### Example Usage: realtime
-
-<!-- UsageSnippet language="typescript" operationID="setMetricsPushInterval" method="patch" path="/configurationManager/metricsCollection/pushInterval" example="realtime" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.metricsCollection.setPushInterval({
-    pushIntervalMs: 10000,
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { metricsCollectionSetPushInterval } from "pipeshub/funcs/metrics-collection-set-push-interval.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await metricsCollectionSetPushInterval(pipeshub, {
-    pushIntervalMs: 10000,
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("metricsCollectionSetPushInterval failed:", res.error);
+    console.log("metricsCollectionToggleMetricsCollection failed:", res.error);
   }
 }
 
@@ -260,153 +237,15 @@ run();
 
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.SetMetricsPushIntervalRequest](../../models/operations/set-metrics-push-interval-request.md)                                                                       | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `request`                                                                                                                                                                      | [operations.ToggleMetricsCollectionRequest](../../models/operations/toggle-metrics-collection-request.md)                                                                      | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.ToggleMetricsCollectionSecurity](../../models/operations/toggle-metrics-collection-security.md)                                                                    | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
 
 ### Response
 
-**Promise\<[operations.SetMetricsPushIntervalResponse](../../models/operations/set-metrics-push-interval-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## setServerUrl
-
-Set the remote server URL where metrics will be pushed.
-
-**Use Cases:**
-- Self-hosted analytics: Point to your own Prometheus-compatible endpoint
-- Custom monitoring: Integrate with your organization's monitoring stack
-- Development: Use a local endpoint for testing
-
-**URL Requirements:**
-- Must be a valid URL (http or https)
-- Server must accept POST requests with JSON payload
-- Server should return 2xx status for successful pushes
-
-**Admin Access Required:** This endpoint requires administrator privileges.
-
-
-### Example Usage: localDev
-
-<!-- UsageSnippet language="typescript" operationID="setMetricsServerUrl" method="patch" path="/configurationManager/metricsCollection/serverUrl" example="localDev" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.metricsCollection.setServerUrl({
-    serverUrl: "http://localhost:9090/metrics",
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { metricsCollectionSetServerUrl } from "pipeshub/funcs/metrics-collection-set-server-url.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await metricsCollectionSetServerUrl(pipeshub, {
-    serverUrl: "http://localhost:9090/metrics",
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("metricsCollectionSetServerUrl failed:", res.error);
-  }
-}
-
-run();
-```
-### Example Usage: selfHosted
-
-<!-- UsageSnippet language="typescript" operationID="setMetricsServerUrl" method="patch" path="/configurationManager/metricsCollection/serverUrl" example="selfHosted" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.metricsCollection.setServerUrl({
-    serverUrl: "https://metrics.mycompany.com/collect",
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { metricsCollectionSetServerUrl } from "pipeshub/funcs/metrics-collection-set-server-url.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await metricsCollectionSetServerUrl(pipeshub, {
-    serverUrl: "https://metrics.mycompany.com/collect",
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("metricsCollectionSetServerUrl failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.SetMetricsServerUrlRequest](../../models/operations/set-metrics-server-url-request.md)                                                                             | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.SetMetricsServerUrlResponse](../../models/operations/set-metrics-server-url-response.md)\>**
+**Promise\<[operations.ToggleMetricsCollectionResponse](../../models/operations/toggle-metrics-collection-response.md)\>**
 
 ### Errors
 

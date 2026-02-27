@@ -9,6 +9,11 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
+export type ListKBPermissionsSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 export type ListKBPermissionsRequest = {
   kbId: string;
 };
@@ -21,6 +26,29 @@ export type ListKBPermissionsResponse = {
   permissions?: Array<models.KBPermission> | undefined;
   totalCount?: number | undefined;
 };
+
+/** @internal */
+export type ListKBPermissionsSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const ListKBPermissionsSecurity$outboundSchema: z.ZodMiniType<
+  ListKBPermissionsSecurity$Outbound,
+  ListKBPermissionsSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function listKBPermissionsSecurityToJSON(
+  listKBPermissionsSecurity: ListKBPermissionsSecurity,
+): string {
+  return JSON.stringify(
+    ListKBPermissionsSecurity$outboundSchema.parse(listKBPermissionsSecurity),
+  );
+}
 
 /** @internal */
 export type ListKBPermissionsRequest$Outbound = {

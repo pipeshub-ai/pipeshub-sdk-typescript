@@ -8,6 +8,12 @@ import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { smartUnion } from "../../types/smart-union.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
+
+export type DownloadDocumentSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export type DownloadDocumentRequest = {
   /**
@@ -38,6 +44,29 @@ export type DownloadDocumentResponseBody = {
 export type DownloadDocumentResponse =
   | DownloadDocumentResponseBody
   | ReadableStream<Uint8Array>;
+
+/** @internal */
+export type DownloadDocumentSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const DownloadDocumentSecurity$outboundSchema: z.ZodMiniType<
+  DownloadDocumentSecurity$Outbound,
+  DownloadDocumentSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function downloadDocumentSecurityToJSON(
+  downloadDocumentSecurity: DownloadDocumentSecurity,
+): string {
+  return JSON.stringify(
+    DownloadDocumentSecurity$outboundSchema.parse(downloadDocumentSecurity),
+  );
+}
 
 /** @internal */
 export type DownloadDocumentRequest$Outbound = {

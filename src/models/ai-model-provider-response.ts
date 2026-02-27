@@ -11,7 +11,7 @@ import * as types from "../types/primitives.js";
 import {
   AIModelProviderConfig,
   AIModelProviderConfig$inboundSchema,
-} from "./ai-model-provider-config-input.js";
+} from "./ai-model-provider-config.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
 export const AIModelProviderResponseStatus = {

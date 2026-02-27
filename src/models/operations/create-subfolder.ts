@@ -3,6 +3,12 @@
  */
 
 import * as z from "zod/v4-mini";
+import * as models from "../index.js";
+
+export type CreateSubfolderSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 /**
  * Request payload
@@ -22,6 +28,29 @@ export type CreateSubfolderRequest = {
    */
   body: CreateSubfolderRequestBody;
 };
+
+/** @internal */
+export type CreateSubfolderSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const CreateSubfolderSecurity$outboundSchema: z.ZodMiniType<
+  CreateSubfolderSecurity$Outbound,
+  CreateSubfolderSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function createSubfolderSecurityToJSON(
+  createSubfolderSecurity: CreateSubfolderSecurity,
+): string {
+  return JSON.stringify(
+    CreateSubfolderSecurity$outboundSchema.parse(createSubfolderSecurity),
+  );
+}
 
 /** @internal */
 export type CreateSubfolderRequestBody$Outbound = {

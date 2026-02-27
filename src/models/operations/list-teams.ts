@@ -9,6 +9,11 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
+export type ListTeamsSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 export type ListTeamsRequest = {
   /**
    * Search teams by name or description
@@ -39,6 +44,29 @@ export type ListTeamsResponse = {
   data?: Array<models.Team> | undefined;
   pagination?: ListTeamsPagination | undefined;
 };
+
+/** @internal */
+export type ListTeamsSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const ListTeamsSecurity$outboundSchema: z.ZodMiniType<
+  ListTeamsSecurity$Outbound,
+  ListTeamsSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function listTeamsSecurityToJSON(
+  listTeamsSecurity: ListTeamsSecurity,
+): string {
+  return JSON.stringify(
+    ListTeamsSecurity$outboundSchema.parse(listTeamsSecurity),
+  );
+}
 
 /** @internal */
 export type ListTeamsRequest$Outbound = {

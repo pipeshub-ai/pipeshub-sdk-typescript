@@ -9,6 +9,11 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
+export type ListConfiguredConnectorsSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 export type ListConfiguredConnectorsRequest = {
   /**
    * Scope determines visibility and access control for connectors:<br>
@@ -36,6 +41,31 @@ export type ListConfiguredConnectorsResponse = {
    */
   pagination?: models.ConnectorPagination | undefined;
 };
+
+/** @internal */
+export type ListConfiguredConnectorsSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const ListConfiguredConnectorsSecurity$outboundSchema: z.ZodMiniType<
+  ListConfiguredConnectorsSecurity$Outbound,
+  ListConfiguredConnectorsSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function listConfiguredConnectorsSecurityToJSON(
+  listConfiguredConnectorsSecurity: ListConfiguredConnectorsSecurity,
+): string {
+  return JSON.stringify(
+    ListConfiguredConnectorsSecurity$outboundSchema.parse(
+      listConfiguredConnectorsSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type ListConfiguredConnectorsRequest$Outbound = {

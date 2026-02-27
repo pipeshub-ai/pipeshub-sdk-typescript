@@ -8,6 +8,12 @@ import { blobLikeSchema } from "../../types/blobs.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
+
+export type UploadOrganizationLogoSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export type Logo = {
   fileName: string;
@@ -34,6 +40,31 @@ export type UploadOrganizationLogoResponse = {
    */
   logoUrl?: string | undefined;
 };
+
+/** @internal */
+export type UploadOrganizationLogoSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const UploadOrganizationLogoSecurity$outboundSchema: z.ZodMiniType<
+  UploadOrganizationLogoSecurity$Outbound,
+  UploadOrganizationLogoSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function uploadOrganizationLogoSecurityToJSON(
+  uploadOrganizationLogoSecurity: UploadOrganizationLogoSecurity,
+): string {
+  return JSON.stringify(
+    UploadOrganizationLogoSecurity$outboundSchema.parse(
+      uploadOrganizationLogoSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type Logo$Outbound = {

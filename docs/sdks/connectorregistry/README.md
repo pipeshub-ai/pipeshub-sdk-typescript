@@ -2,12 +2,14 @@
 
 ## Overview
 
+Browse available connector types and their configuration schemas
+
 ### Available Operations
 
-* [list](#list) - List available connector types
-* [getSchema](#getschema) - Get connector configuration schema
+* [getConnectorRegistry](#getconnectorregistry) - List available connector types
+* [getConnectorSchema](#getconnectorschema) - Get connector configuration schema
 
-## list
+## getConnectorRegistry
 
 Get all available connector types from the registry.<br><br>
 <b>Overview:</b><br>
@@ -34,11 +36,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.connectorRegistry.list({
+  const result = await pipeshub.connectorRegistry.getConnectorRegistry({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     scope: "team",
   });
 
@@ -54,24 +57,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { connectorRegistryList } from "pipeshub/funcs/connector-registry-list.js";
+import { connectorRegistryGetConnectorRegistry } from "pipeshub/funcs/connector-registry-get-connector-registry.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await connectorRegistryList(pipeshub, {
+  const res = await connectorRegistryGetConnectorRegistry(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     scope: "team",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("connectorRegistryList failed:", res.error);
+    console.log("connectorRegistryGetConnectorRegistry failed:", res.error);
   }
 }
 
@@ -83,6 +87,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.GetConnectorRegistryRequest](../../models/operations/get-connector-registry-request.md)                                                                            | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.GetConnectorRegistrySecurity](../../models/operations/get-connector-registry-security.md)                                                                          | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -97,7 +102,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getSchema
+## getConnectorSchema
 
 Get the configuration schema for a specific connector type.<br><br>
 <b>Overview:</b><br>
@@ -119,11 +124,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.connectorRegistry.getSchema({
+  const result = await pipeshub.connectorRegistry.getConnectorSchema({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connectorType: "google-drive",
   });
 
@@ -139,24 +145,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { connectorRegistryGetSchema } from "pipeshub/funcs/connector-registry-get-schema.js";
+import { connectorRegistryGetConnectorSchema } from "pipeshub/funcs/connector-registry-get-connector-schema.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await connectorRegistryGetSchema(pipeshub, {
+  const res = await connectorRegistryGetConnectorSchema(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connectorType: "google-drive",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("connectorRegistryGetSchema failed:", res.error);
+    console.log("connectorRegistryGetConnectorSchema failed:", res.error);
   }
 }
 
@@ -168,6 +175,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.GetConnectorSchemaRequest](../../models/operations/get-connector-schema-request.md)                                                                                | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.GetConnectorSchemaSecurity](../../models/operations/get-connector-schema-security.md)                                                                              | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |

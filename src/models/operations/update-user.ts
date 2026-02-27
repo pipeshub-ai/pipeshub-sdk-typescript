@@ -9,6 +9,11 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
+export type UpdateUserSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 /**
  * Request payload
  */
@@ -62,6 +67,29 @@ export type UpdateUserResponse = {
    */
   data?: models.User | undefined;
 };
+
+/** @internal */
+export type UpdateUserSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const UpdateUserSecurity$outboundSchema: z.ZodMiniType<
+  UpdateUserSecurity$Outbound,
+  UpdateUserSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function updateUserSecurityToJSON(
+  updateUserSecurity: UpdateUserSecurity,
+): string {
+  return JSON.stringify(
+    UpdateUserSecurity$outboundSchema.parse(updateUserSecurity),
+  );
+}
 
 /** @internal */
 export type UpdateUserRequestBody$Outbound = {

@@ -2,13 +2,28 @@
 
 ## Overview
 
+OpenID Connect 1.0 endpoints for identity federation and discovery.
+
+**Discovery:**
+- `/.well-known/openid-configuration` - Authorization server metadata
+- `/.well-known/jwks.json` - Public keys for token verification
+
+**UserInfo:**
+- `/oauth/userinfo` - Get authenticated user's profile information
+
+**Supported Claims:**
+- `user_id` - User identifier
+- `email`, `email_verified` - Email information
+- `name`, `given_name`, `family_name` - Name information
+
+
 ### Available Operations
 
-* [getUserInfo](#getuserinfo) - Get authenticated user information
-* [getConfiguration](#getconfiguration) - OpenID Connect Discovery
+* [oauthUserInfo](#oauthuserinfo) - Get authenticated user information
+* [openidConfiguration](#openidconfiguration) - OpenID Connect Discovery
 * [jwks](#jwks) - JSON Web Key Set
 
-## getUserInfo
+## oauthUserInfo
 
 OpenID Connect UserInfo Endpoint.
 <br><br>
@@ -16,7 +31,7 @@ Returns claims about the authenticated user. Requires a valid access token
 with the `openid` scope.
 <br><br>
 <b>Available Claims:</b><br>
-- `sub` - Subject identifier (user ID)<br>
+- `user_id` - User identifier<br>
 - `name`, `given_name`, `family_name` - Name claims (with `profile` scope)<br>
 - `email`, `email_verified` - Email claims (with `email` scope)
 <br><br>
@@ -36,7 +51,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.openIDConnect.getUserInfo();
+  const result = await pipeshub.openIDConnect.oauthUserInfo();
 
   console.log(result);
 }
@@ -50,7 +65,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { openIDConnectGetUserInfo } from "pipeshub/funcs/open-id-connect-get-user-info.js";
+import { openIDConnectOauthUserInfo } from "pipeshub/funcs/open-id-connect-oauth-user-info.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -60,12 +75,12 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await openIDConnectGetUserInfo(pipeshub);
+  const res = await openIDConnectOauthUserInfo(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("openIDConnectGetUserInfo failed:", res.error);
+    console.log("openIDConnectOauthUserInfo failed:", res.error);
   }
 }
 
@@ -90,7 +105,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getConfiguration
+## openidConfiguration
 
 OpenID Connect Discovery Endpoint (RFC 8414).
 <br><br>
@@ -116,7 +131,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.openIDConnect.getConfiguration();
+  const result = await pipeshub.openIDConnect.openidConfiguration();
 
   console.log(result);
 }
@@ -130,7 +145,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { openIDConnectGetConfiguration } from "pipeshub/funcs/open-id-connect-get-configuration.js";
+import { openIDConnectOpenidConfiguration } from "pipeshub/funcs/open-id-connect-openid-configuration.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -139,12 +154,12 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await openIDConnectGetConfiguration(pipeshub);
+  const res = await openIDConnectOpenidConfiguration(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("openIDConnectGetConfiguration failed:", res.error);
+    console.log("openIDConnectOpenidConfiguration failed:", res.error);
   }
 }
 

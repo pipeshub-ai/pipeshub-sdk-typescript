@@ -2,17 +2,40 @@
 
 ## Overview
 
+Endpoints for scheduling, managing, and monitoring data crawling jobs for enterprise connectors.
+
+The Crawling Manager uses BullMQ (Redis-based queue) to schedule and execute crawling jobs that
+sync data from external connectors (Google Drive, OneDrive, Slack, Jira, etc.) into PipesHub's
+search index.
+
+**Key Features:**
+- Schedule recurring crawls (hourly, daily, weekly, monthly) or one-time crawls
+- Pause and resume crawling jobs without losing configuration
+- Priority-based job execution (1-10 scale)
+- Automatic retry with exponential backoff on failures
+- Per-connector job isolation and tracking
+
+**Access Control:**
+- Team-scoped connectors require admin privileges
+- Personal-scoped connectors can only be managed by the creator
+- All operations require valid JWT authentication
+
+**Schedule Types:**
+- `hourly`: Run every X hours at specified minute
+- `daily`: Run once per day at specified time
+- `weekly`: Run on specified days of the week
+- `monthly`: Run on specified day of the month
+- `custom`: Use cron expression for complex schedules
+- `once`: Run once at a specific future time
+
+
 ### Available Operations
 
-* [schedule](#schedule) - Schedule a crawling job
-* [getStatus](#getstatus) - Get crawling job status
-* [remove](#remove) - Remove a crawling job
-* [pause](#pause) - Pause a crawling job
-* [resume](#resume) - Resume a paused crawling job
-* [list](#list) - Get all crawling job statuses
-* [removeAll](#removeall) - Remove all crawling jobs
+* [scheduleCrawlingJob](#schedulecrawlingjob) - Schedule a crawling job
+* [getCrawlingJobStatus](#getcrawlingjobstatus) - Get crawling job status
+* [removeCrawlingJob](#removecrawlingjob) - Remove a crawling job
 
-## schedule
+## scheduleCrawlingJob
 
 Schedule a new crawling job for a specific connector instance.<br><br>
 
@@ -61,11 +84,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.crawlingJobs.schedule({
+  const result = await pipeshub.crawlingJobs.scheduleCrawlingJob({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
     body: {
@@ -91,17 +115,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { crawlingJobsSchedule } from "pipeshub/funcs/crawling-jobs-schedule.js";
+import { crawlingJobsScheduleCrawlingJob } from "pipeshub/funcs/crawling-jobs-schedule-crawling-job.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await crawlingJobsSchedule(pipeshub, {
+  const res = await crawlingJobsScheduleCrawlingJob(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
     body: {
@@ -118,7 +143,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("crawlingJobsSchedule failed:", res.error);
+    console.log("crawlingJobsScheduleCrawlingJob failed:", res.error);
   }
 }
 
@@ -132,11 +157,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.crawlingJobs.schedule({
+  const result = await pipeshub.crawlingJobs.scheduleCrawlingJob({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
     body: {
@@ -162,17 +188,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { crawlingJobsSchedule } from "pipeshub/funcs/crawling-jobs-schedule.js";
+import { crawlingJobsScheduleCrawlingJob } from "pipeshub/funcs/crawling-jobs-schedule-crawling-job.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await crawlingJobsSchedule(pipeshub, {
+  const res = await crawlingJobsScheduleCrawlingJob(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
     body: {
@@ -189,7 +216,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("crawlingJobsSchedule failed:", res.error);
+    console.log("crawlingJobsScheduleCrawlingJob failed:", res.error);
   }
 }
 
@@ -203,11 +230,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.crawlingJobs.schedule({
+  const result = await pipeshub.crawlingJobs.scheduleCrawlingJob({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
     body: {
@@ -235,17 +263,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { crawlingJobsSchedule } from "pipeshub/funcs/crawling-jobs-schedule.js";
+import { crawlingJobsScheduleCrawlingJob } from "pipeshub/funcs/crawling-jobs-schedule-crawling-job.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await crawlingJobsSchedule(pipeshub, {
+  const res = await crawlingJobsScheduleCrawlingJob(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
     body: {
@@ -264,7 +293,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("crawlingJobsSchedule failed:", res.error);
+    console.log("crawlingJobsScheduleCrawlingJob failed:", res.error);
   }
 }
 
@@ -278,11 +307,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.crawlingJobs.schedule({
+  const result = await pipeshub.crawlingJobs.scheduleCrawlingJob({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
     body: {
@@ -308,17 +338,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { crawlingJobsSchedule } from "pipeshub/funcs/crawling-jobs-schedule.js";
+import { crawlingJobsScheduleCrawlingJob } from "pipeshub/funcs/crawling-jobs-schedule-crawling-job.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await crawlingJobsSchedule(pipeshub, {
+  const res = await crawlingJobsScheduleCrawlingJob(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
     body: {
@@ -335,7 +366,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("crawlingJobsSchedule failed:", res.error);
+    console.log("crawlingJobsScheduleCrawlingJob failed:", res.error);
   }
 }
 
@@ -349,11 +380,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.crawlingJobs.schedule({
+  const result = await pipeshub.crawlingJobs.scheduleCrawlingJob({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
     body: {
@@ -384,17 +416,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { crawlingJobsSchedule } from "pipeshub/funcs/crawling-jobs-schedule.js";
+import { crawlingJobsScheduleCrawlingJob } from "pipeshub/funcs/crawling-jobs-schedule-crawling-job.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await crawlingJobsSchedule(pipeshub, {
+  const res = await crawlingJobsScheduleCrawlingJob(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
     body: {
@@ -416,7 +449,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("crawlingJobsSchedule failed:", res.error);
+    console.log("crawlingJobsScheduleCrawlingJob failed:", res.error);
   }
 }
 
@@ -428,6 +461,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.ScheduleCrawlingJobRequest](../../models/operations/schedule-crawling-job-request.md)                                                                              | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.ScheduleCrawlingJobSecurity](../../models/operations/schedule-crawling-job-security.md)                                                                            | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -442,7 +476,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getStatus
+## getCrawlingJobStatus
 
 Retrieve the current status of a scheduled crawling job for a specific connector.<br><br>
 
@@ -472,11 +506,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.crawlingJobs.getStatus({
+  const result = await pipeshub.crawlingJobs.getCrawlingJobStatus({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
   });
@@ -493,17 +528,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { crawlingJobsGetStatus } from "pipeshub/funcs/crawling-jobs-get-status.js";
+import { crawlingJobsGetCrawlingJobStatus } from "pipeshub/funcs/crawling-jobs-get-crawling-job-status.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await crawlingJobsGetStatus(pipeshub, {
+  const res = await crawlingJobsGetCrawlingJobStatus(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
   });
@@ -511,7 +547,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("crawlingJobsGetStatus failed:", res.error);
+    console.log("crawlingJobsGetCrawlingJobStatus failed:", res.error);
   }
 }
 
@@ -523,6 +559,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.GetCrawlingJobStatusRequest](../../models/operations/get-crawling-job-status-request.md)                                                                           | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.GetCrawlingJobStatusSecurity](../../models/operations/get-crawling-job-status-security.md)                                                                         | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -537,7 +574,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## remove
+## removeCrawlingJob
 
 Permanently remove a scheduled crawling job for a specific connector.<br><br>
 
@@ -569,11 +606,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.crawlingJobs.remove({
+  const result = await pipeshub.crawlingJobs.removeCrawlingJob({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
   });
@@ -590,17 +628,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { crawlingJobsRemove } from "pipeshub/funcs/crawling-jobs-remove.js";
+import { crawlingJobsRemoveCrawlingJob } from "pipeshub/funcs/crawling-jobs-remove-crawling-job.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await crawlingJobsRemove(pipeshub, {
+  const res = await crawlingJobsRemoveCrawlingJob(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
   });
@@ -608,7 +647,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("crawlingJobsRemove failed:", res.error);
+    console.log("crawlingJobsRemoveCrawlingJob failed:", res.error);
   }
 }
 
@@ -620,6 +659,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.RemoveCrawlingJobRequest](../../models/operations/remove-crawling-job-request.md)                                                                                  | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.RemoveCrawlingJobSecurity](../../models/operations/remove-crawling-job-security.md)                                                                                | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -627,374 +667,6 @@ run();
 ### Response
 
 **Promise\<[operations.RemoveCrawlingJobResponse](../../models/operations/remove-crawling-job-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## pause
-
-Pause a running or scheduled crawling job without losing its configuration.<br><br>
-
-<b>Overview:</b><br>
-Pausing a job stores its complete configuration and removes it from the active queue.
-The job can be resumed later with <code>POST /crawlingManager/{connector}/{connectorId}/resume</code>,
-which will restore the exact same schedule configuration.<br><br>
-
-<b>How Pausing Works:</b><br>
-<ol>
-<li>Current job configuration is stored in memory</li>
-<li>Active/repeatable job is removed from BullMQ queue</li>
-<li>Job state changes to "paused"</li>
-<li>No new job executions will occur until resumed</li>
-</ol>
-
-<b>Use Cases:</b><br>
-<ul>
-<li>Temporarily stop crawling during maintenance</li>
-<li>Pause data sync while investigating issues</li>
-<li>Stop crawling for a connector being reconfigured</li>
-</ul>
-
-<b>Note:</b> If a job is currently active (processing), it will complete before pausing.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="pauseCrawlingJob" method="post" path="/crawlingManager/{connector}/{connectorId}/pause" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.crawlingJobs.pause({
-    connector: "drive",
-    connectorId: "507f1f77bcf86cd799439011",
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { crawlingJobsPause } from "pipeshub/funcs/crawling-jobs-pause.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await crawlingJobsPause(pipeshub, {
-    connector: "drive",
-    connectorId: "507f1f77bcf86cd799439011",
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("crawlingJobsPause failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.PauseCrawlingJobRequest](../../models/operations/pause-crawling-job-request.md)                                                                                    | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.PauseCrawlingJobResponse](../../models/operations/pause-crawling-job-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## resume
-
-Resume a previously paused crawling job using its stored configuration.<br><br>
-
-<b>Overview:</b><br>
-Restores a paused job to active state using the exact configuration it had when paused.
-A new job is created in BullMQ with the same schedule settings.<br><br>
-
-<b>How Resuming Works:</b><br>
-<ol>
-<li>Retrieve stored job configuration from pause state</li>
-<li>Create new scheduled job with same configuration</li>
-<li>Remove from paused jobs tracking</li>
-<li>Job will execute according to its original schedule</li>
-</ol>
-
-<b>Note:</b> The job will resume according to its schedule, not immediately execute
-(unless it's a one-time job that hasn't run yet).
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="resumeCrawlingJob" method="post" path="/crawlingManager/{connector}/{connectorId}/resume" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.crawlingJobs.resume({
-    connector: "drive",
-    connectorId: "507f1f77bcf86cd799439011",
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { crawlingJobsResume } from "pipeshub/funcs/crawling-jobs-resume.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await crawlingJobsResume(pipeshub, {
-    connector: "drive",
-    connectorId: "507f1f77bcf86cd799439011",
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("crawlingJobsResume failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.ResumeCrawlingJobRequest](../../models/operations/resume-crawling-job-request.md)                                                                                  | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.ResumeCrawlingJobResponse](../../models/operations/resume-crawling-job-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## list
-
-Retrieve the status of all scheduled crawling jobs for the current organization.<br><br>
-
-<b>Overview:</b><br>
-Returns a list of all crawling jobs across all connectors for the authenticated user's
-organization. This includes active, waiting, paused, completed, and failed jobs.<br><br>
-
-<b>Response Details:</b><br>
-<ul>
-<li>Jobs are grouped by connector type</li>
-<li>Last 10 jobs per connector type are returned</li>
-<li>Includes both active queue jobs and paused jobs</li>
-</ul>
-
-<b>Use Cases:</b><br>
-<ul>
-<li>Dashboard overview of all crawling activities</li>
-<li>Monitoring job health across connectors</li>
-<li>Identifying failed or stuck jobs</li>
-</ul>
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="getAllCrawlingJobStatus" method="get" path="/crawlingManager/schedule/all" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.crawlingJobs.list();
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { crawlingJobsList } from "pipeshub/funcs/crawling-jobs-list.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await crawlingJobsList(pipeshub);
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("crawlingJobsList failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.GetAllCrawlingJobStatusResponse](../../models/operations/get-all-crawling-job-status-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## removeAll
-
-Remove all scheduled crawling jobs for the current organization.<br><br>
-
-<b>Overview:</b><br>
-Bulk operation to remove all crawling jobs across all connectors for the organization.
-This is useful when decommissioning an organization or doing a complete reset.<br><br>
-
-<b>What Gets Removed:</b><br>
-<ul>
-<li>All active and waiting jobs</li>
-<li>All repeatable job configurations</li>
-<li>All paused jobs</li>
-<li>All job mappings for the organization</li>
-</ul>
-
-<b>Warning:</b> This operation cannot be undone. All job configurations will need
-to be recreated manually.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="removeAllCrawlingJobs" method="delete" path="/crawlingManager/schedule/all" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.crawlingJobs.removeAll();
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { crawlingJobsRemoveAll } from "pipeshub/funcs/crawling-jobs-remove-all.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await crawlingJobsRemoveAll(pipeshub);
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("crawlingJobsRemoveAll failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.RemoveAllCrawlingJobsResponse](../../models/operations/remove-all-crawling-jobs-response.md)\>**
 
 ### Errors
 

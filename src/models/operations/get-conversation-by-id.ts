@@ -12,6 +12,11 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
+export type GetConversationByIdSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 /**
  * Sort direction
  */
@@ -190,6 +195,31 @@ export type GetConversationByIdResponse = {
   updatedAt?: Date | undefined;
   pagination?: GetConversationByIdPagination | undefined;
 };
+
+/** @internal */
+export type GetConversationByIdSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const GetConversationByIdSecurity$outboundSchema: z.ZodMiniType<
+  GetConversationByIdSecurity$Outbound,
+  GetConversationByIdSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function getConversationByIdSecurityToJSON(
+  getConversationByIdSecurity: GetConversationByIdSecurity,
+): string {
+  return JSON.stringify(
+    GetConversationByIdSecurity$outboundSchema.parse(
+      getConversationByIdSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export const GetConversationByIdSortOrder$outboundSchema: z.ZodMiniEnum<

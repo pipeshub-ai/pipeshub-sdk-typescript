@@ -7,6 +7,12 @@ import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
+
+export type GetFilterFieldOptionsSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export type GetFilterFieldOptionsRequest = {
   connectorId: string;
@@ -47,6 +53,31 @@ export type GetFilterFieldOptionsResponse = {
   options?: Array<Option> | undefined;
   pagination?: GetFilterFieldOptionsPagination | undefined;
 };
+
+/** @internal */
+export type GetFilterFieldOptionsSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const GetFilterFieldOptionsSecurity$outboundSchema: z.ZodMiniType<
+  GetFilterFieldOptionsSecurity$Outbound,
+  GetFilterFieldOptionsSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function getFilterFieldOptionsSecurityToJSON(
+  getFilterFieldOptionsSecurity: GetFilterFieldOptionsSecurity,
+): string {
+  return JSON.stringify(
+    GetFilterFieldOptionsSecurity$outboundSchema.parse(
+      getFilterFieldOptionsSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type GetFilterFieldOptionsRequest$Outbound = {

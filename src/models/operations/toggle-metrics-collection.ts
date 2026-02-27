@@ -7,6 +7,12 @@ import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
+
+export type ToggleMetricsCollectionSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 /**
  * Request payload
@@ -24,6 +30,31 @@ export type ToggleMetricsCollectionRequest = {
 export type ToggleMetricsCollectionResponse = {
   message?: string | undefined;
 };
+
+/** @internal */
+export type ToggleMetricsCollectionSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const ToggleMetricsCollectionSecurity$outboundSchema: z.ZodMiniType<
+  ToggleMetricsCollectionSecurity$Outbound,
+  ToggleMetricsCollectionSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function toggleMetricsCollectionSecurityToJSON(
+  toggleMetricsCollectionSecurity: ToggleMetricsCollectionSecurity,
+): string {
+  return JSON.stringify(
+    ToggleMetricsCollectionSecurity$outboundSchema.parse(
+      toggleMetricsCollectionSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type ToggleMetricsCollectionRequest$Outbound = {

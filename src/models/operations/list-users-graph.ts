@@ -10,6 +10,11 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
+export type ListUsersGraphSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 /**
  * Field to sort by
  */
@@ -78,6 +83,29 @@ export type ListUsersGraphResponse = {
   page?: number | undefined;
   limit?: number | undefined;
 };
+
+/** @internal */
+export type ListUsersGraphSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const ListUsersGraphSecurity$outboundSchema: z.ZodMiniType<
+  ListUsersGraphSecurity$Outbound,
+  ListUsersGraphSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function listUsersGraphSecurityToJSON(
+  listUsersGraphSecurity: ListUsersGraphSecurity,
+): string {
+  return JSON.stringify(
+    ListUsersGraphSecurity$outboundSchema.parse(listUsersGraphSecurity),
+  );
+}
 
 /** @internal */
 export const ListUsersGraphSortBy$outboundSchema: z.ZodMiniEnum<

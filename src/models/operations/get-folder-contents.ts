@@ -4,6 +4,12 @@
 
 import * as z from "zod/v4-mini";
 import { ClosedEnum } from "../../types/enums.js";
+import * as models from "../index.js";
+
+export type GetFolderContentsSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export const GetFolderContentsSortOrder = {
   Asc: "asc",
@@ -28,6 +34,29 @@ export type GetFolderContentsRequest = {
   sortBy?: string | undefined;
   sortOrder?: GetFolderContentsSortOrder | undefined;
 };
+
+/** @internal */
+export type GetFolderContentsSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const GetFolderContentsSecurity$outboundSchema: z.ZodMiniType<
+  GetFolderContentsSecurity$Outbound,
+  GetFolderContentsSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function getFolderContentsSecurityToJSON(
+  getFolderContentsSecurity: GetFolderContentsSecurity,
+): string {
+  return JSON.stringify(
+    GetFolderContentsSecurity$outboundSchema.parse(getFolderContentsSecurity),
+  );
+}
 
 /** @internal */
 export const GetFolderContentsSortOrder$outboundSchema: z.ZodMiniEnum<

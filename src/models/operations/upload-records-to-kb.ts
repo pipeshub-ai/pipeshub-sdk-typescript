@@ -4,6 +4,12 @@
 
 import * as z from "zod/v4-mini";
 import { remap as remap$ } from "../../lib/primitives.js";
+import * as models from "../index.js";
+
+export type UploadRecordsToKBSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export type UploadRecordsToKBFile = {
   fileName: string;
@@ -42,6 +48,29 @@ export type UploadRecordsToKBRequest = {
    */
   body: UploadRecordsToKBRequestBody;
 };
+
+/** @internal */
+export type UploadRecordsToKBSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const UploadRecordsToKBSecurity$outboundSchema: z.ZodMiniType<
+  UploadRecordsToKBSecurity$Outbound,
+  UploadRecordsToKBSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function uploadRecordsToKBSecurityToJSON(
+  uploadRecordsToKBSecurity: UploadRecordsToKBSecurity,
+): string {
+  return JSON.stringify(
+    UploadRecordsToKBSecurity$outboundSchema.parse(uploadRecordsToKBSecurity),
+  );
+}
 
 /** @internal */
 export type UploadRecordsToKBFile$Outbound = {

@@ -10,6 +10,11 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
+export type ListKnowledgeBasesSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 /**
  * Field to sort by
  */
@@ -74,6 +79,29 @@ export type ListKnowledgeBasesResponse = {
   knowledgeBases?: Array<models.KnowledgeBase> | undefined;
   pagination?: models.PaginationInfo | undefined;
 };
+
+/** @internal */
+export type ListKnowledgeBasesSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const ListKnowledgeBasesSecurity$outboundSchema: z.ZodMiniType<
+  ListKnowledgeBasesSecurity$Outbound,
+  ListKnowledgeBasesSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function listKnowledgeBasesSecurityToJSON(
+  listKnowledgeBasesSecurity: ListKnowledgeBasesSecurity,
+): string {
+  return JSON.stringify(
+    ListKnowledgeBasesSecurity$outboundSchema.parse(listKnowledgeBasesSecurity),
+  );
+}
 
 /** @internal */
 export const ListKnowledgeBasesSortBy$outboundSchema: z.ZodMiniEnum<

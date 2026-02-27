@@ -5,6 +5,11 @@
 import * as z from "zod/v4-mini";
 import * as models from "../index.js";
 
+export type StreamAgentConversationSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 export type StreamAgentConversationRequest = {
   agentKey: string;
   /**
@@ -12,6 +17,31 @@ export type StreamAgentConversationRequest = {
    */
   body: models.CreateConversationRequest;
 };
+
+/** @internal */
+export type StreamAgentConversationSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const StreamAgentConversationSecurity$outboundSchema: z.ZodMiniType<
+  StreamAgentConversationSecurity$Outbound,
+  StreamAgentConversationSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function streamAgentConversationSecurityToJSON(
+  streamAgentConversationSecurity: StreamAgentConversationSecurity,
+): string {
+  return JSON.stringify(
+    StreamAgentConversationSecurity$outboundSchema.parse(
+      streamAgentConversationSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type StreamAgentConversationRequest$Outbound = {

@@ -11,6 +11,11 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
+export type GetUserTeamsSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 export type GetUserTeamsRequest = {
   /**
    * Page number for pagination (1-based)
@@ -50,6 +55,29 @@ export type GetUserTeamsResponse = {
   data?: Array<GetUserTeamsData> | undefined;
   pagination?: GetUserTeamsPagination | undefined;
 };
+
+/** @internal */
+export type GetUserTeamsSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const GetUserTeamsSecurity$outboundSchema: z.ZodMiniType<
+  GetUserTeamsSecurity$Outbound,
+  GetUserTeamsSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function getUserTeamsSecurityToJSON(
+  getUserTeamsSecurity: GetUserTeamsSecurity,
+): string {
+  return JSON.stringify(
+    GetUserTeamsSecurity$outboundSchema.parse(getUserTeamsSecurity),
+  );
+}
 
 /** @internal */
 export type GetUserTeamsRequest$Outbound = {

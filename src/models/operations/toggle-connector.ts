@@ -9,6 +9,11 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
+export type ToggleConnectorSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 export type ToggleConnectorRequest = {
   connectorId: string;
   /**
@@ -31,6 +36,29 @@ export type ToggleConnectorResponse = {
    */
   connector?: models.ConnectorInstance | undefined;
 };
+
+/** @internal */
+export type ToggleConnectorSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const ToggleConnectorSecurity$outboundSchema: z.ZodMiniType<
+  ToggleConnectorSecurity$Outbound,
+  ToggleConnectorSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function toggleConnectorSecurityToJSON(
+  toggleConnectorSecurity: ToggleConnectorSecurity,
+): string {
+  return JSON.stringify(
+    ToggleConnectorSecurity$outboundSchema.parse(toggleConnectorSecurity),
+  );
+}
 
 /** @internal */
 export type ToggleConnectorRequest$Outbound = {

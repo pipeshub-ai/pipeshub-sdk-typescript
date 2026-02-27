@@ -7,7 +7,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.userAccount.initializeAuth({
+  const result = await pipeshub.userAccount.initAuth({
     email: "user@example.com",
   });
 

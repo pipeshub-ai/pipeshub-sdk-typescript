@@ -8,6 +8,12 @@ import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
+
+export type DeleteUserSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export type DeleteUserRequest = {
   /**
@@ -30,6 +36,29 @@ export type DeleteUserResponse = {
   message?: string | undefined;
   deletedUser?: DeletedUser | undefined;
 };
+
+/** @internal */
+export type DeleteUserSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const DeleteUserSecurity$outboundSchema: z.ZodMiniType<
+  DeleteUserSecurity$Outbound,
+  DeleteUserSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function deleteUserSecurityToJSON(
+  deleteUserSecurity: DeleteUserSecurity,
+): string {
+  return JSON.stringify(
+    DeleteUserSecurity$outboundSchema.parse(deleteUserSecurity),
+  );
+}
 
 /** @internal */
 export type DeleteUserRequest$Outbound = {

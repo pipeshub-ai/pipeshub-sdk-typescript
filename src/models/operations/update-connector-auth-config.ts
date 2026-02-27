@@ -9,6 +9,11 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
+export type UpdateConnectorAuthConfigSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 export type UpdateConnectorAuthConfigRequest = {
   connectorId: string;
   /**
@@ -27,6 +32,31 @@ export type UpdateConnectorAuthConfigResponse = {
    */
   config?: models.ConnectorConfig | undefined;
 };
+
+/** @internal */
+export type UpdateConnectorAuthConfigSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const UpdateConnectorAuthConfigSecurity$outboundSchema: z.ZodMiniType<
+  UpdateConnectorAuthConfigSecurity$Outbound,
+  UpdateConnectorAuthConfigSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function updateConnectorAuthConfigSecurityToJSON(
+  updateConnectorAuthConfigSecurity: UpdateConnectorAuthConfigSecurity,
+): string {
+  return JSON.stringify(
+    UpdateConnectorAuthConfigSecurity$outboundSchema.parse(
+      updateConnectorAuthConfigSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type UpdateConnectorAuthConfigRequest$Outbound = {

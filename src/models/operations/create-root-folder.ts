@@ -3,6 +3,12 @@
  */
 
 import * as z from "zod/v4-mini";
+import * as models from "../index.js";
+
+export type CreateRootFolderSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 /**
  * Request payload
@@ -24,6 +30,29 @@ export type CreateRootFolderRequest = {
    */
   body: CreateRootFolderRequestBody;
 };
+
+/** @internal */
+export type CreateRootFolderSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const CreateRootFolderSecurity$outboundSchema: z.ZodMiniType<
+  CreateRootFolderSecurity$Outbound,
+  CreateRootFolderSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function createRootFolderSecurityToJSON(
+  createRootFolderSecurity: CreateRootFolderSecurity,
+): string {
+  return JSON.stringify(
+    CreateRootFolderSecurity$outboundSchema.parse(createRootFolderSecurity),
+  );
+}
 
 /** @internal */
 export type CreateRootFolderRequestBody$Outbound = {

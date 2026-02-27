@@ -3,8 +3,14 @@
  */
 
 import * as z from "zod/v4-mini";
+import * as models from "../index.js";
 
-export type CreateAgentLlmConfig = {
+export type CreateAgentSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
+export type CreateAgentModelConfig = {
   modelKey?: string | undefined;
   temperature?: number | undefined;
   maxTokens?: number | undefined;
@@ -34,7 +40,7 @@ export type CreateAgentRequest = {
    * Knowledge base IDs to access
    */
   knowledgeBases?: Array<string> | undefined;
-  llmConfig?: CreateAgentLlmConfig | undefined;
+  modelConfig?: CreateAgentModelConfig | undefined;
   /**
    * Make agent available to all org users
    */
@@ -42,27 +48,50 @@ export type CreateAgentRequest = {
 };
 
 /** @internal */
-export type CreateAgentLlmConfig$Outbound = {
+export type CreateAgentSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const CreateAgentSecurity$outboundSchema: z.ZodMiniType<
+  CreateAgentSecurity$Outbound,
+  CreateAgentSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function createAgentSecurityToJSON(
+  createAgentSecurity: CreateAgentSecurity,
+): string {
+  return JSON.stringify(
+    CreateAgentSecurity$outboundSchema.parse(createAgentSecurity),
+  );
+}
+
+/** @internal */
+export type CreateAgentModelConfig$Outbound = {
   modelKey?: string | undefined;
   temperature?: number | undefined;
   maxTokens?: number | undefined;
 };
 
 /** @internal */
-export const CreateAgentLlmConfig$outboundSchema: z.ZodMiniType<
-  CreateAgentLlmConfig$Outbound,
-  CreateAgentLlmConfig
+export const CreateAgentModelConfig$outboundSchema: z.ZodMiniType<
+  CreateAgentModelConfig$Outbound,
+  CreateAgentModelConfig
 > = z.object({
   modelKey: z.optional(z.string()),
   temperature: z.optional(z.number()),
   maxTokens: z.optional(z.int()),
 });
 
-export function createAgentLlmConfigToJSON(
-  createAgentLlmConfig: CreateAgentLlmConfig,
+export function createAgentModelConfigToJSON(
+  createAgentModelConfig: CreateAgentModelConfig,
 ): string {
   return JSON.stringify(
-    CreateAgentLlmConfig$outboundSchema.parse(createAgentLlmConfig),
+    CreateAgentModelConfig$outboundSchema.parse(createAgentModelConfig),
   );
 }
 
@@ -73,7 +102,7 @@ export type CreateAgentRequest$Outbound = {
   systemPrompt?: string | undefined;
   tools?: Array<string> | undefined;
   knowledgeBases?: Array<string> | undefined;
-  llmConfig?: CreateAgentLlmConfig$Outbound | undefined;
+  modelConfig?: CreateAgentModelConfig$Outbound | undefined;
   isPublic: boolean;
 };
 
@@ -87,7 +116,7 @@ export const CreateAgentRequest$outboundSchema: z.ZodMiniType<
   systemPrompt: z.optional(z.string()),
   tools: z.optional(z.array(z.string())),
   knowledgeBases: z.optional(z.array(z.string())),
-  llmConfig: z.optional(z.lazy(() => CreateAgentLlmConfig$outboundSchema)),
+  modelConfig: z.optional(z.lazy(() => CreateAgentModelConfig$outboundSchema)),
   isPublic: z._default(z.boolean(), false),
 });
 

@@ -3,6 +3,12 @@
  */
 
 import * as z from "zod/v4-mini";
+import * as models from "../index.js";
+
+export type SetPlatformSettingsSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 /**
  * Request body for Update platform settings
@@ -17,6 +23,31 @@ export type SetPlatformSettingsRequest = {
    */
   featureFlags: { [k: string]: boolean };
 };
+
+/** @internal */
+export type SetPlatformSettingsSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const SetPlatformSettingsSecurity$outboundSchema: z.ZodMiniType<
+  SetPlatformSettingsSecurity$Outbound,
+  SetPlatformSettingsSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function setPlatformSettingsSecurityToJSON(
+  setPlatformSettingsSecurity: SetPlatformSettingsSecurity,
+): string {
+  return JSON.stringify(
+    SetPlatformSettingsSecurity$outboundSchema.parse(
+      setPlatformSettingsSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type SetPlatformSettingsRequest$Outbound = {

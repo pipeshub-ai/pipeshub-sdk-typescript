@@ -4,6 +4,12 @@
 
 import * as z from "zod/v4-mini";
 import { ClosedEnum } from "../../types/enums.js";
+import * as models from "../index.js";
+
+export type GetKBRecordsSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export const GetKBRecordsSortOrder = {
   Asc: "asc",
@@ -45,6 +51,29 @@ export type GetKBRecordsRequest = {
   sortBy?: string | undefined;
   sortOrder?: GetKBRecordsSortOrder | undefined;
 };
+
+/** @internal */
+export type GetKBRecordsSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const GetKBRecordsSecurity$outboundSchema: z.ZodMiniType<
+  GetKBRecordsSecurity$Outbound,
+  GetKBRecordsSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function getKBRecordsSecurityToJSON(
+  getKBRecordsSecurity: GetKBRecordsSecurity,
+): string {
+  return JSON.stringify(
+    GetKBRecordsSecurity$outboundSchema.parse(getKBRecordsSecurity),
+  );
+}
 
 /** @internal */
 export const GetKBRecordsSortOrder$outboundSchema: z.ZodMiniEnum<

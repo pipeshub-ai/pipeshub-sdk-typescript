@@ -9,6 +9,11 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
+export type GetTeamByIdSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 export type GetTeamByIdRequest = {
   /**
    * Team ID (24-character MongoDB ObjectId)
@@ -23,6 +28,29 @@ export type GetTeamByIdResponse = {
   success?: boolean | undefined;
   data?: models.Team | undefined;
 };
+
+/** @internal */
+export type GetTeamByIdSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const GetTeamByIdSecurity$outboundSchema: z.ZodMiniType<
+  GetTeamByIdSecurity$Outbound,
+  GetTeamByIdSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function getTeamByIdSecurityToJSON(
+  getTeamByIdSecurity: GetTeamByIdSecurity,
+): string {
+  return JSON.stringify(
+    GetTeamByIdSecurity$outboundSchema.parse(getTeamByIdSecurity),
+  );
+}
 
 /** @internal */
 export type GetTeamByIdRequest$Outbound = {

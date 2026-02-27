@@ -6,30 +6,21 @@ User management operations
 
 ### Available Operations
 
-* [get](#get) - Get all users
-* [create](#create) - Create a new user
-* [getById](#getbyid) - Get user by ID
-* [update](#update) - Update user
-* [delete](#delete) - Delete user
-* [fetchWithGroups](#fetchwithgroups) - Get all users with their groups
-* [getEmail](#getemail) - Get user email by ID
-* [getByIds](#getbyids) - Get users by IDs (bulk)
-* [checkExistsByEmail](#checkexistsbyemail) - Check if user exists by email
-* [getInternal](#getinternal) - Get user (internal service-to-service)
-* [updateFullName](#updatefullname) - Update user full name
-* [updateFirstName](#updatefirstname) - Update user first name
-* [updateLastName](#updatelastname) - Update user last name
-* [updateDesignation](#updatedesignation) - Update user designation
-* [checkIsAdmin](#checkisadmin) - Check if user is admin
-* [uploadDisplayPicture](#uploaddisplaypicture) - Upload display picture
-* [getDisplayPicture](#getdisplaypicture) - Get display picture
-* [removeDisplayPicture](#removedisplaypicture) - Remove display picture
-* [bulkInvite](#bulkinvite) - Bulk invite users
-* [resendInvite](#resendinvite) - Resend user invite
-* [listGraph](#listgraph) - List users (paginated with graph data)
-* [listTeams](#listteams) - Get current user's teams
+* [getAllUsers](#getallusers) - Get all users
+* [createUser](#createuser) - Create a new user
+* [getUserById](#getuserbyid) - Get user by ID
+* [updateUser](#updateuser) - Update user
+* [deleteUser](#deleteuser) - Delete user
+* [getUserEmailById](#getuseremailbyid) - Get user email by ID
+* [uploadUserDisplayPicture](#uploaduserdisplaypicture) - Upload display picture
+* [getUserDisplayPicture](#getuserdisplaypicture) - Get display picture
+* [removeUserDisplayPicture](#removeuserdisplaypicture) - Remove display picture
+* [bulkInviteUsers](#bulkinviteusers) - Bulk invite users
+* [resendUserInvite](#resenduserinvite) - Resend user invite
+* [listUsersGraph](#listusersgraph) - List users (paginated with graph data)
+* [unblockUser](#unblockuser) - Unblock a user in organization
 
-## get
+## getAllUsers
 
 Retrieve a paginated list of all users in the organization.<br><br>
 <b>Overview:</b><br>
@@ -63,11 +54,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.users.get({});
+  const result = await pipeshub.users.getAllUsers({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {});
 
   console.log(result);
 }
@@ -81,22 +73,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { usersGet } from "pipeshub/funcs/users-get.js";
+import { usersGetAllUsers } from "pipeshub/funcs/users-get-all-users.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await usersGet(pipeshub, {});
+  const res = await usersGetAllUsers(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {});
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("usersGet failed:", res.error);
+    console.log("usersGetAllUsers failed:", res.error);
   }
 }
 
@@ -108,6 +101,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.GetAllUsersRequest](../../models/operations/get-all-users-request.md)                                                                                              | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.GetAllUsersSecurity](../../models/operations/get-all-users-security.md)                                                                                            | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -122,7 +116,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## create
+## createUser
 
 Create a new user account in the organization and optionally send an invitation email.<br><br>
 <b>Overview:</b><br>
@@ -165,7 +159,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.users.create({
+  const result = await pipeshub.users.createUser({
     fullName: "John Smith",
     email: "john.smith@company.com",
     mobile: "+15551234567",
@@ -184,7 +178,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { usersCreate } from "pipeshub/funcs/users-create.js";
+import { usersCreateUser } from "pipeshub/funcs/users-create-user.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -194,7 +188,7 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await usersCreate(pipeshub, {
+  const res = await usersCreateUser(pipeshub, {
     fullName: "John Smith",
     email: "john.smith@company.com",
     mobile: "+15551234567",
@@ -204,7 +198,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("usersCreate failed:", res.error);
+    console.log("usersCreateUser failed:", res.error);
   }
 }
 
@@ -230,7 +224,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getById
+## getUserById
 
 Retrieve detailed information about a specific user by their unique identifier.<br><br>
 <b>Overview:</b><br>
@@ -264,11 +258,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.users.getById({
+  const result = await pipeshub.users.getUserById({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     id: "507f1f77bcf86cd799439011",
   });
 
@@ -284,24 +279,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { usersGetById } from "pipeshub/funcs/users-get-by-id.js";
+import { usersGetUserById } from "pipeshub/funcs/users-get-user-by-id.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await usersGetById(pipeshub, {
+  const res = await usersGetUserById(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     id: "507f1f77bcf86cd799439011",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("usersGetById failed:", res.error);
+    console.log("usersGetUserById failed:", res.error);
   }
 }
 
@@ -313,6 +309,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.GetUserByIdRequest](../../models/operations/get-user-by-id-request.md)                                                                                             | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.GetUserByIdSecurity](../../models/operations/get-user-by-id-security.md)                                                                                           | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -327,7 +324,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## update
+## updateUser
 
 Update user profile information. Users can update their own profile, admins can update any user.<br><br>
 <b>Overview:</b><br>
@@ -370,11 +367,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.users.update({
+  const result = await pipeshub.users.updateUser({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     id: "507f1f77bcf86cd799439011",
     body: {
       fullName: "John Smith",
@@ -398,17 +396,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { usersUpdate } from "pipeshub/funcs/users-update.js";
+import { usersUpdateUser } from "pipeshub/funcs/users-update-user.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await usersUpdate(pipeshub, {
+  const res = await usersUpdateUser(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     id: "507f1f77bcf86cd799439011",
     body: {
       fullName: "John Smith",
@@ -423,7 +422,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("usersUpdate failed:", res.error);
+    console.log("usersUpdateUser failed:", res.error);
   }
 }
 
@@ -435,6 +434,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.UpdateUserRequest](../../models/operations/update-user-request.md)                                                                                                 | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.UpdateUserSecurity](../../models/operations/update-user-security.md)                                                                                               | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -449,7 +449,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## delete
+## deleteUser
 
 Soft delete a user from the organization. The user account is deactivated but data is retained for audit purposes.<br><br>
 <b>Overview:</b><br>
@@ -488,11 +488,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.users.delete({
+  const result = await pipeshub.users.deleteUser({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     id: "507f1f77bcf86cd799439011",
   });
 
@@ -508,24 +509,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { usersDelete } from "pipeshub/funcs/users-delete.js";
+import { usersDeleteUser } from "pipeshub/funcs/users-delete-user.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await usersDelete(pipeshub, {
+  const res = await usersDeleteUser(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     id: "507f1f77bcf86cd799439011",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("usersDelete failed:", res.error);
+    console.log("usersDeleteUser failed:", res.error);
   }
 }
 
@@ -537,6 +539,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.DeleteUserRequest](../../models/operations/delete-user-request.md)                                                                                                 | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.DeleteUserSecurity](../../models/operations/delete-user-security.md)                                                                                               | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -551,106 +554,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## fetchWithGroups
-
-Retrieve all users along with their group memberships in a single optimized query.<br><br>
-<b>Overview:</b><br>
-This endpoint returns users with their associated groups pre-loaded, eliminating the need for separate group lookup calls. Ideal for admin dashboards that need to display user permissions at a glance.<br><br>
-<b>Use Cases:</b><br>
-<ul>
-<li>Admin dashboards showing user-group matrix</li>
-<li>Permission auditing and compliance checks</li>
-<li>Bulk user management interfaces</li>
-<li>Access control visualization</li>
-</ul>
-<b>Response Data per User:</b><br>
-<ul>
-<li><code>_id</code>: User's unique identifier</li>
-<li><code>userId</code>: User's public-facing ID</li>
-<li><code>orgId</code>: Organization identifier</li>
-<li><code>fullName</code>: User's display name</li>
-<li><code>hasLoggedIn</code>: Whether user has ever logged in</li>
-<li><code>groups</code>: Array of group objects with name and type</li>
-</ul>
-<b>Group Types Returned:</b><br>
-<ul>
-<li><code>admin</code>: Administrative groups with elevated permissions</li>
-<li><code>standard</code>: Regular user groups</li>
-<li><code>everyone</code>: Default group containing all org users</li>
-<li><code>custom</code>: Custom groups created by admins</li>
-</ul>
-<b>Performance Notes:</b><br>
-Uses aggregation pipeline for efficient single-query retrieval. Cached results for improved performance on large organizations.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="getAllUsersWithGroups" method="get" path="/users/fetch/with-groups" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.users.fetchWithGroups({});
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { usersFetchWithGroups } from "pipeshub/funcs/users-fetch-with-groups.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await usersFetchWithGroups(pipeshub, {});
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("usersFetchWithGroups failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.GetAllUsersWithGroupsRequest](../../models/operations/get-all-users-with-groups-request.md)                                                                        | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.GetAllUsersWithGroupsResponse](../../models/operations/get-all-users-with-groups-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## getEmail
+## getUserEmailById
 
 Retrieve the email address for a specific user. This is a dedicated endpoint for email lookup with proper access controls.<br><br>
 <b>Overview:</b><br>
@@ -684,7 +588,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.users.getEmail({
+  const result = await pipeshub.users.getUserEmailById({
     id: "507f1f77bcf86cd799439011",
   });
 
@@ -700,7 +604,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { usersGetEmail } from "pipeshub/funcs/users-get-email.js";
+import { usersGetUserEmailById } from "pipeshub/funcs/users-get-user-email-by-id.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -710,14 +614,14 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await usersGetEmail(pipeshub, {
+  const res = await usersGetUserEmailById(pipeshub, {
     id: "507f1f77bcf86cd799439011",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("usersGetEmail failed:", res.error);
+    console.log("usersGetUserEmailById failed:", res.error);
   }
 }
 
@@ -743,789 +647,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getByIds
-
-Retrieve multiple users by their IDs in a single optimized request. Ideal for efficiently fetching a specific set of users.<br><br>
-<b>Overview:</b><br>
-This bulk endpoint allows fetching multiple users in a single API call, reducing network overhead when you need to display information about several known users.<br><br>
-<b>Use Cases:</b><br>
-<ul>
-<li>Fetching user details for a list of team members</li>
-<li>Populating user cards in a dashboard</li>
-<li>Loading participants in a document or conversation</li>
-<li>Building user mention/autocomplete features</li>
-</ul>
-<b>Request Format:</b><br>
-<ul>
-<li>Send array of user IDs in request body</li>
-<li>Each ID must be valid 24-character MongoDB ObjectId</li>
-<li>Maximum 100 IDs per request (for performance)</li>
-<li>Duplicate IDs are automatically deduplicated</li>
-</ul>
-<b>Response Behavior:</b><br>
-<ul>
-<li>Returns array of found users</li>
-<li>Order matches order of requested IDs</li>
-<li>Non-existent or deleted users are silently omitted</li>
-<li>Partial results returned if some IDs are invalid</li>
-</ul>
-<b>Performance Notes:</b><br>
-Uses single database query with $in operator for optimal performance. Preferable to multiple individual user fetches.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="getUsersByIds" method="post" path="/users/by-ids" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.users.getByIds({
-    userIds: [
-      "507f1f77bcf86cd799439011",
-      "507f1f77bcf86cd799439012",
-    ],
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { usersGetByIds } from "pipeshub/funcs/users-get-by-ids.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await usersGetByIds(pipeshub, {
-    userIds: [
-      "507f1f77bcf86cd799439011",
-      "507f1f77bcf86cd799439012",
-    ],
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("usersGetByIds failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.GetUsersByIdsRequest](../../models/operations/get-users-by-ids-request.md)                                                                                         | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.GetUsersByIdsResponse](../../models/operations/get-users-by-ids-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## checkExistsByEmail
-
-Check if a user account exists with the given email address. Used for pre-validation in registration and invitation flows.<br><br>
-<b>Overview:</b><br>
-This internal service endpoint validates email existence before creating accounts or sending invitations. It helps prevent duplicate accounts and validates recovery email addresses.<br><br>
-<b>Use Cases:</b><br>
-<ul>
-<li>Pre-flight check before user invitation</li>
-<li>Email validation during registration</li>
-<li>Account recovery flow validation</li>
-<li>Duplicate prevention checks</li>
-</ul>
-<b>Security Model:</b><br>
-<ul>
-<li>Requires scoped token with USER_LOOKUP privilege</li>
-<li>Not accessible with regular bearer tokens</li>
-<li>Typically called from internal services only</li>
-</ul>
-<b>Response Behavior:</b><br>
-<ul>
-<li>Returns matching users (including soft-deleted for recovery)</li>
-<li>Empty array if no match found</li>
-<li>Does not expose whether email exists to prevent enumeration</li>
-</ul>
-<b>Note:</b> May return soft-deleted users to support account recovery workflows.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="checkUserExistsByEmail" method="get" path="/users/email/exists" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-});
-
-async function run() {
-  const result = await pipeshub.users.checkExistsByEmail({
-    scopedToken: process.env["PIPESHUB_SCOPED_TOKEN"] ?? "",
-  }, {
-    email: "john.smith@company.com",
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { usersCheckExistsByEmail } from "pipeshub/funcs/users-check-exists-by-email.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-});
-
-async function run() {
-  const res = await usersCheckExistsByEmail(pipeshub, {
-    scopedToken: process.env["PIPESHUB_SCOPED_TOKEN"] ?? "",
-  }, {
-    email: "john.smith@company.com",
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("usersCheckExistsByEmail failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.CheckUserExistsByEmailRequest](../../models/operations/check-user-exists-by-email-request.md)                                                                      | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `security`                                                                                                                                                                     | [operations.CheckUserExistsByEmailSecurity](../../models/operations/check-user-exists-by-email-security.md)                                                                    | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.CheckUserExistsByEmailResponse](../../models/operations/check-user-exists-by-email-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## getInternal
-
-Internal endpoint for service-to-service user lookup. Returns complete user data without privacy masking.<br><br>
-<b>Overview:</b><br>
-This internal endpoint provides full user data access for trusted backend services. Unlike public endpoints, it bypasses privacy controls and returns complete user information.<br><br>
-<b>Security Model:</b><br>
-<ul>
-<li>Requires scoped token with USER_LOOKUP privilege</li>
-<li>Not accessible via regular bearer tokens</li>
-<li>Intended for trusted internal services only</li>
-<li>All access is logged for audit purposes</li>
-</ul>
-<b>Intended Consumers:</b><br>
-<ul>
-<li>Email notification service</li>
-<li>Analytics and reporting services</li>
-<li>Audit logging service</li>
-<li>Integration sync services</li>
-</ul>
-<b>Data Returned:</b><br>
-Complete user object including fields that may be masked in public endpoints (email, phone, etc.).<br><br>
-<b>Warning:</b><br>
-This endpoint returns sensitive data. Ensure consuming services handle data according to privacy policies.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="getInternalUser" method="get" path="/users/internal/{id}" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-});
-
-async function run() {
-  const result = await pipeshub.users.getInternal({
-    scopedToken: process.env["PIPESHUB_SCOPED_TOKEN"] ?? "",
-  }, {
-    id: "507f1f77bcf86cd799439011",
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { usersGetInternal } from "pipeshub/funcs/users-get-internal.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-});
-
-async function run() {
-  const res = await usersGetInternal(pipeshub, {
-    scopedToken: process.env["PIPESHUB_SCOPED_TOKEN"] ?? "",
-  }, {
-    id: "507f1f77bcf86cd799439011",
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("usersGetInternal failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.GetInternalUserRequest](../../models/operations/get-internal-user-request.md)                                                                                      | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `security`                                                                                                                                                                     | [operations.GetInternalUserSecurity](../../models/operations/get-internal-user-security.md)                                                                                    | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.GetInternalUserResponse](../../models/operations/get-internal-user-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## updateFullName
-
-Update the full name of a user. This is a targeted update endpoint for changing only the display name without affecting other profile fields.<br><br>
-<b>Overview:</b><br>
-This endpoint updates a user's fullName field, which is their primary display name throughout the application. The firstName and lastName fields may also be updated based on name parsing logic.<br><br>
-<b>Authorization:</b><br>
-<ul>
-<li><b>Self-update:</b> Users can update their own full name</li>
-<li><b>Admin-update:</b> Admins can update any user's name</li>
-</ul>
-<b>Side Effects:</b><br>
-<ul>
-<li>Updates fullName field</li>
-<li>May parse and update firstName/lastName</li>
-<li>User update event published</li>
-<li>Cached user data invalidated</li>
-</ul>
-<b>Use Cases:</b><br>
-<ul>
-<li>User profile name change</li>
-<li>Name correction by admin</li>
-<li>Legal name update</li>
-</ul>
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="updateUserFullName" method="patch" path="/users/{id}/fullname" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.users.updateFullName({
-    id: "<id>",
-    body: {
-      fullName: "Jim Denesik",
-    },
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { usersUpdateFullName } from "pipeshub/funcs/users-update-full-name.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await usersUpdateFullName(pipeshub, {
-    id: "<id>",
-    body: {
-      fullName: "Jim Denesik",
-    },
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("usersUpdateFullName failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.UpdateUserFullNameRequest](../../models/operations/update-user-full-name-request.md)                                                                               | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[models.User](../../models/user.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## updateFirstName
-
-Update only the first name of a user without affecting other profile fields.<br><br>
-<b>Overview:</b><br>
-This targeted endpoint updates just the firstName field. Useful when you need fine-grained control over name components rather than updating the full name.<br><br>
-<b>Authorization:</b><br>
-<ul>
-<li><b>Self-update:</b> Users can update their own first name</li>
-<li><b>Admin-update:</b> Admins can update any user's first name</li>
-</ul>
-<b>Note:</b> This does NOT automatically update the fullName field. Use <code>/users/{id}/fullname</code> if you need to update the complete display name.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="updateUserFirstName" method="patch" path="/users/{id}/firstName" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.users.updateFirstName({
-    id: "507f1f77bcf86cd799439011",
-    body: {
-      firstName: "John",
-    },
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { usersUpdateFirstName } from "pipeshub/funcs/users-update-first-name.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await usersUpdateFirstName(pipeshub, {
-    id: "507f1f77bcf86cd799439011",
-    body: {
-      firstName: "John",
-    },
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("usersUpdateFirstName failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.UpdateUserFirstNameRequest](../../models/operations/update-user-first-name-request.md)                                                                             | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.UpdateUserFirstNameResponse](../../models/operations/update-user-first-name-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## updateLastName
-
-Update only the last name of a user without affecting other profile fields.<br><br>
-<b>Overview:</b><br>
-This targeted endpoint updates just the lastName field. Useful for fine-grained control over name components.<br><br>
-<b>Authorization:</b><br>
-<ul>
-<li><b>Self-update:</b> Users can update their own last name</li>
-<li><b>Admin-update:</b> Admins can update any user's last name</li>
-</ul>
-<b>Note:</b> This does NOT automatically update the fullName field. Use <code>/users/{id}/fullname</code> if you need to update the complete display name.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="updateUserLastName" method="patch" path="/users/{id}/lastName" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.users.updateLastName({
-    id: "507f1f77bcf86cd799439011",
-    body: {
-      lastName: "Smith",
-    },
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { usersUpdateLastName } from "pipeshub/funcs/users-update-last-name.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await usersUpdateLastName(pipeshub, {
-    id: "507f1f77bcf86cd799439011",
-    body: {
-      lastName: "Smith",
-    },
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("usersUpdateLastName failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.UpdateUserLastNameRequest](../../models/operations/update-user-last-name-request.md)                                                                               | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.UpdateUserLastNameResponse](../../models/operations/update-user-last-name-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## updateDesignation
-
-Update the job title or designation of a user.<br><br>
-<b>Overview:</b><br>
-This endpoint updates the user's designation field, which typically represents their job title, role, or position within the organization.<br><br>
-<b>Authorization:</b><br>
-<ul>
-<li><b>Self-update:</b> Users can update their own designation</li>
-<li><b>Admin-update:</b> Admins can update any user's designation</li>
-</ul>
-<b>Common Values:</b><br>
-<ul>
-<li>Software Engineer</li>
-<li>Product Manager</li>
-<li>Team Lead</li>
-<li>Director of Engineering</li>
-</ul>
-<b>Display:</b><br>
-Designation is shown in user profiles, team views, and organizational charts.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="updateUserDesignation" method="patch" path="/users/{id}/designation" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.users.updateDesignation({
-    id: "507f1f77bcf86cd799439011",
-    body: {
-      designation: "Senior Software Engineer",
-    },
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { usersUpdateDesignation } from "pipeshub/funcs/users-update-designation.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await usersUpdateDesignation(pipeshub, {
-    id: "507f1f77bcf86cd799439011",
-    body: {
-      designation: "Senior Software Engineer",
-    },
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("usersUpdateDesignation failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.UpdateUserDesignationRequest](../../models/operations/update-user-designation-request.md)                                                                          | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.UpdateUserDesignationResponse](../../models/operations/update-user-designation-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## checkIsAdmin
-
-Verify whether a specific user has administrative privileges in the organization.<br><br>
-<b>Overview:</b><br>
-This endpoint checks if the specified user belongs to an admin group and has elevated permissions. It's useful for authorization checks before performing admin-only operations.<br><br>
-<b>What Makes a User an Admin:</b><br>
-<ul>
-<li>Member of a group with type "admin"</li>
-<li>Has explicit admin role assignment</li>
-<li>Organization owner (always admin)</li>
-</ul>
-<b>Use Cases:</b><br>
-<ul>
-<li>UI permission checks before showing admin features</li>
-<li>Pre-flight authorization validation</li>
-<li>Access control for sensitive operations</li>
-</ul>
-<b>Response Codes:</b><br>
-<ul>
-<li><code>200</code>: User IS an admin</li>
-<li><code>403</code>: User is NOT an admin</li>
-</ul>
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="checkUserIsAdmin" method="get" path="/users/{id}/adminCheck" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.users.checkIsAdmin({
-    id: "507f1f77bcf86cd799439011",
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { usersCheckIsAdmin } from "pipeshub/funcs/users-check-is-admin.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await usersCheckIsAdmin(pipeshub, {
-    id: "507f1f77bcf86cd799439011",
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("usersCheckIsAdmin failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.CheckUserIsAdminRequest](../../models/operations/check-user-is-admin-request.md)                                                                                   | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.CheckUserIsAdminResponse](../../models/operations/check-user-is-admin-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## uploadDisplayPicture
+## uploadUserDisplayPicture
 
 Upload or update the display picture (avatar) for the authenticated user.<br><br>
 <b>Overview:</b><br>
@@ -1567,7 +689,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.users.uploadDisplayPicture({
+  const result = await pipeshub.users.uploadUserDisplayPicture({
     file: await openAsBlob("example.file"),
   });
 
@@ -1584,7 +706,7 @@ The standalone function version of this method:
 ```typescript
 import { openAsBlob } from "node:fs";
 import { PipeshubCore } from "pipeshub/core.js";
-import { usersUploadDisplayPicture } from "pipeshub/funcs/users-upload-display-picture.js";
+import { usersUploadUserDisplayPicture } from "pipeshub/funcs/users-upload-user-display-picture.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -1594,14 +716,14 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await usersUploadDisplayPicture(pipeshub, {
+  const res = await usersUploadUserDisplayPicture(pipeshub, {
     file: await openAsBlob("example.file"),
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("usersUploadDisplayPicture failed:", res.error);
+    console.log("usersUploadUserDisplayPicture failed:", res.error);
   }
 }
 
@@ -1627,7 +749,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getDisplayPicture
+## getUserDisplayPicture
 
 Retrieve the current user's display picture image.<br><br>
 <b>Overview:</b><br>
@@ -1660,7 +782,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.users.getDisplayPicture();
+  const result = await pipeshub.users.getUserDisplayPicture();
 
   console.log(result);
 }
@@ -1674,7 +796,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { usersGetDisplayPicture } from "pipeshub/funcs/users-get-display-picture.js";
+import { usersGetUserDisplayPicture } from "pipeshub/funcs/users-get-user-display-picture.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -1684,12 +806,12 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await usersGetDisplayPicture(pipeshub);
+  const res = await usersGetUserDisplayPicture(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("usersGetDisplayPicture failed:", res.error);
+    console.log("usersGetUserDisplayPicture failed:", res.error);
   }
 }
 
@@ -1714,7 +836,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## removeDisplayPicture
+## removeUserDisplayPicture
 
 Remove the current user's display picture and revert to default avatar.<br><br>
 <b>Overview:</b><br>
@@ -1742,7 +864,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.users.removeDisplayPicture();
+  const result = await pipeshub.users.removeUserDisplayPicture();
 
   console.log(result);
 }
@@ -1756,7 +878,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { usersRemoveDisplayPicture } from "pipeshub/funcs/users-remove-display-picture.js";
+import { usersRemoveUserDisplayPicture } from "pipeshub/funcs/users-remove-user-display-picture.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -1766,12 +888,12 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await usersRemoveDisplayPicture(pipeshub);
+  const res = await usersRemoveUserDisplayPicture(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("usersRemoveDisplayPicture failed:", res.error);
+    console.log("usersRemoveUserDisplayPicture failed:", res.error);
   }
 }
 
@@ -1796,7 +918,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## bulkInvite
+## bulkInviteUsers
 
 Invite multiple users to the organization in a single operation. Ideal for onboarding entire teams at once.<br><br>
 <b>Overview:</b><br>
@@ -1835,11 +957,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.users.bulkInvite({
+  const result = await pipeshub.users.bulkInviteUsers({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     emails: [
       "user1@company.com",
       "user2@company.com",
@@ -1861,17 +984,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { usersBulkInvite } from "pipeshub/funcs/users-bulk-invite.js";
+import { usersBulkInviteUsers } from "pipeshub/funcs/users-bulk-invite-users.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await usersBulkInvite(pipeshub, {
+  const res = await usersBulkInviteUsers(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     emails: [
       "user1@company.com",
       "user2@company.com",
@@ -1884,7 +1008,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("usersBulkInvite failed:", res.error);
+    console.log("usersBulkInviteUsers failed:", res.error);
   }
 }
 
@@ -1896,6 +1020,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.BulkInviteUsersRequest](../../models/operations/bulk-invite-users-request.md)                                                                                      | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.BulkInviteUsersSecurity](../../models/operations/bulk-invite-users-security.md)                                                                                    | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -1910,7 +1035,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## resendInvite
+## resendUserInvite
 
 Resend the invitation email to a user who hasn't completed their account setup.<br><br>
 <b>Overview:</b><br>
@@ -1950,7 +1075,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.users.resendInvite({
+  const result = await pipeshub.users.resendUserInvite({
     id: "507f1f77bcf86cd799439011",
   });
 
@@ -1966,7 +1091,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { usersResendInvite } from "pipeshub/funcs/users-resend-invite.js";
+import { usersResendUserInvite } from "pipeshub/funcs/users-resend-user-invite.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -1976,14 +1101,14 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await usersResendInvite(pipeshub, {
+  const res = await usersResendUserInvite(pipeshub, {
     id: "507f1f77bcf86cd799439011",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("usersResendInvite failed:", res.error);
+    console.log("usersResendUserInvite failed:", res.error);
   }
 }
 
@@ -2009,7 +1134,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## listGraph
+## listUsersGraph
 
 Retrieve a paginated list of users with enhanced search capabilities using the graph service.<br><br>
 <b>Overview:</b><br>
@@ -2045,11 +1170,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.users.listGraph({
+  const result = await pipeshub.users.listUsersGraph({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     search: "john",
   });
 
@@ -2065,24 +1191,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { usersListGraph } from "pipeshub/funcs/users-list-graph.js";
+import { usersListUsersGraph } from "pipeshub/funcs/users-list-users-graph.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await usersListGraph(pipeshub, {
+  const res = await usersListUsersGraph(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     search: "john",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("usersListGraph failed:", res.error);
+    console.log("usersListUsersGraph failed:", res.error);
   }
 }
 
@@ -2094,6 +1221,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.ListUsersGraphRequest](../../models/operations/list-users-graph-request.md)                                                                                        | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.ListUsersGraphSecurity](../../models/operations/list-users-graph-security.md)                                                                                      | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -2108,13 +1236,33 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## listTeams
+## unblockUser
 
-Get teams that the current user belongs to
+Unblock a previously blocked user within the authenticated administrator's organization.<br><br>
+
+<b>Overview:</b><br>
+This endpoint updates the user's credential record by setting <code>isBlocked</code> to <code>false</code> 
+and resetting <code>wrongCredentialCount</code> to <code>0</code>.<br><br>
+
+<b>Authorization:</b><br>
+<ul>
+<li><b>Admin only:</b> Only organization administrators can unblock users</li>
+<li>Requires a valid Bearer token</li>
+</ul>
+
+<b>Validation & Conditions:</b><br>
+<ul>
+<li>User must belong to the same <code>orgId</code> as the authenticated admin</li>
+<li>User must currently be blocked (<code>isBlocked: true</code>)</li>
+<li>User must not be deleted (<code>isDeleted: false</code>)</li>
+</ul>
+
+<b>Note:</b> If the user is not blocked or does not exist in the organization, a 404 response is returned.
+
 
 ### Example Usage
 
-<!-- UsageSnippet language="typescript" operationID="getCurrentUserTeams" method="get" path="/users/teams/list" -->
+<!-- UsageSnippet language="typescript" operationID="unblockUser" method="put" path="/users/{id}/unblock" -->
 ```typescript
 import { Pipeshub } from "pipeshub";
 
@@ -2124,7 +1272,9 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.users.listTeams();
+  const result = await pipeshub.users.unblockUser({
+    id: "507f1f77bcf86cd799439011",
+  });
 
   console.log(result);
 }
@@ -2138,7 +1288,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { usersListTeams } from "pipeshub/funcs/users-list-teams.js";
+import { usersUnblockUser } from "pipeshub/funcs/users-unblock-user.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -2148,12 +1298,14 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await usersListTeams(pipeshub);
+  const res = await usersUnblockUser(pipeshub, {
+    id: "507f1f77bcf86cd799439011",
+  });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("usersListTeams failed:", res.error);
+    console.log("usersUnblockUser failed:", res.error);
   }
 }
 
@@ -2164,14 +1316,14 @@ run();
 
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.GetCurrentUserTeamsRequest](../../models/operations/get-current-user-teams-request.md)                                                                             | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `request`                                                                                                                                                                      | [operations.UnblockUserRequest](../../models/operations/unblock-user-request.md)                                                                                               | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
 
 ### Response
 
-**Promise\<[models.Team[]](../../models/.md)\>**
+**Promise\<[operations.UnblockUserResponse](../../models/operations/unblock-user-response.md)\>**
 
 ### Errors
 

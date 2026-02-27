@@ -7,6 +7,12 @@ import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
+
+export type DeleteConversationByIdSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export type DeleteConversationByIdRequest = {
   /**
@@ -21,6 +27,31 @@ export type DeleteConversationByIdRequest = {
 export type DeleteConversationByIdResponse = {
   message?: string | undefined;
 };
+
+/** @internal */
+export type DeleteConversationByIdSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const DeleteConversationByIdSecurity$outboundSchema: z.ZodMiniType<
+  DeleteConversationByIdSecurity$Outbound,
+  DeleteConversationByIdSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function deleteConversationByIdSecurityToJSON(
+  deleteConversationByIdSecurity: DeleteConversationByIdSecurity,
+): string {
+  return JSON.stringify(
+    DeleteConversationByIdSecurity$outboundSchema.parse(
+      deleteConversationByIdSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type DeleteConversationByIdRequest$Outbound = {

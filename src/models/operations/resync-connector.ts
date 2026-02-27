@@ -3,6 +3,12 @@
  */
 
 import * as z from "zod/v4-mini";
+import * as models from "../index.js";
+
+export type ResyncConnectorSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 /**
  * Request body for Resync connector
@@ -17,6 +23,29 @@ export type ResyncConnectorRequest = {
    */
   connectorId: string;
 };
+
+/** @internal */
+export type ResyncConnectorSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const ResyncConnectorSecurity$outboundSchema: z.ZodMiniType<
+  ResyncConnectorSecurity$Outbound,
+  ResyncConnectorSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function resyncConnectorSecurityToJSON(
+  resyncConnectorSecurity: ResyncConnectorSecurity,
+): string {
+  return JSON.stringify(
+    ResyncConnectorSecurity$outboundSchema.parse(resyncConnectorSecurity),
+  );
+}
 
 /** @internal */
 export type ResyncConnectorRequest$Outbound = {

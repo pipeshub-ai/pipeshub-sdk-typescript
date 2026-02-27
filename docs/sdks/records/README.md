@@ -6,15 +6,15 @@ Record management and operations
 
 ### Available Operations
 
-* [get](#get) - Get all records across knowledge bases
-* [list](#list) - Get records for a knowledge base
-* [getById](#getbyid) - Get record by ID
-* [update](#update) - Update record
-* [delete](#delete) - Delete record
-* [streamContent](#streamcontent) - Stream record content
-* [move](#move) - Move a record to another folder
+* [getAllRecords](#getallrecords) - Get all records across knowledge bases
+* [getKBRecords](#getkbrecords) - Get records for a knowledge base
+* [getKBChildren](#getkbchildren) - Get KB children (alias for records)
+* [getRecordById](#getrecordbyid) - Get record by ID
+* [updateRecord](#updaterecord) - Update record
+* [deleteRecord](#deleterecord) - Delete record
+* [streamRecordBuffer](#streamrecordbuffer) - Stream record content
 
-## get
+## getAllRecords
 
 Retrieve records from all knowledge bases accessible to the user.<br><br>
 <b>Overview:</b><br>
@@ -44,11 +44,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.records.get({
+  const result = await pipeshub.records.getAllRecords({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     recordTypes: "FILE,WEBPAGE,EMAIL",
     connectors: "GOOGLE_DRIVE,ONEDRIVE",
     indexingStatus: "COMPLETED,FAILED",
@@ -66,17 +67,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { recordsGet } from "pipeshub/funcs/records-get.js";
+import { recordsGetAllRecords } from "pipeshub/funcs/records-get-all-records.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await recordsGet(pipeshub, {
+  const res = await recordsGetAllRecords(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     recordTypes: "FILE,WEBPAGE,EMAIL",
     connectors: "GOOGLE_DRIVE,ONEDRIVE",
     indexingStatus: "COMPLETED,FAILED",
@@ -85,7 +87,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("recordsGet failed:", res.error);
+    console.log("recordsGetAllRecords failed:", res.error);
   }
 }
 
@@ -97,6 +99,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.GetAllRecordsRequest](../../models/operations/get-all-records-request.md)                                                                                          | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.GetAllRecordsSecurity](../../models/operations/get-all-records-security.md)                                                                                        | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -111,7 +114,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## list
+## getKBRecords
 
 Retrieve a paginated list of records within a specific knowledge base.<br><br>
 <b>Overview:</b><br>
@@ -136,11 +139,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.records.list({
+  const result = await pipeshub.records.getKBRecords({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     kbId: "<id>",
   });
 
@@ -156,24 +160,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { recordsList } from "pipeshub/funcs/records-list.js";
+import { recordsGetKBRecords } from "pipeshub/funcs/records-get-kb-records.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await recordsList(pipeshub, {
+  const res = await recordsGetKBRecords(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     kbId: "<id>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("recordsList failed:", res.error);
+    console.log("recordsGetKBRecords failed:", res.error);
   }
 }
 
@@ -185,6 +190,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.GetKBRecordsRequest](../../models/operations/get-kb-records-request.md)                                                                                            | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.GetKBRecordsSecurity](../../models/operations/get-kb-records-security.md)                                                                                          | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -199,7 +205,98 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getById
+## getKBChildren
+
+Retrieve a paginated list of children (folders and records) within a specific knowledge base.<br><br>
+<b>Overview:</b><br>
+This is an alias endpoint for <code>/knowledgeBase/{kbId}/records</code>. It returns all direct children of the KB root, including both folders and records.<br><br>
+<b>Filtering:</b><br>
+<ul>
+<li><b>search:</b> Search by record name (partial match, max 1000 chars)</li>
+<li><b>recordTypes:</b> FILE, WEBPAGE, COMMENT, MESSAGE, EMAIL, TICKET</li>
+<li><b>origins:</b> UPLOAD (manual uploads) or CONNECTOR (synced)</li>
+<li><b>indexingStatus:</b> Filter by processing state</li>
+<li><b>dateFrom/dateTo:</b> Creation date range (Unix timestamps)</li>
+</ul>
+<b>Sorting:</b><br>
+Default sorts by <code>createdAtTimestamp</code> descending (newest first).
+
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="getKBChildren" method="get" path="/knowledgeBase/{kbId}/children" -->
+```typescript
+import { Pipeshub } from "pipeshub";
+
+const pipeshub = new Pipeshub({
+  serverURL: "https://api.example.com",
+});
+
+async function run() {
+  const result = await pipeshub.records.getKBChildren({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
+    kbId: "<id>",
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "pipeshub/core.js";
+import { recordsGetKBChildren } from "pipeshub/funcs/records-get-kb-children.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  serverURL: "https://api.example.com",
+});
+
+async function run() {
+  const res = await recordsGetKBChildren(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
+    kbId: "<id>",
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("recordsGetKBChildren failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.GetKBChildrenRequest](../../models/operations/get-kb-children-request.md)                                                                                          | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.GetKBChildrenSecurity](../../models/operations/get-kb-children-security.md)                                                                                        | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[models.RecordsResponse](../../models/records-response.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
+## getRecordById
 
 Retrieve detailed information about a specific record.<br><br>
 <b>Overview:</b><br>
@@ -216,11 +313,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.records.getById({
+  const result = await pipeshub.records.getRecordById({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     recordId: "<id>",
     convertTo: "txt",
   });
@@ -237,17 +335,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { recordsGetById } from "pipeshub/funcs/records-get-by-id.js";
+import { recordsGetRecordById } from "pipeshub/funcs/records-get-record-by-id.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await recordsGetById(pipeshub, {
+  const res = await recordsGetRecordById(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     recordId: "<id>",
     convertTo: "txt",
   });
@@ -255,7 +354,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("recordsGetById failed:", res.error);
+    console.log("recordsGetRecordById failed:", res.error);
   }
 }
 
@@ -267,6 +366,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.GetRecordByIdRequest](../../models/operations/get-record-by-id-request.md)                                                                                         | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.GetRecordByIdSecurity](../../models/operations/get-record-by-id-security.md)                                                                                       | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -281,7 +381,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## update
+## updateRecord
 
 Update a record's name and/or file content.<br><br>
 <b>Overview:</b><br>
@@ -309,7 +409,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.records.update({
+  const result = await pipeshub.records.updateRecord({
     recordId: "<id>",
   });
 
@@ -325,7 +425,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { recordsUpdate } from "pipeshub/funcs/records-update.js";
+import { recordsUpdateRecord } from "pipeshub/funcs/records-update-record.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -335,14 +435,14 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await recordsUpdate(pipeshub, {
+  const res = await recordsUpdateRecord(pipeshub, {
     recordId: "<id>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("recordsUpdate failed:", res.error);
+    console.log("recordsUpdateRecord failed:", res.error);
   }
 }
 
@@ -368,7 +468,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## delete
+## deleteRecord
 
 Permanently delete a record from the knowledge base.<br><br>
 <b>Required Permission:</b> WRITER or higher<br><br>
@@ -389,11 +489,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  await pipeshub.records.delete({
+  await pipeshub.records.deleteRecord({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     recordId: "<id>",
   });
 
@@ -409,24 +510,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { recordsDelete } from "pipeshub/funcs/records-delete.js";
+import { recordsDeleteRecord } from "pipeshub/funcs/records-delete-record.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await recordsDelete(pipeshub, {
+  const res = await recordsDeleteRecord(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     recordId: "<id>",
   });
   if (res.ok) {
     const { value: result } = res;
     
   } else {
-    console.log("recordsDelete failed:", res.error);
+    console.log("recordsDeleteRecord failed:", res.error);
   }
 }
 
@@ -438,6 +540,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.DeleteRecordRequest](../../models/operations/delete-record-request.md)                                                                                             | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.DeleteRecordSecurity](../../models/operations/delete-record-security.md)                                                                                           | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -452,7 +555,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## streamContent
+## streamRecordBuffer
 
 Stream the binary content of a record's file.<br><br>
 <b>Overview:</b><br>
@@ -475,11 +578,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.records.streamContent({
+  const result = await pipeshub.records.streamRecordBuffer({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     recordId: "<id>",
   });
 
@@ -495,24 +599,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { recordsStreamContent } from "pipeshub/funcs/records-stream-content.js";
+import { recordsStreamRecordBuffer } from "pipeshub/funcs/records-stream-record-buffer.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await recordsStreamContent(pipeshub, {
+  const res = await recordsStreamRecordBuffer(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     recordId: "<id>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("recordsStreamContent failed:", res.error);
+    console.log("recordsStreamRecordBuffer failed:", res.error);
   }
 }
 
@@ -524,6 +629,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.StreamRecordBufferRequest](../../models/operations/stream-record-buffer-request.md)                                                                                | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.StreamRecordBufferSecurity](../../models/operations/stream-record-buffer-security.md)                                                                              | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -531,152 +637,6 @@ run();
 ### Response
 
 **Promise\<[ReadableStream<Uint8Array>](../../models/.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## move
-
-Move a record (file or folder) to a different parent folder within the same knowledge base.<br><br>
-<b>Required Permission:</b> WRITER or higher<br><br>
-<b>Moving to Root:</b><br>
-Set <code>newParentId</code> to <code>null</code> to move the record to the root level of the knowledge base.
-
-
-### Example Usage: moveToFolder
-
-<!-- UsageSnippet language="typescript" operationID="moveRecord" method="put" path="/knowledgeBase/{kbId}/record/{recordId}/move" example="moveToFolder" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  await pipeshub.records.move({
-    kbId: "702f8ff0-0a01-4354-b592-eea268f40f25",
-    recordId: "<id>",
-    body: {
-      newParentId: "folder-abc123",
-    },
-  });
-
-
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { recordsMove } from "pipeshub/funcs/records-move.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await recordsMove(pipeshub, {
-    kbId: "702f8ff0-0a01-4354-b592-eea268f40f25",
-    recordId: "<id>",
-    body: {
-      newParentId: "folder-abc123",
-    },
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    
-  } else {
-    console.log("recordsMove failed:", res.error);
-  }
-}
-
-run();
-```
-### Example Usage: moveToRoot
-
-<!-- UsageSnippet language="typescript" operationID="moveRecord" method="put" path="/knowledgeBase/{kbId}/record/{recordId}/move" example="moveToRoot" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  await pipeshub.records.move({
-    kbId: "8bdbd4fc-ec2e-4e15-8a88-ae59a5b4bad2",
-    recordId: "<id>",
-    body: {
-      newParentId: null,
-    },
-  });
-
-
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { recordsMove } from "pipeshub/funcs/records-move.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await recordsMove(pipeshub, {
-    kbId: "8bdbd4fc-ec2e-4e15-8a88-ae59a5b4bad2",
-    recordId: "<id>",
-    body: {
-      newParentId: null,
-    },
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    
-  } else {
-    console.log("recordsMove failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.MoveRecordRequest](../../models/operations/move-record-request.md)                                                                                                 | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<void\>**
 
 ### Errors
 

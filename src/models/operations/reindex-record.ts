@@ -3,6 +3,12 @@
  */
 
 import * as z from "zod/v4-mini";
+import * as models from "../index.js";
+
+export type ReindexRecordSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 /**
  * Request payload
@@ -21,6 +27,29 @@ export type ReindexRecordRequest = {
    */
   body?: ReindexRecordRequestBody | undefined;
 };
+
+/** @internal */
+export type ReindexRecordSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const ReindexRecordSecurity$outboundSchema: z.ZodMiniType<
+  ReindexRecordSecurity$Outbound,
+  ReindexRecordSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function reindexRecordSecurityToJSON(
+  reindexRecordSecurity: ReindexRecordSecurity,
+): string {
+  return JSON.stringify(
+    ReindexRecordSecurity$outboundSchema.parse(reindexRecordSecurity),
+  );
+}
 
 /** @internal */
 export type ReindexRecordRequestBody$Outbound = {

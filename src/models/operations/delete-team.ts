@@ -7,6 +7,12 @@ import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
+
+export type DeleteTeamSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export type DeleteTeamRequest = {
   /**
@@ -22,6 +28,29 @@ export type DeleteTeamResponse = {
   success?: boolean | undefined;
   message?: string | undefined;
 };
+
+/** @internal */
+export type DeleteTeamSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const DeleteTeamSecurity$outboundSchema: z.ZodMiniType<
+  DeleteTeamSecurity$Outbound,
+  DeleteTeamSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function deleteTeamSecurityToJSON(
+  deleteTeamSecurity: DeleteTeamSecurity,
+): string {
+  return JSON.stringify(
+    DeleteTeamSecurity$outboundSchema.parse(deleteTeamSecurity),
+  );
+}
 
 /** @internal */
 export type DeleteTeamRequest$Outbound = {

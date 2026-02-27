@@ -8,6 +8,12 @@ import { ClosedEnum } from "../../types/enums.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
+
+export type DeleteOrganizationSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 /**
  * Must be "DELETE" to confirm deletion
@@ -34,6 +40,29 @@ export type DeleteOrganizationResponse = {
   success?: boolean | undefined;
   message?: string | undefined;
 };
+
+/** @internal */
+export type DeleteOrganizationSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const DeleteOrganizationSecurity$outboundSchema: z.ZodMiniType<
+  DeleteOrganizationSecurity$Outbound,
+  DeleteOrganizationSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function deleteOrganizationSecurityToJSON(
+  deleteOrganizationSecurity: DeleteOrganizationSecurity,
+): string {
+  return JSON.stringify(
+    DeleteOrganizationSecurity$outboundSchema.parse(deleteOrganizationSecurity),
+  );
+}
 
 /** @internal */
 export const Confirm$outboundSchema: z.ZodMiniEnum<typeof Confirm> = z.enum(

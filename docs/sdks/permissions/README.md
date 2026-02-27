@@ -6,12 +6,12 @@ Permission management for knowledge bases
 
 ### Available Operations
 
-* [grant](#grant) - Grant permissions
-* [list](#list) - List permissions
-* [update](#update) - Update permissions
-* [remove](#remove) - Remove permissions
+* [createKBPermission](#createkbpermission) - Grant permissions
+* [listKBPermissions](#listkbpermissions) - List permissions
+* [updateKBPermissions](#updatekbpermissions) - Update permissions
+* [deleteKBPermissions](#deletekbpermissions) - Remove permissions
 
-## grant
+## createKBPermission
 
 Grant access permissions to users or teams for a knowledge base.<br><br>
 <b>Required Permission:</b> OWNER or ORGANIZER<br><br>
@@ -40,7 +40,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.permissions.grant({
+  const result = await pipeshub.permissions.createKBPermission({
     kbId: "<id>",
     body: {
       role: "OWNER",
@@ -59,7 +59,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { permissionsGrant } from "pipeshub/funcs/permissions-grant.js";
+import { permissionsCreateKBPermission } from "pipeshub/funcs/permissions-create-kb-permission.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -69,7 +69,7 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await permissionsGrant(pipeshub, {
+  const res = await permissionsCreateKBPermission(pipeshub, {
     kbId: "<id>",
     body: {
       role: "OWNER",
@@ -79,7 +79,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("permissionsGrant failed:", res.error);
+    console.log("permissionsCreateKBPermission failed:", res.error);
   }
 }
 
@@ -105,7 +105,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## list
+## listKBPermissions
 
 Retrieve all permissions granted on a knowledge base.<br><br>
 <b>Required Permission:</b> ORGANIZER or higher to see all permissions, others see only their own.
@@ -119,11 +119,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.permissions.list({
+  const result = await pipeshub.permissions.listKBPermissions({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     kbId: "<id>",
   });
 
@@ -139,24 +140,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { permissionsList } from "pipeshub/funcs/permissions-list.js";
+import { permissionsListKBPermissions } from "pipeshub/funcs/permissions-list-kb-permissions.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await permissionsList(pipeshub, {
+  const res = await permissionsListKBPermissions(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     kbId: "<id>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("permissionsList failed:", res.error);
+    console.log("permissionsListKBPermissions failed:", res.error);
   }
 }
 
@@ -168,6 +170,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.ListKBPermissionsRequest](../../models/operations/list-kb-permissions-request.md)                                                                                  | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.ListKBPermissionsSecurity](../../models/operations/list-kb-permissions-security.md)                                                                                | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -182,7 +185,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## update
+## updateKBPermissions
 
 Update permission roles for users or teams.<br><br>
 <b>Required Permission:</b> OWNER or ORGANIZER
@@ -196,11 +199,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  await pipeshub.permissions.update({
+  await pipeshub.permissions.updateKBPermissions({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     kbId: "<id>",
     body: {
       role: "WRITER",
@@ -219,17 +223,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { permissionsUpdate } from "pipeshub/funcs/permissions-update.js";
+import { permissionsUpdateKBPermissions } from "pipeshub/funcs/permissions-update-kb-permissions.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await permissionsUpdate(pipeshub, {
+  const res = await permissionsUpdateKBPermissions(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     kbId: "<id>",
     body: {
       role: "WRITER",
@@ -239,7 +244,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("permissionsUpdate failed:", res.error);
+    console.log("permissionsUpdateKBPermissions failed:", res.error);
   }
 }
 
@@ -251,6 +256,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.UpdateKBPermissionsRequest](../../models/operations/update-kb-permissions-request.md)                                                                              | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.UpdateKBPermissionsSecurity](../../models/operations/update-kb-permissions-security.md)                                                                            | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -265,7 +271,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## remove
+## deleteKBPermissions
 
 Remove access permissions from users or teams.<br><br>
 <b>Required Permission:</b> OWNER or ORGANIZER<br><br>
@@ -284,7 +290,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  await pipeshub.permissions.remove({
+  await pipeshub.permissions.deleteKBPermissions({
     kbId: "<id>",
     body: {},
   });
@@ -301,7 +307,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { permissionsRemove } from "pipeshub/funcs/permissions-remove.js";
+import { permissionsDeleteKBPermissions } from "pipeshub/funcs/permissions-delete-kb-permissions.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -311,7 +317,7 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await permissionsRemove(pipeshub, {
+  const res = await permissionsDeleteKBPermissions(pipeshub, {
     kbId: "<id>",
     body: {},
   });
@@ -319,7 +325,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("permissionsRemove failed:", res.error);
+    console.log("permissionsDeleteKBPermissions failed:", res.error);
   }
 }
 

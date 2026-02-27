@@ -9,6 +9,11 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
+export type GetAllUsersSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 export type GetAllUsersRequest = {
   /**
    * Page number for pagination (1-based)
@@ -39,6 +44,29 @@ export type GetAllUsersResponse = {
   data?: Array<models.User> | undefined;
   pagination?: GetAllUsersPagination | undefined;
 };
+
+/** @internal */
+export type GetAllUsersSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const GetAllUsersSecurity$outboundSchema: z.ZodMiniType<
+  GetAllUsersSecurity$Outbound,
+  GetAllUsersSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function getAllUsersSecurityToJSON(
+  getAllUsersSecurity: GetAllUsersSecurity,
+): string {
+  return JSON.stringify(
+    GetAllUsersSecurity$outboundSchema.parse(getAllUsersSecurity),
+  );
+}
 
 /** @internal */
 export type GetAllUsersRequest$Outbound = {

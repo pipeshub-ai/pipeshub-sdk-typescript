@@ -1,22 +1,38 @@
-# OauthApps
+# OAuthApps
 
 ## Overview
 
+Manage OAuth 2.0 client applications registered with PipesHub.
+
+OAuth apps allow third-party applications to access PipesHub APIs on behalf of users
+or organizations. Each app receives a client ID and secret for authentication.
+
+**App Types:**
+- **Confidential clients**: Server-side apps that can securely store secrets
+- **Public clients**: Browser/mobile apps that cannot securely store secrets (use PKCE)
+
+**App Lifecycle:**
+- Create apps with name, redirect URIs, and allowed scopes
+- Regenerate secrets if compromised
+- Suspend/activate apps to control access
+- Revoke all tokens for emergency access removal
+
+
 ### Available Operations
 
-* [list](#list) - List OAuth apps
-* [create](#create) - Create OAuth app
-* [listScopes](#listscopes) - List available scopes
-* [get](#get) - Get OAuth app details
-* [update](#update) - Update OAuth app
-* [delete](#delete) - Delete OAuth app
-* [regenerateSecret](#regeneratesecret) - Regenerate client secret
-* [suspend](#suspend) - Suspend OAuth app
-* [activate](#activate) - Activate suspended OAuth app
-* [listTokens](#listtokens) - List app tokens
-* [revokeAllTokens](#revokealltokens) - Revoke all app tokens
+* [listOAuthApps](#listoauthapps) - List OAuth apps
+* [createOAuthApp](#createoauthapp) - Create OAuth app
+* [listOAuthScopes](#listoauthscopes) - List available scopes
+* [getOAuthApp](#getoauthapp) - Get OAuth app details
+* [updateOAuthApp](#updateoauthapp) - Update OAuth app
+* [deleteOAuthApp](#deleteoauthapp) - Delete OAuth app
+* [regenerateOAuthAppSecret](#regenerateoauthappsecret) - Regenerate client secret
+* [suspendOAuthApp](#suspendoauthapp) - Suspend OAuth app
+* [activateOAuthApp](#activateoauthapp) - Activate suspended OAuth app
+* [listOAuthAppTokens](#listoauthapptokens) - List app tokens
+* [revokeAllOAuthAppTokens](#revokealloauthapptokens) - Revoke all app tokens
 
-## list
+## listOAuthApps
 
 List all OAuth apps registered for the organization.
 <br><br>
@@ -39,7 +55,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.oauthApps.list({});
+  const result = await pipeshub.oAuthApps.listOAuthApps({});
 
   console.log(result);
 }
@@ -53,7 +69,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { oauthAppsList } from "pipeshub/funcs/oauth-apps-list.js";
+import { oAuthAppsListOAuthApps } from "pipeshub/funcs/o-auth-apps-list-o-auth-apps.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -63,12 +79,12 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await oauthAppsList(pipeshub, {});
+  const res = await oAuthAppsListOAuthApps(pipeshub, {});
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("oauthAppsList failed:", res.error);
+    console.log("oAuthAppsListOAuthApps failed:", res.error);
   }
 }
 
@@ -94,7 +110,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## create
+## createOAuthApp
 
 Create a new OAuth app for the organization.
 <br><br>
@@ -119,7 +135,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.oauthApps.create({
+  const result = await pipeshub.oAuthApps.createOAuthApp({
     name: "My Integration App",
     description: "Integrates PipesHub with our internal tools",
     redirectUris: [
@@ -149,7 +165,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { oauthAppsCreate } from "pipeshub/funcs/oauth-apps-create.js";
+import { oAuthAppsCreateOAuthApp } from "pipeshub/funcs/o-auth-apps-create-o-auth-app.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -159,7 +175,7 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await oauthAppsCreate(pipeshub, {
+  const res = await oAuthAppsCreateOAuthApp(pipeshub, {
     name: "My Integration App",
     description: "Integrates PipesHub with our internal tools",
     redirectUris: [
@@ -180,7 +196,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("oauthAppsCreate failed:", res.error);
+    console.log("oAuthAppsCreateOAuthApp failed:", res.error);
   }
 }
 
@@ -206,7 +222,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## listScopes
+## listOAuthScopes
 
 List all available OAuth scopes that can be requested by apps.
 <br><br>
@@ -226,7 +242,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.oauthApps.listScopes();
+  const result = await pipeshub.oAuthApps.listOAuthScopes();
 
   console.log(result);
 }
@@ -240,7 +256,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { oauthAppsListScopes } from "pipeshub/funcs/oauth-apps-list-scopes.js";
+import { oAuthAppsListOAuthScopes } from "pipeshub/funcs/o-auth-apps-list-o-auth-scopes.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -250,12 +266,12 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await oauthAppsListScopes(pipeshub);
+  const res = await oAuthAppsListOAuthScopes(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("oauthAppsListScopes failed:", res.error);
+    console.log("oAuthAppsListOAuthScopes failed:", res.error);
   }
 }
 
@@ -280,7 +296,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## get
+## getOAuthApp
 
 Get details of a specific OAuth app.
 <br><br>
@@ -299,7 +315,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.oauthApps.get({
+  const result = await pipeshub.oAuthApps.getOAuthApp({
     appId: "<id>",
   });
 
@@ -315,7 +331,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { oauthAppsGet } from "pipeshub/funcs/oauth-apps-get.js";
+import { oAuthAppsGetOAuthApp } from "pipeshub/funcs/o-auth-apps-get-o-auth-app.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -325,14 +341,14 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await oauthAppsGet(pipeshub, {
+  const res = await oAuthAppsGetOAuthApp(pipeshub, {
     appId: "<id>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("oauthAppsGet failed:", res.error);
+    console.log("oAuthAppsGetOAuthApp failed:", res.error);
   }
 }
 
@@ -358,7 +374,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## update
+## updateOAuthApp
 
 Update an OAuth app's configuration.
 <br><br>
@@ -382,7 +398,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.oauthApps.update({
+  const result = await pipeshub.oAuthApps.updateOAuthApp({
     appId: "<id>",
     body: {},
   });
@@ -399,7 +415,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { oauthAppsUpdate } from "pipeshub/funcs/oauth-apps-update.js";
+import { oAuthAppsUpdateOAuthApp } from "pipeshub/funcs/o-auth-apps-update-o-auth-app.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -409,7 +425,7 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await oauthAppsUpdate(pipeshub, {
+  const res = await oAuthAppsUpdateOAuthApp(pipeshub, {
     appId: "<id>",
     body: {},
   });
@@ -417,7 +433,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("oauthAppsUpdate failed:", res.error);
+    console.log("oAuthAppsUpdateOAuthApp failed:", res.error);
   }
 }
 
@@ -443,7 +459,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## delete
+## deleteOAuthApp
 
 Delete (soft delete) an OAuth app.
 <br><br>
@@ -467,7 +483,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.oauthApps.delete({
+  const result = await pipeshub.oAuthApps.deleteOAuthApp({
     appId: "<id>",
   });
 
@@ -483,7 +499,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { oauthAppsDelete } from "pipeshub/funcs/oauth-apps-delete.js";
+import { oAuthAppsDeleteOAuthApp } from "pipeshub/funcs/o-auth-apps-delete-o-auth-app.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -493,14 +509,14 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await oauthAppsDelete(pipeshub, {
+  const res = await oAuthAppsDeleteOAuthApp(pipeshub, {
     appId: "<id>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("oauthAppsDelete failed:", res.error);
+    console.log("oAuthAppsDeleteOAuthApp failed:", res.error);
   }
 }
 
@@ -526,7 +542,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## regenerateSecret
+## regenerateOAuthAppSecret
 
 Regenerate the client secret for an OAuth app.
 <br><br>
@@ -552,7 +568,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.oauthApps.regenerateSecret({
+  const result = await pipeshub.oAuthApps.regenerateOAuthAppSecret({
     appId: "<id>",
   });
 
@@ -568,7 +584,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { oauthAppsRegenerateSecret } from "pipeshub/funcs/oauth-apps-regenerate-secret.js";
+import { oAuthAppsRegenerateOAuthAppSecret } from "pipeshub/funcs/o-auth-apps-regenerate-o-auth-app-secret.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -578,14 +594,14 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await oauthAppsRegenerateSecret(pipeshub, {
+  const res = await oAuthAppsRegenerateOAuthAppSecret(pipeshub, {
     appId: "<id>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("oauthAppsRegenerateSecret failed:", res.error);
+    console.log("oAuthAppsRegenerateOAuthAppSecret failed:", res.error);
   }
 }
 
@@ -611,7 +627,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## suspend
+## suspendOAuthApp
 
 Suspend an OAuth app, preventing it from authenticating or issuing tokens.
 <br><br>
@@ -635,7 +651,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.oauthApps.suspend({
+  const result = await pipeshub.oAuthApps.suspendOAuthApp({
     appId: "<id>",
   });
 
@@ -651,7 +667,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { oauthAppsSuspend } from "pipeshub/funcs/oauth-apps-suspend.js";
+import { oAuthAppsSuspendOAuthApp } from "pipeshub/funcs/o-auth-apps-suspend-o-auth-app.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -661,14 +677,14 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await oauthAppsSuspend(pipeshub, {
+  const res = await oAuthAppsSuspendOAuthApp(pipeshub, {
     appId: "<id>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("oauthAppsSuspend failed:", res.error);
+    console.log("oAuthAppsSuspendOAuthApp failed:", res.error);
   }
 }
 
@@ -694,7 +710,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## activate
+## activateOAuthApp
 
 Reactivate a suspended OAuth app, allowing it to authenticate and issue tokens again.
 <br><br>
@@ -715,7 +731,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.oauthApps.activate({
+  const result = await pipeshub.oAuthApps.activateOAuthApp({
     appId: "<id>",
   });
 
@@ -731,7 +747,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { oauthAppsActivate } from "pipeshub/funcs/oauth-apps-activate.js";
+import { oAuthAppsActivateOAuthApp } from "pipeshub/funcs/o-auth-apps-activate-o-auth-app.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -741,14 +757,14 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await oauthAppsActivate(pipeshub, {
+  const res = await oAuthAppsActivateOAuthApp(pipeshub, {
     appId: "<id>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("oauthAppsActivate failed:", res.error);
+    console.log("oAuthAppsActivateOAuthApp failed:", res.error);
   }
 }
 
@@ -774,7 +790,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## listTokens
+## listOAuthAppTokens
 
 List all active tokens issued to an OAuth app.
 <br><br>
@@ -795,7 +811,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.oauthApps.listTokens({
+  const result = await pipeshub.oAuthApps.listOAuthAppTokens({
     appId: "<id>",
   });
 
@@ -811,7 +827,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { oauthAppsListTokens } from "pipeshub/funcs/oauth-apps-list-tokens.js";
+import { oAuthAppsListOAuthAppTokens } from "pipeshub/funcs/o-auth-apps-list-o-auth-app-tokens.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -821,14 +837,14 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await oauthAppsListTokens(pipeshub, {
+  const res = await oAuthAppsListOAuthAppTokens(pipeshub, {
     appId: "<id>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("oauthAppsListTokens failed:", res.error);
+    console.log("oAuthAppsListOAuthAppTokens failed:", res.error);
   }
 }
 
@@ -854,7 +870,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## revokeAllTokens
+## revokeAllOAuthAppTokens
 
 Revoke all tokens (access and refresh) issued to an OAuth app.
 <br><br>
@@ -877,7 +893,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.oauthApps.revokeAllTokens({
+  const result = await pipeshub.oAuthApps.revokeAllOAuthAppTokens({
     appId: "<id>",
   });
 
@@ -893,7 +909,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { oauthAppsRevokeAllTokens } from "pipeshub/funcs/oauth-apps-revoke-all-tokens.js";
+import { oAuthAppsRevokeAllOAuthAppTokens } from "pipeshub/funcs/o-auth-apps-revoke-all-o-auth-app-tokens.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -903,14 +919,14 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await oauthAppsRevokeAllTokens(pipeshub, {
+  const res = await oAuthAppsRevokeAllOAuthAppTokens(pipeshub, {
     appId: "<id>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("oauthAppsRevokeAllTokens failed:", res.error);
+    console.log("oAuthAppsRevokeAllOAuthAppTokens failed:", res.error);
   }
 }
 

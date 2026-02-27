@@ -3,6 +3,12 @@
  */
 
 import * as z from "zod/v4-mini";
+import * as models from "../index.js";
+
+export type UpdateFolderSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 /**
  * Request payload
@@ -19,6 +25,29 @@ export type UpdateFolderRequest = {
    */
   body: UpdateFolderRequestBody;
 };
+
+/** @internal */
+export type UpdateFolderSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const UpdateFolderSecurity$outboundSchema: z.ZodMiniType<
+  UpdateFolderSecurity$Outbound,
+  UpdateFolderSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function updateFolderSecurityToJSON(
+  updateFolderSecurity: UpdateFolderSecurity,
+): string {
+  return JSON.stringify(
+    UpdateFolderSecurity$outboundSchema.parse(updateFolderSecurity),
+  );
+}
 
 /** @internal */
 export type UpdateFolderRequestBody$Outbound = {

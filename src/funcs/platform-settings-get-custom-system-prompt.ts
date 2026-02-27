@@ -6,7 +6,7 @@ import { PipeshubCore } from "../core.js";
 import * as M from "../lib/matchers.js";
 import { compactMap } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import { extractSecurity, resolveGlobalSecurity } from "../lib/security.js";
+import { resolveSecurity } from "../lib/security.js";
 import { pathToFunc } from "../lib/url.js";
 import {
   ConnectionError,
@@ -19,6 +19,7 @@ import { PipeshubError } from "../models/errors/pipeshub-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { SDKValidationError } from "../models/errors/sdk-validation-error.js";
 import * as models from "../models/index.js";
+import * as operations from "../models/operations/index.js";
 import { APICall, APIPromise } from "../types/async.js";
 import { Result } from "../types/fp.js";
 
@@ -30,6 +31,7 @@ import { Result } from "../types/fp.js";
  */
 export function platformSettingsGetCustomSystemPrompt(
   client: PipeshubCore,
+  security: operations.GetCustomSystemPromptSecurity,
   options?: RequestOptions,
 ): APIPromise<
   Result<
@@ -46,12 +48,14 @@ export function platformSettingsGetCustomSystemPrompt(
 > {
   return new APIPromise($do(
     client,
+    security,
     options,
   ));
 }
 
 async function $do(
   client: PipeshubCore,
+  security: operations.GetCustomSystemPromptSecurity,
   options?: RequestOptions,
 ): Promise<
   [
@@ -75,19 +79,34 @@ async function $do(
     Accept: "application/json",
   }));
 
-  const secConfig = await extractSecurity(client._options.bearerAuth);
-  const securityInput = secConfig == null ? {} : { bearerAuth: secConfig };
-  const requestSecurity = resolveGlobalSecurity(securityInput);
+  const requestSecurity = resolveSecurity(
+    [
+      {
+        fieldName: "Authorization",
+        type: "http:bearer",
+        value: security?.bearerAuth,
+      },
+    ],
+    [
+      {
+        type: "oauth2:client_credentials",
+        value: {
+          clientID: security?.oauth2?.clientID,
+          clientSecret: security?.oauth2?.clientSecret,
+        },
+      },
+    ],
+  );
 
   const context = {
     options: client._options,
     baseURL: options?.serverURL ?? client._baseURL ?? "",
     operationID: "getCustomSystemPrompt",
-    oAuth2Scopes: null,
+    oAuth2Scopes: ["config:read"],
 
     resolvedSecurity: requestSecurity,
 
-    securitySource: client._options.bearerAuth,
+    securitySource: security,
     retryConfig: options?.retries
       || client._options.retryConfig
       || { strategy: "none" },

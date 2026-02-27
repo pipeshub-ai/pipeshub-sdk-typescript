@@ -9,6 +9,11 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
+export type ListActiveConnectorsSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 /**
  * Active connectors retrieved
  */
@@ -16,6 +21,31 @@ export type ListActiveConnectorsResponse = {
   success?: boolean | undefined;
   connectors?: Array<models.ConnectorInstance> | undefined;
 };
+
+/** @internal */
+export type ListActiveConnectorsSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const ListActiveConnectorsSecurity$outboundSchema: z.ZodMiniType<
+  ListActiveConnectorsSecurity$Outbound,
+  ListActiveConnectorsSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function listActiveConnectorsSecurityToJSON(
+  listActiveConnectorsSecurity: ListActiveConnectorsSecurity,
+): string {
+  return JSON.stringify(
+    ListActiveConnectorsSecurity$outboundSchema.parse(
+      listActiveConnectorsSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export const ListActiveConnectorsResponse$inboundSchema: z.ZodMiniType<

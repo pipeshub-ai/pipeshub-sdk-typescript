@@ -6,11 +6,11 @@ File upload operations
 
 ### Available Operations
 
-* [files](#files) - Upload files to knowledge base
-* [toFolder](#tofolder) - Upload files to folder
-* [getLimits](#getlimits) - Get upload limits
+* [uploadRecordsToKB](#uploadrecordstokb) - Upload files to knowledge base
+* [uploadRecordsToFolder](#uploadrecordstofolder) - Upload files to folder
+* [getUploadLimits](#getuploadlimits) - Get upload limits
 
-## files
+## uploadRecordsToKB
 
 Upload one or more files directly to a knowledge base.<br><br>
 <b>Overview:</b><br>
@@ -38,11 +38,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.upload.files({
+  const result = await pipeshub.upload.uploadRecordsToKB({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     kbId: "<id>",
     body: {
       files: [
@@ -65,17 +66,18 @@ The standalone function version of this method:
 ```typescript
 import { openAsBlob } from "node:fs";
 import { PipeshubCore } from "pipeshub/core.js";
-import { uploadFiles } from "pipeshub/funcs/upload-files.js";
+import { uploadUploadRecordsToKB } from "pipeshub/funcs/upload-upload-records-to-kb.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await uploadFiles(pipeshub, {
+  const res = await uploadUploadRecordsToKB(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     kbId: "<id>",
     body: {
       files: [
@@ -88,7 +90,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("uploadFiles failed:", res.error);
+    console.log("uploadUploadRecordsToKB failed:", res.error);
   }
 }
 
@@ -100,6 +102,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.UploadRecordsToKBRequest](../../models/operations/upload-records-to-kb-request.md)                                                                                 | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.UploadRecordsToKBSecurity](../../models/operations/upload-records-to-kb-security.md)                                                                               | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -114,7 +117,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## toFolder
+## uploadRecordsToFolder
 
 Upload files directly to a specific folder within a knowledge base.<br><br>
 <b>Same as KB upload</b> but files are placed in the specified folder instead of KB root.
@@ -129,11 +132,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.upload.toFolder({
+  const result = await pipeshub.upload.uploadRecordsToFolder({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     kbId: "<id>",
     folderId: "<id>",
     body: {
@@ -156,17 +160,18 @@ The standalone function version of this method:
 ```typescript
 import { openAsBlob } from "node:fs";
 import { PipeshubCore } from "pipeshub/core.js";
-import { uploadToFolder } from "pipeshub/funcs/upload-to-folder.js";
+import { uploadUploadRecordsToFolder } from "pipeshub/funcs/upload-upload-records-to-folder.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await uploadToFolder(pipeshub, {
+  const res = await uploadUploadRecordsToFolder(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     kbId: "<id>",
     folderId: "<id>",
     body: {
@@ -179,7 +184,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("uploadToFolder failed:", res.error);
+    console.log("uploadUploadRecordsToFolder failed:", res.error);
   }
 }
 
@@ -191,6 +196,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.UploadRecordsToFolderRequest](../../models/operations/upload-records-to-folder-request.md)                                                                         | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.UploadRecordsToFolderSecurity](../../models/operations/upload-records-to-folder-security.md)                                                                       | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -205,7 +211,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getLimits
+## getUploadLimits
 
 Retrieve current upload constraints for the organization.<br><br>
 <b>Use Case:</b><br>
@@ -220,11 +226,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.upload.getLimits();
+  const result = await pipeshub.upload.getUploadLimits({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  });
 
   console.log(result);
 }
@@ -238,22 +245,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { uploadGetLimits } from "pipeshub/funcs/upload-get-limits.js";
+import { uploadGetUploadLimits } from "pipeshub/funcs/upload-get-upload-limits.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await uploadGetLimits(pipeshub);
+  const res = await uploadGetUploadLimits(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("uploadGetLimits failed:", res.error);
+    console.log("uploadGetUploadLimits failed:", res.error);
   }
 }
 
@@ -264,6 +272,7 @@ run();
 
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `security`                                                                                                                                                                     | [operations.GetUploadLimitsSecurity](../../models/operations/get-upload-limits-security.md)                                                                                    | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |

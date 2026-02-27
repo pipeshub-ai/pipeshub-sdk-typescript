@@ -9,6 +9,11 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
+export type ScheduleCrawlingJobSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 /**
  * Request payload
  */
@@ -90,6 +95,31 @@ export type ScheduleCrawlingJobResponse = {
   message?: string | undefined;
   data?: ScheduleCrawlingJobData | undefined;
 };
+
+/** @internal */
+export type ScheduleCrawlingJobSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const ScheduleCrawlingJobSecurity$outboundSchema: z.ZodMiniType<
+  ScheduleCrawlingJobSecurity$Outbound,
+  ScheduleCrawlingJobSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function scheduleCrawlingJobSecurityToJSON(
+  scheduleCrawlingJobSecurity: ScheduleCrawlingJobSecurity,
+): string {
+  return JSON.stringify(
+    ScheduleCrawlingJobSecurity$outboundSchema.parse(
+      scheduleCrawlingJobSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type ScheduleCrawlingJobRequestBody$Outbound = {

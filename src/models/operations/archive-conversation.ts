@@ -3,10 +3,41 @@
  */
 
 import * as z from "zod/v4-mini";
+import * as models from "../index.js";
+
+export type ArchiveConversationSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export type ArchiveConversationRequest = {
   conversationId: string;
 };
+
+/** @internal */
+export type ArchiveConversationSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const ArchiveConversationSecurity$outboundSchema: z.ZodMiniType<
+  ArchiveConversationSecurity$Outbound,
+  ArchiveConversationSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function archiveConversationSecurityToJSON(
+  archiveConversationSecurity: ArchiveConversationSecurity,
+): string {
+  return JSON.stringify(
+    ArchiveConversationSecurity$outboundSchema.parse(
+      archiveConversationSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type ArchiveConversationRequest$Outbound = {

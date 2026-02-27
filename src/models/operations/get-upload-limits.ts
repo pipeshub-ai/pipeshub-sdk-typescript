@@ -7,6 +7,12 @@ import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
+
+export type GetUploadLimitsSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 /**
  * Upload limits retrieved
@@ -21,6 +27,29 @@ export type GetUploadLimitsResponse = {
    */
   maxFileSizeBytes?: number | undefined;
 };
+
+/** @internal */
+export type GetUploadLimitsSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const GetUploadLimitsSecurity$outboundSchema: z.ZodMiniType<
+  GetUploadLimitsSecurity$Outbound,
+  GetUploadLimitsSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function getUploadLimitsSecurityToJSON(
+  getUploadLimitsSecurity: GetUploadLimitsSecurity,
+): string {
+  return JSON.stringify(
+    GetUploadLimitsSecurity$outboundSchema.parse(getUploadLimitsSecurity),
+  );
+}
 
 /** @internal */
 export const GetUploadLimitsResponse$inboundSchema: z.ZodMiniType<

@@ -3,10 +3,39 @@
  */
 
 import * as z from "zod/v4-mini";
+import * as models from "../index.js";
+
+export type DeleteAgentSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export type DeleteAgentRequest = {
   agentKey: string;
 };
+
+/** @internal */
+export type DeleteAgentSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const DeleteAgentSecurity$outboundSchema: z.ZodMiniType<
+  DeleteAgentSecurity$Outbound,
+  DeleteAgentSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function deleteAgentSecurityToJSON(
+  deleteAgentSecurity: DeleteAgentSecurity,
+): string {
+  return JSON.stringify(
+    DeleteAgentSecurity$outboundSchema.parse(deleteAgentSecurity),
+  );
+}
 
 /** @internal */
 export type DeleteAgentRequest$Outbound = {

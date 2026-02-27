@@ -7,6 +7,12 @@ import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
+
+export type DeleteOrganizationLogoSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 /**
  * Logo deleted successfully
@@ -15,6 +21,31 @@ export type DeleteOrganizationLogoResponse = {
   success?: boolean | undefined;
   message?: string | undefined;
 };
+
+/** @internal */
+export type DeleteOrganizationLogoSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const DeleteOrganizationLogoSecurity$outboundSchema: z.ZodMiniType<
+  DeleteOrganizationLogoSecurity$Outbound,
+  DeleteOrganizationLogoSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function deleteOrganizationLogoSecurityToJSON(
+  deleteOrganizationLogoSecurity: DeleteOrganizationLogoSecurity,
+): string {
+  return JSON.stringify(
+    DeleteOrganizationLogoSecurity$outboundSchema.parse(
+      deleteOrganizationLogoSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export const DeleteOrganizationLogoResponse$inboundSchema: z.ZodMiniType<

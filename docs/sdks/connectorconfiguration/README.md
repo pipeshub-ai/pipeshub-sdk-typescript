@@ -2,13 +2,16 @@
 
 ## Overview
 
+Configure authentication, sync settings, and filters for connectors
+
 ### Available Operations
 
-* [get](#get) - Get connector configuration
-* [update](#update) - Update connector configuration
-* [updateFiltersSync](#updatefilterssync) - Update filters and sync configuration
+* [getConnectorConfig](#getconnectorconfig) - Get connector configuration
+* [updateConnectorConfig](#updateconnectorconfig) - Update connector configuration
+* [updateConnectorAuthConfig](#updateconnectorauthconfig) - Update authentication configuration
+* [updateConnectorFiltersSyncConfig](#updateconnectorfilterssyncconfig) - Update filters and sync configuration
 
-## get
+## getConnectorConfig
 
 Get the current configuration for a connector instance.<br><br>
 <b>Security:</b><br>
@@ -24,11 +27,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.connectorConfiguration.get({
+  const result = await pipeshub.connectorConfiguration.getConnectorConfig({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connectorId: "<id>",
   });
 
@@ -44,24 +48,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { connectorConfigurationGet } from "pipeshub/funcs/connector-configuration-get.js";
+import { connectorConfigurationGetConnectorConfig } from "pipeshub/funcs/connector-configuration-get-connector-config.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await connectorConfigurationGet(pipeshub, {
+  const res = await connectorConfigurationGetConnectorConfig(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connectorId: "<id>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("connectorConfigurationGet failed:", res.error);
+    console.log("connectorConfigurationGetConnectorConfig failed:", res.error);
   }
 }
 
@@ -73,6 +78,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.GetConnectorConfigRequest](../../models/operations/get-connector-config-request.md)                                                                                | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.GetConnectorConfigSecurity](../../models/operations/get-connector-config-security.md)                                                                              | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -87,7 +93,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## update
+## updateConnectorConfig
 
 Update authentication, sync, and filter configuration.<br><br>
 <b>Prerequisites:</b><br>
@@ -106,11 +112,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.connectorConfiguration.update({
+  const result = await pipeshub.connectorConfiguration.updateConnectorConfig({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connectorId: "<id>",
     body: {
       auth: {
@@ -165,17 +172,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { connectorConfigurationUpdate } from "pipeshub/funcs/connector-configuration-update.js";
+import { connectorConfigurationUpdateConnectorConfig } from "pipeshub/funcs/connector-configuration-update-connector-config.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await connectorConfigurationUpdate(pipeshub, {
+  const res = await connectorConfigurationUpdateConnectorConfig(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connectorId: "<id>",
     body: {
       auth: {
@@ -221,7 +229,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("connectorConfigurationUpdate failed:", res.error);
+    console.log("connectorConfigurationUpdateConnectorConfig failed:", res.error);
   }
 }
 
@@ -233,6 +241,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.UpdateConnectorConfigRequest](../../models/operations/update-connector-config-request.md)                                                                          | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.UpdateConnectorConfigSecurity](../../models/operations/update-connector-config-security.md)                                                                        | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -247,7 +256,110 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## updateFiltersSync
+## updateConnectorAuthConfig
+
+Update only the authentication configuration.<br><br>
+<b>Use Case:</b><br>
+Use this when you need to update credentials without changing
+sync or filter settings. Useful for credential rotation.<br><br>
+<b>Prerequisites:</b><br>
+Connector must be disabled. This endpoint clears OAuth state,
+requiring re-authentication for OAuth connectors.
+
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="updateConnectorAuthConfig" method="put" path="/connectors/{connectorId}/config/auth" -->
+```typescript
+import { Pipeshub } from "pipeshub";
+
+const pipeshub = new Pipeshub({
+  serverURL: "https://api.example.com",
+});
+
+async function run() {
+  const result = await pipeshub.connectorConfiguration.updateConnectorAuthConfig({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
+    connectorId: "<id>",
+    body: {
+      auth: {
+        values: {
+          "apiKey": "sk-xxxxx",
+          "baseUrl": "https://api.example.com",
+        },
+        oauthConfigId: "oauth_config_123",
+      },
+    },
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "pipeshub/core.js";
+import { connectorConfigurationUpdateConnectorAuthConfig } from "pipeshub/funcs/connector-configuration-update-connector-auth-config.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  serverURL: "https://api.example.com",
+});
+
+async function run() {
+  const res = await connectorConfigurationUpdateConnectorAuthConfig(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
+    connectorId: "<id>",
+    body: {
+      auth: {
+        values: {
+          "apiKey": "sk-xxxxx",
+          "baseUrl": "https://api.example.com",
+        },
+        oauthConfigId: "oauth_config_123",
+      },
+    },
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("connectorConfigurationUpdateConnectorAuthConfig failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.UpdateConnectorAuthConfigRequest](../../models/operations/update-connector-auth-config-request.md)                                                                 | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.UpdateConnectorAuthConfigSecurity](../../models/operations/update-connector-auth-config-security.md)                                                               | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[operations.UpdateConnectorAuthConfigResponse](../../models/operations/update-connector-auth-config-response.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
+## updateConnectorFiltersSyncConfig
 
 Update filter selections and sync settings without touching auth.<br><br>
 <b>Use Case:</b><br>
@@ -263,11 +375,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.connectorConfiguration.updateFiltersSync({
+  const result = await pipeshub.connectorConfiguration.updateConnectorFiltersSyncConfig({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connectorId: "<id>",
     body: {
       sync: {
@@ -314,17 +427,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { connectorConfigurationUpdateFiltersSync } from "pipeshub/funcs/connector-configuration-update-filters-sync.js";
+import { connectorConfigurationUpdateConnectorFiltersSyncConfig } from "pipeshub/funcs/connector-configuration-update-connector-filters-sync-config.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await connectorConfigurationUpdateFiltersSync(pipeshub, {
+  const res = await connectorConfigurationUpdateConnectorFiltersSyncConfig(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connectorId: "<id>",
     body: {
       sync: {
@@ -362,7 +476,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("connectorConfigurationUpdateFiltersSync failed:", res.error);
+    console.log("connectorConfigurationUpdateConnectorFiltersSyncConfig failed:", res.error);
   }
 }
 
@@ -374,6 +488,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.UpdateConnectorFiltersSyncConfigRequest](../../models/operations/update-connector-filters-sync-config-request.md)                                                  | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.UpdateConnectorFiltersSyncConfigSecurity](../../models/operations/update-connector-filters-sync-config-security.md)                                                | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |

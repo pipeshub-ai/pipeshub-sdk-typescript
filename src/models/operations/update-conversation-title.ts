@@ -3,6 +3,12 @@
  */
 
 import * as z from "zod/v4-mini";
+import * as models from "../index.js";
+
+export type UpdateConversationTitleSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 /**
  * Request payload
@@ -21,6 +27,31 @@ export type UpdateConversationTitleRequest = {
    */
   body: UpdateConversationTitleRequestBody;
 };
+
+/** @internal */
+export type UpdateConversationTitleSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const UpdateConversationTitleSecurity$outboundSchema: z.ZodMiniType<
+  UpdateConversationTitleSecurity$Outbound,
+  UpdateConversationTitleSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function updateConversationTitleSecurityToJSON(
+  updateConversationTitleSecurity: UpdateConversationTitleSecurity,
+): string {
+  return JSON.stringify(
+    UpdateConversationTitleSecurity$outboundSchema.parse(
+      updateConversationTitleSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type UpdateConversationTitleRequestBody$Outbound = {

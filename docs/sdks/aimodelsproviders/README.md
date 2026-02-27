@@ -1,88 +1,19 @@
-# AiModelsProviders
+# AIModelsProviders
 
 ## Overview
 
+Manage individual AI model providers - add, update, delete, and set defaults.
+
 ### Available Operations
 
-* [list](#list) - Get all AI model providers
-* [getByType](#getbytype) - Get models by type
+* [getModelsByType](#getmodelsbytype) - Get models by type
 * [getAvailableModelsByType](#getavailablemodelsbytype) - Get available models for selection
-* [add](#add) - Add new AI model provider
-* [update](#update) - Update AI model provider
-* [delete](#delete) - Delete AI model provider
-* [setDefault](#setdefault) - Set default AI model
+* [addAIModelProvider](#addaimodelprovider) - Add new AI model provider
+* [updateAIModelProvider](#updateaimodelprovider) - Update AI model provider
+* [deleteAIModelProvider](#deleteaimodelprovider) - Delete AI model provider
+* [setDefaultAIModel](#setdefaultaimodel) - Set default AI model
 
-## list
-
-List all configured AI model providers with their configurations.
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="getAIModelsProviders" method="get" path="/configurationManager/ai-models" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.aiModelsProviders.list();
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { aiModelsProvidersList } from "pipeshub/funcs/ai-models-providers-list.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await aiModelsProvidersList(pipeshub);
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("aiModelsProvidersList failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[models.AIModelsConfig](../../models/ai-models-config.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## getByType
+## getModelsByType
 
 Get all configured models of a specific type.
 
@@ -94,11 +25,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.aiModelsProviders.getByType({
+  const result = await pipeshub.aiModelsProviders.getModelsByType({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     modelType: "embedding",
   });
 
@@ -114,24 +46,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { aiModelsProvidersGetByType } from "pipeshub/funcs/ai-models-providers-get-by-type.js";
+import { aiModelsProvidersGetModelsByType } from "pipeshub/funcs/ai-models-providers-get-models-by-type.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await aiModelsProvidersGetByType(pipeshub, {
+  const res = await aiModelsProvidersGetModelsByType(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     modelType: "embedding",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("aiModelsProvidersGetByType failed:", res.error);
+    console.log("aiModelsProvidersGetModelsByType failed:", res.error);
   }
 }
 
@@ -143,6 +76,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.GetModelsByTypeRequest](../../models/operations/get-models-by-type-request.md)                                                                                     | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.GetModelsByTypeSecurity](../../models/operations/get-models-by-type-security.md)                                                                                   | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -169,11 +103,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
   const result = await pipeshub.aiModelsProviders.getAvailableModelsByType({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     modelType: "llm",
   });
 
@@ -195,11 +130,12 @@ import { aiModelsProvidersGetAvailableModelsByType } from "pipeshub/funcs/ai-mod
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
   const res = await aiModelsProvidersGetAvailableModelsByType(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     modelType: "llm",
   });
   if (res.ok) {
@@ -218,6 +154,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.GetAvailableModelsByTypeRequest](../../models/operations/get-available-models-by-type-request.md)                                                                  | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.GetAvailableModelsByTypeSecurity](../../models/operations/get-available-models-by-type-security.md)                                                                | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -232,7 +169,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## add
+## addAIModelProvider
 
 Add a new AI model provider configuration. Performs a health check before saving to verify connectivity. Supported providers: openai, anthropic, azure-openai, aws-bedrock, google-vertex, ollama, huggingface.
 
@@ -244,11 +181,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.aiModelsProviders.add({
+  const result = await pipeshub.aiModelsProviders.addAIModelProvider({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     modelType: "embedding",
     provider: "openai",
     configuration: {
@@ -268,17 +206,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { aiModelsProvidersAdd } from "pipeshub/funcs/ai-models-providers-add.js";
+import { aiModelsProvidersAddAIModelProvider } from "pipeshub/funcs/ai-models-providers-add-ai-model-provider.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await aiModelsProvidersAdd(pipeshub, {
+  const res = await aiModelsProvidersAddAIModelProvider(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     modelType: "embedding",
     provider: "openai",
     configuration: {
@@ -289,7 +228,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("aiModelsProvidersAdd failed:", res.error);
+    console.log("aiModelsProvidersAddAIModelProvider failed:", res.error);
   }
 }
 
@@ -301,6 +240,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [models.AddAIModelProviderRequest](../../models/add-ai-model-provider-request.md)                                                                                              | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.AddAIModelProviderSecurity](../../models/operations/add-ai-model-provider-security.md)                                                                             | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -315,7 +255,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## update
+## updateAIModelProvider
 
 Update an existing AI model provider configuration.
 
@@ -327,11 +267,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  await pipeshub.aiModelsProviders.update({
+  await pipeshub.aiModelsProviders.updateAIModelProvider({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     modelType: "reasoning",
     modelKey: "<value>",
     body: {
@@ -352,17 +293,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { aiModelsProvidersUpdate } from "pipeshub/funcs/ai-models-providers-update.js";
+import { aiModelsProvidersUpdateAIModelProvider } from "pipeshub/funcs/ai-models-providers-update-ai-model-provider.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await aiModelsProvidersUpdate(pipeshub, {
+  const res = await aiModelsProvidersUpdateAIModelProvider(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     modelType: "reasoning",
     modelKey: "<value>",
     body: {
@@ -374,7 +316,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("aiModelsProvidersUpdate failed:", res.error);
+    console.log("aiModelsProvidersUpdateAIModelProvider failed:", res.error);
   }
 }
 
@@ -386,6 +328,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.UpdateAIModelProviderRequest](../../models/operations/update-ai-model-provider-request.md)                                                                         | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.UpdateAIModelProviderSecurity](../../models/operations/update-ai-model-provider-security.md)                                                                       | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -400,7 +343,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## delete
+## deleteAIModelProvider
 
 Remove an AI model provider configuration. Cannot delete the default model if it's the only one.
 
@@ -416,7 +359,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  await pipeshub.aiModelsProviders.delete({
+  await pipeshub.aiModelsProviders.deleteAIModelProvider({
     modelType: "reasoning",
     modelKey: "<value>",
   });
@@ -433,7 +376,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { aiModelsProvidersDelete } from "pipeshub/funcs/ai-models-providers-delete.js";
+import { aiModelsProvidersDeleteAIModelProvider } from "pipeshub/funcs/ai-models-providers-delete-ai-model-provider.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -443,7 +386,7 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await aiModelsProvidersDelete(pipeshub, {
+  const res = await aiModelsProvidersDeleteAIModelProvider(pipeshub, {
     modelType: "reasoning",
     modelKey: "<value>",
   });
@@ -451,7 +394,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("aiModelsProvidersDelete failed:", res.error);
+    console.log("aiModelsProvidersDeleteAIModelProvider failed:", res.error);
   }
 }
 
@@ -477,7 +420,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## setDefault
+## setDefaultAIModel
 
 Set a model as the default for its type.
 
@@ -489,11 +432,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  await pipeshub.aiModelsProviders.setDefault({
+  await pipeshub.aiModelsProviders.setDefaultAIModel({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     modelType: "ocr",
     modelKey: "<value>",
   });
@@ -510,17 +454,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { aiModelsProvidersSetDefault } from "pipeshub/funcs/ai-models-providers-set-default.js";
+import { aiModelsProvidersSetDefaultAIModel } from "pipeshub/funcs/ai-models-providers-set-default-ai-model.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await aiModelsProvidersSetDefault(pipeshub, {
+  const res = await aiModelsProvidersSetDefaultAIModel(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     modelType: "ocr",
     modelKey: "<value>",
   });
@@ -528,7 +473,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("aiModelsProvidersSetDefault failed:", res.error);
+    console.log("aiModelsProvidersSetDefaultAIModel failed:", res.error);
   }
 }
 
@@ -540,6 +485,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.SetDefaultAIModelRequest](../../models/operations/set-default-ai-model-request.md)                                                                                 | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.SetDefaultAIModelSecurity](../../models/operations/set-default-ai-model-security.md)                                                                               | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |

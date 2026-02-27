@@ -7,6 +7,12 @@ import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
+
+export type GetOrganizationLogoSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 /**
  * Logo URL retrieved successfully
@@ -22,6 +28,31 @@ export type GetOrganizationLogoResponse = {
    */
   logoUrl?: string | undefined;
 };
+
+/** @internal */
+export type GetOrganizationLogoSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const GetOrganizationLogoSecurity$outboundSchema: z.ZodMiniType<
+  GetOrganizationLogoSecurity$Outbound,
+  GetOrganizationLogoSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function getOrganizationLogoSecurityToJSON(
+  getOrganizationLogoSecurity: GetOrganizationLogoSecurity,
+): string {
+  return JSON.stringify(
+    GetOrganizationLogoSecurity$outboundSchema.parse(
+      getOrganizationLogoSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export const GetOrganizationLogoResponse$inboundSchema: z.ZodMiniType<

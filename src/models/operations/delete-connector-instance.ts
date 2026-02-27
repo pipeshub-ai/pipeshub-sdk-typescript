@@ -7,6 +7,12 @@ import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
+
+export type DeleteConnectorInstanceSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export type DeleteConnectorInstanceRequest = {
   connectorId: string;
@@ -19,6 +25,31 @@ export type DeleteConnectorInstanceResponse = {
   success?: boolean | undefined;
   message?: string | undefined;
 };
+
+/** @internal */
+export type DeleteConnectorInstanceSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const DeleteConnectorInstanceSecurity$outboundSchema: z.ZodMiniType<
+  DeleteConnectorInstanceSecurity$Outbound,
+  DeleteConnectorInstanceSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function deleteConnectorInstanceSecurityToJSON(
+  deleteConnectorInstanceSecurity: DeleteConnectorInstanceSecurity,
+): string {
+  return JSON.stringify(
+    DeleteConnectorInstanceSecurity$outboundSchema.parse(
+      deleteConnectorInstanceSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type DeleteConnectorInstanceRequest$Outbound = {

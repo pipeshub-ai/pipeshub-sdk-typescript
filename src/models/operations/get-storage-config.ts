@@ -9,11 +9,17 @@ import { OpenEnum } from "../../types/enums.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
+
+export type GetStorageConfigSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 /**
  * Currently configured storage type
  */
-export const GetStorageConfigStorageType = {
+export const StorageType = {
   Local: "local",
   S3: "s3",
   AzureBlob: "azureBlob",
@@ -21,9 +27,7 @@ export const GetStorageConfigStorageType = {
 /**
  * Currently configured storage type
  */
-export type GetStorageConfigStorageType = OpenEnum<
-  typeof GetStorageConfigStorageType
->;
+export type StorageType = OpenEnum<typeof StorageType>;
 
 /**
  * Storage configuration retrieved
@@ -32,7 +36,7 @@ export type GetStorageConfigResponse = {
   /**
    * Currently configured storage type
    */
-  storageType?: GetStorageConfigStorageType | undefined;
+  storageType?: StorageType | undefined;
   /**
    * Mount point name (Local)
    */
@@ -68,17 +72,38 @@ export type GetStorageConfigResponse = {
 };
 
 /** @internal */
-export const GetStorageConfigStorageType$inboundSchema: z.ZodMiniType<
-  GetStorageConfigStorageType,
-  unknown
-> = openEnums.inboundSchema(GetStorageConfigStorageType);
+export type GetStorageConfigSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const GetStorageConfigSecurity$outboundSchema: z.ZodMiniType<
+  GetStorageConfigSecurity$Outbound,
+  GetStorageConfigSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function getStorageConfigSecurityToJSON(
+  getStorageConfigSecurity: GetStorageConfigSecurity,
+): string {
+  return JSON.stringify(
+    GetStorageConfigSecurity$outboundSchema.parse(getStorageConfigSecurity),
+  );
+}
+
+/** @internal */
+export const StorageType$inboundSchema: z.ZodMiniType<StorageType, unknown> =
+  openEnums.inboundSchema(StorageType);
 
 /** @internal */
 export const GetStorageConfigResponse$inboundSchema: z.ZodMiniType<
   GetStorageConfigResponse,
   unknown
 > = z.object({
-  storageType: types.optional(GetStorageConfigStorageType$inboundSchema),
+  storageType: types.optional(StorageType$inboundSchema),
   mountName: types.optional(types.string()),
   baseUrl: types.optional(types.string()),
   accessKeyId: types.optional(types.string()),

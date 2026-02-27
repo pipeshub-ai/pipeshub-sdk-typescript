@@ -3,10 +3,41 @@
  */
 
 import * as z from "zod/v4-mini";
+import * as models from "../index.js";
+
+export type DeleteAgentTemplateSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export type DeleteAgentTemplateRequest = {
   templateId: string;
 };
+
+/** @internal */
+export type DeleteAgentTemplateSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const DeleteAgentTemplateSecurity$outboundSchema: z.ZodMiniType<
+  DeleteAgentTemplateSecurity$Outbound,
+  DeleteAgentTemplateSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function deleteAgentTemplateSecurityToJSON(
+  deleteAgentTemplateSecurity: DeleteAgentTemplateSecurity,
+): string {
+  return JSON.stringify(
+    DeleteAgentTemplateSecurity$outboundSchema.parse(
+      deleteAgentTemplateSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type DeleteAgentTemplateRequest$Outbound = {

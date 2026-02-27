@@ -3,6 +3,12 @@
  */
 
 import * as z from "zod/v4-mini";
+import * as models from "../index.js";
+
+export type GetAgentTemplateSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export type GetAgentTemplateRequest = {
   /**
@@ -10,6 +16,29 @@ export type GetAgentTemplateRequest = {
    */
   templateId: string;
 };
+
+/** @internal */
+export type GetAgentTemplateSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const GetAgentTemplateSecurity$outboundSchema: z.ZodMiniType<
+  GetAgentTemplateSecurity$Outbound,
+  GetAgentTemplateSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function getAgentTemplateSecurityToJSON(
+  getAgentTemplateSecurity: GetAgentTemplateSecurity,
+): string {
+  return JSON.stringify(
+    GetAgentTemplateSecurity$outboundSchema.parse(getAgentTemplateSecurity),
+  );
+}
 
 /** @internal */
 export type GetAgentTemplateRequest$Outbound = {

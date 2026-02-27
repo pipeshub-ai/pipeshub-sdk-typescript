@@ -5,6 +5,11 @@
 import * as z from "zod/v4-mini";
 import * as models from "../index.js";
 
+export type ShareConversationSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 export type ShareConversationRequest = {
   conversationId: string;
   /**
@@ -12,6 +17,29 @@ export type ShareConversationRequest = {
    */
   body: models.ShareRequest;
 };
+
+/** @internal */
+export type ShareConversationSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const ShareConversationSecurity$outboundSchema: z.ZodMiniType<
+  ShareConversationSecurity$Outbound,
+  ShareConversationSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function shareConversationSecurityToJSON(
+  shareConversationSecurity: ShareConversationSecurity,
+): string {
+  return JSON.stringify(
+    ShareConversationSecurity$outboundSchema.parse(shareConversationSecurity),
+  );
+}
 
 /** @internal */
 export type ShareConversationRequest$Outbound = {

@@ -20,7 +20,7 @@ specific category of applications.
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { userAccountInitializeAuth } from "pipeshub/funcs/user-account-initialize-auth.js";
+import { userAccountInitAuth } from "pipeshub/funcs/user-account-init-auth.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -29,14 +29,14 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await userAccountInitializeAuth(pipeshub, {
+  const res = await userAccountInitAuth(pipeshub, {
     email: "user@example.com",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("userAccountInitializeAuth failed:", res.error);
+    console.log("userAccountInitAuth failed:", res.error);
   }
 }
 

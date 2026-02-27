@@ -3,6 +3,12 @@
  */
 
 import * as z from "zod/v4-mini";
+import * as models from "../index.js";
+
+export type DeleteRecordSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export type DeleteRecordRequest = {
   /**
@@ -10,6 +16,29 @@ export type DeleteRecordRequest = {
    */
   recordId: string;
 };
+
+/** @internal */
+export type DeleteRecordSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const DeleteRecordSecurity$outboundSchema: z.ZodMiniType<
+  DeleteRecordSecurity$Outbound,
+  DeleteRecordSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function deleteRecordSecurityToJSON(
+  deleteRecordSecurity: DeleteRecordSecurity,
+): string {
+  return JSON.stringify(
+    DeleteRecordSecurity$outboundSchema.parse(deleteRecordSecurity),
+  );
+}
 
 /** @internal */
 export type DeleteRecordRequest$Outbound = {

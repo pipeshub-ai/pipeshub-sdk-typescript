@@ -4,6 +4,12 @@
 
 import * as z from "zod/v4-mini";
 import { ClosedEnum } from "../../types/enums.js";
+import * as models from "../index.js";
+
+export type UpdateKBPermissionsSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export const UpdateKBPermissionsRole = {
   Owner: "OWNER",
@@ -33,6 +39,31 @@ export type UpdateKBPermissionsRequest = {
    */
   body: UpdateKBPermissionsRequestBody;
 };
+
+/** @internal */
+export type UpdateKBPermissionsSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const UpdateKBPermissionsSecurity$outboundSchema: z.ZodMiniType<
+  UpdateKBPermissionsSecurity$Outbound,
+  UpdateKBPermissionsSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function updateKBPermissionsSecurityToJSON(
+  updateKBPermissionsSecurity: UpdateKBPermissionsSecurity,
+): string {
+  return JSON.stringify(
+    UpdateKBPermissionsSecurity$outboundSchema.parse(
+      updateKBPermissionsSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export const UpdateKBPermissionsRole$outboundSchema: z.ZodMiniEnum<

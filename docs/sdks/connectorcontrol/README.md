@@ -2,11 +2,13 @@
 
 ## Overview
 
+Enable/disable connectors for sync or agent functionality
+
 ### Available Operations
 
-* [toggle](#toggle) - Toggle connector sync or agent
+* [toggleConnector](#toggleconnector) - Toggle connector sync or agent
 
-## toggle
+## toggleConnector
 
 Enable or disable a connector for sync or agent functionality.<br><br>
 <b>Toggle Types:</b><br>
@@ -35,11 +37,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.connectorControl.toggle({
+  const result = await pipeshub.connectorControl.toggleConnector({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connectorId: "<id>",
     body: {
       type: "sync",
@@ -58,17 +61,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { connectorControlToggle } from "pipeshub/funcs/connector-control-toggle.js";
+import { connectorControlToggleConnector } from "pipeshub/funcs/connector-control-toggle-connector.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await connectorControlToggle(pipeshub, {
+  const res = await connectorControlToggleConnector(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     connectorId: "<id>",
     body: {
       type: "sync",
@@ -78,7 +82,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("connectorControlToggle failed:", res.error);
+    console.log("connectorControlToggleConnector failed:", res.error);
   }
 }
 
@@ -90,6 +94,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.ToggleConnectorRequest](../../models/operations/toggle-connector-request.md)                                                                                       | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.ToggleConnectorSecurity](../../models/operations/toggle-connector-security.md)                                                                                     | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |

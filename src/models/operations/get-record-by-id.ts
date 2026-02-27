@@ -3,6 +3,12 @@
  */
 
 import * as z from "zod/v4-mini";
+import * as models from "../index.js";
+
+export type GetRecordByIdSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export type GetRecordByIdRequest = {
   /**
@@ -14,6 +20,29 @@ export type GetRecordByIdRequest = {
    */
   convertTo?: string | undefined;
 };
+
+/** @internal */
+export type GetRecordByIdSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const GetRecordByIdSecurity$outboundSchema: z.ZodMiniType<
+  GetRecordByIdSecurity$Outbound,
+  GetRecordByIdSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function getRecordByIdSecurityToJSON(
+  getRecordByIdSecurity: GetRecordByIdSecurity,
+): string {
+  return JSON.stringify(
+    GetRecordByIdSecurity$outboundSchema.parse(getRecordByIdSecurity),
+  );
+}
 
 /** @internal */
 export type GetRecordByIdRequest$Outbound = {

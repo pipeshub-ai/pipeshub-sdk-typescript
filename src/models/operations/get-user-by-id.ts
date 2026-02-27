@@ -9,6 +9,11 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
+export type GetUserByIdSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 export type GetUserByIdRequest = {
   /**
    * User ID (24-character MongoDB ObjectId)
@@ -26,6 +31,29 @@ export type GetUserByIdResponse = {
    */
   data?: models.User | undefined;
 };
+
+/** @internal */
+export type GetUserByIdSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const GetUserByIdSecurity$outboundSchema: z.ZodMiniType<
+  GetUserByIdSecurity$Outbound,
+  GetUserByIdSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function getUserByIdSecurityToJSON(
+  getUserByIdSecurity: GetUserByIdSecurity,
+): string {
+  return JSON.stringify(
+    GetUserByIdSecurity$outboundSchema.parse(getUserByIdSecurity),
+  );
+}
 
 /** @internal */
 export type GetUserByIdRequest$Outbound = {

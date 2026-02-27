@@ -3,6 +3,12 @@
  */
 
 import * as z from "zod/v4-mini";
+import * as models from "../index.js";
+
+export type StreamRecordBufferSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export type StreamRecordBufferRequest = {
   /**
@@ -14,6 +20,29 @@ export type StreamRecordBufferRequest = {
    */
   convertTo?: string | undefined;
 };
+
+/** @internal */
+export type StreamRecordBufferSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const StreamRecordBufferSecurity$outboundSchema: z.ZodMiniType<
+  StreamRecordBufferSecurity$Outbound,
+  StreamRecordBufferSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function streamRecordBufferSecurityToJSON(
+  streamRecordBufferSecurity: StreamRecordBufferSecurity,
+): string {
+  return JSON.stringify(
+    StreamRecordBufferSecurity$outboundSchema.parse(streamRecordBufferSecurity),
+  );
+}
 
 /** @internal */
 export type StreamRecordBufferRequest$Outbound = {

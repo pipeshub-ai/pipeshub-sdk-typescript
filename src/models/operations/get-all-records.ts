@@ -4,6 +4,12 @@
 
 import * as z from "zod/v4-mini";
 import { ClosedEnum } from "../../types/enums.js";
+import * as models from "../index.js";
+
+export type GetAllRecordsSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 /**
  * Filter by origin (comma-separated)
@@ -57,6 +63,29 @@ export type GetAllRecordsRequest = {
   sortBy?: string | undefined;
   sortOrder?: GetAllRecordsSortOrder | undefined;
 };
+
+/** @internal */
+export type GetAllRecordsSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const GetAllRecordsSecurity$outboundSchema: z.ZodMiniType<
+  GetAllRecordsSecurity$Outbound,
+  GetAllRecordsSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function getAllRecordsSecurityToJSON(
+  getAllRecordsSecurity: GetAllRecordsSecurity,
+): string {
+  return JSON.stringify(
+    GetAllRecordsSecurity$outboundSchema.parse(getAllRecordsSecurity),
+  );
+}
 
 /** @internal */
 export const Origins$outboundSchema: z.ZodMiniEnum<typeof Origins> = z.enum(

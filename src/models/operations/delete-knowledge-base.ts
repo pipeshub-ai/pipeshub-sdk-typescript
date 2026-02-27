@@ -7,6 +7,12 @@ import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
+
+export type DeleteKnowledgeBaseSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export type DeleteKnowledgeBaseRequest = {
   /**
@@ -22,6 +28,31 @@ export type DeleteKnowledgeBaseResponse = {
   success?: boolean | undefined;
   message?: string | undefined;
 };
+
+/** @internal */
+export type DeleteKnowledgeBaseSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const DeleteKnowledgeBaseSecurity$outboundSchema: z.ZodMiniType<
+  DeleteKnowledgeBaseSecurity$Outbound,
+  DeleteKnowledgeBaseSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function deleteKnowledgeBaseSecurityToJSON(
+  deleteKnowledgeBaseSecurity: DeleteKnowledgeBaseSecurity,
+): string {
+  return JSON.stringify(
+    DeleteKnowledgeBaseSecurity$outboundSchema.parse(
+      deleteKnowledgeBaseSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type DeleteKnowledgeBaseRequest$Outbound = {

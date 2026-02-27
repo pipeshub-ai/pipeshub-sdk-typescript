@@ -9,6 +9,11 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
+export type GetConnectorSchemaSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 export type GetConnectorSchemaRequest = {
   /**
    * Connector type identifier
@@ -26,6 +31,29 @@ export type GetConnectorSchemaResponse = {
    */
   schema?: models.ConnectorSchema | undefined;
 };
+
+/** @internal */
+export type GetConnectorSchemaSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const GetConnectorSchemaSecurity$outboundSchema: z.ZodMiniType<
+  GetConnectorSchemaSecurity$Outbound,
+  GetConnectorSchemaSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function getConnectorSchemaSecurityToJSON(
+  getConnectorSchemaSecurity: GetConnectorSchemaSecurity,
+): string {
+  return JSON.stringify(
+    GetConnectorSchemaSecurity$outboundSchema.parse(getConnectorSchemaSecurity),
+  );
+}
 
 /** @internal */
 export type GetConnectorSchemaRequest$Outbound = {

@@ -7,6 +7,12 @@ import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
+
+export type BulkInviteUsersSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 /**
  * Request payload
@@ -54,6 +60,29 @@ export type BulkInviteUsersResponse = {
    */
   failures?: Array<Failure> | undefined;
 };
+
+/** @internal */
+export type BulkInviteUsersSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const BulkInviteUsersSecurity$outboundSchema: z.ZodMiniType<
+  BulkInviteUsersSecurity$Outbound,
+  BulkInviteUsersSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function bulkInviteUsersSecurityToJSON(
+  bulkInviteUsersSecurity: BulkInviteUsersSecurity,
+): string {
+  return JSON.stringify(
+    BulkInviteUsersSecurity$outboundSchema.parse(bulkInviteUsersSecurity),
+  );
+}
 
 /** @internal */
 export type BulkInviteUsersRequest$Outbound = {

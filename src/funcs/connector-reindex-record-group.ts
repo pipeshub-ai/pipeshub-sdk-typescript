@@ -9,7 +9,7 @@ import * as M from "../lib/matchers.js";
 import { compactMap } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
 import { RequestOptions } from "../lib/sdks.js";
-import { extractSecurity, resolveGlobalSecurity } from "../lib/security.js";
+import { resolveSecurity } from "../lib/security.js";
 import { pathToFunc } from "../lib/url.js";
 import {
   ConnectionError,
@@ -35,6 +35,7 @@ import { Result } from "../types/fp.js";
  */
 export function connectorReindexRecordGroup(
   client: PipeshubCore,
+  security: operations.ReindexRecordGroupSecurity,
   request: operations.ReindexRecordGroupRequest,
   options?: RequestOptions,
 ): APIPromise<
@@ -52,6 +53,7 @@ export function connectorReindexRecordGroup(
 > {
   return new APIPromise($do(
     client,
+    security,
     request,
     options,
   ));
@@ -59,6 +61,7 @@ export function connectorReindexRecordGroup(
 
 async function $do(
   client: PipeshubCore,
+  security: operations.ReindexRecordGroupSecurity,
   request: operations.ReindexRecordGroupRequest,
   options?: RequestOptions,
 ): Promise<
@@ -105,19 +108,34 @@ async function $do(
     Accept: "*/*",
   }));
 
-  const secConfig = await extractSecurity(client._options.bearerAuth);
-  const securityInput = secConfig == null ? {} : { bearerAuth: secConfig };
-  const requestSecurity = resolveGlobalSecurity(securityInput);
+  const requestSecurity = resolveSecurity(
+    [
+      {
+        fieldName: "Authorization",
+        type: "http:bearer",
+        value: security?.bearerAuth,
+      },
+    ],
+    [
+      {
+        type: "oauth2:client_credentials",
+        value: {
+          clientID: security?.oauth2?.clientID,
+          clientSecret: security?.oauth2?.clientSecret,
+        },
+      },
+    ],
+  );
 
   const context = {
     options: client._options,
     baseURL: options?.serverURL ?? client._baseURL ?? "",
     operationID: "reindexRecordGroup",
-    oAuth2Scopes: null,
+    oAuth2Scopes: ["kb:write"],
 
     resolvedSecurity: requestSecurity,
 
-    securitySource: client._options.bearerAuth,
+    securitySource: security,
     retryConfig: options?.retries
       || client._options.retryConfig
       || { strategy: "none" },

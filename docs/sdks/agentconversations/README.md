@@ -2,18 +2,20 @@
 
 ## Overview
 
+Conversations with custom AI agents including streaming and feedback
+
 ### Available Operations
 
-* [list](#list) - List agent conversations
-* [start](#start) - Create agent conversation
-* [stream](#stream) - Create agent conversation with streaming
-* [get](#get) - Get agent conversation
-* [delete](#delete) - Delete agent conversation
-* [addMessage](#addmessage) - Add message to agent conversation
-* [streamMessage](#streammessage) - Add message with streaming
-* [regenerate](#regenerate) - Regenerate agent response
+* [listAgentConversations](#listagentconversations) - List agent conversations
+* [createAgentConversation](#createagentconversation) - Create agent conversation
+* [streamAgentConversation](#streamagentconversation) - Create agent conversation with streaming
+* [getAgentConversation](#getagentconversation) - Get agent conversation
+* [deleteAgentConversation](#deleteagentconversation) - Delete agent conversation
+* [addAgentMessage](#addagentmessage) - Add message to agent conversation
+* [streamAgentMessage](#streamagentmessage) - Add message with streaming
+* [regenerateAgentAnswer](#regenerateagentanswer) - Regenerate agent response
 
-## list
+## listAgentConversations
 
 Get all conversations with a specific agent.<br><br>
 <b>Overview:</b><br>
@@ -29,11 +31,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.agentConversations.list({
+  const result = await pipeshub.agentConversations.listAgentConversations({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     agentKey: "<value>",
   });
 
@@ -49,24 +52,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { agentConversationsList } from "pipeshub/funcs/agent-conversations-list.js";
+import { agentConversationsListAgentConversations } from "pipeshub/funcs/agent-conversations-list-agent-conversations.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await agentConversationsList(pipeshub, {
+  const res = await agentConversationsListAgentConversations(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     agentKey: "<value>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("agentConversationsList failed:", res.error);
+    console.log("agentConversationsListAgentConversations failed:", res.error);
   }
 }
 
@@ -78,6 +82,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.ListAgentConversationsRequest](../../models/operations/list-agent-conversations-request.md)                                                                        | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.ListAgentConversationsSecurity](../../models/operations/list-agent-conversations-security.md)                                                                      | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -92,7 +97,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## start
+## createAgentConversation
 
 Start a new conversation with an agent.<br><br>
 <b>Overview:</b><br>
@@ -108,11 +113,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.agentConversations.start({
+  const result = await pipeshub.agentConversations.createAgentConversation({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     agentKey: "<value>",
     body: {
       query: "What are the key findings from our Q4 financial report?",
@@ -138,17 +144,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { agentConversationsStart } from "pipeshub/funcs/agent-conversations-start.js";
+import { agentConversationsCreateAgentConversation } from "pipeshub/funcs/agent-conversations-create-agent-conversation.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await agentConversationsStart(pipeshub, {
+  const res = await agentConversationsCreateAgentConversation(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     agentKey: "<value>",
     body: {
       query: "What are the key findings from our Q4 financial report?",
@@ -165,7 +172,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("agentConversationsStart failed:", res.error);
+    console.log("agentConversationsCreateAgentConversation failed:", res.error);
   }
 }
 
@@ -177,6 +184,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.CreateAgentConversationRequest](../../models/operations/create-agent-conversation-request.md)                                                                      | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.CreateAgentConversationSecurity](../../models/operations/create-agent-conversation-security.md)                                                                    | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -191,7 +199,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## stream
+## streamAgentConversation
 
 Start a new agent conversation with SSE streaming response.<br><br>
 <b>Overview:</b><br>
@@ -206,11 +214,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.agentConversations.stream({
+  const result = await pipeshub.agentConversations.streamAgentConversation({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     agentKey: "<value>",
     body: {
       query: "What are the key findings from our Q4 financial report?",
@@ -238,17 +247,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { agentConversationsStream } from "pipeshub/funcs/agent-conversations-stream.js";
+import { agentConversationsStreamAgentConversation } from "pipeshub/funcs/agent-conversations-stream-agent-conversation.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await agentConversationsStream(pipeshub, {
+  const res = await agentConversationsStreamAgentConversation(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     agentKey: "<value>",
     body: {
       query: "What are the key findings from our Q4 financial report?",
@@ -267,7 +277,7 @@ async function run() {
     console.log(event);
   }
   } else {
-    console.log("agentConversationsStream failed:", res.error);
+    console.log("agentConversationsStreamAgentConversation failed:", res.error);
   }
 }
 
@@ -279,6 +289,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.StreamAgentConversationRequest](../../models/operations/stream-agent-conversation-request.md)                                                                      | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.StreamAgentConversationSecurity](../../models/operations/stream-agent-conversation-security.md)                                                                    | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -293,7 +304,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## get
+## getAgentConversation
 
 Retrieve a specific agent conversation by ID.
 
@@ -305,11 +316,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.agentConversations.get({
+  const result = await pipeshub.agentConversations.getAgentConversation({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     agentKey: "<value>",
     conversationId: "<value>",
   });
@@ -326,17 +338,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { agentConversationsGet } from "pipeshub/funcs/agent-conversations-get.js";
+import { agentConversationsGetAgentConversation } from "pipeshub/funcs/agent-conversations-get-agent-conversation.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await agentConversationsGet(pipeshub, {
+  const res = await agentConversationsGetAgentConversation(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     agentKey: "<value>",
     conversationId: "<value>",
   });
@@ -344,7 +357,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("agentConversationsGet failed:", res.error);
+    console.log("agentConversationsGetAgentConversation failed:", res.error);
   }
 }
 
@@ -356,6 +369,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.GetAgentConversationRequest](../../models/operations/get-agent-conversation-request.md)                                                                            | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.GetAgentConversationSecurity](../../models/operations/get-agent-conversation-security.md)                                                                          | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -370,7 +384,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## delete
+## deleteAgentConversation
 
 Delete a conversation with an agent.
 
@@ -382,11 +396,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  await pipeshub.agentConversations.delete({
+  await pipeshub.agentConversations.deleteAgentConversation({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     agentKey: "<value>",
     conversationId: "<value>",
   });
@@ -403,17 +418,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { agentConversationsDelete } from "pipeshub/funcs/agent-conversations-delete.js";
+import { agentConversationsDeleteAgentConversation } from "pipeshub/funcs/agent-conversations-delete-agent-conversation.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await agentConversationsDelete(pipeshub, {
+  const res = await agentConversationsDeleteAgentConversation(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     agentKey: "<value>",
     conversationId: "<value>",
   });
@@ -421,7 +437,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("agentConversationsDelete failed:", res.error);
+    console.log("agentConversationsDeleteAgentConversation failed:", res.error);
   }
 }
 
@@ -433,6 +449,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.DeleteAgentConversationRequest](../../models/operations/delete-agent-conversation-request.md)                                                                      | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.DeleteAgentConversationSecurity](../../models/operations/delete-agent-conversation-security.md)                                                                    | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -447,7 +464,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## addMessage
+## addAgentMessage
 
 Add a follow-up message to an agent conversation.
 
@@ -459,11 +476,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.agentConversations.addMessage({
+  const result = await pipeshub.agentConversations.addAgentMessage({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     agentKey: "<value>",
     conversationId: "<value>",
     body: {
@@ -483,17 +501,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { agentConversationsAddMessage } from "pipeshub/funcs/agent-conversations-add-message.js";
+import { agentConversationsAddAgentMessage } from "pipeshub/funcs/agent-conversations-add-agent-message.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await agentConversationsAddMessage(pipeshub, {
+  const res = await agentConversationsAddAgentMessage(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     agentKey: "<value>",
     conversationId: "<value>",
     body: {
@@ -504,7 +523,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("agentConversationsAddMessage failed:", res.error);
+    console.log("agentConversationsAddAgentMessage failed:", res.error);
   }
 }
 
@@ -516,6 +535,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.AddAgentMessageRequest](../../models/operations/add-agent-message-request.md)                                                                                      | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.AddAgentMessageSecurity](../../models/operations/add-agent-message-security.md)                                                                                    | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -530,7 +550,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## streamMessage
+## streamAgentMessage
 
 Add a message to agent conversation with SSE streaming response.
 
@@ -542,11 +562,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.agentConversations.streamMessage({
+  const result = await pipeshub.agentConversations.streamAgentMessage({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     agentKey: "<value>",
     conversationId: "<value>",
     body: {
@@ -568,17 +589,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { agentConversationsStreamMessage } from "pipeshub/funcs/agent-conversations-stream-message.js";
+import { agentConversationsStreamAgentMessage } from "pipeshub/funcs/agent-conversations-stream-agent-message.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await agentConversationsStreamMessage(pipeshub, {
+  const res = await agentConversationsStreamAgentMessage(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     agentKey: "<value>",
     conversationId: "<value>",
     body: {
@@ -591,7 +613,7 @@ async function run() {
     console.log(event);
   }
   } else {
-    console.log("agentConversationsStreamMessage failed:", res.error);
+    console.log("agentConversationsStreamAgentMessage failed:", res.error);
   }
 }
 
@@ -603,6 +625,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.StreamAgentMessageRequest](../../models/operations/stream-agent-message-request.md)                                                                                | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.StreamAgentMessageSecurity](../../models/operations/stream-agent-message-security.md)                                                                              | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -617,7 +640,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## regenerate
+## regenerateAgentAnswer
 
 Regenerate the agent's response for a specific message.<br><br>
 <b>Overview:</b><br>
@@ -632,11 +655,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.agentConversations.regenerate({
+  const result = await pipeshub.agentConversations.regenerateAgentAnswer({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     agentKey: "<value>",
     conversationId: "<value>",
     messageId: "<value>",
@@ -654,17 +678,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { agentConversationsRegenerate } from "pipeshub/funcs/agent-conversations-regenerate.js";
+import { agentConversationsRegenerateAgentAnswer } from "pipeshub/funcs/agent-conversations-regenerate-agent-answer.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await agentConversationsRegenerate(pipeshub, {
+  const res = await agentConversationsRegenerateAgentAnswer(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     agentKey: "<value>",
     conversationId: "<value>",
     messageId: "<value>",
@@ -673,7 +698,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("agentConversationsRegenerate failed:", res.error);
+    console.log("agentConversationsRegenerateAgentAnswer failed:", res.error);
   }
 }
 
@@ -685,6 +710,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.RegenerateAgentAnswerRequest](../../models/operations/regenerate-agent-answer-request.md)                                                                          | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.RegenerateAgentAnswerSecurity](../../models/operations/regenerate-agent-answer-security.md)                                                                        | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |

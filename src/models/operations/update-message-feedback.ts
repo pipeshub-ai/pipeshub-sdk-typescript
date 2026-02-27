@@ -5,6 +5,11 @@
 import * as z from "zod/v4-mini";
 import * as models from "../index.js";
 
+export type UpdateMessageFeedbackSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 export type UpdateMessageFeedbackRequest = {
   conversationId: string;
   messageId: string;
@@ -13,6 +18,31 @@ export type UpdateMessageFeedbackRequest = {
    */
   body: models.MessageFeedback;
 };
+
+/** @internal */
+export type UpdateMessageFeedbackSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const UpdateMessageFeedbackSecurity$outboundSchema: z.ZodMiniType<
+  UpdateMessageFeedbackSecurity$Outbound,
+  UpdateMessageFeedbackSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function updateMessageFeedbackSecurityToJSON(
+  updateMessageFeedbackSecurity: UpdateMessageFeedbackSecurity,
+): string {
+  return JSON.stringify(
+    UpdateMessageFeedbackSecurity$outboundSchema.parse(
+      updateMessageFeedbackSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type UpdateMessageFeedbackRequest$Outbound = {

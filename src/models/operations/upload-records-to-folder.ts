@@ -4,6 +4,12 @@
 
 import * as z from "zod/v4-mini";
 import { remap as remap$ } from "../../lib/primitives.js";
+import * as models from "../index.js";
+
+export type UploadRecordsToFolderSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export type UploadRecordsToFolderFile = {
   fileName: string;
@@ -33,6 +39,31 @@ export type UploadRecordsToFolderRequest = {
    */
   body: UploadRecordsToFolderRequestBody;
 };
+
+/** @internal */
+export type UploadRecordsToFolderSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const UploadRecordsToFolderSecurity$outboundSchema: z.ZodMiniType<
+  UploadRecordsToFolderSecurity$Outbound,
+  UploadRecordsToFolderSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function uploadRecordsToFolderSecurityToJSON(
+  uploadRecordsToFolderSecurity: UploadRecordsToFolderSecurity,
+): string {
+  return JSON.stringify(
+    UploadRecordsToFolderSecurity$outboundSchema.parse(
+      uploadRecordsToFolderSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type UploadRecordsToFolderFile$Outbound = {

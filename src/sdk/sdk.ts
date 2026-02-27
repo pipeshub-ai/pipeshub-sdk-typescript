@@ -6,66 +6,45 @@ import { ClientSDK } from "../lib/sdks.js";
 import { AgentConversations } from "./agent-conversations.js";
 import { AgentTemplates } from "./agent-templates.js";
 import { Agents } from "./agents.js";
-import { AiModelsConfiguration } from "./ai-models-configuration.js";
-import { AiModelsProviders } from "./ai-models-providers.js";
-import { AuthConfig } from "./auth-config.js";
+import { AIModelsProviders } from "./ai-models-providers.js";
 import { AuthenticationConfiguration } from "./authentication-configuration.js";
-import { AuthenticationConfigurations } from "./authentication-configurations.js";
 import { ConnectorConfiguration } from "./connector-configuration.js";
-import { ConnectorConfigurations } from "./connector-configurations.js";
 import { ConnectorControl } from "./connector-control.js";
 import { ConnectorFilters } from "./connector-filters.js";
 import { ConnectorInstances } from "./connector-instances.js";
-import { ConnectorOAuthConfiguration1 } from "./connector-o-auth-configuration-1.js";
-import { ConnectorOAuthConfigurations } from "./connector-o-auth-configurations.js";
 import { ConnectorOAuth } from "./connector-o-auth.js";
-import { ConnectorOauthConfiguration2 } from "./connector-oauth-configuration-2.js";
 import { ConnectorRegistry } from "./connector-registry.js";
-import { ConnectorService } from "./connector-service.js";
-import { ConnectorServices } from "./connector-services.js";
 import { Connector } from "./connector.js";
 import { Conversations } from "./conversations.js";
 import { CrawlingJobs } from "./crawling-jobs.js";
-import { DoclingService } from "./docling-service.js";
-import { DocumentBuffer } from "./document-buffer.js";
 import { DocumentManagement } from "./document-management.js";
-import { DocumentUpload } from "./document-upload.js";
-import { EmailOperations } from "./email-operations.js";
 import { Folders } from "./folders.js";
-import { IndexingService } from "./indexing-service.js";
 import { KnowledgeBases } from "./knowledge-bases.js";
-import { MailConfiguration } from "./mail-configuration.js";
 import { MetricsCollection } from "./metrics-collection.js";
-import { MetricsCollections } from "./metrics-collections.js";
-import { OAuthConfiguration2 } from "./o-auth-configuration-2.js";
-import { OauthApps } from "./oauth-apps.js";
-import { OauthConfiguration1 } from "./oauth-configuration-1.js";
-import { OauthConfigurations } from "./oauth-configurations.js";
-import { OauthProvider } from "./oauth-provider.js";
-import { Oauth } from "./oauth.js";
+import { OAuthApps } from "./o-auth-apps.js";
+import { OAuthConfiguration } from "./o-auth-configuration.js";
+import { OAuthProvider } from "./o-auth-provider.js";
+import { OAuth } from "./o-auth.js";
 import { OpenIDConnect } from "./open-id-connect.js";
 import { OrganizationAuthConfig } from "./organization-auth-config.js";
-import { OrganizationAuthConfigs } from "./organization-auth-configs.js";
-import { OrganizationAuthConfiguration } from "./organization-auth-configuration.js";
 import { Organizations } from "./organizations.js";
 import { Permissions } from "./permissions.js";
 import { PlatformSettings } from "./platform-settings.js";
-import { PublicUrls } from "./public-urls.js";
-import { QueryService } from "./query-service.js";
-import { QueryServices } from "./query-services.js";
-import { QueueManagement } from "./queue-management.js";
+import { PublicURLs } from "./public-ur-ls.js";
 import { Records } from "./records.js";
 import { Saml } from "./saml.js";
 import { SemanticSearch } from "./semantic-search.js";
-import { SmtpConfiguration } from "./smtp-configuration.js";
+import { SMTPConfiguration } from "./smtp-configuration.js";
 import { StorageConfiguration } from "./storage-configuration.js";
 import { Teams } from "./teams.js";
+import { ToolsetConfiguration } from "./toolset-configuration.js";
+import { ToolsetInstances } from "./toolset-instances.js";
+import { ToolsetOAuth } from "./toolset-o-auth.js";
+import { ToolsetRegistry } from "./toolset-registry.js";
 import { Upload } from "./upload.js";
 import { UserAccount } from "./user-account.js";
 import { UserGroups } from "./user-groups.js";
 import { Users } from "./users.js";
-import { VersionControl } from "./version-control.js";
-import { Webhooks } from "./webhooks.js";
 
 export class Pipeshub extends ClientSDK {
   private _userAccount?: UserAccount;
@@ -73,14 +52,14 @@ export class Pipeshub extends ClientSDK {
     return (this._userAccount ??= new UserAccount(this._options));
   }
 
-  private _oauth?: Oauth;
-  get oauth(): Oauth {
-    return (this._oauth ??= new Oauth(this._options));
+  private _oAuth?: OAuth;
+  get oAuth(): OAuth {
+    return (this._oAuth ??= new OAuth(this._options));
   }
 
-  private _oauthProvider?: OauthProvider;
-  get oauthProvider(): OauthProvider {
-    return (this._oauthProvider ??= new OauthProvider(this._options));
+  private _oAuthProvider?: OAuthProvider;
+  get oAuthProvider(): OAuthProvider {
+    return (this._oAuthProvider ??= new OAuthProvider(this._options));
   }
 
   private _openIDConnect?: OpenIDConnect;
@@ -88,16 +67,9 @@ export class Pipeshub extends ClientSDK {
     return (this._openIDConnect ??= new OpenIDConnect(this._options));
   }
 
-  private _oauthApps?: OauthApps;
-  get oauthApps(): OauthApps {
-    return (this._oauthApps ??= new OauthApps(this._options));
-  }
-
-  private _organizationAuthConfigs?: OrganizationAuthConfigs;
-  get organizationAuthConfigs(): OrganizationAuthConfigs {
-    return (this._organizationAuthConfigs ??= new OrganizationAuthConfigs(
-      this._options,
-    ));
+  private _oAuthApps?: OAuthApps;
+  get oAuthApps(): OAuthApps {
+    return (this._oAuthApps ??= new OAuthApps(this._options));
   }
 
   private _organizationAuthConfig?: OrganizationAuthConfig;
@@ -105,12 +77,6 @@ export class Pipeshub extends ClientSDK {
     return (this._organizationAuthConfig ??= new OrganizationAuthConfig(
       this._options,
     ));
-  }
-
-  private _organizationAuthConfiguration?: OrganizationAuthConfiguration;
-  get organizationAuthConfiguration(): OrganizationAuthConfiguration {
-    return (this._organizationAuthConfiguration ??=
-      new OrganizationAuthConfiguration(this._options));
   }
 
   private _saml?: Saml;
@@ -138,24 +104,9 @@ export class Pipeshub extends ClientSDK {
     return (this._userGroups ??= new UserGroups(this._options));
   }
 
-  private _documentUpload?: DocumentUpload;
-  get documentUpload(): DocumentUpload {
-    return (this._documentUpload ??= new DocumentUpload(this._options));
-  }
-
   private _documentManagement?: DocumentManagement;
   get documentManagement(): DocumentManagement {
     return (this._documentManagement ??= new DocumentManagement(this._options));
-  }
-
-  private _documentBuffer?: DocumentBuffer;
-  get documentBuffer(): DocumentBuffer {
-    return (this._documentBuffer ??= new DocumentBuffer(this._options));
-  }
-
-  private _versionControl?: VersionControl;
-  get versionControl(): VersionControl {
-    return (this._versionControl ??= new VersionControl(this._options));
   }
 
   private _knowledgeBases?: KnowledgeBases;
@@ -230,13 +181,6 @@ export class Pipeshub extends ClientSDK {
     ));
   }
 
-  private _connectorConfigurations?: ConnectorConfigurations;
-  get connectorConfigurations(): ConnectorConfigurations {
-    return (this._connectorConfigurations ??= new ConnectorConfigurations(
-      this._options,
-    ));
-  }
-
   private _connectorControl?: ConnectorControl;
   get connectorControl(): ConnectorControl {
     return (this._connectorControl ??= new ConnectorControl(this._options));
@@ -252,25 +196,31 @@ export class Pipeshub extends ClientSDK {
     return (this._connectorFilters ??= new ConnectorFilters(this._options));
   }
 
-  private _oauthConfiguration1?: OauthConfiguration1;
-  get oauthConfiguration1(): OauthConfiguration1 {
-    return (this._oauthConfiguration1 ??= new OauthConfiguration1(
+  private _toolsetRegistry?: ToolsetRegistry;
+  get toolsetRegistry(): ToolsetRegistry {
+    return (this._toolsetRegistry ??= new ToolsetRegistry(this._options));
+  }
+
+  private _toolsetInstances?: ToolsetInstances;
+  get toolsetInstances(): ToolsetInstances {
+    return (this._toolsetInstances ??= new ToolsetInstances(this._options));
+  }
+
+  private _toolsetConfiguration?: ToolsetConfiguration;
+  get toolsetConfiguration(): ToolsetConfiguration {
+    return (this._toolsetConfiguration ??= new ToolsetConfiguration(
       this._options,
     ));
   }
 
-  private _oauthConfigurations?: OauthConfigurations;
-  get oauthConfigurations(): OauthConfigurations {
-    return (this._oauthConfigurations ??= new OauthConfigurations(
-      this._options,
-    ));
+  private _toolsetOAuth?: ToolsetOAuth;
+  get toolsetOAuth(): ToolsetOAuth {
+    return (this._toolsetOAuth ??= new ToolsetOAuth(this._options));
   }
 
-  private _oAuthConfiguration2?: OAuthConfiguration2;
-  get oAuthConfiguration2(): OAuthConfiguration2 {
-    return (this._oAuthConfiguration2 ??= new OAuthConfiguration2(
-      this._options,
-    ));
+  private _oAuthConfiguration?: OAuthConfiguration;
+  get oAuthConfiguration(): OAuthConfiguration {
+    return (this._oAuthConfiguration ??= new OAuthConfiguration(this._options));
   }
 
   private _storageConfiguration?: StorageConfiguration;
@@ -280,9 +230,9 @@ export class Pipeshub extends ClientSDK {
     ));
   }
 
-  private _smtpConfiguration?: SmtpConfiguration;
-  get smtpConfiguration(): SmtpConfiguration {
-    return (this._smtpConfiguration ??= new SmtpConfiguration(this._options));
+  private _smtpConfiguration?: SMTPConfiguration;
+  get smtpConfiguration(): SMTPConfiguration {
+    return (this._smtpConfiguration ??= new SMTPConfiguration(this._options));
   }
 
   private _authenticationConfiguration?: AuthenticationConfiguration;
@@ -291,50 +241,14 @@ export class Pipeshub extends ClientSDK {
       new AuthenticationConfiguration(this._options));
   }
 
-  private _authenticationConfigurations?: AuthenticationConfigurations;
-  get authenticationConfigurations(): AuthenticationConfigurations {
-    return (this._authenticationConfigurations ??=
-      new AuthenticationConfigurations(this._options));
+  private _aiModelsProviders?: AIModelsProviders;
+  get aiModelsProviders(): AIModelsProviders {
+    return (this._aiModelsProviders ??= new AIModelsProviders(this._options));
   }
 
-  private _authConfig?: AuthConfig;
-  get authConfig(): AuthConfig {
-    return (this._authConfig ??= new AuthConfig(this._options));
-  }
-
-  private _aiModelsConfiguration?: AiModelsConfiguration;
-  get aiModelsConfiguration(): AiModelsConfiguration {
-    return (this._aiModelsConfiguration ??= new AiModelsConfiguration(
-      this._options,
-    ));
-  }
-
-  private _aiModelsProviders?: AiModelsProviders;
-  get aiModelsProviders(): AiModelsProviders {
-    return (this._aiModelsProviders ??= new AiModelsProviders(this._options));
-  }
-
-  private _connectorOAuthConfiguration1?: ConnectorOAuthConfiguration1;
-  get connectorOAuthConfiguration1(): ConnectorOAuthConfiguration1 {
-    return (this._connectorOAuthConfiguration1 ??=
-      new ConnectorOAuthConfiguration1(this._options));
-  }
-
-  private _connectorOAuthConfigurations?: ConnectorOAuthConfigurations;
-  get connectorOAuthConfigurations(): ConnectorOAuthConfigurations {
-    return (this._connectorOAuthConfigurations ??=
-      new ConnectorOAuthConfigurations(this._options));
-  }
-
-  private _connectorOauthConfiguration2?: ConnectorOauthConfiguration2;
-  get connectorOauthConfiguration2(): ConnectorOauthConfiguration2 {
-    return (this._connectorOauthConfiguration2 ??=
-      new ConnectorOauthConfiguration2(this._options));
-  }
-
-  private _publicUrls?: PublicUrls;
-  get publicUrls(): PublicUrls {
-    return (this._publicUrls ??= new PublicUrls(this._options));
+  private _publicURLs?: PublicURLs;
+  get publicURLs(): PublicURLs {
+    return (this._publicURLs ??= new PublicURLs(this._options));
   }
 
   private _platformSettings?: PlatformSettings;
@@ -347,63 +261,8 @@ export class Pipeshub extends ClientSDK {
     return (this._metricsCollection ??= new MetricsCollection(this._options));
   }
 
-  private _metricsCollections?: MetricsCollections;
-  get metricsCollections(): MetricsCollections {
-    return (this._metricsCollections ??= new MetricsCollections(this._options));
-  }
-
   private _crawlingJobs?: CrawlingJobs;
   get crawlingJobs(): CrawlingJobs {
     return (this._crawlingJobs ??= new CrawlingJobs(this._options));
-  }
-
-  private _queueManagement?: QueueManagement;
-  get queueManagement(): QueueManagement {
-    return (this._queueManagement ??= new QueueManagement(this._options));
-  }
-
-  private _emailOperations?: EmailOperations;
-  get emailOperations(): EmailOperations {
-    return (this._emailOperations ??= new EmailOperations(this._options));
-  }
-
-  private _mailConfiguration?: MailConfiguration;
-  get mailConfiguration(): MailConfiguration {
-    return (this._mailConfiguration ??= new MailConfiguration(this._options));
-  }
-
-  private _queryServices?: QueryServices;
-  get queryServices(): QueryServices {
-    return (this._queryServices ??= new QueryServices(this._options));
-  }
-
-  private _queryService?: QueryService;
-  get queryService(): QueryService {
-    return (this._queryService ??= new QueryService(this._options));
-  }
-
-  private _indexingService?: IndexingService;
-  get indexingService(): IndexingService {
-    return (this._indexingService ??= new IndexingService(this._options));
-  }
-
-  private _connectorService?: ConnectorService;
-  get connectorService(): ConnectorService {
-    return (this._connectorService ??= new ConnectorService(this._options));
-  }
-
-  private _webhooks?: Webhooks;
-  get webhooks(): Webhooks {
-    return (this._webhooks ??= new Webhooks(this._options));
-  }
-
-  private _connectorServices?: ConnectorServices;
-  get connectorServices(): ConnectorServices {
-    return (this._connectorServices ??= new ConnectorServices(this._options));
-  }
-
-  private _doclingService?: DoclingService;
-  get doclingService(): DoclingService {
-    return (this._doclingService ??= new DoclingService(this._options));
   }
 }

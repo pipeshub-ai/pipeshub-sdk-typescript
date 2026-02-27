@@ -3,14 +3,12 @@
  */
 
 import { userAccountAuthenticate } from "../funcs/user-account-authenticate.js";
-import { userAccountCheckPasswordStatus } from "../funcs/user-account-check-password-status.js";
 import { userAccountForgotPassword } from "../funcs/user-account-forgot-password.js";
 import { userAccountGenerateLoginOtp } from "../funcs/user-account-generate-login-otp.js";
-import { userAccountInitializeAuth } from "../funcs/user-account-initialize-auth.js";
+import { userAccountInitAuth } from "../funcs/user-account-init-auth.js";
 import { userAccountLogout } from "../funcs/user-account-logout.js";
-import { userAccountRefresh } from "../funcs/user-account-refresh.js";
+import { userAccountRefreshToken } from "../funcs/user-account-refresh-token.js";
 import { userAccountResetPasswordWithToken } from "../funcs/user-account-reset-password-with-token.js";
-import { userAccountResetPassword } from "../funcs/user-account-reset-password.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
 import * as models from "../models/index.js";
 import * as operations from "../models/operations/index.js";
@@ -39,11 +37,11 @@ export class UserAccount extends ClientSDK {
    * If the organization has MFA configured, you'll need to complete multiple
    * authentication steps. Each step completion returns the next step's allowed methods.
    */
-  async initializeAuth(
+  async initAuth(
     request: models.InitAuthRequest,
     options?: RequestOptions,
   ): Promise<operations.InitAuthResponse> {
-    return unwrapAsync(userAccountInitializeAuth(
+    return unwrapAsync(userAccountInitAuth(
       this,
       request,
       options,
@@ -120,34 +118,6 @@ export class UserAccount extends ClientSDK {
   }
 
   /**
-   * Reset password (authenticated user)
-   *
-   * @remarks
-   * Reset password for an authenticated user. Requires the current password for verification.
-   * <br><br>
-   * <b>Password Requirements:</b><br>
-   * - Minimum 8 characters<br>
-   * - At least 1 uppercase letter (A-Z)<br>
-   * - At least 1 lowercase letter (a-z)<br>
-   * - At least 1 number (0-9)<br>
-   * - At least 1 special character (#?!@$%^&*-)
-   * <br><br>
-   * <b>Security Notes:</b><br>
-   * - A new access token is returned (old tokens are invalidated)<br>
-   * - CAPTCHA may be required if enabled (pass <code>cf-turnstile-response</code>)
-   */
-  async resetPassword(
-    request: models.PasswordResetRequest,
-    options?: RequestOptions,
-  ): Promise<models.PasswordResetResponse> {
-    return unwrapAsync(userAccountResetPassword(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
    * Request password reset email
    *
    * @remarks
@@ -198,26 +168,6 @@ export class UserAccount extends ClientSDK {
   }
 
   /**
-   * Check if user has password set (Internal)
-   *
-   * @remarks
-   * Internal endpoint to check if a user has a password configured.
-   * Used by other services to determine authentication capabilities.
-   * <br><br>
-   * <b>Note:</b> This is an internal service-to-service endpoint.
-   */
-  async checkPasswordStatus(
-    security: operations.CheckPasswordStatusSecurity,
-    options?: RequestOptions,
-  ): Promise<operations.CheckPasswordStatusResponse> {
-    return unwrapAsync(userAccountCheckPasswordStatus(
-      this,
-      security,
-      options,
-    ));
-  }
-
-  /**
    * Refresh access token
    *
    * @remarks
@@ -236,11 +186,11 @@ export class UserAccount extends ClientSDK {
    * - Store the new access token and continue using it for authenticated requests<br>
    * - If refresh fails with 401, redirect user to login flow
    */
-  async refresh(
+  async refreshToken(
     security: operations.RefreshTokenSecurity,
     options?: RequestOptions,
   ): Promise<models.RefreshTokenResponse> {
-    return unwrapAsync(userAccountRefresh(
+    return unwrapAsync(userAccountRefreshToken(
       this,
       security,
       options,

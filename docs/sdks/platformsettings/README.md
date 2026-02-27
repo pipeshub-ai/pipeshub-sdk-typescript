@@ -2,15 +2,17 @@
 
 ## Overview
 
+Platform-wide settings including file upload limits, feature flags, and custom system prompts.
+
 ### Available Operations
 
-* [update](#update) - Update platform settings
-* [get](#get) - Get platform settings
-* [getFeatureFlags](#getfeatureflags) - Get available feature flags
-* [updateSystemPrompt](#updatesystemprompt) - Update custom system prompt
+* [setPlatformSettings](#setplatformsettings) - Update platform settings
+* [getPlatformSettings](#getplatformsettings) - Get platform settings
+* [getAvailableFeatureFlags](#getavailablefeatureflags) - Get available feature flags
+* [setCustomSystemPrompt](#setcustomsystemprompt) - Update custom system prompt
 * [getCustomSystemPrompt](#getcustomsystemprompt) - Get custom system prompt
 
-## update
+## setPlatformSettings
 
 Configure platform-wide settings including file upload limits and feature flags.
 
@@ -30,11 +32,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  await pipeshub.platformSettings.update({
+  await pipeshub.platformSettings.setPlatformSettings({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     fileUploadMaxSizeBytes: 31457280,
     featureFlags: {
       "ENABLE_BETA_CONNECTORS": false,
@@ -53,17 +56,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { platformSettingsUpdate } from "pipeshub/funcs/platform-settings-update.js";
+import { platformSettingsSetPlatformSettings } from "pipeshub/funcs/platform-settings-set-platform-settings.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await platformSettingsUpdate(pipeshub, {
+  const res = await platformSettingsSetPlatformSettings(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     fileUploadMaxSizeBytes: 31457280,
     featureFlags: {
       "ENABLE_BETA_CONNECTORS": false,
@@ -73,7 +77,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("platformSettingsUpdate failed:", res.error);
+    console.log("platformSettingsSetPlatformSettings failed:", res.error);
   }
 }
 
@@ -87,11 +91,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  await pipeshub.platformSettings.update({
+  await pipeshub.platformSettings.setPlatformSettings({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     fileUploadMaxSizeBytes: 31457280,
     featureFlags: {
       "ENABLE_BETA_CONNECTORS": true,
@@ -110,17 +115,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { platformSettingsUpdate } from "pipeshub/funcs/platform-settings-update.js";
+import { platformSettingsSetPlatformSettings } from "pipeshub/funcs/platform-settings-set-platform-settings.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await platformSettingsUpdate(pipeshub, {
+  const res = await platformSettingsSetPlatformSettings(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     fileUploadMaxSizeBytes: 31457280,
     featureFlags: {
       "ENABLE_BETA_CONNECTORS": true,
@@ -130,7 +136,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("platformSettingsUpdate failed:", res.error);
+    console.log("platformSettingsSetPlatformSettings failed:", res.error);
   }
 }
 
@@ -144,11 +150,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  await pipeshub.platformSettings.update({
+  await pipeshub.platformSettings.setPlatformSettings({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     fileUploadMaxSizeBytes: 104857600,
     featureFlags: {
       "ENABLE_BETA_CONNECTORS": false,
@@ -167,17 +174,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { platformSettingsUpdate } from "pipeshub/funcs/platform-settings-update.js";
+import { platformSettingsSetPlatformSettings } from "pipeshub/funcs/platform-settings-set-platform-settings.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await platformSettingsUpdate(pipeshub, {
+  const res = await platformSettingsSetPlatformSettings(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {
     fileUploadMaxSizeBytes: 104857600,
     featureFlags: {
       "ENABLE_BETA_CONNECTORS": false,
@@ -187,7 +195,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("platformSettingsUpdate failed:", res.error);
+    console.log("platformSettingsSetPlatformSettings failed:", res.error);
   }
 }
 
@@ -199,6 +207,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.SetPlatformSettingsRequest](../../models/operations/set-platform-settings-request.md)                                                                              | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.SetPlatformSettingsSecurity](../../models/operations/set-platform-settings-security.md)                                                                            | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -213,7 +222,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## get
+## getPlatformSettings
 
 Retrieve current platform settings including file upload limits and feature flag states.
 
@@ -225,11 +234,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.platformSettings.get();
+  const result = await pipeshub.platformSettings.getPlatformSettings({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  });
 
   console.log(result);
 }
@@ -243,22 +253,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { platformSettingsGet } from "pipeshub/funcs/platform-settings-get.js";
+import { platformSettingsGetPlatformSettings } from "pipeshub/funcs/platform-settings-get-platform-settings.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await platformSettingsGet(pipeshub);
+  const res = await platformSettingsGetPlatformSettings(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("platformSettingsGet failed:", res.error);
+    console.log("platformSettingsGetPlatformSettings failed:", res.error);
   }
 }
 
@@ -269,6 +280,7 @@ run();
 
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `security`                                                                                                                                                                     | [operations.GetPlatformSettingsSecurity](../../models/operations/get-platform-settings-security.md)                                                                            | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -283,7 +295,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getFeatureFlags
+## getAvailableFeatureFlags
 
 List all available feature flags with their descriptions and default values.
 
@@ -295,11 +307,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.platformSettings.getFeatureFlags();
+  const result = await pipeshub.platformSettings.getAvailableFeatureFlags({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  });
 
   console.log(result);
 }
@@ -313,22 +326,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { platformSettingsGetFeatureFlags } from "pipeshub/funcs/platform-settings-get-feature-flags.js";
+import { platformSettingsGetAvailableFeatureFlags } from "pipeshub/funcs/platform-settings-get-available-feature-flags.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await platformSettingsGetFeatureFlags(pipeshub);
+  const res = await platformSettingsGetAvailableFeatureFlags(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("platformSettingsGetFeatureFlags failed:", res.error);
+    console.log("platformSettingsGetAvailableFeatureFlags failed:", res.error);
   }
 }
 
@@ -339,6 +353,7 @@ run();
 
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `security`                                                                                                                                                                     | [operations.GetAvailableFeatureFlagsSecurity](../../models/operations/get-available-feature-flags-security.md)                                                                 | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -353,7 +368,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## updateSystemPrompt
+## setCustomSystemPrompt
 
 Set a custom system prompt that will be used by AI models.
 
@@ -365,11 +380,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  await pipeshub.platformSettings.updateSystemPrompt({});
+  await pipeshub.platformSettings.setCustomSystemPrompt({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {});
 
 
 }
@@ -383,22 +399,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { platformSettingsUpdateSystemPrompt } from "pipeshub/funcs/platform-settings-update-system-prompt.js";
+import { platformSettingsSetCustomSystemPrompt } from "pipeshub/funcs/platform-settings-set-custom-system-prompt.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await platformSettingsUpdateSystemPrompt(pipeshub, {});
+  const res = await platformSettingsSetCustomSystemPrompt(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  }, {});
   if (res.ok) {
     const { value: result } = res;
     
   } else {
-    console.log("platformSettingsUpdateSystemPrompt failed:", res.error);
+    console.log("platformSettingsSetCustomSystemPrompt failed:", res.error);
   }
 }
 
@@ -410,6 +427,7 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [models.CustomSystemPrompt](../../models/custom-system-prompt.md)                                                                                                              | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `security`                                                                                                                                                                     | [operations.SetCustomSystemPromptSecurity](../../models/operations/set-custom-system-prompt-security.md)                                                                       | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -436,11 +454,12 @@ import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const result = await pipeshub.platformSettings.getCustomSystemPrompt();
+  const result = await pipeshub.platformSettings.getCustomSystemPrompt({
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  });
 
   console.log(result);
 }
@@ -460,11 +479,12 @@ import { platformSettingsGetCustomSystemPrompt } from "pipeshub/funcs/platform-s
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
   serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
 });
 
 async function run() {
-  const res = await platformSettingsGetCustomSystemPrompt(pipeshub);
+  const res = await platformSettingsGetCustomSystemPrompt(pipeshub, {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
@@ -480,6 +500,7 @@ run();
 
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `security`                                                                                                                                                                     | [operations.GetCustomSystemPromptSecurity](../../models/operations/get-custom-system-prompt-security.md)                                                                       | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |

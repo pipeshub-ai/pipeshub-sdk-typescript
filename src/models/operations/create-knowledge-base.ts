@@ -3,6 +3,12 @@
  */
 
 import * as z from "zod/v4-mini";
+import * as models from "../index.js";
+
+export type CreateKnowledgeBaseSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 /**
  * Request payload
@@ -13,6 +19,31 @@ export type CreateKnowledgeBaseRequest = {
    */
   kbName: string;
 };
+
+/** @internal */
+export type CreateKnowledgeBaseSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const CreateKnowledgeBaseSecurity$outboundSchema: z.ZodMiniType<
+  CreateKnowledgeBaseSecurity$Outbound,
+  CreateKnowledgeBaseSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function createKnowledgeBaseSecurityToJSON(
+  createKnowledgeBaseSecurity: CreateKnowledgeBaseSecurity,
+): string {
+  return JSON.stringify(
+    CreateKnowledgeBaseSecurity$outboundSchema.parse(
+      createKnowledgeBaseSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type CreateKnowledgeBaseRequest$Outbound = {

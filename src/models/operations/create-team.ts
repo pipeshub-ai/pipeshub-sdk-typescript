@@ -9,6 +9,11 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
+export type CreateTeamSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 /**
  * Request payload
  */
@@ -35,6 +40,29 @@ export type CreateTeamResponse = {
   message?: string | undefined;
   data?: models.Team | undefined;
 };
+
+/** @internal */
+export type CreateTeamSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const CreateTeamSecurity$outboundSchema: z.ZodMiniType<
+  CreateTeamSecurity$Outbound,
+  CreateTeamSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function createTeamSecurityToJSON(
+  createTeamSecurity: CreateTeamSecurity,
+): string {
+  return JSON.stringify(
+    CreateTeamSecurity$outboundSchema.parse(createTeamSecurity),
+  );
+}
 
 /** @internal */
 export type CreateTeamRequest$Outbound = {

@@ -9,6 +9,11 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
+export type ListConnectorInstancesSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 export type ListConnectorInstancesRequest = {
   /**
    * Filter by scope (team or personal)
@@ -33,6 +38,31 @@ export type ListConnectorInstancesResponse = {
    */
   pagination?: models.ConnectorPagination | undefined;
 };
+
+/** @internal */
+export type ListConnectorInstancesSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const ListConnectorInstancesSecurity$outboundSchema: z.ZodMiniType<
+  ListConnectorInstancesSecurity$Outbound,
+  ListConnectorInstancesSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function listConnectorInstancesSecurityToJSON(
+  listConnectorInstancesSecurity: ListConnectorInstancesSecurity,
+): string {
+  return JSON.stringify(
+    ListConnectorInstancesSecurity$outboundSchema.parse(
+      listConnectorInstancesSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type ListConnectorInstancesRequest$Outbound = {

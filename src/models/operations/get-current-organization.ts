@@ -9,6 +9,11 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
+export type GetCurrentOrganizationSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 /**
  * Organization details retrieved successfully
  */
@@ -16,6 +21,31 @@ export type GetCurrentOrganizationResponse = {
   success?: boolean | undefined;
   data?: models.Organization | undefined;
 };
+
+/** @internal */
+export type GetCurrentOrganizationSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const GetCurrentOrganizationSecurity$outboundSchema: z.ZodMiniType<
+  GetCurrentOrganizationSecurity$Outbound,
+  GetCurrentOrganizationSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function getCurrentOrganizationSecurityToJSON(
+  getCurrentOrganizationSecurity: GetCurrentOrganizationSecurity,
+): string {
+  return JSON.stringify(
+    GetCurrentOrganizationSecurity$outboundSchema.parse(
+      getCurrentOrganizationSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export const GetCurrentOrganizationResponse$inboundSchema: z.ZodMiniType<

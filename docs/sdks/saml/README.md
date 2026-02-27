@@ -2,13 +2,13 @@
 
 ## Overview
 
+SAML 2.0 Single Sign-On integration with enterprise Identity Providers
+
 ### Available Operations
 
-* [signIn](#signin) - Initiate SAML sign-in flow
-* [callback](#callback) - SAML authentication callback
-* [updateAppConfig](#updateappconfig) - Reload SAML application configuration (Internal)
+* [signInViaSAML](#signinviasaml) - Initiate SAML sign-in flow
 
-## signIn
+## signInViaSAML
 
 Initiate SAML Single Sign-On authentication by redirecting to the Identity Provider (IDP).
 <br><br>
@@ -38,7 +38,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.saml.signIn({
+  const result = await pipeshub.saml.signInViaSAML({
     email: "Daphney.Koss@hotmail.com",
   });
 
@@ -54,7 +54,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { samlSignIn } from "pipeshub/funcs/saml-sign-in.js";
+import { samlSignInViaSAML } from "pipeshub/funcs/saml-sign-in-via-saml.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -63,14 +63,14 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await samlSignIn(pipeshub, {
+  const res = await samlSignInViaSAML(pipeshub, {
     email: "Daphney.Koss@hotmail.com",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("samlSignIn failed:", res.error);
+    console.log("samlSignInViaSAML failed:", res.error);
   }
 }
 
@@ -89,175 +89,6 @@ run();
 ### Response
 
 **Promise\<[operations.SignInViaSAMLResponse](../../models/operations/sign-in-via-saml-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## callback
-
-Handle the callback from SAML Identity Provider after user authentication.
-This endpoint processes the SAML response and completes the authentication flow.
-<br><br>
-<b>Note:</b> This endpoint is called by the IDP, not directly by the client.
-The IDP posts the SAML response to this URL after user authentication.
-<br><br>
-<b>Flow:</b><br>
-1. IDP posts SAMLResponse and RelayState<br>
-2. Server validates SAML assertion signature<br>
-3. Server extracts user identity from assertion<br>
-4. Server completes the authentication step<br>
-5. Redirects to frontend with success/error status
-<br><br>
-<b>RelayState:</b> Contains the session token to resume the authentication flow.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="samlCallback" method="post" path="/saml/signIn/callback" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-});
-
-async function run() {
-  const result = await pipeshub.saml.callback();
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { samlCallback } from "pipeshub/funcs/saml-callback.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-});
-
-async function run() {
-  const res = await samlCallback(pipeshub);
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("samlCallback failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.SamlCallbackRequest](../../models/operations/saml-callback-request.md)                                                                                             | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.SamlCallbackResponse](../../models/operations/saml-callback-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.AuthError            | 400, 401                    | application/json            |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## updateAppConfig
-
-Internal endpoint to reload SAML configuration from the configuration manager.
-This is called by other services when SAML settings are updated.<br><br>
-<b>Purpose:</b><br>
-When SAML configuration is updated in the Configuration Manager, this endpoint
-is called to reload the settings into the authentication service without restart.<br><br>
-<b>Effects:</b><br>
-<ul>
-<li>Reloads AppConfig from configuration files</li>
-<li>Rebinds authentication controllers with new config</li>
-<li>Updates SAML passport strategy settings</li>
-</ul>
-<b>Note:</b> This is an internal service-to-service endpoint.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="updateSamlAppConfig" method="post" path="/saml/updateAppConfig" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-});
-
-async function run() {
-  const result = await pipeshub.saml.updateAppConfig({
-    scopedToken: process.env["PIPESHUB_SCOPED_TOKEN"] ?? "",
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { samlUpdateAppConfig } from "pipeshub/funcs/saml-update-app-config.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-});
-
-async function run() {
-  const res = await samlUpdateAppConfig(pipeshub, {
-    scopedToken: process.env["PIPESHUB_SCOPED_TOKEN"] ?? "",
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("samlUpdateAppConfig failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `security`                                                                                                                                                                     | [operations.UpdateSamlAppConfigSecurity](../../models/operations/update-saml-app-config-security.md)                                                                           | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.UpdateSamlAppConfigResponse](../../models/operations/update-saml-app-config-response.md)\>**
 
 ### Errors
 

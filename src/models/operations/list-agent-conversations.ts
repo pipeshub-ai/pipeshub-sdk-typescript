@@ -3,6 +3,12 @@
  */
 
 import * as z from "zod/v4-mini";
+import * as models from "../index.js";
+
+export type ListAgentConversationsSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export type ListAgentConversationsRequest = {
   /**
@@ -10,6 +16,31 @@ export type ListAgentConversationsRequest = {
    */
   agentKey: string;
 };
+
+/** @internal */
+export type ListAgentConversationsSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const ListAgentConversationsSecurity$outboundSchema: z.ZodMiniType<
+  ListAgentConversationsSecurity$Outbound,
+  ListAgentConversationsSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function listAgentConversationsSecurityToJSON(
+  listAgentConversationsSecurity: ListAgentConversationsSecurity,
+): string {
+  return JSON.stringify(
+    ListAgentConversationsSecurity$outboundSchema.parse(
+      listAgentConversationsSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type ListAgentConversationsRequest$Outbound = {

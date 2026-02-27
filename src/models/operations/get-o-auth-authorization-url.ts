@@ -7,6 +7,12 @@ import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
+
+export type GetOAuthAuthorizationUrlSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export type GetOAuthAuthorizationUrlRequest = {
   connectorId: string;
@@ -30,6 +36,31 @@ export type GetOAuthAuthorizationUrlResponse = {
    */
   state?: string | undefined;
 };
+
+/** @internal */
+export type GetOAuthAuthorizationUrlSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const GetOAuthAuthorizationUrlSecurity$outboundSchema: z.ZodMiniType<
+  GetOAuthAuthorizationUrlSecurity$Outbound,
+  GetOAuthAuthorizationUrlSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function getOAuthAuthorizationUrlSecurityToJSON(
+  getOAuthAuthorizationUrlSecurity: GetOAuthAuthorizationUrlSecurity,
+): string {
+  return JSON.stringify(
+    GetOAuthAuthorizationUrlSecurity$outboundSchema.parse(
+      getOAuthAuthorizationUrlSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type GetOAuthAuthorizationUrlRequest$Outbound = {

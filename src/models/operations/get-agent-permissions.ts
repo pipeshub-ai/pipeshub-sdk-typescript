@@ -9,6 +9,12 @@ import { OpenEnum } from "../../types/enums.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
+
+export type GetAgentPermissionsSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export type GetAgentPermissionsRequest = {
   agentKey: string;
@@ -35,6 +41,31 @@ export type GetAgentPermissionsResponse = {
   isPublic?: boolean | undefined;
   sharedWith?: Array<GetAgentPermissionsSharedWith> | undefined;
 };
+
+/** @internal */
+export type GetAgentPermissionsSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const GetAgentPermissionsSecurity$outboundSchema: z.ZodMiniType<
+  GetAgentPermissionsSecurity$Outbound,
+  GetAgentPermissionsSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function getAgentPermissionsSecurityToJSON(
+  getAgentPermissionsSecurity: GetAgentPermissionsSecurity,
+): string {
+  return JSON.stringify(
+    GetAgentPermissionsSecurity$outboundSchema.parse(
+      getAgentPermissionsSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type GetAgentPermissionsRequest$Outbound = {

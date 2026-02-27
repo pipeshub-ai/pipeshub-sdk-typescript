@@ -4,6 +4,12 @@
 
 import * as z from "zod/v4-mini";
 import { ClosedEnum } from "../../types/enums.js";
+import * as models from "../index.js";
+
+export type UpdateAgentPermissionsSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
 
 export const UpdateAgentPermissionsAccessLevel = {
   Read: "read",
@@ -34,6 +40,31 @@ export type UpdateAgentPermissionsRequest = {
    */
   body: UpdateAgentPermissionsRequestBody;
 };
+
+/** @internal */
+export type UpdateAgentPermissionsSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const UpdateAgentPermissionsSecurity$outboundSchema: z.ZodMiniType<
+  UpdateAgentPermissionsSecurity$Outbound,
+  UpdateAgentPermissionsSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function updateAgentPermissionsSecurityToJSON(
+  updateAgentPermissionsSecurity: UpdateAgentPermissionsSecurity,
+): string {
+  return JSON.stringify(
+    UpdateAgentPermissionsSecurity$outboundSchema.parse(
+      updateAgentPermissionsSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export const UpdateAgentPermissionsAccessLevel$outboundSchema: z.ZodMiniEnum<

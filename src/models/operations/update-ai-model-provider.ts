@@ -5,6 +5,11 @@
 import * as z from "zod/v4-mini";
 import * as models from "../index.js";
 
+export type UpdateAIModelProviderSecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 export type UpdateAIModelProviderRequest = {
   /**
    * Type of AI model
@@ -19,6 +24,31 @@ export type UpdateAIModelProviderRequest = {
    */
   body: models.UpdateAIModelProviderRequest;
 };
+
+/** @internal */
+export type UpdateAIModelProviderSecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const UpdateAIModelProviderSecurity$outboundSchema: z.ZodMiniType<
+  UpdateAIModelProviderSecurity$Outbound,
+  UpdateAIModelProviderSecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function updateAIModelProviderSecurityToJSON(
+  updateAIModelProviderSecurity: UpdateAIModelProviderSecurity,
+): string {
+  return JSON.stringify(
+    UpdateAIModelProviderSecurity$outboundSchema.parse(
+      updateAIModelProviderSecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type UpdateAIModelProviderRequest$Outbound = {

@@ -9,7 +9,7 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
-export type UpdateOAuthConfigConfig = {
+export type Config = {
   clientId?: string | undefined;
   clientSecret?: string | undefined;
   tenantId?: string | undefined;
@@ -20,7 +20,7 @@ export type UpdateOAuthConfigConfig = {
  */
 export type UpdateOAuthConfigRequestBody = {
   oauthInstanceName?: string | undefined;
-  config?: UpdateOAuthConfigConfig | undefined;
+  config?: Config | undefined;
 };
 
 export type UpdateOAuthConfigRequest = {
@@ -47,34 +47,28 @@ export type UpdateOAuthConfigResponse = {
 };
 
 /** @internal */
-export type UpdateOAuthConfigConfig$Outbound = {
+export type Config$Outbound = {
   clientId?: string | undefined;
   clientSecret?: string | undefined;
   tenantId?: string | undefined;
 };
 
 /** @internal */
-export const UpdateOAuthConfigConfig$outboundSchema: z.ZodMiniType<
-  UpdateOAuthConfigConfig$Outbound,
-  UpdateOAuthConfigConfig
-> = z.object({
-  clientId: z.optional(z.string()),
-  clientSecret: z.optional(z.string()),
-  tenantId: z.optional(z.string()),
-});
+export const Config$outboundSchema: z.ZodMiniType<Config$Outbound, Config> = z
+  .object({
+    clientId: z.optional(z.string()),
+    clientSecret: z.optional(z.string()),
+    tenantId: z.optional(z.string()),
+  });
 
-export function updateOAuthConfigConfigToJSON(
-  updateOAuthConfigConfig: UpdateOAuthConfigConfig,
-): string {
-  return JSON.stringify(
-    UpdateOAuthConfigConfig$outboundSchema.parse(updateOAuthConfigConfig),
-  );
+export function configToJSON(config: Config): string {
+  return JSON.stringify(Config$outboundSchema.parse(config));
 }
 
 /** @internal */
 export type UpdateOAuthConfigRequestBody$Outbound = {
   oauthInstanceName?: string | undefined;
-  config?: UpdateOAuthConfigConfig$Outbound | undefined;
+  config?: Config$Outbound | undefined;
 };
 
 /** @internal */
@@ -83,7 +77,7 @@ export const UpdateOAuthConfigRequestBody$outboundSchema: z.ZodMiniType<
   UpdateOAuthConfigRequestBody
 > = z.object({
   oauthInstanceName: z.optional(z.string()),
-  config: z.optional(z.lazy(() => UpdateOAuthConfigConfig$outboundSchema)),
+  config: z.optional(z.lazy(() => Config$outboundSchema)),
 });
 
 export function updateOAuthConfigRequestBodyToJSON(

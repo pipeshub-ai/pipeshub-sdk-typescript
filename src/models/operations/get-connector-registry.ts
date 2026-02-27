@@ -9,6 +9,11 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
+export type GetConnectorRegistrySecurity = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2 | undefined;
+};
+
 export type GetConnectorRegistryRequest = {
   /**
    * Filter by scope type
@@ -39,6 +44,31 @@ export type GetConnectorRegistryResponse = {
    */
   pagination?: models.ConnectorPagination | undefined;
 };
+
+/** @internal */
+export type GetConnectorRegistrySecurity$Outbound = {
+  bearerAuth?: string | undefined;
+  oauth2?: models.SchemeOauth2$Outbound | undefined;
+};
+
+/** @internal */
+export const GetConnectorRegistrySecurity$outboundSchema: z.ZodMiniType<
+  GetConnectorRegistrySecurity$Outbound,
+  GetConnectorRegistrySecurity
+> = z.object({
+  bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(models.SchemeOauth2$outboundSchema),
+});
+
+export function getConnectorRegistrySecurityToJSON(
+  getConnectorRegistrySecurity: GetConnectorRegistrySecurity,
+): string {
+  return JSON.stringify(
+    GetConnectorRegistrySecurity$outboundSchema.parse(
+      getConnectorRegistrySecurity,
+    ),
+  );
+}
 
 /** @internal */
 export type GetConnectorRegistryRequest$Outbound = {

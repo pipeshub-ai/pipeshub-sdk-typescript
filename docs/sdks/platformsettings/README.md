@@ -2,15 +2,17 @@
 
 ## Overview
 
+Platform-wide settings including file upload limits, feature flags, and custom system prompts.
+
 ### Available Operations
 
-* [update](#update) - Update platform settings
-* [get](#get) - Get platform settings
-* [getFeatureFlags](#getfeatureflags) - Get available feature flags
-* [updateSystemPrompt](#updatesystemprompt) - Update custom system prompt
+* [setPlatformSettings](#setplatformsettings) - Update platform settings
+* [getPlatformSettings](#getplatformsettings) - Get platform settings
+* [getAvailableFeatureFlags](#getavailablefeatureflags) - Get available feature flags
+* [setCustomSystemPrompt](#setcustomsystemprompt) - Update custom system prompt
 * [getCustomSystemPrompt](#getcustomsystemprompt) - Get custom system prompt
 
-## update
+## setPlatformSettings
 
 Configure platform-wide settings including file upload limits and feature flags.
 
@@ -29,12 +31,13 @@ Configure platform-wide settings including file upload limits and feature flags.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  await pipeshub.platformSettings.update({
+  await pipeshub.platformSettings.setPlatformSettings({
     fileUploadMaxSizeBytes: 31457280,
     featureFlags: {
       "ENABLE_BETA_CONNECTORS": false,
@@ -53,17 +56,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { platformSettingsUpdate } from "pipeshub/funcs/platform-settings-update.js";
+import { platformSettingsSetPlatformSettings } from "pipeshub/funcs/platform-settings-set-platform-settings.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await platformSettingsUpdate(pipeshub, {
+  const res = await platformSettingsSetPlatformSettings(pipeshub, {
     fileUploadMaxSizeBytes: 31457280,
     featureFlags: {
       "ENABLE_BETA_CONNECTORS": false,
@@ -73,7 +77,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("platformSettingsUpdate failed:", res.error);
+    console.log("platformSettingsSetPlatformSettings failed:", res.error);
   }
 }
 
@@ -86,12 +90,13 @@ run();
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  await pipeshub.platformSettings.update({
+  await pipeshub.platformSettings.setPlatformSettings({
     fileUploadMaxSizeBytes: 31457280,
     featureFlags: {
       "ENABLE_BETA_CONNECTORS": true,
@@ -110,17 +115,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { platformSettingsUpdate } from "pipeshub/funcs/platform-settings-update.js";
+import { platformSettingsSetPlatformSettings } from "pipeshub/funcs/platform-settings-set-platform-settings.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await platformSettingsUpdate(pipeshub, {
+  const res = await platformSettingsSetPlatformSettings(pipeshub, {
     fileUploadMaxSizeBytes: 31457280,
     featureFlags: {
       "ENABLE_BETA_CONNECTORS": true,
@@ -130,7 +136,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("platformSettingsUpdate failed:", res.error);
+    console.log("platformSettingsSetPlatformSettings failed:", res.error);
   }
 }
 
@@ -143,12 +149,13 @@ run();
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  await pipeshub.platformSettings.update({
+  await pipeshub.platformSettings.setPlatformSettings({
     fileUploadMaxSizeBytes: 104857600,
     featureFlags: {
       "ENABLE_BETA_CONNECTORS": false,
@@ -167,17 +174,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { platformSettingsUpdate } from "pipeshub/funcs/platform-settings-update.js";
+import { platformSettingsSetPlatformSettings } from "pipeshub/funcs/platform-settings-set-platform-settings.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await platformSettingsUpdate(pipeshub, {
+  const res = await platformSettingsSetPlatformSettings(pipeshub, {
     fileUploadMaxSizeBytes: 104857600,
     featureFlags: {
       "ENABLE_BETA_CONNECTORS": false,
@@ -187,7 +195,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("platformSettingsUpdate failed:", res.error);
+    console.log("platformSettingsSetPlatformSettings failed:", res.error);
   }
 }
 
@@ -213,7 +221,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## get
+## getPlatformSettings
 
 Retrieve current platform settings including file upload limits and feature flag states.
 
@@ -224,12 +232,13 @@ Retrieve current platform settings including file upload limits and feature flag
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.platformSettings.get();
+  const result = await pipeshub.platformSettings.getPlatformSettings();
 
   console.log(result);
 }
@@ -243,22 +252,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { platformSettingsGet } from "pipeshub/funcs/platform-settings-get.js";
+import { platformSettingsGetPlatformSettings } from "pipeshub/funcs/platform-settings-get-platform-settings.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await platformSettingsGet(pipeshub);
+  const res = await platformSettingsGetPlatformSettings(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("platformSettingsGet failed:", res.error);
+    console.log("platformSettingsGetPlatformSettings failed:", res.error);
   }
 }
 
@@ -283,7 +293,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getFeatureFlags
+## getAvailableFeatureFlags
 
 List all available feature flags with their descriptions and default values.
 
@@ -294,12 +304,13 @@ List all available feature flags with their descriptions and default values.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.platformSettings.getFeatureFlags();
+  const result = await pipeshub.platformSettings.getAvailableFeatureFlags();
 
   console.log(result);
 }
@@ -313,22 +324,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { platformSettingsGetFeatureFlags } from "pipeshub/funcs/platform-settings-get-feature-flags.js";
+import { platformSettingsGetAvailableFeatureFlags } from "pipeshub/funcs/platform-settings-get-available-feature-flags.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await platformSettingsGetFeatureFlags(pipeshub);
+  const res = await platformSettingsGetAvailableFeatureFlags(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("platformSettingsGetFeatureFlags failed:", res.error);
+    console.log("platformSettingsGetAvailableFeatureFlags failed:", res.error);
   }
 }
 
@@ -353,7 +365,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## updateSystemPrompt
+## setCustomSystemPrompt
 
 Set a custom system prompt that will be used by AI models.
 
@@ -364,12 +376,13 @@ Set a custom system prompt that will be used by AI models.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  await pipeshub.platformSettings.updateSystemPrompt({});
+  await pipeshub.platformSettings.setCustomSystemPrompt({});
 
 
 }
@@ -383,22 +396,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { platformSettingsUpdateSystemPrompt } from "pipeshub/funcs/platform-settings-update-system-prompt.js";
+import { platformSettingsSetCustomSystemPrompt } from "pipeshub/funcs/platform-settings-set-custom-system-prompt.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await platformSettingsUpdateSystemPrompt(pipeshub, {});
+  const res = await platformSettingsSetCustomSystemPrompt(pipeshub, {});
   if (res.ok) {
     const { value: result } = res;
     
   } else {
-    console.log("platformSettingsUpdateSystemPrompt failed:", res.error);
+    console.log("platformSettingsSetCustomSystemPrompt failed:", res.error);
   }
 }
 
@@ -435,8 +449,9 @@ Get custom system prompt.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
@@ -459,8 +474,9 @@ import { platformSettingsGetCustomSystemPrompt } from "pipeshub/funcs/platform-s
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {

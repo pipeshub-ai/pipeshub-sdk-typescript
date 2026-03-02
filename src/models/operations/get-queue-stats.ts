@@ -5,31 +5,18 @@
 import * as z from "zod/v4-mini";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
-import * as models from "../index.js";
 
 /**
- * Queue statistics retrieved successfully
+ * Queue statistics retrieved
  */
-export type GetQueueStatsResponse = {
-  success?: boolean | undefined;
-  message?: string | undefined;
-  /**
-   * Aggregate statistics for the crawling job queue
-   */
-  data?: models.QueueStats | undefined;
-};
+export type GetQueueStatsResponse = {};
 
 /** @internal */
 export const GetQueueStatsResponse$inboundSchema: z.ZodMiniType<
   GetQueueStatsResponse,
   unknown
-> = z.object({
-  success: types.optional(types.boolean()),
-  message: types.optional(types.string()),
-  data: types.optional(models.QueueStats$inboundSchema),
-});
+> = z.object({});
 
 export function getQueueStatsResponseFromJSON(
   jsonString: string,

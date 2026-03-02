@@ -1,13 +1,15 @@
-# SmtpConfiguration
+# SMTPConfiguration
 
 ## Overview
 
+Configure SMTP email server for sending notifications and invitations.
+
 ### Available Operations
 
-* [createOrUpdate](#createorupdate) - Create or update SMTP configuration
-* [get](#get) - Get SMTP configuration
+* [createSMTPConfig](#createsmtpconfig) - Create or update SMTP configuration
+* [getSMTPConfig](#getsmtpconfig) - Get SMTP configuration
 
-## createOrUpdate
+## createSMTPConfig
 
 Configure SMTP email server for sending system emails including user invitations, notifications, and password resets.
 
@@ -27,12 +29,13 @@ Configuration is encrypted before storage.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  await pipeshub.smtpConfiguration.createOrUpdate({
+  await pipeshub.smtpConfiguration.createSMTPConfig({
     host: "email-smtp.us-east-1.amazonaws.com",
     port: 587,
     username: "AKIAIOSFODNN7EXAMPLE",
@@ -52,17 +55,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { smtpConfigurationCreateOrUpdate } from "pipeshub/funcs/smtp-configuration-create-or-update.js";
+import { smtpConfigurationCreateSMTPConfig } from "pipeshub/funcs/smtp-configuration-create-smtp-config.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await smtpConfigurationCreateOrUpdate(pipeshub, {
+  const res = await smtpConfigurationCreateSMTPConfig(pipeshub, {
     host: "email-smtp.us-east-1.amazonaws.com",
     port: 587,
     username: "AKIAIOSFODNN7EXAMPLE",
@@ -73,7 +77,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("smtpConfigurationCreateOrUpdate failed:", res.error);
+    console.log("smtpConfigurationCreateSMTPConfig failed:", res.error);
   }
 }
 
@@ -86,12 +90,13 @@ run();
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  await pipeshub.smtpConfiguration.createOrUpdate({
+  await pipeshub.smtpConfiguration.createSMTPConfig({
     host: "smtp.gmail.com",
     port: 587,
     username: "notifications@yourcompany.com",
@@ -111,17 +116,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { smtpConfigurationCreateOrUpdate } from "pipeshub/funcs/smtp-configuration-create-or-update.js";
+import { smtpConfigurationCreateSMTPConfig } from "pipeshub/funcs/smtp-configuration-create-smtp-config.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await smtpConfigurationCreateOrUpdate(pipeshub, {
+  const res = await smtpConfigurationCreateSMTPConfig(pipeshub, {
     host: "smtp.gmail.com",
     port: 587,
     username: "notifications@yourcompany.com",
@@ -132,7 +138,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("smtpConfigurationCreateOrUpdate failed:", res.error);
+    console.log("smtpConfigurationCreateSMTPConfig failed:", res.error);
   }
 }
 
@@ -145,12 +151,13 @@ run();
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  await pipeshub.smtpConfiguration.createOrUpdate({
+  await pipeshub.smtpConfiguration.createSMTPConfig({
     host: "smtp.office365.com",
     port: 587,
     username: "notifications@yourcompany.onmicrosoft.com",
@@ -170,17 +177,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { smtpConfigurationCreateOrUpdate } from "pipeshub/funcs/smtp-configuration-create-or-update.js";
+import { smtpConfigurationCreateSMTPConfig } from "pipeshub/funcs/smtp-configuration-create-smtp-config.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await smtpConfigurationCreateOrUpdate(pipeshub, {
+  const res = await smtpConfigurationCreateSMTPConfig(pipeshub, {
     host: "smtp.office365.com",
     port: 587,
     username: "notifications@yourcompany.onmicrosoft.com",
@@ -191,7 +199,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("smtpConfigurationCreateOrUpdate failed:", res.error);
+    console.log("smtpConfigurationCreateSMTPConfig failed:", res.error);
   }
 }
 
@@ -204,12 +212,13 @@ run();
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  await pipeshub.smtpConfiguration.createOrUpdate({
+  await pipeshub.smtpConfiguration.createSMTPConfig({
     host: "smtp.sendgrid.net",
     port: 587,
     username: "apikey",
@@ -229,17 +238,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { smtpConfigurationCreateOrUpdate } from "pipeshub/funcs/smtp-configuration-create-or-update.js";
+import { smtpConfigurationCreateSMTPConfig } from "pipeshub/funcs/smtp-configuration-create-smtp-config.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await smtpConfigurationCreateOrUpdate(pipeshub, {
+  const res = await smtpConfigurationCreateSMTPConfig(pipeshub, {
     host: "smtp.sendgrid.net",
     port: 587,
     username: "apikey",
@@ -250,7 +260,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("smtpConfigurationCreateOrUpdate failed:", res.error);
+    console.log("smtpConfigurationCreateSMTPConfig failed:", res.error);
   }
 }
 
@@ -276,7 +286,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## get
+## getSMTPConfig
 
 Retrieve the current SMTP server configuration. Password is included in the response for admin users.
 
@@ -287,12 +297,13 @@ Retrieve the current SMTP server configuration. Password is included in the resp
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.smtpConfiguration.get();
+  const result = await pipeshub.smtpConfiguration.getSMTPConfig();
 
   console.log(result);
 }
@@ -306,22 +317,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { smtpConfigurationGet } from "pipeshub/funcs/smtp-configuration-get.js";
+import { smtpConfigurationGetSMTPConfig } from "pipeshub/funcs/smtp-configuration-get-smtp-config.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await smtpConfigurationGet(pipeshub);
+  const res = await smtpConfigurationGetSMTPConfig(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("smtpConfigurationGet failed:", res.error);
+    console.log("smtpConfigurationGetSMTPConfig failed:", res.error);
   }
 }
 

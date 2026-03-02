@@ -3,28 +3,12 @@
  */
 
 import * as z from "zod/v4-mini";
-import { safeParse } from "../../lib/schemas.js";
-import { Result as SafeParseResult } from "../../types/fp.js";
-import * as types from "../../types/primitives.js";
-import { SDKValidationError } from "../errors/sdk-validation-error.js";
-import * as models from "../index.js";
 
 export type GetUserByIdRequest = {
   /**
    * User ID (24-character MongoDB ObjectId)
    */
   id: string;
-};
-
-/**
- * User details retrieved successfully
- */
-export type GetUserByIdResponse = {
-  success?: boolean | undefined;
-  /**
-   * User account in an organization
-   */
-  data?: models.User | undefined;
 };
 
 /** @internal */
@@ -45,24 +29,5 @@ export function getUserByIdRequestToJSON(
 ): string {
   return JSON.stringify(
     GetUserByIdRequest$outboundSchema.parse(getUserByIdRequest),
-  );
-}
-
-/** @internal */
-export const GetUserByIdResponse$inboundSchema: z.ZodMiniType<
-  GetUserByIdResponse,
-  unknown
-> = z.object({
-  success: types.optional(types.boolean()),
-  data: types.optional(models.User$inboundSchema),
-});
-
-export function getUserByIdResponseFromJSON(
-  jsonString: string,
-): SafeParseResult<GetUserByIdResponse, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => GetUserByIdResponse$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetUserByIdResponse' from JSON`,
   );
 }

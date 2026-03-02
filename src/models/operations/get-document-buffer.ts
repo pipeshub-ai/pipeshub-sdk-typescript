@@ -5,20 +5,12 @@
 import * as z from "zod/v4-mini";
 
 export type GetDocumentBufferRequest = {
-  /**
-   * Document ID (24-character MongoDB ObjectId)
-   */
   documentId: string;
-  /**
-   * Version number to retrieve (0-indexed)
-   */
-  version?: number | undefined;
 };
 
 /** @internal */
 export type GetDocumentBufferRequest$Outbound = {
   documentId: string;
-  version?: number | undefined;
 };
 
 /** @internal */
@@ -27,7 +19,6 @@ export const GetDocumentBufferRequest$outboundSchema: z.ZodMiniType<
   GetDocumentBufferRequest
 > = z.object({
   documentId: z.string(),
-  version: z.optional(z.int()),
 });
 
 export function getDocumentBufferRequestToJSON(

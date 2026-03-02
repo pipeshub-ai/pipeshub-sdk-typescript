@@ -6,18 +6,18 @@ Custom AI agents with specialized capabilities and tool integrations
 
 ### Available Operations
 
-* [list](#list) - List agents
-* [create](#create) - Create agent
-* [listTools](#listtools) - List available tools
-* [get](#get) - Get agent
-* [update](#update) - Update agent
-* [delete](#delete) - Delete agent
-* [getPermissions](#getpermissions) - Get agent permissions
-* [updatePermissions](#updatepermissions) - Update agent permissions
-* [share](#share) - Share agent
-* [unshare](#unshare) - Revoke agent access
+* [listAgents](#listagents) - List agents
+* [createAgent](#createagent) - Create agent
+* [listAgentTools](#listagenttools) - List available tools
+* [getAgent](#getagent) - Get agent
+* [updateAgent](#updateagent) - Update agent
+* [deleteAgent](#deleteagent) - Delete agent
+* [getAgentPermissions](#getagentpermissions) - Get agent permissions
+* [updateAgentPermissions](#updateagentpermissions) - Update agent permissions
+* [shareAgent](#shareagent) - Share agent
+* [unshareAgent](#unshareagent) - Unshare an agent
 
-## list
+## listAgents
 
 Retrieve all agents available to the authenticated user.<br><br>
 <b>Overview:</b><br>
@@ -32,12 +32,13 @@ Each agent has unique capabilities defined by its tools and knowledge scope.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.agents.list();
+  const result = await pipeshub.agents.listAgents();
 
   console.log(result);
 }
@@ -51,22 +52,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { agentsList } from "pipeshub/funcs/agents-list.js";
+import { agentsListAgents } from "pipeshub/funcs/agents-list-agents.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await agentsList(pipeshub);
+  const res = await agentsListAgents(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("agentsList failed:", res.error);
+    console.log("agentsListAgents failed:", res.error);
   }
 }
 
@@ -91,7 +93,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## create
+## createAgent
 
 Create a new custom AI agent.<br><br>
 <b>Overview:</b><br>
@@ -120,12 +122,13 @@ be limited to certain knowledge bases.<br><br>
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.agents.create({
+  const result = await pipeshub.agents.createAgent({
     name: "Product Support Agent",
   });
 
@@ -141,24 +144,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { agentsCreate } from "pipeshub/funcs/agents-create.js";
+import { agentsCreateAgent } from "pipeshub/funcs/agents-create-agent.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await agentsCreate(pipeshub, {
+  const res = await agentsCreateAgent(pipeshub, {
     name: "Product Support Agent",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("agentsCreate failed:", res.error);
+    console.log("agentsCreateAgent failed:", res.error);
   }
 }
 
@@ -184,7 +188,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## listTools
+## listAgentTools
 
 Get all tools that can be assigned to agents.<br><br>
 <b>Overview:</b><br>
@@ -206,12 +210,13 @@ has specific inputs and outputs defined by its schema.<br><br>
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.agents.listTools();
+  const result = await pipeshub.agents.listAgentTools();
 
   console.log(result);
 }
@@ -225,22 +230,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { agentsListTools } from "pipeshub/funcs/agents-list-tools.js";
+import { agentsListAgentTools } from "pipeshub/funcs/agents-list-agent-tools.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await agentsListTools(pipeshub);
+  const res = await agentsListAgentTools(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("agentsListTools failed:", res.error);
+    console.log("agentsListAgentTools failed:", res.error);
   }
 }
 
@@ -265,7 +271,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## get
+## getAgent
 
 Retrieve agent details by its unique key.
 
@@ -276,12 +282,13 @@ Retrieve agent details by its unique key.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.agents.get({
+  const result = await pipeshub.agents.getAgent({
     agentKey: "customer-support-agent",
   });
 
@@ -297,24 +304,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { agentsGet } from "pipeshub/funcs/agents-get.js";
+import { agentsGetAgent } from "pipeshub/funcs/agents-get-agent.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await agentsGet(pipeshub, {
+  const res = await agentsGetAgent(pipeshub, {
     agentKey: "customer-support-agent",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("agentsGet failed:", res.error);
+    console.log("agentsGetAgent failed:", res.error);
   }
 }
 
@@ -340,7 +348,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## update
+## updateAgent
 
 Update an existing agent's configuration.<br><br>
 <b>Permissions:</b><br>
@@ -354,12 +362,13 @@ Only the agent creator can update it.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.agents.update({
+  const result = await pipeshub.agents.updateAgent({
     agentKey: "<value>",
     body: {},
   });
@@ -376,17 +385,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { agentsUpdate } from "pipeshub/funcs/agents-update.js";
+import { agentsUpdateAgent } from "pipeshub/funcs/agents-update-agent.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await agentsUpdate(pipeshub, {
+  const res = await agentsUpdateAgent(pipeshub, {
     agentKey: "<value>",
     body: {},
   });
@@ -394,7 +404,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("agentsUpdate failed:", res.error);
+    console.log("agentsUpdateAgent failed:", res.error);
   }
 }
 
@@ -420,7 +430,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## delete
+## deleteAgent
 
 Delete an agent.<br><br>
 <b>Warning:</b><br>
@@ -434,12 +444,13 @@ All conversations with this agent will become inaccessible.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  await pipeshub.agents.delete({
+  await pipeshub.agents.deleteAgent({
     agentKey: "<value>",
   });
 
@@ -455,24 +466,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { agentsDelete } from "pipeshub/funcs/agents-delete.js";
+import { agentsDeleteAgent } from "pipeshub/funcs/agents-delete-agent.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await agentsDelete(pipeshub, {
+  const res = await agentsDeleteAgent(pipeshub, {
     agentKey: "<value>",
   });
   if (res.ok) {
     const { value: result } = res;
     
   } else {
-    console.log("agentsDelete failed:", res.error);
+    console.log("agentsDeleteAgent failed:", res.error);
   }
 }
 
@@ -498,7 +510,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getPermissions
+## getAgentPermissions
 
 Get the current permission configuration for an agent.
 
@@ -509,12 +521,13 @@ Get the current permission configuration for an agent.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.agents.getPermissions({
+  const result = await pipeshub.agents.getAgentPermissions({
     agentKey: "<value>",
   });
 
@@ -530,24 +543,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { agentsGetPermissions } from "pipeshub/funcs/agents-get-permissions.js";
+import { agentsGetAgentPermissions } from "pipeshub/funcs/agents-get-agent-permissions.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await agentsGetPermissions(pipeshub, {
+  const res = await agentsGetAgentPermissions(pipeshub, {
     agentKey: "<value>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("agentsGetPermissions failed:", res.error);
+    console.log("agentsGetAgentPermissions failed:", res.error);
   }
 }
 
@@ -573,7 +587,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## updatePermissions
+## updateAgentPermissions
 
 Update who can access and use the agent.
 
@@ -584,12 +598,13 @@ Update who can access and use the agent.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  await pipeshub.agents.updatePermissions({
+  await pipeshub.agents.updateAgentPermissions({
     agentKey: "<value>",
     body: {},
   });
@@ -606,17 +621,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { agentsUpdatePermissions } from "pipeshub/funcs/agents-update-permissions.js";
+import { agentsUpdateAgentPermissions } from "pipeshub/funcs/agents-update-agent-permissions.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await agentsUpdatePermissions(pipeshub, {
+  const res = await agentsUpdateAgentPermissions(pipeshub, {
     agentKey: "<value>",
     body: {},
   });
@@ -624,7 +640,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("agentsUpdatePermissions failed:", res.error);
+    console.log("agentsUpdateAgentPermissions failed:", res.error);
   }
 }
 
@@ -650,7 +666,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## share
+## shareAgent
 
 Share an agent with specific users.
 
@@ -661,12 +677,13 @@ Share an agent with specific users.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.agents.share({
+  const result = await pipeshub.agents.shareAgent({
     agentKey: "<value>",
     body: {
       userIds: [
@@ -687,17 +704,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { agentsShare } from "pipeshub/funcs/agents-share.js";
+import { agentsShareAgent } from "pipeshub/funcs/agents-share-agent.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await agentsShare(pipeshub, {
+  const res = await agentsShareAgent(pipeshub, {
     agentKey: "<value>",
     body: {
       userIds: [
@@ -709,7 +727,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("agentsShare failed:", res.error);
+    console.log("agentsShareAgent failed:", res.error);
   }
 }
 
@@ -735,9 +753,10 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## unshare
+## unshareAgent
 
-Remove sharing access from specified users.
+Revoke sharing for an agent, removing access for specified users or teams.
+
 
 ### Example Usage
 
@@ -746,16 +765,15 @@ Remove sharing access from specified users.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.agents.unshare({
+  const result = await pipeshub.agents.unshareAgent({
     agentKey: "<value>",
-    body: {
-      userIds: [],
-    },
+    body: {},
   });
 
   console.log(result);
@@ -770,27 +788,26 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { agentsUnshare } from "pipeshub/funcs/agents-unshare.js";
+import { agentsUnshareAgent } from "pipeshub/funcs/agents-unshare-agent.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await agentsUnshare(pipeshub, {
+  const res = await agentsUnshareAgent(pipeshub, {
     agentKey: "<value>",
-    body: {
-      userIds: [],
-    },
+    body: {},
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("agentsUnshare failed:", res.error);
+    console.log("agentsUnshareAgent failed:", res.error);
   }
 }
 
@@ -808,7 +825,7 @@ run();
 
 ### Response
 
-**Promise\<[models.Agent](../../models/agent.md)\>**
+**Promise\<[operations.UnshareAgentResponse](../../models/operations/unshare-agent-response.md)\>**
 
 ### Errors
 

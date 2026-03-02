@@ -2,13 +2,15 @@
 
 ## Overview
 
+Dynamic filter options for selecting which data to sync
+
 ### Available Operations
 
-* [getOptions](#getoptions) - Get filter options
-* [save](#save) - Save filter selections
-* [getFieldOptions](#getfieldoptions) - Get dynamic filter options
+* [getConnectorFilters](#getconnectorfilters) - Get filter options
+* [saveConnectorFilters](#saveconnectorfilters) - Save filter selections
+* [getFilterFieldOptions](#getfilterfieldoptions) - Get dynamic filter options
 
-## getOptions
+## getConnectorFilters
 
 Get available filter options for a connector.<br><br>
 <b>Overview:</b><br>
@@ -27,12 +29,13 @@ options are loaded separately via the filter options endpoint.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.connectorFilters.getOptions({
+  const result = await pipeshub.connectorFilters.getConnectorFilters({
     connectorId: "<id>",
   });
 
@@ -48,24 +51,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { connectorFiltersGetOptions } from "pipeshub/funcs/connector-filters-get-options.js";
+import { connectorFiltersGetConnectorFilters } from "pipeshub/funcs/connector-filters-get-connector-filters.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await connectorFiltersGetOptions(pipeshub, {
+  const res = await connectorFiltersGetConnectorFilters(pipeshub, {
     connectorId: "<id>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("connectorFiltersGetOptions failed:", res.error);
+    console.log("connectorFiltersGetConnectorFilters failed:", res.error);
   }
 }
 
@@ -91,7 +95,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## save
+## saveConnectorFilters
 
 Save the user's filter selections for a connector.<br><br>
 <b>Overview:</b><br>
@@ -106,12 +110,13 @@ selected values. These determine what data will be synced.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.connectorFilters.save({
+  const result = await pipeshub.connectorFilters.saveConnectorFilters({
     connectorId: "<id>",
     body: {
       filters: {
@@ -146,17 +151,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { connectorFiltersSave } from "pipeshub/funcs/connector-filters-save.js";
+import { connectorFiltersSaveConnectorFilters } from "pipeshub/funcs/connector-filters-save-connector-filters.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await connectorFiltersSave(pipeshub, {
+  const res = await connectorFiltersSaveConnectorFilters(pipeshub, {
     connectorId: "<id>",
     body: {
       filters: {
@@ -182,7 +188,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("connectorFiltersSave failed:", res.error);
+    console.log("connectorFiltersSaveConnectorFilters failed:", res.error);
   }
 }
 
@@ -208,7 +214,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getFieldOptions
+## getFilterFieldOptions
 
 Get options for a dynamic filter field with pagination.<br><br>
 <b>Overview:</b><br>
@@ -229,12 +235,13 @@ from the connected service. This supports pagination and search.<br><br>
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.connectorFilters.getFieldOptions({
+  const result = await pipeshub.connectorFilters.getFilterFieldOptions({
     connectorId: "<id>",
     filterKey: "folders",
   });
@@ -251,17 +258,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { connectorFiltersGetFieldOptions } from "pipeshub/funcs/connector-filters-get-field-options.js";
+import { connectorFiltersGetFilterFieldOptions } from "pipeshub/funcs/connector-filters-get-filter-field-options.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await connectorFiltersGetFieldOptions(pipeshub, {
+  const res = await connectorFiltersGetFilterFieldOptions(pipeshub, {
     connectorId: "<id>",
     filterKey: "folders",
   });
@@ -269,7 +277,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("connectorFiltersGetFieldOptions failed:", res.error);
+    console.log("connectorFiltersGetFilterFieldOptions failed:", res.error);
   }
 }
 

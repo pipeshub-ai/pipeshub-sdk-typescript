@@ -8,7 +8,7 @@ Feature flags retrieved
 import { GetAvailableFeatureFlagsResponse } from "pipeshub/models/operations";
 
 let value: GetAvailableFeatureFlagsResponse = {
-  featureFlags: [
+  flags: [
     {
       key: "ENABLE_BETA_CONNECTORS",
       label: "Enable Beta Connectors",
@@ -21,4 +21,4 @@ let value: GetAvailableFeatureFlagsResponse = {
 
 | Field                                                | Type                                                 | Required                                             | Description                                          |
 | ---------------------------------------------------- | ---------------------------------------------------- | ---------------------------------------------------- | ---------------------------------------------------- |
-| `featureFlags`                                       | [models.FeatureFlag](../../models/feature-flag.md)[] | :heavy_minus_sign:                                   | N/A                                                  |
+| `flags`                                              | [models.FeatureFlag](../../models/feature-flag.md)[] | :heavy_minus_sign:                                   | N/A                                                  |

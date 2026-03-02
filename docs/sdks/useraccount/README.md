@@ -2,19 +2,20 @@
 
 ## Overview
 
+User authentication including multi-step MFA, password reset, OTP login, and token management
+
 ### Available Operations
 
-* [initializeAuth](#initializeauth) - Initialize authentication session
+* [initAuth](#initauth) - Initialize authentication session
 * [authenticate](#authenticate) - Authenticate user with credentials
 * [generateLoginOtp](#generateloginotp) - Generate and send OTP for login
-* [resetPassword](#resetpassword) - Reset password (authenticated user)
 * [forgotPassword](#forgotpassword) - Request password reset email
 * [resetPasswordWithToken](#resetpasswordwithtoken) - Reset password with email token
-* [checkPasswordStatus](#checkpasswordstatus) - Check if user has password set (Internal)
-* [refresh](#refresh) - Refresh access token
+* [refreshToken](#refreshtoken) - Refresh access token
 * [logout](#logout) - Logout current session
+* [resetPassword](#resetpassword) - Reset password
 
-## initializeAuth
+## initAuth
 
 Initialize an authentication session for a user by email address.
 This is the first step in the multi-step authentication flow.
@@ -41,12 +42,10 @@ authentication steps. Each step completion returns the next step's allowed metho
 ```typescript
 import { Pipeshub } from "pipeshub";
 
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new Pipeshub();
 
 async function run() {
-  const result = await pipeshub.userAccount.initializeAuth({
+  const result = await pipeshub.userAccount.initAuth({
     email: "user@example.com",
   });
 
@@ -62,23 +61,21 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { userAccountInitializeAuth } from "pipeshub/funcs/user-account-initialize-auth.js";
+import { userAccountInitAuth } from "pipeshub/funcs/user-account-init-auth.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new PipeshubCore();
 
 async function run() {
-  const res = await userAccountInitializeAuth(pipeshub, {
+  const res = await userAccountInitAuth(pipeshub, {
     email: "user@example.com",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("userAccountInitializeAuth failed:", res.error);
+    console.log("userAccountInitAuth failed:", res.error);
   }
 }
 
@@ -138,9 +135,7 @@ After completing all steps:<br>
 ```typescript
 import { Pipeshub } from "pipeshub";
 
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new Pipeshub();
 
 async function run() {
   const result = await pipeshub.userAccount.authenticate({
@@ -169,9 +164,7 @@ import { userAccountAuthenticate } from "pipeshub/funcs/user-account-authenticat
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new PipeshubCore();
 
 async function run() {
   const res = await userAccountAuthenticate(pipeshub, {
@@ -238,9 +231,7 @@ If Cloudflare Turnstile is enabled, include <code>cf-turnstile-response</code> i
 ```typescript
 import { Pipeshub } from "pipeshub";
 
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new Pipeshub();
 
 async function run() {
   const result = await pipeshub.userAccount.generateLoginOtp({
@@ -263,9 +254,7 @@ import { userAccountGenerateLoginOtp } from "pipeshub/funcs/user-account-generat
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new PipeshubCore();
 
 async function run() {
   const res = await userAccountGenerateLoginOtp(pipeshub, {
@@ -302,96 +291,6 @@ run();
 | errors.AuthError            | 400, 403, 404               | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## resetPassword
-
-Reset password for an authenticated user. Requires the current password for verification.
-<br><br>
-<b>Password Requirements:</b><br>
-- Minimum 8 characters<br>
-- At least 1 uppercase letter (A-Z)<br>
-- At least 1 lowercase letter (a-z)<br>
-- At least 1 number (0-9)<br>
-- At least 1 special character (#?!@$%^&*-)
-<br><br>
-<b>Security Notes:</b><br>
-- A new access token is returned (old tokens are invalidated)<br>
-- CAPTCHA may be required if enabled (pass <code>cf-turnstile-response</code>)
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="resetPassword" method="post" path="/userAccount/password/reset" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.userAccount.resetPassword({
-    currentPassword: "fR5Alu28cPCa984",
-    newPassword: "vcFGz9GLaOB88kV",
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { userAccountResetPassword } from "pipeshub/funcs/user-account-reset-password.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await userAccountResetPassword(pipeshub, {
-    currentPassword: "fR5Alu28cPCa984",
-    newPassword: "vcFGz9GLaOB88kV",
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("userAccountResetPassword failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [models.PasswordResetRequest](../../models/password-reset-request.md)                                                                                                          | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[models.PasswordResetResponse](../../models/password-reset-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.AuthError            | 400                         | application/json            |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
 ## forgotPassword
 
 Send a password reset link to the user's email.
@@ -406,9 +305,7 @@ The link contains a time-limited token that can be used to reset the password.
 ```typescript
 import { Pipeshub } from "pipeshub";
 
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new Pipeshub();
 
 async function run() {
   const result = await pipeshub.userAccount.forgotPassword({
@@ -431,9 +328,7 @@ import { userAccountForgotPassword } from "pipeshub/funcs/user-account-forgot-pa
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new PipeshubCore();
 
 async function run() {
   const res = await userAccountForgotPassword(pipeshub, {
@@ -491,9 +386,7 @@ Reset password using a token received via email from the forgot password flow.
 ```typescript
 import { Pipeshub } from "pipeshub";
 
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new Pipeshub();
 
 async function run() {
   const result = await pipeshub.userAccount.resetPasswordWithToken({
@@ -518,9 +411,7 @@ import { userAccountResetPasswordWithToken } from "pipeshub/funcs/user-account-r
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new PipeshubCore();
 
 async function run() {
   const res = await userAccountResetPasswordWithToken(pipeshub, {
@@ -560,84 +451,7 @@ run();
 | errors.AuthError            | 400                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## checkPasswordStatus
-
-Internal endpoint to check if a user has a password configured.
-Used by other services to determine authentication capabilities.
-<br><br>
-<b>Note:</b> This is an internal service-to-service endpoint.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="checkPasswordStatus" method="get" path="/userAccount/internal/password/check" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-});
-
-async function run() {
-  const result = await pipeshub.userAccount.checkPasswordStatus({
-    scopedToken: process.env["PIPESHUB_SCOPED_TOKEN"] ?? "",
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { userAccountCheckPasswordStatus } from "pipeshub/funcs/user-account-check-password-status.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-});
-
-async function run() {
-  const res = await userAccountCheckPasswordStatus(pipeshub, {
-    scopedToken: process.env["PIPESHUB_SCOPED_TOKEN"] ?? "",
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("userAccountCheckPasswordStatus failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `security`                                                                                                                                                                     | [operations.CheckPasswordStatusSecurity](../../models/operations/check-password-status-security.md)                                                                            | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.CheckPasswordStatusResponse](../../models/operations/check-password-status-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## refresh
+## refreshToken
 
 Get a new access token using a valid refresh token.
 <br><br>
@@ -661,12 +475,10 @@ Get a new access token using a valid refresh token.
 ```typescript
 import { Pipeshub } from "pipeshub";
 
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new Pipeshub();
 
 async function run() {
-  const result = await pipeshub.userAccount.refresh({
+  const result = await pipeshub.userAccount.refreshToken({
     scopedToken: process.env["PIPESHUB_SCOPED_TOKEN"] ?? "",
   });
 
@@ -682,23 +494,21 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { userAccountRefresh } from "pipeshub/funcs/user-account-refresh.js";
+import { userAccountRefreshToken } from "pipeshub/funcs/user-account-refresh-token.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new PipeshubCore();
 
 async function run() {
-  const res = await userAccountRefresh(pipeshub, {
+  const res = await userAccountRefreshToken(pipeshub, {
     scopedToken: process.env["PIPESHUB_SCOPED_TOKEN"] ?? "",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("userAccountRefresh failed:", res.error);
+    console.log("userAccountRefreshToken failed:", res.error);
   }
 }
 
@@ -744,8 +554,9 @@ Log out the current user session and invalidate tokens.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
@@ -768,8 +579,9 @@ import { userAccountLogout } from "pipeshub/funcs/user-account-logout.js";
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
@@ -802,3 +614,86 @@ run();
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
+## resetPassword
+
+Reset the password for the currently authenticated user.<br><br>
+<b>Overview:</b><br>
+Allows a logged-in user to change their password by providing the current password and a new password.
+
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="resetPassword" method="post" path="/userAccount/password/reset" -->
+```typescript
+import { Pipeshub } from "pipeshub";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.userAccount.resetPassword({
+    currentPassword: "fR5Alu28cPCa984",
+    newPassword: "vcFGz9GLaOB88kV",
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "pipeshub/core.js";
+import { userAccountResetPassword } from "pipeshub/funcs/user-account-reset-password.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
+});
+
+async function run() {
+  const res = await userAccountResetPassword(pipeshub, {
+    currentPassword: "fR5Alu28cPCa984",
+    newPassword: "vcFGz9GLaOB88kV",
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("userAccountResetPassword failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.ResetPasswordRequest](../../models/operations/reset-password-request.md)                                                                                           | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[operations.ResetPasswordResponse](../../models/operations/reset-password-response.md)\>**
+
+### Errors
+
+| Error Type                          | Status Code                         | Content Type                        |
+| ----------------------------------- | ----------------------------------- | ----------------------------------- |
+| errors.ResetPasswordBadRequestError | 400                                 | application/json                    |
+| errors.PipeshubDefaultError         | 4XX, 5XX                            | \*/\*                               |

@@ -6,18 +6,18 @@ Organization management operations
 
 ### Available Operations
 
-* [checkExists](#checkexists) - Check if organization exists
-* [create](#create) - Create organization
-* [getCurrent](#getcurrent) - Get current organization
-* [update](#update) - Update organization
-* [delete](#delete) - Delete organization
-* [uploadLogo](#uploadlogo) - Upload organization logo
-* [getLogo](#getlogo) - Get organization logo
-* [deleteLogo](#deletelogo) - Delete organization logo
+* [checkOrgExists](#checkorgexists) - Check if organization exists
+* [createOrganization](#createorganization) - Create organization
+* [getCurrentOrganization](#getcurrentorganization) - Get current organization
+* [updateOrganization](#updateorganization) - Update organization
+* [deleteOrganization](#deleteorganization) - Delete organization
+* [uploadOrganizationLogo](#uploadorganizationlogo) - Upload organization logo
+* [getOrganizationLogo](#getorganizationlogo) - Get organization logo
+* [deleteOrganizationLogo](#deleteorganizationlogo) - Delete organization logo
 * [getOnboardingStatus](#getonboardingstatus) - Get onboarding status
 * [updateOnboardingStatus](#updateonboardingstatus) - Update onboarding status
 
-## checkExists
+## checkOrgExists
 
 Check if any organization has been created in the system. This is typically the first API call made during initial setup.<br><br>
 <b>Overview:</b><br>
@@ -42,12 +42,10 @@ This public endpoint determines whether the system has been initialized with an 
 ```typescript
 import { Pipeshub } from "pipeshub";
 
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new Pipeshub();
 
 async function run() {
-  const result = await pipeshub.organizations.checkExists();
+  const result = await pipeshub.organizations.checkOrgExists();
 
   console.log(result);
 }
@@ -61,21 +59,19 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { organizationsCheckExists } from "pipeshub/funcs/organizations-check-exists.js";
+import { organizationsCheckOrgExists } from "pipeshub/funcs/organizations-check-org-exists.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new PipeshubCore();
 
 async function run() {
-  const res = await organizationsCheckExists(pipeshub);
+  const res = await organizationsCheckOrgExists(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("organizationsCheckExists failed:", res.error);
+    console.log("organizationsCheckOrgExists failed:", res.error);
   }
 }
 
@@ -100,7 +96,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## create
+## createOrganization
 
 Create a new organization and its first admin user. This is the initial setup endpoint for new PipesHub installations.<br><br>
 <b>Overview:</b><br>
@@ -140,12 +136,10 @@ This endpoint performs the complete initial setup of a PipesHub instance, includ
 ```typescript
 import { Pipeshub } from "pipeshub";
 
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new Pipeshub();
 
 async function run() {
-  const result = await pipeshub.organizations.create({
+  const result = await pipeshub.organizations.createOrganization({
     accountType: "business",
     shortName: "Acme",
     registeredName: "Acme Corporation Inc.",
@@ -166,16 +160,14 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { organizationsCreate } from "pipeshub/funcs/organizations-create.js";
+import { organizationsCreateOrganization } from "pipeshub/funcs/organizations-create-organization.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new PipeshubCore();
 
 async function run() {
-  const res = await organizationsCreate(pipeshub, {
+  const res = await organizationsCreateOrganization(pipeshub, {
     accountType: "business",
     shortName: "Acme",
     registeredName: "Acme Corporation Inc.",
@@ -187,7 +179,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("organizationsCreate failed:", res.error);
+    console.log("organizationsCreateOrganization failed:", res.error);
   }
 }
 
@@ -213,7 +205,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getCurrent
+## getCurrentOrganization
 
 Retrieve details about the authenticated user's organization.<br><br>
 <b>Overview:</b><br>
@@ -244,12 +236,13 @@ All authenticated users can access this endpoint to view their organization's de
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.organizations.getCurrent();
+  const result = await pipeshub.organizations.getCurrentOrganization();
 
   console.log(result);
 }
@@ -263,22 +256,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { organizationsGetCurrent } from "pipeshub/funcs/organizations-get-current.js";
+import { organizationsGetCurrentOrganization } from "pipeshub/funcs/organizations-get-current-organization.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await organizationsGetCurrent(pipeshub);
+  const res = await organizationsGetCurrentOrganization(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("organizationsGetCurrent failed:", res.error);
+    console.log("organizationsGetCurrentOrganization failed:", res.error);
   }
 }
 
@@ -295,7 +289,7 @@ run();
 
 ### Response
 
-**Promise\<[operations.GetCurrentOrganizationResponse](../../models/operations/get-current-organization-response.md)\>**
+**Promise\<[models.Organization](../../models/organization.md)\>**
 
 ### Errors
 
@@ -303,7 +297,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## update
+## updateOrganization
 
 Update organization profile and settings information.<br><br>
 <b>Overview:</b><br>
@@ -342,12 +336,13 @@ This endpoint allows administrators to update the organization's profile informa
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.organizations.update({
+  const result = await pipeshub.organizations.updateOrganization({
     registeredName: "Acme Corporation Inc.",
     shortName: "Acme Corp",
     phoneNumber: "+15551234567",
@@ -365,17 +360,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { organizationsUpdate } from "pipeshub/funcs/organizations-update.js";
+import { organizationsUpdateOrganization } from "pipeshub/funcs/organizations-update-organization.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await organizationsUpdate(pipeshub, {
+  const res = await organizationsUpdateOrganization(pipeshub, {
     registeredName: "Acme Corporation Inc.",
     shortName: "Acme Corp",
     phoneNumber: "+15551234567",
@@ -384,7 +380,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("organizationsUpdate failed:", res.error);
+    console.log("organizationsUpdateOrganization failed:", res.error);
   }
 }
 
@@ -410,7 +406,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## delete
+## deleteOrganization
 
 Permanently delete an organization and all associated data.<br><br>
 <b>WARNING:</b> This action is <b>irreversible</b>.<br><br>
@@ -436,12 +432,13 @@ Permanently delete an organization and all associated data.<br><br>
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.organizations.delete({
+  const result = await pipeshub.organizations.deleteOrganization({
     confirm: "DELETE",
   });
 
@@ -457,24 +454,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { organizationsDelete } from "pipeshub/funcs/organizations-delete.js";
+import { organizationsDeleteOrganization } from "pipeshub/funcs/organizations-delete-organization.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await organizationsDelete(pipeshub, {
+  const res = await organizationsDeleteOrganization(pipeshub, {
     confirm: "DELETE",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("organizationsDelete failed:", res.error);
+    console.log("organizationsDeleteOrganization failed:", res.error);
   }
 }
 
@@ -500,7 +498,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## uploadLogo
+## uploadOrganizationLogo
 
 Upload or update the organization's logo image.<br><br>
 <b>Supported Formats:</b><br>
@@ -531,12 +529,13 @@ import { openAsBlob } from "node:fs";
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.organizations.uploadLogo({
+  const result = await pipeshub.organizations.uploadOrganizationLogo({
     logo: await openAsBlob("example.file"),
   });
 
@@ -553,24 +552,25 @@ The standalone function version of this method:
 ```typescript
 import { openAsBlob } from "node:fs";
 import { PipeshubCore } from "pipeshub/core.js";
-import { organizationsUploadLogo } from "pipeshub/funcs/organizations-upload-logo.js";
+import { organizationsUploadOrganizationLogo } from "pipeshub/funcs/organizations-upload-organization-logo.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await organizationsUploadLogo(pipeshub, {
+  const res = await organizationsUploadOrganizationLogo(pipeshub, {
     logo: await openAsBlob("example.file"),
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("organizationsUploadLogo failed:", res.error);
+    console.log("organizationsUploadOrganizationLogo failed:", res.error);
   }
 }
 
@@ -596,7 +596,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getLogo
+## getOrganizationLogo
 
 Retrieve the organization's logo image or URL.<br><br>
 <b>Response Formats:</b><br>
@@ -619,12 +619,13 @@ Retrieve the organization's logo image or URL.<br><br>
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.organizations.getLogo();
+  const result = await pipeshub.organizations.getOrganizationLogo();
 
   console.log(result);
 }
@@ -638,22 +639,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { organizationsGetLogo } from "pipeshub/funcs/organizations-get-logo.js";
+import { organizationsGetOrganizationLogo } from "pipeshub/funcs/organizations-get-organization-logo.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await organizationsGetLogo(pipeshub);
+  const res = await organizationsGetOrganizationLogo(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("organizationsGetLogo failed:", res.error);
+    console.log("organizationsGetOrganizationLogo failed:", res.error);
   }
 }
 
@@ -678,7 +680,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## deleteLogo
+## deleteOrganizationLogo
 
 Remove the organization's custom logo.<br><br>
 <b>Behavior:</b><br>
@@ -695,12 +697,13 @@ Remove the organization's custom logo.<br><br>
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.organizations.deleteLogo();
+  const result = await pipeshub.organizations.deleteOrganizationLogo();
 
   console.log(result);
 }
@@ -714,22 +717,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { organizationsDeleteLogo } from "pipeshub/funcs/organizations-delete-logo.js";
+import { organizationsDeleteOrganizationLogo } from "pipeshub/funcs/organizations-delete-organization-logo.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await organizationsDeleteLogo(pipeshub);
+  const res = await organizationsDeleteOrganizationLogo(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("organizationsDeleteLogo failed:", res.error);
+    console.log("organizationsDeleteOrganizationLogo failed:", res.error);
   }
 }
 
@@ -780,8 +784,9 @@ Retrieve the organization's onboarding progress and status.<br><br>
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
@@ -804,8 +809,9 @@ import { organizationsGetOnboardingStatus } from "pipeshub/funcs/organizations-g
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
@@ -862,8 +868,9 @@ Update the organization's onboarding progress.<br><br>
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
@@ -889,8 +896,9 @@ import { organizationsUpdateOnboardingStatus } from "pipeshub/funcs/organization
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {

@@ -2,15 +2,17 @@
 
 ## Overview
 
+Reusable templates for creating AI agents with predefined configurations
+
 ### Available Operations
 
-* [list](#list) - List agent templates
-* [create](#create) - Create agent template
-* [get](#get) - Get agent template
-* [update](#update) - Update agent template
-* [delete](#delete) - Delete agent template
+* [listAgentTemplates](#listagenttemplates) - List agent templates
+* [createAgentTemplate](#createagenttemplate) - Create agent template
+* [getAgentTemplate](#getagenttemplate) - Get agent template
+* [updateAgentTemplate](#updateagenttemplate) - Update agent template
+* [deleteAgentTemplate](#deleteagenttemplate) - Delete agent template
 
-## list
+## listAgentTemplates
 
 Retrieve all available agent templates.<br><br>
 <b>Overview:</b><br>
@@ -31,12 +33,13 @@ and configuration schemas.<br><br>
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.agentTemplates.list();
+  const result = await pipeshub.agentTemplates.listAgentTemplates();
 
   console.log(result);
 }
@@ -50,22 +53,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { agentTemplatesList } from "pipeshub/funcs/agent-templates-list.js";
+import { agentTemplatesListAgentTemplates } from "pipeshub/funcs/agent-templates-list-agent-templates.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await agentTemplatesList(pipeshub);
+  const res = await agentTemplatesListAgentTemplates(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("agentTemplatesList failed:", res.error);
+    console.log("agentTemplatesListAgentTemplates failed:", res.error);
   }
 }
 
@@ -90,7 +94,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## create
+## createAgentTemplate
 
 Create a new reusable agent template.<br><br>
 <b>Overview:</b><br>
@@ -111,12 +115,13 @@ system prompts, tool recommendations, and customization options.<br><br>
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.agentTemplates.create({
+  const result = await pipeshub.agentTemplates.createAgentTemplate({
     name: "Customer Support Agent",
     category: "Support",
   });
@@ -133,17 +138,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { agentTemplatesCreate } from "pipeshub/funcs/agent-templates-create.js";
+import { agentTemplatesCreateAgentTemplate } from "pipeshub/funcs/agent-templates-create-agent-template.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await agentTemplatesCreate(pipeshub, {
+  const res = await agentTemplatesCreateAgentTemplate(pipeshub, {
     name: "Customer Support Agent",
     category: "Support",
   });
@@ -151,7 +157,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("agentTemplatesCreate failed:", res.error);
+    console.log("agentTemplatesCreateAgentTemplate failed:", res.error);
   }
 }
 
@@ -177,7 +183,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## get
+## getAgentTemplate
 
 Retrieve a specific agent template by ID.
 
@@ -188,12 +194,13 @@ Retrieve a specific agent template by ID.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.agentTemplates.get({
+  const result = await pipeshub.agentTemplates.getAgentTemplate({
     templateId: "<id>",
   });
 
@@ -209,24 +216,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { agentTemplatesGet } from "pipeshub/funcs/agent-templates-get.js";
+import { agentTemplatesGetAgentTemplate } from "pipeshub/funcs/agent-templates-get-agent-template.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await agentTemplatesGet(pipeshub, {
+  const res = await agentTemplatesGetAgentTemplate(pipeshub, {
     templateId: "<id>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("agentTemplatesGet failed:", res.error);
+    console.log("agentTemplatesGetAgentTemplate failed:", res.error);
   }
 }
 
@@ -252,7 +260,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## update
+## updateAgentTemplate
 
 Update an existing agent template.<br><br>
 <b>Permissions:</b><br>
@@ -266,12 +274,13 @@ Only the template creator can update it.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.agentTemplates.update({
+  const result = await pipeshub.agentTemplates.updateAgentTemplate({
     templateId: "<id>",
     body: {},
   });
@@ -288,17 +297,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { agentTemplatesUpdate } from "pipeshub/funcs/agent-templates-update.js";
+import { agentTemplatesUpdateAgentTemplate } from "pipeshub/funcs/agent-templates-update-agent-template.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await agentTemplatesUpdate(pipeshub, {
+  const res = await agentTemplatesUpdateAgentTemplate(pipeshub, {
     templateId: "<id>",
     body: {},
   });
@@ -306,7 +316,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("agentTemplatesUpdate failed:", res.error);
+    console.log("agentTemplatesUpdateAgentTemplate failed:", res.error);
   }
 }
 
@@ -332,7 +342,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## delete
+## deleteAgentTemplate
 
 Delete an agent template.<br><br>
 <b>Note:</b><br>
@@ -346,12 +356,13 @@ Existing agents created from this template are not affected.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  await pipeshub.agentTemplates.delete({
+  await pipeshub.agentTemplates.deleteAgentTemplate({
     templateId: "<id>",
   });
 
@@ -367,24 +378,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { agentTemplatesDelete } from "pipeshub/funcs/agent-templates-delete.js";
+import { agentTemplatesDeleteAgentTemplate } from "pipeshub/funcs/agent-templates-delete-agent-template.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await agentTemplatesDelete(pipeshub, {
+  const res = await agentTemplatesDeleteAgentTemplate(pipeshub, {
     templateId: "<id>",
   });
   if (res.ok) {
     const { value: result } = res;
     
   } else {
-    console.log("agentTemplatesDelete failed:", res.error);
+    console.log("agentTemplatesDeleteAgentTemplate failed:", res.error);
   }
 }
 

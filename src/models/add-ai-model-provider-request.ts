@@ -30,11 +30,11 @@ export type AddAIModelProviderRequestConfiguration = {
    */
   deploymentName?: string | undefined;
   /**
-   * AWS access key (Bedrock)
+   * AWS access key (Bedrock). Optional - omit to use IAM role credentials.
    */
   awsAccessKeyId?: string | undefined;
   /**
-   * AWS secret key (Bedrock)
+   * AWS secret key (Bedrock). Optional - omit to use IAM role credentials.
    */
   awsAccessSecretKey?: string | undefined;
   /**

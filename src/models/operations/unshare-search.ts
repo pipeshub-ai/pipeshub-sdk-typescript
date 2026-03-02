@@ -3,25 +3,39 @@
  */
 
 import * as z from "zod/v4-mini";
+import { safeParse } from "../../lib/schemas.js";
+import { Result as SafeParseResult } from "../../types/fp.js";
+import * as types from "../../types/primitives.js";
+import { SDKValidationError } from "../errors/sdk-validation-error.js";
 
 /**
- * Request body for Revoke search access
+ * Request payload
  */
 export type UnshareSearchRequestBody = {
-  userIds: Array<string>;
+  userIds?: Array<string> | undefined;
 };
 
 export type UnshareSearchRequest = {
+  /**
+   * Unique search identifier
+   */
   searchId: string;
   /**
-   * Request body for Revoke search access
+   * Request payload
    */
   body: UnshareSearchRequestBody;
 };
 
+/**
+ * Search unshared successfully
+ */
+export type UnshareSearchResponse = {
+  message?: string | undefined;
+};
+
 /** @internal */
 export type UnshareSearchRequestBody$Outbound = {
-  userIds: Array<string>;
+  userIds?: Array<string> | undefined;
 };
 
 /** @internal */
@@ -29,7 +43,7 @@ export const UnshareSearchRequestBody$outboundSchema: z.ZodMiniType<
   UnshareSearchRequestBody$Outbound,
   UnshareSearchRequestBody
 > = z.object({
-  userIds: z.array(z.string()),
+  userIds: z.optional(z.array(z.string())),
 });
 
 export function unshareSearchRequestBodyToJSON(
@@ -60,5 +74,23 @@ export function unshareSearchRequestToJSON(
 ): string {
   return JSON.stringify(
     UnshareSearchRequest$outboundSchema.parse(unshareSearchRequest),
+  );
+}
+
+/** @internal */
+export const UnshareSearchResponse$inboundSchema: z.ZodMiniType<
+  UnshareSearchResponse,
+  unknown
+> = z.object({
+  message: types.optional(types.string()),
+});
+
+export function unshareSearchResponseFromJSON(
+  jsonString: string,
+): SafeParseResult<UnshareSearchResponse, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => UnshareSearchResponse$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'UnshareSearchResponse' from JSON`,
   );
 }

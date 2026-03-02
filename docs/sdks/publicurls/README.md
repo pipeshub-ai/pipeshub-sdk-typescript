@@ -1,15 +1,17 @@
-# PublicUrls
+# PublicURLs
 
 ## Overview
 
+Configure public URLs for frontend application and connector callbacks.
+
 ### Available Operations
 
-* [setFrontendUrl](#setfrontendurl) - Set frontend public URL
-* [getFrontend](#getfrontend) - Get frontend public URL
-* [setConnector](#setconnector) - Set connector public URL
-* [getConnector](#getconnector) - Get connector public URL
+* [setFrontendPublicUrl](#setfrontendpublicurl) - Set frontend public URL
+* [getFrontendPublicUrl](#getfrontendpublicurl) - Get frontend public URL
+* [setConnectorPublicUrl](#setconnectorpublicurl) - Set connector public URL
+* [getConnectorPublicUrl](#getconnectorpublicurl) - Get connector public URL
 
-## setFrontendUrl
+## setFrontendPublicUrl
 
 Configure the public URL where the frontend application is accessible. Used for OAuth redirects and email links.
 
@@ -20,12 +22,13 @@ Configure the public URL where the frontend application is accessible. Used for 
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  await pipeshub.publicUrls.setFrontendUrl({
+  await pipeshub.publicURLs.setFrontendPublicUrl({
     url: "https://app.example.com",
   });
 
@@ -41,24 +44,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { publicUrlsSetFrontendUrl } from "pipeshub/funcs/public-urls-set-frontend-url.js";
+import { publicURLsSetFrontendPublicUrl } from "pipeshub/funcs/public-ur-ls-set-frontend-public-url.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await publicUrlsSetFrontendUrl(pipeshub, {
+  const res = await publicURLsSetFrontendPublicUrl(pipeshub, {
     url: "https://app.example.com",
   });
   if (res.ok) {
     const { value: result } = res;
     
   } else {
-    console.log("publicUrlsSetFrontendUrl failed:", res.error);
+    console.log("publicURLsSetFrontendPublicUrl failed:", res.error);
   }
 }
 
@@ -84,7 +88,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getFrontend
+## getFrontendPublicUrl
 
 Get frontend public URL.
 
@@ -95,12 +99,13 @@ Get frontend public URL.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.publicUrls.getFrontend();
+  const result = await pipeshub.publicURLs.getFrontendPublicUrl();
 
   console.log(result);
 }
@@ -114,22 +119,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { publicUrlsGetFrontend } from "pipeshub/funcs/public-urls-get-frontend.js";
+import { publicURLsGetFrontendPublicUrl } from "pipeshub/funcs/public-ur-ls-get-frontend-public-url.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await publicUrlsGetFrontend(pipeshub);
+  const res = await publicURLsGetFrontendPublicUrl(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("publicUrlsGetFrontend failed:", res.error);
+    console.log("publicURLsGetFrontendPublicUrl failed:", res.error);
   }
 }
 
@@ -154,7 +160,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## setConnector
+## setConnectorPublicUrl
 
 Configure the public URL for connector OAuth callbacks.
 
@@ -165,12 +171,13 @@ Configure the public URL for connector OAuth callbacks.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  await pipeshub.publicUrls.setConnector({
+  await pipeshub.publicURLs.setConnectorPublicUrl({
     url: "https://app.example.com",
   });
 
@@ -186,24 +193,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { publicUrlsSetConnector } from "pipeshub/funcs/public-urls-set-connector.js";
+import { publicURLsSetConnectorPublicUrl } from "pipeshub/funcs/public-ur-ls-set-connector-public-url.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await publicUrlsSetConnector(pipeshub, {
+  const res = await publicURLsSetConnectorPublicUrl(pipeshub, {
     url: "https://app.example.com",
   });
   if (res.ok) {
     const { value: result } = res;
     
   } else {
-    console.log("publicUrlsSetConnector failed:", res.error);
+    console.log("publicURLsSetConnectorPublicUrl failed:", res.error);
   }
 }
 
@@ -229,7 +237,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getConnector
+## getConnectorPublicUrl
 
 Get connector public URL.
 
@@ -240,12 +248,13 @@ Get connector public URL.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.publicUrls.getConnector();
+  const result = await pipeshub.publicURLs.getConnectorPublicUrl();
 
   console.log(result);
 }
@@ -259,22 +268,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { publicUrlsGetConnector } from "pipeshub/funcs/public-urls-get-connector.js";
+import { publicURLsGetConnectorPublicUrl } from "pipeshub/funcs/public-ur-ls-get-connector-public-url.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await publicUrlsGetConnector(pipeshub);
+  const res = await publicURLsGetConnectorPublicUrl(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("publicUrlsGetConnector failed:", res.error);
+    console.log("publicURLsGetConnectorPublicUrl failed:", res.error);
   }
 }
 

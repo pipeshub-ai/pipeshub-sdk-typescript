@@ -7,7 +7,6 @@ import { KnowledgeBase } from "pipeshub/models";
 
 let value: KnowledgeBase = {
   name: "<value>",
-  orgId: "<id>",
 };
 ```
 
@@ -15,10 +14,11 @@ let value: KnowledgeBase = {
 
 | Field                                              | Type                                               | Required                                           | Description                                        |
 | -------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------- |
-| `key`                                              | *string*                                           | :heavy_minus_sign:                                 | Unique knowledge base identifier                   |
+| `id`                                               | *string*                                           | :heavy_minus_sign:                                 | Unique knowledge base identifier                   |
 | `name`                                             | *string*                                           | :heavy_check_mark:                                 | Name of the knowledge base                         |
-| `orgId`                                            | *string*                                           | :heavy_check_mark:                                 | Organization ID                                    |
-| `createdAtTimestamp`                               | *number*                                           | :heavy_minus_sign:                                 | Creation timestamp                                 |
-| `updatedAtTimestamp`                               | *number*                                           | :heavy_minus_sign:                                 | Last update timestamp                              |
+| `connectorId`                                      | *string*                                           | :heavy_minus_sign:                                 | Associated connector ID (null for manual KBs)      |
+| `createdAtTimestamp`                               | *number*                                           | :heavy_minus_sign:                                 | Creation timestamp in milliseconds                 |
+| `updatedAtTimestamp`                               | *number*                                           | :heavy_minus_sign:                                 | Last update timestamp in milliseconds              |
+| `createdBy`                                        | *string*                                           | :heavy_minus_sign:                                 | User ID of the creator                             |
 | `userRole`                                         | [models.UserRoleEnum](../models/user-role-enum.md) | :heavy_minus_sign:                                 | User's role in this knowledge base                 |
-| `isDeleted`                                        | *boolean*                                          | :heavy_minus_sign:                                 | Whether the knowledge base is deleted              |
+| `folders`                                          | [models.Folder](../models/folder.md)[]             | :heavy_minus_sign:                                 | Folders in this knowledge base                     |

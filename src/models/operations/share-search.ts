@@ -3,20 +3,61 @@
  */
 
 import * as z from "zod/v4-mini";
-import * as models from "../index.js";
+import { safeParse } from "../../lib/schemas.js";
+import { Result as SafeParseResult } from "../../types/fp.js";
+import * as types from "../../types/primitives.js";
+import { SDKValidationError } from "../errors/sdk-validation-error.js";
+
+/**
+ * Request payload
+ */
+export type ShareSearchRequestBody = {
+  userIds?: Array<string> | undefined;
+};
 
 export type ShareSearchRequest = {
+  /**
+   * Unique search identifier
+   */
   searchId: string;
   /**
    * Request payload
    */
-  body: models.ShareRequest;
+  body: ShareSearchRequestBody;
 };
+
+/**
+ * Search shared successfully
+ */
+export type ShareSearchResponse = {
+  message?: string | undefined;
+};
+
+/** @internal */
+export type ShareSearchRequestBody$Outbound = {
+  userIds?: Array<string> | undefined;
+};
+
+/** @internal */
+export const ShareSearchRequestBody$outboundSchema: z.ZodMiniType<
+  ShareSearchRequestBody$Outbound,
+  ShareSearchRequestBody
+> = z.object({
+  userIds: z.optional(z.array(z.string())),
+});
+
+export function shareSearchRequestBodyToJSON(
+  shareSearchRequestBody: ShareSearchRequestBody,
+): string {
+  return JSON.stringify(
+    ShareSearchRequestBody$outboundSchema.parse(shareSearchRequestBody),
+  );
+}
 
 /** @internal */
 export type ShareSearchRequest$Outbound = {
   searchId: string;
-  body: models.ShareRequest$Outbound;
+  body: ShareSearchRequestBody$Outbound;
 };
 
 /** @internal */
@@ -25,7 +66,7 @@ export const ShareSearchRequest$outboundSchema: z.ZodMiniType<
   ShareSearchRequest
 > = z.object({
   searchId: z.string(),
-  body: models.ShareRequest$outboundSchema,
+  body: z.lazy(() => ShareSearchRequestBody$outboundSchema),
 });
 
 export function shareSearchRequestToJSON(
@@ -33,5 +74,23 @@ export function shareSearchRequestToJSON(
 ): string {
   return JSON.stringify(
     ShareSearchRequest$outboundSchema.parse(shareSearchRequest),
+  );
+}
+
+/** @internal */
+export const ShareSearchResponse$inboundSchema: z.ZodMiniType<
+  ShareSearchResponse,
+  unknown
+> = z.object({
+  message: types.optional(types.string()),
+});
+
+export function shareSearchResponseFromJSON(
+  jsonString: string,
+): SafeParseResult<ShareSearchResponse, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => ShareSearchResponse$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ShareSearchResponse' from JSON`,
   );
 }

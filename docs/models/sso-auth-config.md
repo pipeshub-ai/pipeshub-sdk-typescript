@@ -9,7 +9,6 @@ import { SSOAuthConfig } from "pipeshub/models";
 
 let value: SSOAuthConfig = {
   entryPoint: "https://idp.example.com/sso/saml",
-  certificate: "<value>",
   emailKey: "email",
 };
 ```
@@ -18,6 +17,6 @@ let value: SSOAuthConfig = {
 
 | Field                                                   | Type                                                    | Required                                                | Description                                             | Example                                                 |
 | ------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------- |
-| `entryPoint`                                            | *string*                                                | :heavy_check_mark:                                      | Identity provider SSO URL                               | https://idp.example.com/sso/saml                        |
-| `certificate`                                           | *string*                                                | :heavy_check_mark:                                      | X.509 certificate for signature validation (PEM format) |                                                         |
-| `emailKey`                                              | *string*                                                | :heavy_check_mark:                                      | SAML attribute name for user email                      | email                                                   |
+| `entryPoint`                                            | *string*                                                | :heavy_minus_sign:                                      | Identity provider SSO URL                               | https://idp.example.com/sso/saml                        |
+| `certificate`                                           | *string*                                                | :heavy_minus_sign:                                      | X.509 certificate for signature validation (PEM format) |                                                         |
+| `emailKey`                                              | *string*                                                | :heavy_minus_sign:                                      | SAML attribute name for user email                      | email                                                   |

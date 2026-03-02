@@ -12,7 +12,6 @@ import { SDKValidationError } from "../errors/sdk-validation-error.js";
  * Organization existence check completed
  */
 export type CheckOrgExistsResponse = {
-  success?: boolean | undefined;
   /**
    * Whether an organization has been created
    */
@@ -24,7 +23,6 @@ export const CheckOrgExistsResponse$inboundSchema: z.ZodMiniType<
   CheckOrgExistsResponse,
   unknown
 > = z.object({
-  success: types.optional(types.boolean()),
   exists: types.optional(types.boolean()),
 });
 

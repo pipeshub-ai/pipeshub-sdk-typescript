@@ -3,7 +3,6 @@
  */
 
 import * as z from "zod/v4-mini";
-import { remap as remap$ } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
 import * as openEnums from "../types/enums.js";
 import { OpenEnum } from "../types/enums.js";
@@ -70,6 +69,7 @@ export type Origin = OpenEnum<typeof Origin>;
  * Name of the source connector
  */
 export const ConnectorName = {
+  Kb: "KB",
   Onedrive: "ONEDRIVE",
   GoogleDrive: "GOOGLE_DRIVE",
   Confluence: "CONFLUENCE",
@@ -133,6 +133,30 @@ export const IndexingStatus = {
 export type IndexingStatus = OpenEnum<typeof IndexingStatus>;
 
 /**
+ * File-specific metadata (present when recordType is FILE)
+ */
+export type FileRecord = {
+  id?: string | undefined;
+  name?: string | undefined;
+  extension?: string | undefined;
+  mimeType?: string | undefined;
+  sizeInBytes?: number | undefined;
+  webUrl?: string | undefined;
+  path?: string | null | undefined;
+  isFile?: boolean | undefined;
+};
+
+/**
+ * Email-specific metadata (present when recordType is EMAIL)
+ */
+export type MailRecord = {};
+
+/**
+ * Ticket-specific metadata (present when recordType is TICKET)
+ */
+export type TicketRecord = {};
+
+/**
  * A record represents a single document, file, or content item within a knowledge base.
  *
  * @remarks
@@ -142,11 +166,15 @@ export type RecordT = {
   /**
    * Unique record identifier (UUID format)
    */
-  key?: string | undefined;
+  id?: string | undefined;
   /**
    * Display name of the record
    */
   recordName: string;
+  /**
+   * Display name (alias for recordName)
+   */
+  name?: string | undefined;
   /**
    * External storage document ID (links to Storage module)
    */
@@ -191,11 +219,15 @@ export type RecordT = {
   /**
    * Parent folder ID (null if at KB root)
    */
-  folderId?: string | undefined;
+  folderId?: string | null | undefined;
   /**
    * Current version number (increments on updates)
    */
   version: number;
+  /**
+   * Whether this is the latest version
+   */
+  isLatestVersion?: boolean | undefined;
   /**
    * Creation timestamp in milliseconds
    */
@@ -204,6 +236,14 @@ export type RecordT = {
    * Last update timestamp in milliseconds
    */
   updatedAtTimestamp?: number | undefined;
+  /**
+   * Source creation timestamp (from connector)
+   */
+  sourceCreatedAtTimestamp?: number | undefined;
+  /**
+   * Source last modified timestamp (from connector)
+   */
+  sourceLastModifiedTimestamp?: number | undefined;
   /**
    * Current indexing/processing status:
    *
@@ -248,6 +288,22 @@ export type RecordT = {
    * SHA-256 hash for content deduplication
    */
   sha256Hash?: string | undefined;
+  /**
+   * Node type identifier
+   */
+  type?: string | undefined;
+  /**
+   * File-specific metadata (present when recordType is FILE)
+   */
+  fileRecord?: FileRecord | null | undefined;
+  /**
+   * Email-specific metadata (present when recordType is EMAIL)
+   */
+  mailRecord?: MailRecord | null | undefined;
+  /**
+   * Ticket-specific metadata (present when recordType is TICKET)
+   */
+  ticketRecord?: TicketRecord | null | undefined;
 };
 
 /** @internal */
@@ -271,36 +327,90 @@ export const IndexingStatus$inboundSchema: z.ZodMiniType<
 > = openEnums.inboundSchema(IndexingStatus);
 
 /** @internal */
-export const RecordT$inboundSchema: z.ZodMiniType<RecordT, unknown> = z.pipe(
-  z.object({
-    _key: types.optional(types.string()),
-    recordName: types.string(),
-    externalRecordId: types.optional(types.string()),
-    recordType: RecordType$inboundSchema,
-    origin: Origin$inboundSchema,
-    connectorId: types.optional(types.string()),
-    connectorName: types.optional(ConnectorName$inboundSchema),
-    orgId: types.string(),
-    kbId: types.optional(types.string()),
-    folderId: types.optional(types.string()),
-    version: z._default(types.number(), 0),
-    createdAtTimestamp: types.optional(types.number()),
-    updatedAtTimestamp: types.optional(types.number()),
-    indexingStatus: types.optional(IndexingStatus$inboundSchema),
-    isDeleted: z._default(types.boolean(), false),
-    isArchived: z._default(types.boolean(), false),
-    webUrl: types.optional(types.string()),
+export const FileRecord$inboundSchema: z.ZodMiniType<FileRecord, unknown> = z
+  .object({
+    id: types.optional(types.string()),
+    name: types.optional(types.string()),
+    extension: types.optional(types.string()),
     mimeType: types.optional(types.string()),
     sizeInBytes: types.optional(types.number()),
-    extension: types.optional(types.string()),
-    sha256Hash: types.optional(types.string()),
-  }),
-  z.transform((v) => {
-    return remap$(v, {
-      "_key": "key",
-    });
-  }),
-);
+    webUrl: types.optional(types.string()),
+    path: z.optional(z.nullable(types.string())),
+    isFile: types.optional(types.boolean()),
+  });
+
+export function fileRecordFromJSON(
+  jsonString: string,
+): SafeParseResult<FileRecord, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => FileRecord$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'FileRecord' from JSON`,
+  );
+}
+
+/** @internal */
+export const MailRecord$inboundSchema: z.ZodMiniType<MailRecord, unknown> = z
+  .object({});
+
+export function mailRecordFromJSON(
+  jsonString: string,
+): SafeParseResult<MailRecord, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => MailRecord$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'MailRecord' from JSON`,
+  );
+}
+
+/** @internal */
+export const TicketRecord$inboundSchema: z.ZodMiniType<TicketRecord, unknown> =
+  z.object({});
+
+export function ticketRecordFromJSON(
+  jsonString: string,
+): SafeParseResult<TicketRecord, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => TicketRecord$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'TicketRecord' from JSON`,
+  );
+}
+
+/** @internal */
+export const RecordT$inboundSchema: z.ZodMiniType<RecordT, unknown> = z.object({
+  id: types.optional(types.string()),
+  recordName: types.string(),
+  name: types.optional(types.string()),
+  externalRecordId: types.optional(types.string()),
+  recordType: RecordType$inboundSchema,
+  origin: Origin$inboundSchema,
+  connectorId: types.optional(types.string()),
+  connectorName: types.optional(ConnectorName$inboundSchema),
+  orgId: types.string(),
+  kbId: types.optional(types.string()),
+  folderId: z.optional(z.nullable(types.string())),
+  version: z._default(types.number(), 0),
+  isLatestVersion: types.optional(types.boolean()),
+  createdAtTimestamp: types.optional(types.number()),
+  updatedAtTimestamp: types.optional(types.number()),
+  sourceCreatedAtTimestamp: types.optional(types.number()),
+  sourceLastModifiedTimestamp: types.optional(types.number()),
+  indexingStatus: types.optional(IndexingStatus$inboundSchema),
+  isDeleted: z._default(types.boolean(), false),
+  isArchived: z._default(types.boolean(), false),
+  webUrl: types.optional(types.string()),
+  mimeType: types.optional(types.string()),
+  sizeInBytes: types.optional(types.number()),
+  extension: types.optional(types.string()),
+  sha256Hash: types.optional(types.string()),
+  type: types.optional(types.string()),
+  fileRecord: z.optional(z.nullable(z.lazy(() => FileRecord$inboundSchema))),
+  mailRecord: z.optional(z.nullable(z.lazy(() => MailRecord$inboundSchema))),
+  ticketRecord: z.optional(
+    z.nullable(z.lazy(() => TicketRecord$inboundSchema)),
+  ),
+});
 
 export function recordFromJSON(
   jsonString: string,

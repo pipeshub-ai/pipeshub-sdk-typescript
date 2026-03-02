@@ -3,32 +3,20 @@
  */
 
 import * as z from "zod/v4-mini";
-import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 
 export type DeleteDocumentByIdRequest = {
-  /**
-   * Document ID (24-character MongoDB ObjectId)
-   */
   documentId: string;
-};
-
-export type DeleteDocumentByIdData = {
-  id?: string | undefined;
-  isDeleted?: boolean | undefined;
-  deletedByUserId?: string | undefined;
 };
 
 /**
  * Document deleted successfully
  */
 export type DeleteDocumentByIdResponse = {
-  success?: boolean | undefined;
   message?: string | undefined;
-  data?: DeleteDocumentByIdData | undefined;
 };
 
 /** @internal */
@@ -53,40 +41,11 @@ export function deleteDocumentByIdRequestToJSON(
 }
 
 /** @internal */
-export const DeleteDocumentByIdData$inboundSchema: z.ZodMiniType<
-  DeleteDocumentByIdData,
-  unknown
-> = z.pipe(
-  z.object({
-    _id: types.optional(types.string()),
-    isDeleted: types.optional(types.boolean()),
-    deletedByUserId: types.optional(types.string()),
-  }),
-  z.transform((v) => {
-    return remap$(v, {
-      "_id": "id",
-    });
-  }),
-);
-
-export function deleteDocumentByIdDataFromJSON(
-  jsonString: string,
-): SafeParseResult<DeleteDocumentByIdData, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => DeleteDocumentByIdData$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'DeleteDocumentByIdData' from JSON`,
-  );
-}
-
-/** @internal */
 export const DeleteDocumentByIdResponse$inboundSchema: z.ZodMiniType<
   DeleteDocumentByIdResponse,
   unknown
 > = z.object({
-  success: types.optional(types.boolean()),
   message: types.optional(types.string()),
-  data: types.optional(z.lazy(() => DeleteDocumentByIdData$inboundSchema)),
 });
 
 export function deleteDocumentByIdResponseFromJSON(

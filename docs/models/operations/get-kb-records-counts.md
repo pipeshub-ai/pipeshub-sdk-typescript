@@ -1,0 +1,19 @@
+# GetKBRecordsCounts
+
+## Example Usage
+
+```typescript
+import { GetKBRecordsCounts } from "pipeshub/models/operations";
+
+let value: GetKBRecordsCounts = {};
+```
+
+## Fields
+
+| Field              | Type               | Required           | Description        |
+| ------------------ | ------------------ | ------------------ | ------------------ |
+| `folders`          | *number*           | :heavy_minus_sign: | N/A                |
+| `records`          | *number*           | :heavy_minus_sign: | N/A                |
+| `totalItems`       | *number*           | :heavy_minus_sign: | N/A                |
+| `totalFolders`     | *number*           | :heavy_minus_sign: | N/A                |
+| `totalRecords`     | *number*           | :heavy_minus_sign: | N/A                |

@@ -7,12 +7,18 @@ import { dlv } from "./dlv.js";
 
 export interface Env {
   PIPESHUB_BEARER_AUTH?: string | undefined;
+  PIPESHUB_CLIENT_ID?: string | undefined;
+  PIPESHUB_CLIENT_SECRET?: string | undefined;
+  PIPESHUB_TOKEN_URL: string;
 
   PIPESHUB_DEBUG?: boolean | undefined;
 }
 
 export const envSchema: z.ZodMiniType<Env, unknown> = z.object({
   PIPESHUB_BEARER_AUTH: z.optional(z.string()),
+  PIPESHUB_CLIENT_ID: z.optional(z.string()),
+  PIPESHUB_CLIENT_SECRET: z.optional(z.string()),
+  PIPESHUB_TOKEN_URL: z._default(z.string(), "/api/v1/oauth2/token"),
 
   PIPESHUB_DEBUG: z.optional(z.coerce.boolean()),
 });

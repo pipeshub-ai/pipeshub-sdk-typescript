@@ -67,12 +67,55 @@ export type ListKnowledgeBasesRequest = {
   sortOrder?: ListKnowledgeBasesSortOrder | undefined;
 };
 
+export type ListKnowledgeBasesPagination = {
+  /**
+   * Current page number
+   */
+  page?: number | undefined;
+  /**
+   * Items per page
+   */
+  limit?: number | undefined;
+  /**
+   * Total number of items
+   */
+  totalCount?: number | undefined;
+  /**
+   * Total number of pages
+   */
+  totalPages?: number | undefined;
+  /**
+   * Whether there is a next page
+   */
+  hasNext?: boolean | undefined;
+  /**
+   * Whether there is a previous page
+   */
+  hasPrev?: boolean | undefined;
+};
+
+export type Applied = {};
+
+export type Available = {};
+
+/**
+ * Applied and available filters
+ */
+export type ListKnowledgeBasesFilters = {
+  applied?: Applied | undefined;
+  available?: Available | undefined;
+};
+
 /**
  * Successful operation
  */
 export type ListKnowledgeBasesResponse = {
   knowledgeBases?: Array<models.KnowledgeBase> | undefined;
-  pagination?: models.PaginationInfo | undefined;
+  pagination?: ListKnowledgeBasesPagination | undefined;
+  /**
+   * Applied and available filters
+   */
+  filters?: ListKnowledgeBasesFilters | undefined;
 };
 
 /** @internal */
@@ -117,12 +160,88 @@ export function listKnowledgeBasesRequestToJSON(
 }
 
 /** @internal */
+export const ListKnowledgeBasesPagination$inboundSchema: z.ZodMiniType<
+  ListKnowledgeBasesPagination,
+  unknown
+> = z.object({
+  page: types.optional(types.number()),
+  limit: types.optional(types.number()),
+  totalCount: types.optional(types.number()),
+  totalPages: types.optional(types.number()),
+  hasNext: types.optional(types.boolean()),
+  hasPrev: types.optional(types.boolean()),
+});
+
+export function listKnowledgeBasesPaginationFromJSON(
+  jsonString: string,
+): SafeParseResult<ListKnowledgeBasesPagination, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => ListKnowledgeBasesPagination$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ListKnowledgeBasesPagination' from JSON`,
+  );
+}
+
+/** @internal */
+export const Applied$inboundSchema: z.ZodMiniType<Applied, unknown> = z.object(
+  {},
+);
+
+export function appliedFromJSON(
+  jsonString: string,
+): SafeParseResult<Applied, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Applied$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Applied' from JSON`,
+  );
+}
+
+/** @internal */
+export const Available$inboundSchema: z.ZodMiniType<Available, unknown> = z
+  .object({});
+
+export function availableFromJSON(
+  jsonString: string,
+): SafeParseResult<Available, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Available$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Available' from JSON`,
+  );
+}
+
+/** @internal */
+export const ListKnowledgeBasesFilters$inboundSchema: z.ZodMiniType<
+  ListKnowledgeBasesFilters,
+  unknown
+> = z.object({
+  applied: types.optional(z.lazy(() => Applied$inboundSchema)),
+  available: types.optional(z.lazy(() => Available$inboundSchema)),
+});
+
+export function listKnowledgeBasesFiltersFromJSON(
+  jsonString: string,
+): SafeParseResult<ListKnowledgeBasesFilters, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => ListKnowledgeBasesFilters$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ListKnowledgeBasesFilters' from JSON`,
+  );
+}
+
+/** @internal */
 export const ListKnowledgeBasesResponse$inboundSchema: z.ZodMiniType<
   ListKnowledgeBasesResponse,
   unknown
 > = z.object({
   knowledgeBases: types.optional(z.array(models.KnowledgeBase$inboundSchema)),
-  pagination: types.optional(models.PaginationInfo$inboundSchema),
+  pagination: types.optional(
+    z.lazy(() => ListKnowledgeBasesPagination$inboundSchema),
+  ),
+  filters: types.optional(
+    z.lazy(() => ListKnowledgeBasesFilters$inboundSchema),
+  ),
 });
 
 export function listKnowledgeBasesResponseFromJSON(

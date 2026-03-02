@@ -4,129 +4,18 @@
 
 import * as z from "zod/v4-mini";
 import { safeParse } from "../../lib/schemas.js";
-import * as openEnums from "../../types/enums.js";
-import { OpenEnum } from "../../types/enums.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
-export type GetUserCreatedTeamsRequest = {
-  /**
-   * Page number for pagination (1-based)
-   */
-  page?: number | undefined;
-  /**
-   * Number of teams per page
-   */
-  limit?: number | undefined;
-};
-
 /**
- * User's current role (none if no longer a member)
- */
-export const CurrentRole = {
-  Owner: "owner",
-  Admin: "admin",
-  Member: "member",
-  Viewer: "viewer",
-  None: "none",
-} as const;
-/**
- * User's current role (none if no longer a member)
- */
-export type CurrentRole = OpenEnum<typeof CurrentRole>;
-
-export type GetUserCreatedTeamsData = {
-  team?: models.Team | undefined;
-  /**
-   * User's current role (none if no longer a member)
-   */
-  currentRole?: CurrentRole | undefined;
-  createdAt?: Date | undefined;
-};
-
-export type GetUserCreatedTeamsPagination = {
-  page?: number | undefined;
-  limit?: number | undefined;
-  total?: number | undefined;
-};
-
-/**
- * User's created teams retrieved successfully
+ * User created teams retrieved successfully
  */
 export type GetUserCreatedTeamsResponse = {
   success?: boolean | undefined;
-  data?: Array<GetUserCreatedTeamsData> | undefined;
-  pagination?: GetUserCreatedTeamsPagination | undefined;
+  data?: Array<models.Team> | undefined;
 };
-
-/** @internal */
-export type GetUserCreatedTeamsRequest$Outbound = {
-  page: number;
-  limit: number;
-};
-
-/** @internal */
-export const GetUserCreatedTeamsRequest$outboundSchema: z.ZodMiniType<
-  GetUserCreatedTeamsRequest$Outbound,
-  GetUserCreatedTeamsRequest
-> = z.object({
-  page: z._default(z.int(), 1),
-  limit: z._default(z.int(), 20),
-});
-
-export function getUserCreatedTeamsRequestToJSON(
-  getUserCreatedTeamsRequest: GetUserCreatedTeamsRequest,
-): string {
-  return JSON.stringify(
-    GetUserCreatedTeamsRequest$outboundSchema.parse(getUserCreatedTeamsRequest),
-  );
-}
-
-/** @internal */
-export const CurrentRole$inboundSchema: z.ZodMiniType<CurrentRole, unknown> =
-  openEnums.inboundSchema(CurrentRole);
-
-/** @internal */
-export const GetUserCreatedTeamsData$inboundSchema: z.ZodMiniType<
-  GetUserCreatedTeamsData,
-  unknown
-> = z.object({
-  team: types.optional(models.Team$inboundSchema),
-  currentRole: types.optional(CurrentRole$inboundSchema),
-  createdAt: types.optional(types.date()),
-});
-
-export function getUserCreatedTeamsDataFromJSON(
-  jsonString: string,
-): SafeParseResult<GetUserCreatedTeamsData, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => GetUserCreatedTeamsData$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetUserCreatedTeamsData' from JSON`,
-  );
-}
-
-/** @internal */
-export const GetUserCreatedTeamsPagination$inboundSchema: z.ZodMiniType<
-  GetUserCreatedTeamsPagination,
-  unknown
-> = z.object({
-  page: types.optional(types.number()),
-  limit: types.optional(types.number()),
-  total: types.optional(types.number()),
-});
-
-export function getUserCreatedTeamsPaginationFromJSON(
-  jsonString: string,
-): SafeParseResult<GetUserCreatedTeamsPagination, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => GetUserCreatedTeamsPagination$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetUserCreatedTeamsPagination' from JSON`,
-  );
-}
 
 /** @internal */
 export const GetUserCreatedTeamsResponse$inboundSchema: z.ZodMiniType<
@@ -134,12 +23,7 @@ export const GetUserCreatedTeamsResponse$inboundSchema: z.ZodMiniType<
   unknown
 > = z.object({
   success: types.optional(types.boolean()),
-  data: types.optional(
-    z.array(z.lazy(() => GetUserCreatedTeamsData$inboundSchema)),
-  ),
-  pagination: types.optional(
-    z.lazy(() => GetUserCreatedTeamsPagination$inboundSchema),
-  ),
+  data: types.optional(z.array(models.Team$inboundSchema)),
 });
 
 export function getUserCreatedTeamsResponseFromJSON(

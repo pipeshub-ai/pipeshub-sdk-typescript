@@ -1,7 +1,5 @@
 # KBPermissionRole
 
-Permission role
-
 ## Example Usage
 
 ```typescript

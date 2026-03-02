@@ -6,14 +6,14 @@
 import { PauseCrawlingJobRequest } from "pipeshub/models/operations";
 
 let value: PauseCrawlingJobRequest = {
-  connector: "drive",
-  connectorId: "507f1f77bcf86cd799439011",
+  connector: "<value>",
+  connectorId: "<id>",
 };
 ```
 
 ## Fields
 
-| Field                                       | Type                                        | Required                                    | Description                                 | Example                                     |
-| ------------------------------------------- | ------------------------------------------- | ------------------------------------------- | ------------------------------------------- | ------------------------------------------- |
-| `connector`                                 | *string*                                    | :heavy_check_mark:                          | Connector type identifier                   | drive                                       |
-| `connectorId`                               | *string*                                    | :heavy_check_mark:                          | Unique identifier of the connector instance | 507f1f77bcf86cd799439011                    |
+| Field              | Type               | Required           | Description        |
+| ------------------ | ------------------ | ------------------ | ------------------ |
+| `connector`        | *string*           | :heavy_check_mark: | N/A                |
+| `connectorId`      | *string*           | :heavy_check_mark: | N/A                |

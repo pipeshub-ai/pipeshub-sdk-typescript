@@ -3,13 +3,13 @@
  */
 
 import * as z from "zod/v4-mini";
-import { remap as remap$ } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
 import * as openEnums from "../types/enums.js";
 import { OpenEnum } from "../types/enums.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
+import { Folder, Folder$inboundSchema } from "./folder.js";
 
 /**
  * User's role in this knowledge base
@@ -31,31 +31,35 @@ export type KnowledgeBase = {
   /**
    * Unique knowledge base identifier
    */
-  key?: string | undefined;
+  id?: string | undefined;
   /**
    * Name of the knowledge base
    */
   name: string;
   /**
-   * Organization ID
+   * Associated connector ID (null for manual KBs)
    */
-  orgId: string;
+  connectorId?: string | null | undefined;
   /**
-   * Creation timestamp
+   * Creation timestamp in milliseconds
    */
   createdAtTimestamp?: number | undefined;
   /**
-   * Last update timestamp
+   * Last update timestamp in milliseconds
    */
   updatedAtTimestamp?: number | undefined;
+  /**
+   * User ID of the creator
+   */
+  createdBy?: string | undefined;
   /**
    * User's role in this knowledge base
    */
   userRole?: UserRoleEnum | undefined;
   /**
-   * Whether the knowledge base is deleted
+   * Folders in this knowledge base
    */
-  isDeleted: boolean;
+  folders?: Array<Folder> | undefined;
 };
 
 /** @internal */
@@ -66,22 +70,16 @@ export const UserRoleEnum$inboundSchema: z.ZodMiniType<UserRoleEnum, unknown> =
 export const KnowledgeBase$inboundSchema: z.ZodMiniType<
   KnowledgeBase,
   unknown
-> = z.pipe(
-  z.object({
-    _key: types.optional(types.string()),
-    name: types.string(),
-    orgId: types.string(),
-    createdAtTimestamp: types.optional(types.number()),
-    updatedAtTimestamp: types.optional(types.number()),
-    userRole: types.optional(UserRoleEnum$inboundSchema),
-    isDeleted: z._default(types.boolean(), false),
-  }),
-  z.transform((v) => {
-    return remap$(v, {
-      "_key": "key",
-    });
-  }),
-);
+> = z.object({
+  id: types.optional(types.string()),
+  name: types.string(),
+  connectorId: z.optional(z.nullable(types.string())),
+  createdAtTimestamp: types.optional(types.number()),
+  updatedAtTimestamp: types.optional(types.number()),
+  createdBy: types.optional(types.string()),
+  userRole: types.optional(UserRoleEnum$inboundSchema),
+  folders: types.optional(z.array(Folder$inboundSchema)),
+});
 
 export function knowledgeBaseFromJSON(
   jsonString: string,

@@ -1,18 +1,21 @@
 # GetTokenFromCodeResponse
 
-Tokens exchanged and stored successfully
 
-## Example Usage
+## Supported Types
+
+### `operations.GetTokenFromCodeResponseBody1`
 
 ```typescript
-import { GetTokenFromCodeResponse } from "pipeshub/models/operations";
-
-let value: GetTokenFromCodeResponse = {};
+const value: operations.GetTokenFromCodeResponseBody1 = {
+  message: "Connector is now enabled",
+};
 ```
 
-## Fields
+### `operations.GetTokenFromCodeResponseBody2`
 
-| Field              | Type               | Required           | Description        |
-| ------------------ | ------------------ | ------------------ | ------------------ |
-| `success`          | *boolean*          | :heavy_minus_sign: | N/A                |
-| `message`          | *string*           | :heavy_minus_sign: | N/A                |
+```typescript
+const value: operations.GetTokenFromCodeResponseBody2 = {
+  message: "Connector google_workspace created and enabled",
+};
+```
+

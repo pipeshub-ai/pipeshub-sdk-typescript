@@ -15,5 +15,5 @@ let value: ConnectorName = "GOOGLE_DRIVE";
 This is an open enum. Unrecognized values will be captured as the `Unrecognized<string>` branded type.
 
 ```typescript
-"ONEDRIVE" | "GOOGLE_DRIVE" | "CONFLUENCE" | "JIRA" | "SLACK" | "SHAREPOINT_ONLINE" | "GMAIL" | "DROPBOX" | "OUTLOOK" | "SERVICENOW" | "BOOKSTACK" | "WEB" | Unrecognized<string>
+"KB" | "ONEDRIVE" | "GOOGLE_DRIVE" | "CONFLUENCE" | "JIRA" | "SLACK" | "SHAREPOINT_ONLINE" | "GMAIL" | "DROPBOX" | "OUTLOOK" | "SERVICENOW" | "BOOKSTACK" | "WEB" | Unrecognized<string>
 ```

@@ -7,9 +7,7 @@ import { UnshareSearchRequest } from "pipeshub/models/operations";
 
 let value: UnshareSearchRequest = {
   searchId: "<value>",
-  body: {
-    userIds: [],
-  },
+  body: {},
 };
 ```
 
@@ -17,5 +15,5 @@ let value: UnshareSearchRequest = {
 
 | Field                                                                                         | Type                                                                                          | Required                                                                                      | Description                                                                                   |
 | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `searchId`                                                                                    | *string*                                                                                      | :heavy_check_mark:                                                                            | N/A                                                                                           |
-| `body`                                                                                        | [operations.UnshareSearchRequestBody](../../models/operations/unshare-search-request-body.md) | :heavy_check_mark:                                                                            | Request body for Revoke search access                                                         |
+| `searchId`                                                                                    | *string*                                                                                      | :heavy_check_mark:                                                                            | Unique search identifier                                                                      |
+| `body`                                                                                        | [operations.UnshareSearchRequestBody](../../models/operations/unshare-search-request-body.md) | :heavy_check_mark:                                                                            | Request payload                                                                               |

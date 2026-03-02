@@ -6,19 +6,19 @@ Team management operations
 
 ### Available Operations
 
-* [create](#create) - Create a team
-* [list](#list) - List teams
-* [get](#get) - Get team by ID
-* [update](#update) - Update team
-* [delete](#delete) - Delete team
-* [getUsers](#getusers) - Get team members
-* [addUsers](#addusers) - Add users to team
-* [removeUsers](#removeusers) - Remove users from team
-* [updatePermissions](#updatepermissions) - Update user role in team
-* [getUser](#getuser) - Get current user's teams
-* [getCreatedByUser](#getcreatedbyuser) - Get teams created by current user
+* [createTeam](#createteam) - Create a team
+* [listTeams](#listteams) - List teams
+* [getTeamById](#getteambyid) - Get team by ID
+* [updateTeam](#updateteam) - Update team
+* [deleteTeam](#deleteteam) - Delete team
+* [getUserTeams](#getuserteams) - Get current user's teams
+* [~~getTeamUsers~~](#getteamusers) - Get users in team :warning: **Deprecated**
+* [~~addUsersToTeam~~](#adduserstoteam) - Add users to team :warning: **Deprecated**
+* [~~removeUserFromTeam~~](#removeuserfromteam) - Remove user from team :warning: **Deprecated**
+* [~~updateTeamUsersPermissions~~](#updateteamuserspermissions) - Update team users permissions :warning: **Deprecated**
+* [~~getUserCreatedTeams~~](#getusercreatedteams) - Get user created teams :warning: **Deprecated**
 
-## create
+## createTeam
 
 Create a new team within the organization for project collaboration and resource sharing.<br><br>
 <b>Overview:</b><br>
@@ -54,12 +54,13 @@ You can optionally add initial members with their roles during creation using th
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.teams.create({
+  const result = await pipeshub.teams.createTeam({
     name: "Engineering Team",
     description: "Core engineering team for product development",
   });
@@ -76,17 +77,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { teamsCreate } from "pipeshub/funcs/teams-create.js";
+import { teamsCreateTeam } from "pipeshub/funcs/teams-create-team.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await teamsCreate(pipeshub, {
+  const res = await teamsCreateTeam(pipeshub, {
     name: "Engineering Team",
     description: "Core engineering team for product development",
   });
@@ -94,7 +96,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("teamsCreate failed:", res.error);
+    console.log("teamsCreateTeam failed:", res.error);
   }
 }
 
@@ -120,7 +122,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## list
+## listTeams
 
 Retrieve all teams in the organization with optional search and pagination.<br><br>
 <b>Overview:</b><br>
@@ -150,12 +152,13 @@ Results are sorted by name alphabetically by default.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.teams.list({
+  const result = await pipeshub.teams.listTeams({
     search: "engineering",
   });
 
@@ -171,24 +174,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { teamsList } from "pipeshub/funcs/teams-list.js";
+import { teamsListTeams } from "pipeshub/funcs/teams-list-teams.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await teamsList(pipeshub, {
+  const res = await teamsListTeams(pipeshub, {
     search: "engineering",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("teamsList failed:", res.error);
+    console.log("teamsListTeams failed:", res.error);
   }
 }
 
@@ -214,7 +218,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## get
+## getTeamById
 
 Retrieve detailed information about a specific team.<br><br>
 <b>Overview:</b><br>
@@ -241,12 +245,13 @@ Returns complete team details including metadata, member list with roles, and re
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.teams.get({
+  const result = await pipeshub.teams.getTeamById({
     teamId: "507f1f77bcf86cd799439011",
   });
 
@@ -262,24 +267,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { teamsGet } from "pipeshub/funcs/teams-get.js";
+import { teamsGetTeamById } from "pipeshub/funcs/teams-get-team-by-id.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await teamsGet(pipeshub, {
+  const res = await teamsGetTeamById(pipeshub, {
     teamId: "507f1f77bcf86cd799439011",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("teamsGet failed:", res.error);
+    console.log("teamsGetTeamById failed:", res.error);
   }
 }
 
@@ -305,7 +311,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## update
+## updateTeam
 
 Update team metadata and settings.<br><br>
 <b>Overview:</b><br>
@@ -336,12 +342,13 @@ This endpoint allows updating team properties like name and description. Member 
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.teams.update({
+  const result = await pipeshub.teams.updateTeam({
     teamId: "507f1f77bcf86cd799439011",
     body: {
       name: "Core Engineering Team",
@@ -361,17 +368,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { teamsUpdate } from "pipeshub/funcs/teams-update.js";
+import { teamsUpdateTeam } from "pipeshub/funcs/teams-update-team.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await teamsUpdate(pipeshub, {
+  const res = await teamsUpdateTeam(pipeshub, {
     teamId: "507f1f77bcf86cd799439011",
     body: {
       name: "Core Engineering Team",
@@ -382,7 +390,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("teamsUpdate failed:", res.error);
+    console.log("teamsUpdateTeam failed:", res.error);
   }
 }
 
@@ -408,7 +416,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## delete
+## deleteTeam
 
 Delete a team from the organization.<br><br>
 <b>Behavior:</b><br>
@@ -431,12 +439,13 @@ Delete a team from the organization.<br><br>
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.teams.delete({
+  const result = await pipeshub.teams.deleteTeam({
     teamId: "507f1f77bcf86cd799439011",
   });
 
@@ -452,24 +461,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { teamsDelete } from "pipeshub/funcs/teams-delete.js";
+import { teamsDeleteTeam } from "pipeshub/funcs/teams-delete-team.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await teamsDelete(pipeshub, {
+  const res = await teamsDeleteTeam(pipeshub, {
     teamId: "507f1f77bcf86cd799439011",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("teamsDelete failed:", res.error);
+    console.log("teamsDeleteTeam failed:", res.error);
   }
 }
 
@@ -495,400 +505,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getUsers
-
-Retrieve all users that are members of a specific team.<br><br>
-<b>Response Details:</b><br>
-<ul>
-<li>Returns user profiles with their team role</li>
-<li>Supports pagination for large teams</li>
-<li>Excludes deleted or inactive users</li>
-</ul>
-<b>Team Roles:</b><br>
-<ul>
-<li><code>owner</code> - Full control over team settings and members</li>
-<li><code>admin</code> - Can manage members and most settings</li>
-<li><code>member</code> - Standard team member</li>
-<li><code>viewer</code> - Read-only access to team resources</li>
-</ul>
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="getTeamUsers" method="get" path="/teams/{teamId}/users" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.teams.getUsers({
-    teamId: "507f1f77bcf86cd799439011",
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { teamsGetUsers } from "pipeshub/funcs/teams-get-users.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await teamsGetUsers(pipeshub, {
-    teamId: "507f1f77bcf86cd799439011",
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("teamsGetUsers failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.GetTeamUsersRequest](../../models/operations/get-team-users-request.md)                                                                                            | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.GetTeamUsersResponse](../../models/operations/get-team-users-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## addUsers
-
-Add one or more users to a team with specified roles.<br><br>
-<b>Behavior:</b><br>
-<ul>
-<li>Users already in the team are skipped</li>
-<li>Default role is "member" if not specified</li>
-<li>Sends invitation notification to added users</li>
-</ul>
-<b>Validation:</b><br>
-<ul>
-<li>All user IDs must be valid and from the same organization</li>
-<li>Role must be one of the allowed values</li>
-<li>Only team owner/admin can add members</li>
-</ul>
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="addUsersToTeam" method="post" path="/teams/{teamId}/users" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.teams.addUsers({
-    teamId: "507f1f77bcf86cd799439011",
-    body: {
-      users: [
-        {
-          userId: "507f1f77bcf86cd799439012",
-        },
-        {
-          userId: "507f1f77bcf86cd799439013",
-          role: "admin",
-        },
-      ],
-    },
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { teamsAddUsers } from "pipeshub/funcs/teams-add-users.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await teamsAddUsers(pipeshub, {
-    teamId: "507f1f77bcf86cd799439011",
-    body: {
-      users: [
-        {
-          userId: "507f1f77bcf86cd799439012",
-        },
-        {
-          userId: "507f1f77bcf86cd799439013",
-          role: "admin",
-        },
-      ],
-    },
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("teamsAddUsers failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.AddUsersToTeamRequest](../../models/operations/add-users-to-team-request.md)                                                                                       | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.AddUsersToTeamResponse](../../models/operations/add-users-to-team-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## removeUsers
-
-Remove one or more users from a team.<br><br>
-<b>Behavior:</b><br>
-<ul>
-<li>Users not in the team are silently skipped</li>
-<li>Removed users lose access to team resources immediately</li>
-</ul>
-<b>Restrictions:</b><br>
-<ul>
-<li>Cannot remove the team owner</li>
-<li>Only team owner/admin can remove members</li>
-<li>Admins cannot remove other admins (only owner can)</li>
-</ul>
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="removeUsersFromTeam" method="delete" path="/teams/{teamId}/users" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.teams.removeUsers({
-    teamId: "507f1f77bcf86cd799439011",
-    body: {
-      userIds: [
-        "507f1f77bcf86cd799439012",
-      ],
-    },
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { teamsRemoveUsers } from "pipeshub/funcs/teams-remove-users.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await teamsRemoveUsers(pipeshub, {
-    teamId: "507f1f77bcf86cd799439011",
-    body: {
-      userIds: [
-        "507f1f77bcf86cd799439012",
-      ],
-    },
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("teamsRemoveUsers failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.RemoveUsersFromTeamRequest](../../models/operations/remove-users-from-team-request.md)                                                                             | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.RemoveUsersFromTeamResponse](../../models/operations/remove-users-from-team-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## updatePermissions
-
-Update a user's role/permissions within a team.<br><br>
-<b>Available Roles:</b><br>
-<ul>
-<li><code>owner</code> - Full control (only one per team, transferable)</li>
-<li><code>admin</code> - Can manage members and settings</li>
-<li><code>member</code> - Standard access</li>
-<li><code>viewer</code> - Read-only access</li>
-</ul>
-<b>Restrictions:</b><br>
-<ul>
-<li>Only team owner can promote to admin</li>
-<li>Only team owner can transfer ownership</li>
-<li>Admins can modify member/viewer roles</li>
-</ul>
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="updateTeamUserPermissions" method="put" path="/teams/{teamId}/users/permissions" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.teams.updatePermissions({
-    teamId: "507f1f77bcf86cd799439011",
-    body: {
-      userId: "507f1f77bcf86cd799439012",
-      role: "admin",
-    },
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { teamsUpdatePermissions } from "pipeshub/funcs/teams-update-permissions.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await teamsUpdatePermissions(pipeshub, {
-    teamId: "507f1f77bcf86cd799439011",
-    body: {
-      userId: "507f1f77bcf86cd799439012",
-      role: "admin",
-    },
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("teamsUpdatePermissions failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.UpdateTeamUserPermissionsRequest](../../models/operations/update-team-user-permissions-request.md)                                                                 | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.UpdateTeamUserPermissionsResponse](../../models/operations/update-team-user-permissions-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## getUser
+## getUserTeams
 
 Retrieve all teams that the authenticated user is a member of.<br><br>
 <b>Response Details:</b><br>
@@ -912,12 +529,13 @@ Retrieve all teams that the authenticated user is a member of.<br><br>
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.teams.getUser({});
+  const result = await pipeshub.teams.getUserTeams({});
 
   console.log(result);
 }
@@ -931,22 +549,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { teamsGetUser } from "pipeshub/funcs/teams-get-user.js";
+import { teamsGetUserTeams } from "pipeshub/funcs/teams-get-user-teams.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await teamsGetUser(pipeshub, {});
+  const res = await teamsGetUserTeams(pipeshub, {});
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("teamsGetUser failed:", res.error);
+    console.log("teamsGetUserTeams failed:", res.error);
   }
 }
 
@@ -972,30 +591,30 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getCreatedByUser
+## ~~getTeamUsers~~
 
-Retrieve all teams that were created by the authenticated user.<br><br>
-<b>Response Details:</b><br>
-<ul>
-<li>Only includes teams where user is the original creator</li>
-<li>User may or may not still be the owner (ownership can be transferred)</li>
-<li>Useful for tracking team creation history</li>
-</ul>
+<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
+Retrieve all users that belong to a specific team.
 
+
+> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
 
 ### Example Usage
 
-<!-- UsageSnippet language="typescript" operationID="getUserCreatedTeams" method="get" path="/teams/user/teams/created" -->
+<!-- UsageSnippet language="typescript" operationID="getTeamUsers" method="get" path="/teams/{teamId}/users" -->
 ```typescript
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.teams.getCreatedByUser({});
+  const result = await pipeshub.teams.getTeamUsers({
+    teamId: "507f1f77bcf86cd799439011",
+  });
 
   console.log(result);
 }
@@ -1009,22 +628,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { teamsGetCreatedByUser } from "pipeshub/funcs/teams-get-created-by-user.js";
+import { teamsGetTeamUsers } from "pipeshub/funcs/teams-get-team-users.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await teamsGetCreatedByUser(pipeshub, {});
+  const res = await teamsGetTeamUsers(pipeshub, {
+    teamId: "507f1f77bcf86cd799439011",
+  });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("teamsGetCreatedByUser failed:", res.error);
+    console.log("teamsGetTeamUsers failed:", res.error);
   }
 }
 
@@ -1035,7 +657,332 @@ run();
 
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.GetUserCreatedTeamsRequest](../../models/operations/get-user-created-teams-request.md)                                                                             | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `request`                                                                                                                                                                      | [operations.GetTeamUsersRequest](../../models/operations/get-team-users-request.md)                                                                                            | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[operations.GetTeamUsersResponse](../../models/operations/get-team-users-response.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
+## ~~addUsersToTeam~~
+
+<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
+Add one or more users to a team.
+
+
+> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="addUsersToTeam" method="post" path="/teams/{teamId}/users" -->
+```typescript
+import { Pipeshub } from "pipeshub";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.teams.addUsersToTeam({
+    teamId: "507f1f77bcf86cd799439011",
+    body: {},
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "pipeshub/core.js";
+import { teamsAddUsersToTeam } from "pipeshub/funcs/teams-add-users-to-team.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
+});
+
+async function run() {
+  const res = await teamsAddUsersToTeam(pipeshub, {
+    teamId: "507f1f77bcf86cd799439011",
+    body: {},
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("teamsAddUsersToTeam failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.AddUsersToTeamRequest](../../models/operations/add-users-to-team-request.md)                                                                                       | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[operations.AddUsersToTeamResponse](../../models/operations/add-users-to-team-response.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
+## ~~removeUserFromTeam~~
+
+<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
+Remove a user from a team.
+
+
+> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="removeUserFromTeam" method="delete" path="/teams/{teamId}/users" -->
+```typescript
+import { Pipeshub } from "pipeshub";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.teams.removeUserFromTeam({
+    teamId: "<id>",
+    body: {},
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "pipeshub/core.js";
+import { teamsRemoveUserFromTeam } from "pipeshub/funcs/teams-remove-user-from-team.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
+});
+
+async function run() {
+  const res = await teamsRemoveUserFromTeam(pipeshub, {
+    teamId: "<id>",
+    body: {},
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("teamsRemoveUserFromTeam failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.RemoveUserFromTeamRequest](../../models/operations/remove-user-from-team-request.md)                                                                               | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[operations.RemoveUserFromTeamResponse](../../models/operations/remove-user-from-team-response.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
+## ~~updateTeamUsersPermissions~~
+
+<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
+Update permissions for users within a team.
+
+
+> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="updateTeamUsersPermissions" method="put" path="/teams/{teamId}/users/permissions" -->
+```typescript
+import { Pipeshub } from "pipeshub";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.teams.updateTeamUsersPermissions({
+    teamId: "<id>",
+    body: {},
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "pipeshub/core.js";
+import { teamsUpdateTeamUsersPermissions } from "pipeshub/funcs/teams-update-team-users-permissions.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
+});
+
+async function run() {
+  const res = await teamsUpdateTeamUsersPermissions(pipeshub, {
+    teamId: "<id>",
+    body: {},
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("teamsUpdateTeamUsersPermissions failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.UpdateTeamUsersPermissionsRequest](../../models/operations/update-team-users-permissions-request.md)                                                               | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[operations.UpdateTeamUsersPermissionsResponse](../../models/operations/update-team-users-permissions-response.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
+## ~~getUserCreatedTeams~~
+
+<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
+Retrieve teams created by the authenticated user.
+
+
+> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="getUserCreatedTeams" method="get" path="/teams/user/teams/created" -->
+```typescript
+import { Pipeshub } from "pipeshub";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.teams.getUserCreatedTeams();
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "pipeshub/core.js";
+import { teamsGetUserCreatedTeams } from "pipeshub/funcs/teams-get-user-created-teams.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
+});
+
+async function run() {
+  const res = await teamsGetUserCreatedTeams(pipeshub);
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("teamsGetUserCreatedTeams failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |

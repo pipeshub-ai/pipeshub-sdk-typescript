@@ -9,29 +9,15 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 
 export type PauseCrawlingJobRequest = {
-  /**
-   * Connector type identifier
-   */
   connector: string;
-  /**
-   * Unique identifier of the connector instance
-   */
   connectorId: string;
 };
 
-export type PauseCrawlingJobData = {
-  connector?: string | undefined;
-  orgId?: string | undefined;
-  pausedAt?: Date | undefined;
-};
-
 /**
- * Crawling job paused successfully
+ * Crawling job paused
  */
 export type PauseCrawlingJobResponse = {
-  success?: boolean | undefined;
   message?: string | undefined;
-  data?: PauseCrawlingJobData | undefined;
 };
 
 /** @internal */
@@ -58,33 +44,11 @@ export function pauseCrawlingJobRequestToJSON(
 }
 
 /** @internal */
-export const PauseCrawlingJobData$inboundSchema: z.ZodMiniType<
-  PauseCrawlingJobData,
-  unknown
-> = z.object({
-  connector: types.optional(types.string()),
-  orgId: types.optional(types.string()),
-  pausedAt: types.optional(types.date()),
-});
-
-export function pauseCrawlingJobDataFromJSON(
-  jsonString: string,
-): SafeParseResult<PauseCrawlingJobData, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => PauseCrawlingJobData$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'PauseCrawlingJobData' from JSON`,
-  );
-}
-
-/** @internal */
 export const PauseCrawlingJobResponse$inboundSchema: z.ZodMiniType<
   PauseCrawlingJobResponse,
   unknown
 > = z.object({
-  success: types.optional(types.boolean()),
   message: types.optional(types.string()),
-  data: types.optional(z.lazy(() => PauseCrawlingJobData$inboundSchema)),
 });
 
 export function pauseCrawlingJobResponseFromJSON(

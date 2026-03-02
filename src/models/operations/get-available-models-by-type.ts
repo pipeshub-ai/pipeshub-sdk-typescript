@@ -16,7 +16,7 @@ export type GetAvailableModelsByTypeRequest = {
   modelType: models.ModelType;
 };
 
-export type Model = {
+export type GetAvailableModelsByTypeModel = {
   modelKey?: string | undefined;
   provider?: string | undefined;
   model?: string | undefined;
@@ -27,7 +27,9 @@ export type Model = {
  * Available models retrieved
  */
 export type GetAvailableModelsByTypeResponse = {
-  models?: Array<Model> | undefined;
+  status?: string | undefined;
+  message?: string | undefined;
+  models?: Array<GetAvailableModelsByTypeModel> | undefined;
 };
 
 /** @internal */
@@ -54,20 +56,23 @@ export function getAvailableModelsByTypeRequestToJSON(
 }
 
 /** @internal */
-export const Model$inboundSchema: z.ZodMiniType<Model, unknown> = z.object({
+export const GetAvailableModelsByTypeModel$inboundSchema: z.ZodMiniType<
+  GetAvailableModelsByTypeModel,
+  unknown
+> = z.object({
   modelKey: types.optional(types.string()),
   provider: types.optional(types.string()),
   model: types.optional(types.string()),
   isDefault: types.optional(types.boolean()),
 });
 
-export function modelFromJSON(
+export function getAvailableModelsByTypeModelFromJSON(
   jsonString: string,
-): SafeParseResult<Model, SDKValidationError> {
+): SafeParseResult<GetAvailableModelsByTypeModel, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => Model$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Model' from JSON`,
+    (x) => GetAvailableModelsByTypeModel$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetAvailableModelsByTypeModel' from JSON`,
   );
 }
 
@@ -76,7 +81,11 @@ export const GetAvailableModelsByTypeResponse$inboundSchema: z.ZodMiniType<
   GetAvailableModelsByTypeResponse,
   unknown
 > = z.object({
-  models: types.optional(z.array(z.lazy(() => Model$inboundSchema))),
+  status: types.optional(types.string()),
+  message: types.optional(types.string()),
+  models: types.optional(
+    z.array(z.lazy(() => GetAvailableModelsByTypeModel$inboundSchema)),
+  ),
 });
 
 export function getAvailableModelsByTypeResponseFromJSON(

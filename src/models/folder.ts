@@ -3,7 +3,6 @@
  */
 
 import * as z from "zod/v4-mini";
-import { remap as remap$ } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
@@ -13,7 +12,7 @@ export type Folder = {
   /**
    * Unique folder identifier
    */
-  key?: string | undefined;
+  id?: string | undefined;
   /**
    * Name of the folder
    */
@@ -45,23 +44,16 @@ export type Folder = {
 };
 
 /** @internal */
-export const Folder$inboundSchema: z.ZodMiniType<Folder, unknown> = z.pipe(
-  z.object({
-    _key: types.optional(types.string()),
-    name: types.string(),
-    parentId: types.optional(types.string()),
-    kbId: types.string(),
-    orgId: types.string(),
-    createdAtTimestamp: types.optional(types.number()),
-    updatedAtTimestamp: types.optional(types.number()),
-    isDeleted: z._default(types.boolean(), false),
-  }),
-  z.transform((v) => {
-    return remap$(v, {
-      "_key": "key",
-    });
-  }),
-);
+export const Folder$inboundSchema: z.ZodMiniType<Folder, unknown> = z.object({
+  id: types.optional(types.string()),
+  name: types.string(),
+  parentId: types.optional(types.string()),
+  kbId: types.string(),
+  orgId: types.string(),
+  createdAtTimestamp: types.optional(types.number()),
+  updatedAtTimestamp: types.optional(types.number()),
+  isDeleted: z._default(types.boolean(), false),
+});
 
 export function folderFromJSON(
   jsonString: string,

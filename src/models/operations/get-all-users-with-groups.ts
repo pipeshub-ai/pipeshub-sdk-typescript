@@ -3,48 +3,15 @@
  */
 
 import * as z from "zod/v4-mini";
-import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
-import * as openEnums from "../../types/enums.js";
-import { OpenEnum } from "../../types/enums.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 
-export type GetAllUsersWithGroupsRequest = {
-  /**
-   * Include soft-deleted users (admin only)
-   */
-  includeDeleted?: boolean | undefined;
-};
-
-export const GetAllUsersWithGroupsType = {
-  Admin: "admin",
-  Standard: "standard",
-  Everyone: "everyone",
-  Custom: "custom",
-} as const;
-export type GetAllUsersWithGroupsType = OpenEnum<
-  typeof GetAllUsersWithGroupsType
->;
-
-export type GetAllUsersWithGroupsGroup = {
-  id?: string | undefined;
-  name?: string | undefined;
-  type?: GetAllUsersWithGroupsType | undefined;
-};
-
-export type GetAllUsersWithGroupsData = {
-  id?: string | undefined;
-  userId?: string | undefined;
-  orgId?: string | undefined;
-  fullName?: string | undefined;
-  hasLoggedIn?: boolean | undefined;
-  groups?: Array<GetAllUsersWithGroupsGroup> | undefined;
-};
+export type GetAllUsersWithGroupsData = {};
 
 /**
- * Users with groups retrieved successfully
+ * Users with group data retrieved successfully
  */
 export type GetAllUsersWithGroupsResponse = {
   success?: boolean | undefined;
@@ -52,82 +19,10 @@ export type GetAllUsersWithGroupsResponse = {
 };
 
 /** @internal */
-export type GetAllUsersWithGroupsRequest$Outbound = {
-  includeDeleted: boolean;
-};
-
-/** @internal */
-export const GetAllUsersWithGroupsRequest$outboundSchema: z.ZodMiniType<
-  GetAllUsersWithGroupsRequest$Outbound,
-  GetAllUsersWithGroupsRequest
-> = z.object({
-  includeDeleted: z._default(z.boolean(), false),
-});
-
-export function getAllUsersWithGroupsRequestToJSON(
-  getAllUsersWithGroupsRequest: GetAllUsersWithGroupsRequest,
-): string {
-  return JSON.stringify(
-    GetAllUsersWithGroupsRequest$outboundSchema.parse(
-      getAllUsersWithGroupsRequest,
-    ),
-  );
-}
-
-/** @internal */
-export const GetAllUsersWithGroupsType$inboundSchema: z.ZodMiniType<
-  GetAllUsersWithGroupsType,
-  unknown
-> = openEnums.inboundSchema(GetAllUsersWithGroupsType);
-
-/** @internal */
-export const GetAllUsersWithGroupsGroup$inboundSchema: z.ZodMiniType<
-  GetAllUsersWithGroupsGroup,
-  unknown
-> = z.pipe(
-  z.object({
-    _id: types.optional(types.string()),
-    name: types.optional(types.string()),
-    type: types.optional(GetAllUsersWithGroupsType$inboundSchema),
-  }),
-  z.transform((v) => {
-    return remap$(v, {
-      "_id": "id",
-    });
-  }),
-);
-
-export function getAllUsersWithGroupsGroupFromJSON(
-  jsonString: string,
-): SafeParseResult<GetAllUsersWithGroupsGroup, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => GetAllUsersWithGroupsGroup$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetAllUsersWithGroupsGroup' from JSON`,
-  );
-}
-
-/** @internal */
 export const GetAllUsersWithGroupsData$inboundSchema: z.ZodMiniType<
   GetAllUsersWithGroupsData,
   unknown
-> = z.pipe(
-  z.object({
-    _id: types.optional(types.string()),
-    userId: types.optional(types.string()),
-    orgId: types.optional(types.string()),
-    fullName: types.optional(types.string()),
-    hasLoggedIn: types.optional(types.boolean()),
-    groups: types.optional(
-      z.array(z.lazy(() => GetAllUsersWithGroupsGroup$inboundSchema)),
-    ),
-  }),
-  z.transform((v) => {
-    return remap$(v, {
-      "_id": "id",
-    });
-  }),
-);
+> = z.object({});
 
 export function getAllUsersWithGroupsDataFromJSON(
   jsonString: string,

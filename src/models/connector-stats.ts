@@ -8,31 +8,87 @@ import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
+export type Stats = {
+  total?: number | undefined;
+  indexingStatus?: { [k: string]: number } | undefined;
+};
+
+export type ByRecordType = {};
+
+export type Data = {
+  orgId?: string | undefined;
+  connectorId?: string | undefined;
+  origin?: string | undefined;
+  stats?: Stats | undefined;
+  byRecordType?: Array<ByRecordType> | undefined;
+};
+
 /**
  * Statistics for a connector's records
  */
 export type ConnectorStats = {
-  connectorId?: string | undefined;
-  totalRecords?: number | undefined;
-  indexedRecords?: number | undefined;
-  failedRecords?: number | undefined;
-  pendingRecords?: number | undefined;
-  lastSyncTime?: number | undefined;
-  statusBreakdown?: { [k: string]: number } | undefined;
+  success?: boolean | undefined;
+  data?: Data | undefined;
 };
+
+/** @internal */
+export const Stats$inboundSchema: z.ZodMiniType<Stats, unknown> = z.object({
+  total: types.optional(types.number()),
+  indexingStatus: types.optional(z.record(z.string(), types.number())),
+});
+
+export function statsFromJSON(
+  jsonString: string,
+): SafeParseResult<Stats, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Stats$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Stats' from JSON`,
+  );
+}
+
+/** @internal */
+export const ByRecordType$inboundSchema: z.ZodMiniType<ByRecordType, unknown> =
+  z.object({});
+
+export function byRecordTypeFromJSON(
+  jsonString: string,
+): SafeParseResult<ByRecordType, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => ByRecordType$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ByRecordType' from JSON`,
+  );
+}
+
+/** @internal */
+export const Data$inboundSchema: z.ZodMiniType<Data, unknown> = z.object({
+  orgId: types.optional(types.string()),
+  connectorId: types.optional(types.string()),
+  origin: types.optional(types.string()),
+  stats: types.optional(z.lazy(() => Stats$inboundSchema)),
+  byRecordType: types.optional(
+    z.array(z.lazy(() => ByRecordType$inboundSchema)),
+  ),
+});
+
+export function dataFromJSON(
+  jsonString: string,
+): SafeParseResult<Data, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Data$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Data' from JSON`,
+  );
+}
 
 /** @internal */
 export const ConnectorStats$inboundSchema: z.ZodMiniType<
   ConnectorStats,
   unknown
 > = z.object({
-  connectorId: types.optional(types.string()),
-  totalRecords: types.optional(types.number()),
-  indexedRecords: types.optional(types.number()),
-  failedRecords: types.optional(types.number()),
-  pendingRecords: types.optional(types.number()),
-  lastSyncTime: types.optional(types.number()),
-  statusBreakdown: types.optional(z.record(z.string(), types.number())),
+  success: types.optional(types.boolean()),
+  data: types.optional(z.lazy(() => Data$inboundSchema)),
 });
 
 export function connectorStatsFromJSON(

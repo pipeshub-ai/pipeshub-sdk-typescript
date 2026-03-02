@@ -3,12 +3,51 @@
  */
 
 import * as z from "zod/v4-mini";
+import { safeParse } from "../../lib/schemas.js";
+import { Result as SafeParseResult } from "../../types/fp.js";
+import * as types from "../../types/primitives.js";
+import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
 
 export type ListAgentConversationsRequest = {
   /**
    * Agent identifier
    */
   agentKey: string;
+};
+
+export type ListAgentConversationsPagination = {
+  page?: number | undefined;
+  limit?: number | undefined;
+  totalCount?: number | undefined;
+  totalPages?: number | undefined;
+  hasNextPage?: boolean | undefined;
+  hasPrevPage?: boolean | undefined;
+};
+
+/**
+ * Applied and available filters
+ */
+export type ListAgentConversationsFilters = {};
+
+export type ListAgentConversationsMeta = {
+  requestId?: string | undefined;
+  timestamp?: Date | undefined;
+  duration?: number | undefined;
+};
+
+/**
+ * List of agent conversations
+ */
+export type ListAgentConversationsResponse = {
+  conversations?: Array<models.Conversation> | undefined;
+  sharedWithMeConversations?: Array<models.Conversation> | undefined;
+  pagination?: ListAgentConversationsPagination | undefined;
+  /**
+   * Applied and available filters
+   */
+  filters?: ListAgentConversationsFilters | undefined;
+  meta?: ListAgentConversationsMeta | undefined;
 };
 
 /** @internal */
@@ -31,5 +70,92 @@ export function listAgentConversationsRequestToJSON(
     ListAgentConversationsRequest$outboundSchema.parse(
       listAgentConversationsRequest,
     ),
+  );
+}
+
+/** @internal */
+export const ListAgentConversationsPagination$inboundSchema: z.ZodMiniType<
+  ListAgentConversationsPagination,
+  unknown
+> = z.object({
+  page: types.optional(types.number()),
+  limit: types.optional(types.number()),
+  totalCount: types.optional(types.number()),
+  totalPages: types.optional(types.number()),
+  hasNextPage: types.optional(types.boolean()),
+  hasPrevPage: types.optional(types.boolean()),
+});
+
+export function listAgentConversationsPaginationFromJSON(
+  jsonString: string,
+): SafeParseResult<ListAgentConversationsPagination, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => ListAgentConversationsPagination$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ListAgentConversationsPagination' from JSON`,
+  );
+}
+
+/** @internal */
+export const ListAgentConversationsFilters$inboundSchema: z.ZodMiniType<
+  ListAgentConversationsFilters,
+  unknown
+> = z.object({});
+
+export function listAgentConversationsFiltersFromJSON(
+  jsonString: string,
+): SafeParseResult<ListAgentConversationsFilters, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => ListAgentConversationsFilters$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ListAgentConversationsFilters' from JSON`,
+  );
+}
+
+/** @internal */
+export const ListAgentConversationsMeta$inboundSchema: z.ZodMiniType<
+  ListAgentConversationsMeta,
+  unknown
+> = z.object({
+  requestId: types.optional(types.string()),
+  timestamp: types.optional(types.date()),
+  duration: types.optional(types.number()),
+});
+
+export function listAgentConversationsMetaFromJSON(
+  jsonString: string,
+): SafeParseResult<ListAgentConversationsMeta, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => ListAgentConversationsMeta$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ListAgentConversationsMeta' from JSON`,
+  );
+}
+
+/** @internal */
+export const ListAgentConversationsResponse$inboundSchema: z.ZodMiniType<
+  ListAgentConversationsResponse,
+  unknown
+> = z.object({
+  conversations: types.optional(z.array(models.Conversation$inboundSchema)),
+  sharedWithMeConversations: types.optional(
+    z.array(models.Conversation$inboundSchema),
+  ),
+  pagination: types.optional(
+    z.lazy(() => ListAgentConversationsPagination$inboundSchema),
+  ),
+  filters: types.optional(
+    z.lazy(() => ListAgentConversationsFilters$inboundSchema),
+  ),
+  meta: types.optional(z.lazy(() => ListAgentConversationsMeta$inboundSchema)),
+});
+
+export function listAgentConversationsResponseFromJSON(
+  jsonString: string,
+): SafeParseResult<ListAgentConversationsResponse, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => ListAgentConversationsResponse$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ListAgentConversationsResponse' from JSON`,
   );
 }

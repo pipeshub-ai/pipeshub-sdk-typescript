@@ -3,11 +3,43 @@
  */
 
 import * as z from "zod/v4-mini";
+import { smartUnion } from "../../types/smart-union.js";
 
-export type CreateAgentLlmConfig = {
+export type CreateAgentModel = {
   modelKey?: string | undefined;
-  temperature?: number | undefined;
-  maxTokens?: number | undefined;
+  modelName?: string | undefined;
+  provider?: string | undefined;
+  isReasoning?: boolean | undefined;
+};
+
+export type CreateAgentModelUnion = string | CreateAgentModel;
+
+export type CreateAgentTool = {
+  name?: string | undefined;
+  fullName?: string | undefined;
+  description?: string | undefined;
+};
+
+export type CreateAgentToolset = {
+  name?: string | undefined;
+  displayName?: string | undefined;
+  type?: string | undefined;
+  /**
+   * Admin-created toolset instance ID
+   */
+  instanceId?: string | undefined;
+  /**
+   * Human-friendly instance name
+   */
+  instanceName?: string | undefined;
+  tools?: Array<CreateAgentTool> | undefined;
+};
+
+export type CreateAgentFilters = { [k: string]: any } | string;
+
+export type CreateAgentKnowledge = {
+  connectorId?: string | undefined;
+  filters?: { [k: string]: any } | string | undefined;
 };
 
 /**
@@ -27,42 +59,170 @@ export type CreateAgentRequest = {
    */
   systemPrompt?: string | undefined;
   /**
-   * Tool keys the agent can use
+   * Initial greeting shown when conversation starts
    */
-  tools?: Array<string> | undefined;
+  startMessage?: string | undefined;
   /**
-   * Knowledge base IDs to access
+   * Additional agent execution instructions
    */
-  knowledgeBases?: Array<string> | undefined;
-  llmConfig?: CreateAgentLlmConfig | undefined;
+  instructions?: string | null | undefined;
+  /**
+   * Agent model configuration entries
+   */
+  models?: Array<string | CreateAgentModel> | undefined;
+  /**
+   * Toolsets attached to the agent (instance-aware)
+   */
+  toolsets?: Array<CreateAgentToolset> | undefined;
+  /**
+   * Knowledge sources connected to the agent
+   */
+  knowledge?: Array<CreateAgentKnowledge> | undefined;
   /**
    * Make agent available to all org users
    */
   isPublic?: boolean | undefined;
+  /**
+   * Share agent with the organization
+   */
+  shareWithOrg?: boolean | undefined;
 };
 
 /** @internal */
-export type CreateAgentLlmConfig$Outbound = {
+export type CreateAgentModel$Outbound = {
   modelKey?: string | undefined;
-  temperature?: number | undefined;
-  maxTokens?: number | undefined;
+  modelName?: string | undefined;
+  provider?: string | undefined;
+  isReasoning?: boolean | undefined;
 };
 
 /** @internal */
-export const CreateAgentLlmConfig$outboundSchema: z.ZodMiniType<
-  CreateAgentLlmConfig$Outbound,
-  CreateAgentLlmConfig
+export const CreateAgentModel$outboundSchema: z.ZodMiniType<
+  CreateAgentModel$Outbound,
+  CreateAgentModel
 > = z.object({
   modelKey: z.optional(z.string()),
-  temperature: z.optional(z.number()),
-  maxTokens: z.optional(z.int()),
+  modelName: z.optional(z.string()),
+  provider: z.optional(z.string()),
+  isReasoning: z.optional(z.boolean()),
 });
 
-export function createAgentLlmConfigToJSON(
-  createAgentLlmConfig: CreateAgentLlmConfig,
+export function createAgentModelToJSON(
+  createAgentModel: CreateAgentModel,
 ): string {
   return JSON.stringify(
-    CreateAgentLlmConfig$outboundSchema.parse(createAgentLlmConfig),
+    CreateAgentModel$outboundSchema.parse(createAgentModel),
+  );
+}
+
+/** @internal */
+export type CreateAgentModelUnion$Outbound = string | CreateAgentModel$Outbound;
+
+/** @internal */
+export const CreateAgentModelUnion$outboundSchema: z.ZodMiniType<
+  CreateAgentModelUnion$Outbound,
+  CreateAgentModelUnion
+> = smartUnion([z.string(), z.lazy(() => CreateAgentModel$outboundSchema)]);
+
+export function createAgentModelUnionToJSON(
+  createAgentModelUnion: CreateAgentModelUnion,
+): string {
+  return JSON.stringify(
+    CreateAgentModelUnion$outboundSchema.parse(createAgentModelUnion),
+  );
+}
+
+/** @internal */
+export type CreateAgentTool$Outbound = {
+  name?: string | undefined;
+  fullName?: string | undefined;
+  description?: string | undefined;
+};
+
+/** @internal */
+export const CreateAgentTool$outboundSchema: z.ZodMiniType<
+  CreateAgentTool$Outbound,
+  CreateAgentTool
+> = z.object({
+  name: z.optional(z.string()),
+  fullName: z.optional(z.string()),
+  description: z.optional(z.string()),
+});
+
+export function createAgentToolToJSON(
+  createAgentTool: CreateAgentTool,
+): string {
+  return JSON.stringify(CreateAgentTool$outboundSchema.parse(createAgentTool));
+}
+
+/** @internal */
+export type CreateAgentToolset$Outbound = {
+  name?: string | undefined;
+  displayName?: string | undefined;
+  type?: string | undefined;
+  instanceId?: string | undefined;
+  instanceName?: string | undefined;
+  tools?: Array<CreateAgentTool$Outbound> | undefined;
+};
+
+/** @internal */
+export const CreateAgentToolset$outboundSchema: z.ZodMiniType<
+  CreateAgentToolset$Outbound,
+  CreateAgentToolset
+> = z.object({
+  name: z.optional(z.string()),
+  displayName: z.optional(z.string()),
+  type: z.optional(z.string()),
+  instanceId: z.optional(z.string()),
+  instanceName: z.optional(z.string()),
+  tools: z.optional(z.array(z.lazy(() => CreateAgentTool$outboundSchema))),
+});
+
+export function createAgentToolsetToJSON(
+  createAgentToolset: CreateAgentToolset,
+): string {
+  return JSON.stringify(
+    CreateAgentToolset$outboundSchema.parse(createAgentToolset),
+  );
+}
+
+/** @internal */
+export type CreateAgentFilters$Outbound = { [k: string]: any } | string;
+
+/** @internal */
+export const CreateAgentFilters$outboundSchema: z.ZodMiniType<
+  CreateAgentFilters$Outbound,
+  CreateAgentFilters
+> = smartUnion([z.record(z.string(), z.any()), z.string()]);
+
+export function createAgentFiltersToJSON(
+  createAgentFilters: CreateAgentFilters,
+): string {
+  return JSON.stringify(
+    CreateAgentFilters$outboundSchema.parse(createAgentFilters),
+  );
+}
+
+/** @internal */
+export type CreateAgentKnowledge$Outbound = {
+  connectorId?: string | undefined;
+  filters?: { [k: string]: any } | string | undefined;
+};
+
+/** @internal */
+export const CreateAgentKnowledge$outboundSchema: z.ZodMiniType<
+  CreateAgentKnowledge$Outbound,
+  CreateAgentKnowledge
+> = z.object({
+  connectorId: z.optional(z.string()),
+  filters: z.optional(smartUnion([z.record(z.string(), z.any()), z.string()])),
+});
+
+export function createAgentKnowledgeToJSON(
+  createAgentKnowledge: CreateAgentKnowledge,
+): string {
+  return JSON.stringify(
+    CreateAgentKnowledge$outboundSchema.parse(createAgentKnowledge),
   );
 }
 
@@ -71,10 +231,13 @@ export type CreateAgentRequest$Outbound = {
   name: string;
   description?: string | undefined;
   systemPrompt?: string | undefined;
-  tools?: Array<string> | undefined;
-  knowledgeBases?: Array<string> | undefined;
-  llmConfig?: CreateAgentLlmConfig$Outbound | undefined;
+  startMessage?: string | undefined;
+  instructions?: string | null | undefined;
+  models?: Array<string | CreateAgentModel$Outbound> | undefined;
+  toolsets?: Array<CreateAgentToolset$Outbound> | undefined;
+  knowledge?: Array<CreateAgentKnowledge$Outbound> | undefined;
   isPublic: boolean;
+  shareWithOrg: boolean;
 };
 
 /** @internal */
@@ -85,10 +248,22 @@ export const CreateAgentRequest$outboundSchema: z.ZodMiniType<
   name: z.string(),
   description: z.optional(z.string()),
   systemPrompt: z.optional(z.string()),
-  tools: z.optional(z.array(z.string())),
-  knowledgeBases: z.optional(z.array(z.string())),
-  llmConfig: z.optional(z.lazy(() => CreateAgentLlmConfig$outboundSchema)),
+  startMessage: z.optional(z.string()),
+  instructions: z.optional(z.nullable(z.string())),
+  models: z.optional(
+    z.array(smartUnion([
+      z.string(),
+      z.lazy(() => CreateAgentModel$outboundSchema),
+    ])),
+  ),
+  toolsets: z.optional(
+    z.array(z.lazy(() => CreateAgentToolset$outboundSchema)),
+  ),
+  knowledge: z.optional(
+    z.array(z.lazy(() => CreateAgentKnowledge$outboundSchema)),
+  ),
   isPublic: z._default(z.boolean(), false),
+  shareWithOrg: z._default(z.boolean(), false),
 });
 
 export function createAgentRequestToJSON(

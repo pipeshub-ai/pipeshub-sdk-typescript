@@ -15,7 +15,7 @@ export type GoogleAuthConfig = {
   /**
    * Google OAuth client ID
    */
-  clientId: string;
+  clientId?: string | undefined;
 };
 
 /** @internal */
@@ -23,11 +23,11 @@ export const GoogleAuthConfig$inboundSchema: z.ZodMiniType<
   GoogleAuthConfig,
   unknown
 > = z.object({
-  clientId: types.string(),
+  clientId: types.optional(types.string()),
 });
 /** @internal */
 export type GoogleAuthConfig$Outbound = {
-  clientId: string;
+  clientId?: string | undefined;
 };
 
 /** @internal */
@@ -35,7 +35,7 @@ export const GoogleAuthConfig$outboundSchema: z.ZodMiniType<
   GoogleAuthConfig$Outbound,
   GoogleAuthConfig
 > = z.object({
-  clientId: z.string(),
+  clientId: z.optional(z.string()),
 });
 
 export function googleAuthConfigToJSON(

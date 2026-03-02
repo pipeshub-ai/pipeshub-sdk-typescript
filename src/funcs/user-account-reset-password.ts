@@ -22,35 +22,26 @@ import * as errors from "../models/errors/index.js";
 import { PipeshubError } from "../models/errors/pipeshub-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { SDKValidationError } from "../models/errors/sdk-validation-error.js";
-import * as models from "../models/index.js";
+import * as operations from "../models/operations/index.js";
 import { APICall, APIPromise } from "../types/async.js";
 import { Result } from "../types/fp.js";
 
 /**
- * Reset password (authenticated user)
+ * Reset password
  *
  * @remarks
- * Reset password for an authenticated user. Requires the current password for verification.
- * <br><br>
- * <b>Password Requirements:</b><br>
- * - Minimum 8 characters<br>
- * - At least 1 uppercase letter (A-Z)<br>
- * - At least 1 lowercase letter (a-z)<br>
- * - At least 1 number (0-9)<br>
- * - At least 1 special character (#?!@$%^&*-)
- * <br><br>
- * <b>Security Notes:</b><br>
- * - A new access token is returned (old tokens are invalidated)<br>
- * - CAPTCHA may be required if enabled (pass <code>cf-turnstile-response</code>)
+ * Reset the password for the currently authenticated user.<br><br>
+ * <b>Overview:</b><br>
+ * Allows a logged-in user to change their password by providing the current password and a new password.
  */
 export function userAccountResetPassword(
   client: PipeshubCore,
-  request: models.PasswordResetRequest,
+  request: operations.ResetPasswordRequest,
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    models.PasswordResetResponse,
-    | errors.AuthError
+    operations.ResetPasswordResponse,
+    | errors.ResetPasswordBadRequestError
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -70,13 +61,13 @@ export function userAccountResetPassword(
 
 async function $do(
   client: PipeshubCore,
-  request: models.PasswordResetRequest,
+  request: operations.ResetPasswordRequest,
   options?: RequestOptions,
 ): Promise<
   [
     Result<
-      models.PasswordResetResponse,
-      | errors.AuthError
+      operations.ResetPasswordResponse,
+      | errors.ResetPasswordBadRequestError
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -91,7 +82,7 @@ async function $do(
 > {
   const parsed = safeParse(
     request,
-    (value) => z.parse(models.PasswordResetRequest$outboundSchema, value),
+    (value) => z.parse(operations.ResetPasswordRequest$outboundSchema, value),
     "Input validation failed",
   );
   if (!parsed.ok) {
@@ -107,19 +98,18 @@ async function $do(
     Accept: "application/json",
   }));
 
-  const secConfig = await extractSecurity(client._options.bearerAuth);
-  const securityInput = secConfig == null ? {} : { bearerAuth: secConfig };
+  const securityInput = await extractSecurity(client._options.security);
   const requestSecurity = resolveGlobalSecurity(securityInput);
 
   const context = {
     options: client._options,
     baseURL: options?.serverURL ?? client._baseURL ?? "",
     operationID: "resetPassword",
-    oAuth2Scopes: null,
+    oAuth2Scopes: [],
 
     resolvedSecurity: requestSecurity,
 
-    securitySource: client._options.bearerAuth,
+    securitySource: client._options.security,
     retryConfig: options?.retries
       || client._options.retryConfig
       || { strategy: "none" },
@@ -143,7 +133,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["400", "401", "404", "4XX", "5XX"],
+    errorCodes: ["400", "401", "4XX", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -157,8 +147,8 @@ async function $do(
   };
 
   const [result] = await M.match<
-    models.PasswordResetResponse,
-    | errors.AuthError
+    operations.ResetPasswordResponse,
+    | errors.ResetPasswordBadRequestError
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -168,9 +158,9 @@ async function $do(
     | UnexpectedClientError
     | SDKValidationError
   >(
-    M.json(200, models.PasswordResetResponse$inboundSchema),
-    M.jsonErr(400, errors.AuthError$inboundSchema),
-    M.fail([401, 404, "4XX"]),
+    M.json(200, operations.ResetPasswordResponse$inboundSchema),
+    M.jsonErr(400, errors.ResetPasswordBadRequestError$inboundSchema),
+    M.fail([401, "4XX"]),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });
   if (!result.ok) {

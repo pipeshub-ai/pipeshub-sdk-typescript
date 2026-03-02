@@ -8,7 +8,7 @@ import { ClosedEnum } from "../../types/enums.js";
 /**
  * Group type determining behavior and privileges
  */
-export const CreateUserGroupType = {
+export const Type = {
   Admin: "admin",
   Standard: "standard",
   Everyone: "everyone",
@@ -17,7 +17,7 @@ export const CreateUserGroupType = {
 /**
  * Group type determining behavior and privileges
  */
-export type CreateUserGroupType = ClosedEnum<typeof CreateUserGroupType>;
+export type Type = ClosedEnum<typeof Type>;
 
 /**
  * Request payload
@@ -30,7 +30,7 @@ export type CreateUserGroupRequest = {
   /**
    * Group type determining behavior and privileges
    */
-  type: CreateUserGroupType;
+  type: Type;
   /**
    * Optional description of the group's purpose
    */
@@ -38,9 +38,7 @@ export type CreateUserGroupRequest = {
 };
 
 /** @internal */
-export const CreateUserGroupType$outboundSchema: z.ZodMiniEnum<
-  typeof CreateUserGroupType
-> = z.enum(CreateUserGroupType);
+export const Type$outboundSchema: z.ZodMiniEnum<typeof Type> = z.enum(Type);
 
 /** @internal */
 export type CreateUserGroupRequest$Outbound = {
@@ -55,7 +53,7 @@ export const CreateUserGroupRequest$outboundSchema: z.ZodMiniType<
   CreateUserGroupRequest
 > = z.object({
   name: z.string(),
-  type: CreateUserGroupType$outboundSchema,
+  type: Type$outboundSchema,
   description: z.optional(z.string()),
 });
 

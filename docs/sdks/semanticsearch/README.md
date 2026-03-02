@@ -2,19 +2,21 @@
 
 ## Overview
 
+Enterprise semantic search across all indexed knowledge with relevance scoring
+
 ### Available Operations
 
-* [postSearch](#postsearch) - Perform semantic search
-* [getHistory](#gethistory) - Get search history
-* [deleteAllHistory](#deleteallhistory) - Clear all search history
-* [getById](#getbyid) - Get search by ID
-* [delete](#delete) - Delete search
-* [patchShare](#patchshare) - Share search results
-* [unshare](#unshare) - Revoke search access
-* [archive](#archive) - Archive search
-* [unarchive](#unarchive) - Unarchive search
+* [search](#search) - Perform semantic search
+* [searchHistory](#searchhistory) - Get search history
+* [deleteAllSearchHistory](#deleteallsearchhistory) - Clear all search history
+* [~~getSearchById~~](#getsearchbyid) - Get search by ID :warning: **Deprecated**
+* [~~deleteSearchById~~](#deletesearchbyid) - Delete search by ID :warning: **Deprecated**
+* [~~shareSearch~~](#sharesearch) - Share a search :warning: **Deprecated**
+* [~~unshareSearch~~](#unsharesearch) - Unshare a search :warning: **Deprecated**
+* [~~archiveSearch~~](#archivesearch) - Archive a search :warning: **Deprecated**
+* [~~unarchiveSearch~~](#unarchivesearch) - Unarchive a search :warning: **Deprecated**
 
-## postSearch
+## search
 
 Execute a semantic search across your organization's knowledge base.<br><br>
 <b>Overview:</b><br>
@@ -52,12 +54,13 @@ All searches are saved and can be retrieved via <code>GET /search</code>.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.semanticSearch.postSearch({
+  const result = await pipeshub.semanticSearch.search({
     query: "API documentation examples",
     filters: {
       apps: [
@@ -79,17 +82,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { semanticSearchPostSearch } from "pipeshub/funcs/semantic-search-post-search.js";
+import { semanticSearchSearch } from "pipeshub/funcs/semantic-search-search.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await semanticSearchPostSearch(pipeshub, {
+  const res = await semanticSearchSearch(pipeshub, {
     query: "API documentation examples",
     filters: {
       apps: [
@@ -102,7 +106,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("semanticSearchPostSearch failed:", res.error);
+    console.log("semanticSearchSearch failed:", res.error);
   }
 }
 
@@ -115,12 +119,13 @@ run();
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.semanticSearch.postSearch({
+  const result = await pipeshub.semanticSearch.search({
     query: "company vacation policy",
   });
 
@@ -136,24 +141,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { semanticSearchPostSearch } from "pipeshub/funcs/semantic-search-post-search.js";
+import { semanticSearchSearch } from "pipeshub/funcs/semantic-search-search.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await semanticSearchPostSearch(pipeshub, {
+  const res = await semanticSearchSearch(pipeshub, {
     query: "company vacation policy",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("semanticSearchPostSearch failed:", res.error);
+    console.log("semanticSearchSearch failed:", res.error);
   }
 }
 
@@ -179,7 +185,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getHistory
+## searchHistory
 
 Retrieve your search history with pagination.<br><br>
 <b>Overview:</b><br>
@@ -196,12 +202,13 @@ Use <code>page</code> and <code>limit</code> to navigate through results.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.semanticSearch.getHistory({});
+  const result = await pipeshub.semanticSearch.searchHistory({});
 
   console.log(result);
 }
@@ -215,22 +222,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { semanticSearchGetHistory } from "pipeshub/funcs/semantic-search-get-history.js";
+import { semanticSearchSearchHistory } from "pipeshub/funcs/semantic-search-search-history.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await semanticSearchGetHistory(pipeshub, {});
+  const res = await semanticSearchSearchHistory(pipeshub, {});
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("semanticSearchGetHistory failed:", res.error);
+    console.log("semanticSearchSearchHistory failed:", res.error);
   }
 }
 
@@ -256,7 +264,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## deleteAllHistory
+## deleteAllSearchHistory
 
 Delete all search history for the authenticated user.<br><br>
 <b>Warning:</b><br>
@@ -270,12 +278,13 @@ This action cannot be undone. All saved searches will be permanently removed.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.semanticSearch.deleteAllHistory();
+  const result = await pipeshub.semanticSearch.deleteAllSearchHistory();
 
   console.log(result);
 }
@@ -289,22 +298,23 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { semanticSearchDeleteAllHistory } from "pipeshub/funcs/semantic-search-delete-all-history.js";
+import { semanticSearchDeleteAllSearchHistory } from "pipeshub/funcs/semantic-search-delete-all-search-history.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await semanticSearchDeleteAllHistory(pipeshub);
+  const res = await semanticSearchDeleteAllSearchHistory(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("semanticSearchDeleteAllHistory failed:", res.error);
+    console.log("semanticSearchDeleteAllSearchHistory failed:", res.error);
   }
 }
 
@@ -329,13 +339,13 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getById
+## ~~getSearchById~~
 
-Retrieve a specific search result by its ID.<br><br>
-<b>Overview:</b><br>
-Returns the full search record including query, all results,
-and any sharing/archive status.
+<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
+Retrieve a specific search result by its ID.
 
+
+> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
 
 ### Example Usage
 
@@ -344,12 +354,13 @@ and any sharing/archive status.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.semanticSearch.getById({
+  const result = await pipeshub.semanticSearch.getSearchById({
     searchId: "<value>",
   });
 
@@ -365,24 +376,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { semanticSearchGetById } from "pipeshub/funcs/semantic-search-get-by-id.js";
+import { semanticSearchGetSearchById } from "pipeshub/funcs/semantic-search-get-search-by-id.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await semanticSearchGetById(pipeshub, {
+  const res = await semanticSearchGetSearchById(pipeshub, {
     searchId: "<value>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("semanticSearchGetById failed:", res.error);
+    console.log("semanticSearchGetSearchById failed:", res.error);
   }
 }
 
@@ -408,111 +420,29 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## delete
+## ~~deleteSearchById~~
 
-Delete a specific search from history.<br><br>
-<b>Overview:</b><br>
-Permanently removes the search record from your history.
+<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
+Delete a specific search result by its ID.
 
+
+> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
 
 ### Example Usage
 
-<!-- UsageSnippet language="typescript" operationID="deleteSearch" method="delete" path="/search/{searchId}" -->
+<!-- UsageSnippet language="typescript" operationID="deleteSearchById" method="delete" path="/search/{searchId}" -->
 ```typescript
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  await pipeshub.semanticSearch.delete({
+  const result = await pipeshub.semanticSearch.deleteSearchById({
     searchId: "<value>",
-  });
-
-
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { semanticSearchDelete } from "pipeshub/funcs/semantic-search-delete.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await semanticSearchDelete(pipeshub, {
-    searchId: "<value>",
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    
-  } else {
-    console.log("semanticSearchDelete failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.DeleteSearchRequest](../../models/operations/delete-search-request.md)                                                                                             | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<void\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## patchShare
-
-Share search results with other users.<br><br>
-<b>Overview:</b><br>
-Allows sharing a search and its results with colleagues.
-Useful for collaborative research or knowledge sharing.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="shareSearch" method="patch" path="/search/{searchId}/share" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.semanticSearch.patchShare({
-    searchId: "<value>",
-    body: {
-      userIds: [
-        "507f1f77bcf86cd799439011",
-      ],
-    },
   });
 
   console.log(result);
@@ -527,29 +457,108 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { semanticSearchPatchShare } from "pipeshub/funcs/semantic-search-patch-share.js";
+import { semanticSearchDeleteSearchById } from "pipeshub/funcs/semantic-search-delete-search-by-id.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await semanticSearchPatchShare(pipeshub, {
+  const res = await semanticSearchDeleteSearchById(pipeshub, {
     searchId: "<value>",
-    body: {
-      userIds: [
-        "507f1f77bcf86cd799439011",
-      ],
-    },
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("semanticSearchPatchShare failed:", res.error);
+    console.log("semanticSearchDeleteSearchById failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.DeleteSearchByIdRequest](../../models/operations/delete-search-by-id-request.md)                                                                                   | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[operations.DeleteSearchByIdResponse](../../models/operations/delete-search-by-id-response.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
+## ~~shareSearch~~
+
+<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
+Share a specific search result, making it accessible to other users.
+
+
+> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="shareSearch" method="patch" path="/search/{searchId}/share" -->
+```typescript
+import { Pipeshub } from "pipeshub";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.semanticSearch.shareSearch({
+    searchId: "<value>",
+    body: {},
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "pipeshub/core.js";
+import { semanticSearchShareSearch } from "pipeshub/funcs/semantic-search-share-search.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
+});
+
+async function run() {
+  const res = await semanticSearchShareSearch(pipeshub, {
+    searchId: "<value>",
+    body: {},
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("semanticSearchShareSearch failed:", res.error);
   }
 }
 
@@ -567,7 +576,7 @@ run();
 
 ### Response
 
-**Promise\<[models.SearchResult](../../models/search-result.md)\>**
+**Promise\<[operations.ShareSearchResponse](../../models/operations/share-search-response.md)\>**
 
 ### Errors
 
@@ -575,9 +584,13 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## unshare
+## ~~unshareSearch~~
 
-Remove sharing access from specified users.
+<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
+Revoke sharing for a specific search result, making it private again.
+
+
+> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
 
 ### Example Usage
 
@@ -586,18 +599,15 @@ Remove sharing access from specified users.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.semanticSearch.unshare({
+  const result = await pipeshub.semanticSearch.unshareSearch({
     searchId: "<value>",
-    body: {
-      userIds: [
-        "<value 1>",
-      ],
-    },
+    body: {},
   });
 
   console.log(result);
@@ -612,29 +622,26 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { semanticSearchUnshare } from "pipeshub/funcs/semantic-search-unshare.js";
+import { semanticSearchUnshareSearch } from "pipeshub/funcs/semantic-search-unshare-search.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await semanticSearchUnshare(pipeshub, {
+  const res = await semanticSearchUnshareSearch(pipeshub, {
     searchId: "<value>",
-    body: {
-      userIds: [
-        "<value 1>",
-      ],
-    },
+    body: {},
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("semanticSearchUnshare failed:", res.error);
+    console.log("semanticSearchUnshareSearch failed:", res.error);
   }
 }
 
@@ -652,7 +659,7 @@ run();
 
 ### Response
 
-**Promise\<[models.SearchResult](../../models/search-result.md)\>**
+**Promise\<[operations.UnshareSearchResponse](../../models/operations/unshare-search-response.md)\>**
 
 ### Errors
 
@@ -660,9 +667,13 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## archive
+## ~~archiveSearch~~
 
-Archive a search to hide it from the main history list.
+<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
+Archive a specific search result. Archived searches are hidden from the default search history view.
+
+
+> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
 
 ### Example Usage
 
@@ -671,12 +682,13 @@ Archive a search to hide it from the main history list.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.semanticSearch.archive({
+  const result = await pipeshub.semanticSearch.archiveSearch({
     searchId: "<value>",
   });
 
@@ -692,24 +704,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { semanticSearchArchive } from "pipeshub/funcs/semantic-search-archive.js";
+import { semanticSearchArchiveSearch } from "pipeshub/funcs/semantic-search-archive-search.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await semanticSearchArchive(pipeshub, {
+  const res = await semanticSearchArchiveSearch(pipeshub, {
     searchId: "<value>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("semanticSearchArchive failed:", res.error);
+    console.log("semanticSearchArchiveSearch failed:", res.error);
   }
 }
 
@@ -727,7 +740,7 @@ run();
 
 ### Response
 
-**Promise\<[models.SearchResult](../../models/search-result.md)\>**
+**Promise\<[operations.ArchiveSearchResponse](../../models/operations/archive-search-response.md)\>**
 
 ### Errors
 
@@ -735,9 +748,13 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## unarchive
+## ~~unarchiveSearch~~
 
-Restore an archived search to the active history list.
+<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
+Restore a previously archived search result back to the active search history.
+
+
+> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
 
 ### Example Usage
 
@@ -746,12 +763,13 @@ Restore an archived search to the active history list.
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.semanticSearch.unarchive({
+  const result = await pipeshub.semanticSearch.unarchiveSearch({
     searchId: "<value>",
   });
 
@@ -767,24 +785,25 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { semanticSearchUnarchive } from "pipeshub/funcs/semantic-search-unarchive.js";
+import { semanticSearchUnarchiveSearch } from "pipeshub/funcs/semantic-search-unarchive-search.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await semanticSearchUnarchive(pipeshub, {
+  const res = await semanticSearchUnarchiveSearch(pipeshub, {
     searchId: "<value>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("semanticSearchUnarchive failed:", res.error);
+    console.log("semanticSearchUnarchiveSearch failed:", res.error);
   }
 }
 
@@ -802,7 +821,7 @@ run();
 
 ### Response
 
-**Promise\<[models.SearchResult](../../models/search-result.md)\>**
+**Promise\<[operations.UnarchiveSearchResponse](../../models/operations/unarchive-search-response.md)\>**
 
 ### Errors
 

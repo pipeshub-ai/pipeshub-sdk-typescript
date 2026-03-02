@@ -3,14 +3,21 @@
  */
 
 import * as z from "zod/v4-mini";
+import {
+  SchemeOauth2,
+  SchemeOauth2$Outbound,
+  SchemeOauth2$outboundSchema,
+} from "./scheme-oauth2.js";
 
 export type Security = {
   bearerAuth?: string | undefined;
+  oauth2?: SchemeOauth2 | undefined;
 };
 
 /** @internal */
 export type Security$Outbound = {
   bearerAuth?: string | undefined;
+  oauth2?: SchemeOauth2$Outbound | undefined;
 };
 
 /** @internal */
@@ -19,6 +26,7 @@ export const Security$outboundSchema: z.ZodMiniType<
   Security
 > = z.object({
   bearerAuth: z.optional(z.string()),
+  oauth2: z.optional(SchemeOauth2$outboundSchema),
 });
 
 export function securityToJSON(security: Security): string {

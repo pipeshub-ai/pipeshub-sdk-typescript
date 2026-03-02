@@ -3,32 +3,63 @@
  */
 
 import * as z from "zod/v4-mini";
+import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
+import { smartUnion } from "../../types/smart-union.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 
-/**
- * Authorization code from Google OAuth consent
- */
 export type GetTokenFromCodeRequest = {
   /**
-   * Authorization code from Google OAuth consent flow
+   * Google OAuth authorization code received from the consent flow
    */
-  code: string;
+  tempCode: string;
+};
+
+export type Connector2 = {
+  id?: string | undefined;
+  orgId?: string | undefined;
+  name?: string | undefined;
+  isEnabled?: boolean | undefined;
+  lastUpdatedBy?: string | undefined;
+  createdAt?: Date | undefined;
+  updatedAt?: Date | undefined;
 };
 
 /**
- * Tokens exchanged and stored successfully
+ * New connector created and enabled
  */
-export type GetTokenFromCodeResponse = {
-  success?: boolean | undefined;
+export type GetTokenFromCodeResponseBody2 = {
   message?: string | undefined;
+  connector?: Connector2 | undefined;
 };
+
+export type Connector1 = {
+  id?: string | undefined;
+  orgId?: string | undefined;
+  name?: string | undefined;
+  isEnabled?: boolean | undefined;
+  lastUpdatedBy?: string | undefined;
+  createdAt?: Date | undefined;
+  updatedAt?: Date | undefined;
+};
+
+/**
+ * Existing connector enabled successfully
+ */
+export type GetTokenFromCodeResponseBody1 = {
+  message?: string | undefined;
+  connector?: Connector1 | undefined;
+};
+
+export type GetTokenFromCodeResponse =
+  | GetTokenFromCodeResponseBody1
+  | GetTokenFromCodeResponseBody2;
 
 /** @internal */
 export type GetTokenFromCodeRequest$Outbound = {
-  code: string;
+  tempCode: string;
 };
 
 /** @internal */
@@ -36,7 +67,7 @@ export const GetTokenFromCodeRequest$outboundSchema: z.ZodMiniType<
   GetTokenFromCodeRequest$Outbound,
   GetTokenFromCodeRequest
 > = z.object({
-  code: z.string(),
+  tempCode: z.string(),
 });
 
 export function getTokenFromCodeRequestToJSON(
@@ -48,13 +79,109 @@ export function getTokenFromCodeRequestToJSON(
 }
 
 /** @internal */
+export const Connector2$inboundSchema: z.ZodMiniType<Connector2, unknown> = z
+  .pipe(
+    z.object({
+      _id: types.optional(types.string()),
+      orgId: types.optional(types.string()),
+      name: types.optional(types.string()),
+      isEnabled: types.optional(types.boolean()),
+      lastUpdatedBy: types.optional(types.string()),
+      createdAt: types.optional(types.date()),
+      updatedAt: types.optional(types.date()),
+    }),
+    z.transform((v) => {
+      return remap$(v, {
+        "_id": "id",
+      });
+    }),
+  );
+
+export function connector2FromJSON(
+  jsonString: string,
+): SafeParseResult<Connector2, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Connector2$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Connector2' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetTokenFromCodeResponseBody2$inboundSchema: z.ZodMiniType<
+  GetTokenFromCodeResponseBody2,
+  unknown
+> = z.object({
+  message: types.optional(types.string()),
+  connector: types.optional(z.lazy(() => Connector2$inboundSchema)),
+});
+
+export function getTokenFromCodeResponseBody2FromJSON(
+  jsonString: string,
+): SafeParseResult<GetTokenFromCodeResponseBody2, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetTokenFromCodeResponseBody2$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetTokenFromCodeResponseBody2' from JSON`,
+  );
+}
+
+/** @internal */
+export const Connector1$inboundSchema: z.ZodMiniType<Connector1, unknown> = z
+  .pipe(
+    z.object({
+      _id: types.optional(types.string()),
+      orgId: types.optional(types.string()),
+      name: types.optional(types.string()),
+      isEnabled: types.optional(types.boolean()),
+      lastUpdatedBy: types.optional(types.string()),
+      createdAt: types.optional(types.date()),
+      updatedAt: types.optional(types.date()),
+    }),
+    z.transform((v) => {
+      return remap$(v, {
+        "_id": "id",
+      });
+    }),
+  );
+
+export function connector1FromJSON(
+  jsonString: string,
+): SafeParseResult<Connector1, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Connector1$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Connector1' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetTokenFromCodeResponseBody1$inboundSchema: z.ZodMiniType<
+  GetTokenFromCodeResponseBody1,
+  unknown
+> = z.object({
+  message: types.optional(types.string()),
+  connector: types.optional(z.lazy(() => Connector1$inboundSchema)),
+});
+
+export function getTokenFromCodeResponseBody1FromJSON(
+  jsonString: string,
+): SafeParseResult<GetTokenFromCodeResponseBody1, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetTokenFromCodeResponseBody1$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetTokenFromCodeResponseBody1' from JSON`,
+  );
+}
+
+/** @internal */
 export const GetTokenFromCodeResponse$inboundSchema: z.ZodMiniType<
   GetTokenFromCodeResponse,
   unknown
-> = z.object({
-  success: types.optional(types.boolean()),
-  message: types.optional(types.string()),
-});
+> = smartUnion([
+  z.lazy(() => GetTokenFromCodeResponseBody1$inboundSchema),
+  z.lazy(() => GetTokenFromCodeResponseBody2$inboundSchema),
+]);
 
 export function getTokenFromCodeResponseFromJSON(
   jsonString: string,

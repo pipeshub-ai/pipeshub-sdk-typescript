@@ -15,11 +15,11 @@ export type GenericOAuthConfig = {
   /**
    * Display name for the OAuth provider
    */
-  providerName: string;
+  providerName?: string | undefined;
   /**
    * OAuth client ID
    */
-  clientId: string;
+  clientId?: string | undefined;
   /**
    * OAuth client secret
    */
@@ -51,8 +51,8 @@ export const GenericOAuthConfig$inboundSchema: z.ZodMiniType<
   GenericOAuthConfig,
   unknown
 > = z.object({
-  providerName: types.string(),
-  clientId: types.string(),
+  providerName: types.optional(types.string()),
+  clientId: types.optional(types.string()),
   clientSecret: types.optional(types.string()),
   authorizationUrl: types.optional(types.string()),
   tokenEndpoint: types.optional(types.string()),
@@ -62,8 +62,8 @@ export const GenericOAuthConfig$inboundSchema: z.ZodMiniType<
 });
 /** @internal */
 export type GenericOAuthConfig$Outbound = {
-  providerName: string;
-  clientId: string;
+  providerName?: string | undefined;
+  clientId?: string | undefined;
   clientSecret?: string | undefined;
   authorizationUrl?: string | undefined;
   tokenEndpoint?: string | undefined;
@@ -77,8 +77,8 @@ export const GenericOAuthConfig$outboundSchema: z.ZodMiniType<
   GenericOAuthConfig$Outbound,
   GenericOAuthConfig
 > = z.object({
-  providerName: z.string(),
-  clientId: z.string(),
+  providerName: z.optional(z.string()),
+  clientId: z.optional(z.string()),
   clientSecret: z.optional(z.string()),
   authorizationUrl: z.optional(z.string()),
   tokenEndpoint: z.optional(z.string()),

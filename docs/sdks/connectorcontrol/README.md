@@ -2,11 +2,13 @@
 
 ## Overview
 
+Enable/disable connectors for sync or agent functionality
+
 ### Available Operations
 
-* [toggle](#toggle) - Toggle connector sync or agent
+* [toggleConnector](#toggleconnector) - Toggle connector sync or agent
 
-## toggle
+## toggleConnector
 
 Enable or disable a connector for sync or agent functionality.<br><br>
 <b>Toggle Types:</b><br>
@@ -34,12 +36,13 @@ Enable or disable a connector for sync or agent functionality.<br><br>
 import { Pipeshub } from "pipeshub";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.connectorControl.toggle({
+  const result = await pipeshub.connectorControl.toggleConnector({
     connectorId: "<id>",
     body: {
       type: "sync",
@@ -58,17 +61,18 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { connectorControlToggle } from "pipeshub/funcs/connector-control-toggle.js";
+import { connectorControlToggleConnector } from "pipeshub/funcs/connector-control-toggle-connector.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  },
 });
 
 async function run() {
-  const res = await connectorControlToggle(pipeshub, {
+  const res = await connectorControlToggleConnector(pipeshub, {
     connectorId: "<id>",
     body: {
       type: "sync",
@@ -78,7 +82,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("connectorControlToggle failed:", res.error);
+    console.log("connectorControlToggleConnector failed:", res.error);
   }
 }
 

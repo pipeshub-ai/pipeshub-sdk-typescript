@@ -9,7 +9,6 @@ import { GenericOAuthConfig } from "pipeshub/models";
 
 let value: GenericOAuthConfig = {
   providerName: "Custom OAuth Provider",
-  clientId: "<id>",
   scope: "openid profile email",
 };
 ```
@@ -18,8 +17,8 @@ let value: GenericOAuthConfig = {
 
 | Field                               | Type                                | Required                            | Description                         | Example                             |
 | ----------------------------------- | ----------------------------------- | ----------------------------------- | ----------------------------------- | ----------------------------------- |
-| `providerName`                      | *string*                            | :heavy_check_mark:                  | Display name for the OAuth provider | Custom OAuth Provider               |
-| `clientId`                          | *string*                            | :heavy_check_mark:                  | OAuth client ID                     |                                     |
+| `providerName`                      | *string*                            | :heavy_minus_sign:                  | Display name for the OAuth provider | Custom OAuth Provider               |
+| `clientId`                          | *string*                            | :heavy_minus_sign:                  | OAuth client ID                     |                                     |
 | `clientSecret`                      | *string*                            | :heavy_minus_sign:                  | OAuth client secret                 |                                     |
 | `authorizationUrl`                  | *string*                            | :heavy_minus_sign:                  | Authorization endpoint URL          |                                     |
 | `tokenEndpoint`                     | *string*                            | :heavy_minus_sign:                  | Token endpoint URL                  |                                     |

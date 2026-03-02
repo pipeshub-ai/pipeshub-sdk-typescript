@@ -1,19 +1,18 @@
 # UnshareAgentRequestBody
 
-Request body for Revoke agent access
+Request payload
 
 ## Example Usage
 
 ```typescript
 import { UnshareAgentRequestBody } from "pipeshub/models/operations";
 
-let value: UnshareAgentRequestBody = {
-  userIds: [],
-};
+let value: UnshareAgentRequestBody = {};
 ```
 
 ## Fields
 
 | Field              | Type               | Required           | Description        |
 | ------------------ | ------------------ | ------------------ | ------------------ |
-| `userIds`          | *string*[]         | :heavy_check_mark: | N/A                |
+| `userIds`          | *string*[]         | :heavy_minus_sign: | N/A                |
+| `teamIds`          | *string*[]         | :heavy_minus_sign: | N/A                |

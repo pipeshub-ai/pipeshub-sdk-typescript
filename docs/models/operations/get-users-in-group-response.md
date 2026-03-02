@@ -7,21 +7,12 @@ Users in group retrieved successfully
 ```typescript
 import { GetUsersInGroupResponse } from "pipeshub/models/operations";
 
-let value: GetUsersInGroupResponse = {
-  success: true,
-  pagination: {
-    page: 1,
-    limit: 20,
-    total: 45,
-    totalPages: 3,
-  },
-};
+let value: GetUsersInGroupResponse = {};
 ```
 
 ## Fields
 
-| Field                                                                                            | Type                                                                                             | Required                                                                                         | Description                                                                                      | Example                                                                                          |
-| ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
-| `success`                                                                                        | *boolean*                                                                                        | :heavy_minus_sign:                                                                               | N/A                                                                                              | true                                                                                             |
-| `data`                                                                                           | [models.User](../../models/user.md)[]                                                            | :heavy_minus_sign:                                                                               | N/A                                                                                              |                                                                                                  |
-| `pagination`                                                                                     | [operations.GetUsersInGroupPagination](../../models/operations/get-users-in-group-pagination.md) | :heavy_minus_sign:                                                                               | N/A                                                                                              |                                                                                                  |
+| Field                                                                                  | Type                                                                                   | Required                                                                               | Description                                                                            |
+| -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `success`                                                                              | *boolean*                                                                              | :heavy_minus_sign:                                                                     | N/A                                                                                    |
+| `data`                                                                                 | [operations.GetUsersInGroupData](../../models/operations/get-users-in-group-data.md)[] | :heavy_minus_sign:                                                                     | N/A                                                                                    |

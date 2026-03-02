@@ -3,11 +3,6 @@
  */
 
 import * as z from "zod/v4-mini";
-import { safeParse } from "../../lib/schemas.js";
-import { Result as SafeParseResult } from "../../types/fp.js";
-import * as types from "../../types/primitives.js";
-import { SDKValidationError } from "../errors/sdk-validation-error.js";
-import * as models from "../index.js";
 
 export type GetAllUsersRequest = {
   /**
@@ -22,22 +17,6 @@ export type GetAllUsersRequest = {
    * Search users by name or email
    */
   search?: string | undefined;
-};
-
-export type GetAllUsersPagination = {
-  page?: number | undefined;
-  limit?: number | undefined;
-  total?: number | undefined;
-  totalPages?: number | undefined;
-};
-
-/**
- * List of users retrieved successfully
- */
-export type GetAllUsersResponse = {
-  success?: boolean | undefined;
-  data?: Array<models.User> | undefined;
-  pagination?: GetAllUsersPagination | undefined;
 };
 
 /** @internal */
@@ -62,46 +41,5 @@ export function getAllUsersRequestToJSON(
 ): string {
   return JSON.stringify(
     GetAllUsersRequest$outboundSchema.parse(getAllUsersRequest),
-  );
-}
-
-/** @internal */
-export const GetAllUsersPagination$inboundSchema: z.ZodMiniType<
-  GetAllUsersPagination,
-  unknown
-> = z.object({
-  page: types.optional(types.number()),
-  limit: types.optional(types.number()),
-  total: types.optional(types.number()),
-  totalPages: types.optional(types.number()),
-});
-
-export function getAllUsersPaginationFromJSON(
-  jsonString: string,
-): SafeParseResult<GetAllUsersPagination, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => GetAllUsersPagination$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetAllUsersPagination' from JSON`,
-  );
-}
-
-/** @internal */
-export const GetAllUsersResponse$inboundSchema: z.ZodMiniType<
-  GetAllUsersResponse,
-  unknown
-> = z.object({
-  success: types.optional(types.boolean()),
-  data: types.optional(z.array(models.User$inboundSchema)),
-  pagination: types.optional(z.lazy(() => GetAllUsersPagination$inboundSchema)),
-});
-
-export function getAllUsersResponseFromJSON(
-  jsonString: string,
-): SafeParseResult<GetAllUsersResponse, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => GetAllUsersResponse$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetAllUsersResponse' from JSON`,
   );
 }

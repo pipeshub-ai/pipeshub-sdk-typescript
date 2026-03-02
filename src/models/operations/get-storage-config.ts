@@ -13,7 +13,7 @@ import { SDKValidationError } from "../errors/sdk-validation-error.js";
 /**
  * Currently configured storage type
  */
-export const GetStorageConfigStorageType = {
+export const StorageType = {
   Local: "local",
   S3: "s3",
   AzureBlob: "azureBlob",
@@ -21,9 +21,7 @@ export const GetStorageConfigStorageType = {
 /**
  * Currently configured storage type
  */
-export type GetStorageConfigStorageType = OpenEnum<
-  typeof GetStorageConfigStorageType
->;
+export type StorageType = OpenEnum<typeof StorageType>;
 
 /**
  * Storage configuration retrieved
@@ -32,7 +30,7 @@ export type GetStorageConfigResponse = {
   /**
    * Currently configured storage type
    */
-  storageType?: GetStorageConfigStorageType | undefined;
+  storageType?: StorageType | undefined;
   /**
    * Mount point name (Local)
    */
@@ -68,17 +66,15 @@ export type GetStorageConfigResponse = {
 };
 
 /** @internal */
-export const GetStorageConfigStorageType$inboundSchema: z.ZodMiniType<
-  GetStorageConfigStorageType,
-  unknown
-> = openEnums.inboundSchema(GetStorageConfigStorageType);
+export const StorageType$inboundSchema: z.ZodMiniType<StorageType, unknown> =
+  openEnums.inboundSchema(StorageType);
 
 /** @internal */
 export const GetStorageConfigResponse$inboundSchema: z.ZodMiniType<
   GetStorageConfigResponse,
   unknown
 > = z.object({
-  storageType: types.optional(GetStorageConfigStorageType$inboundSchema),
+  storageType: types.optional(StorageType$inboundSchema),
   mountName: types.optional(types.string()),
   baseUrl: types.optional(types.string()),
   accessKeyId: types.optional(types.string()),

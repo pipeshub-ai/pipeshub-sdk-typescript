@@ -250,6 +250,16 @@ export function resolveGlobalSecurity(
         value: security?.bearerAuth ?? env().PIPESHUB_BEARER_AUTH,
       },
     ],
+    [
+      {
+        type: "oauth2:client_credentials",
+        value: {
+          clientID: security?.oauth2?.clientID ?? env().PIPESHUB_CLIENT_ID,
+          clientSecret: security?.oauth2?.clientSecret
+            ?? env().PIPESHUB_CLIENT_SECRET,
+        },
+      },
+    ],
   );
 }
 

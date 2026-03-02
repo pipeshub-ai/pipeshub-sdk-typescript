@@ -21,7 +21,6 @@ import {
 import { PipeshubError } from "../models/errors/pipeshub-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { SDKValidationError } from "../models/errors/sdk-validation-error.js";
-import * as models from "../models/index.js";
 import * as operations from "../models/operations/index.js";
 import { APICall, APIPromise } from "../types/async.js";
 import { Result } from "../types/fp.js";
@@ -30,35 +29,18 @@ import { Result } from "../types/fp.js";
  * Update user full name
  *
  * @remarks
- * Update the full name of a user. This is a targeted update endpoint for changing only the display name without affecting other profile fields.<br><br>
- * <b>Overview:</b><br>
- * This endpoint updates a user's fullName field, which is their primary display name throughout the application. The firstName and lastName fields may also be updated based on name parsing logic.<br><br>
- * <b>Authorization:</b><br>
- * <ul>
- * <li><b>Self-update:</b> Users can update their own full name</li>
- * <li><b>Admin-update:</b> Admins can update any user's name</li>
- * </ul>
- * <b>Side Effects:</b><br>
- * <ul>
- * <li>Updates fullName field</li>
- * <li>May parse and update firstName/lastName</li>
- * <li>User update event published</li>
- * <li>Cached user data invalidated</li>
- * </ul>
- * <b>Use Cases:</b><br>
- * <ul>
- * <li>User profile name change</li>
- * <li>Name correction by admin</li>
- * <li>Legal name update</li>
- * </ul>
+ * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
+ * Update the full name of a user.
+ *
+ * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
  */
 export function usersUpdateFullName(
   client: PipeshubCore,
-  request: operations.UpdateUserFullNameRequest,
+  request: operations.UpdateFullNameRequest,
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    models.User,
+    operations.UpdateFullNameResponse,
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -78,12 +60,12 @@ export function usersUpdateFullName(
 
 async function $do(
   client: PipeshubCore,
-  request: operations.UpdateUserFullNameRequest,
+  request: operations.UpdateFullNameRequest,
   options?: RequestOptions,
 ): Promise<
   [
     Result<
-      models.User,
+      operations.UpdateFullNameResponse,
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -98,8 +80,7 @@ async function $do(
 > {
   const parsed = safeParse(
     request,
-    (value) =>
-      z.parse(operations.UpdateUserFullNameRequest$outboundSchema, value),
+    (value) => z.parse(operations.UpdateFullNameRequest$outboundSchema, value),
     "Input validation failed",
   );
   if (!parsed.ok) {
@@ -122,19 +103,18 @@ async function $do(
     Accept: "application/json",
   }));
 
-  const secConfig = await extractSecurity(client._options.bearerAuth);
-  const securityInput = secConfig == null ? {} : { bearerAuth: secConfig };
+  const securityInput = await extractSecurity(client._options.security);
   const requestSecurity = resolveGlobalSecurity(securityInput);
 
   const context = {
     options: client._options,
     baseURL: options?.serverURL ?? client._baseURL ?? "",
-    operationID: "updateUserFullName",
-    oAuth2Scopes: null,
+    operationID: "updateFullName",
+    oAuth2Scopes: ["user:write"],
 
     resolvedSecurity: requestSecurity,
 
-    securitySource: client._options.bearerAuth,
+    securitySource: client._options.security,
     retryConfig: options?.retries
       || client._options.retryConfig
       || { strategy: "none" },
@@ -158,7 +138,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["400", "401", "403", "404", "4XX", "5XX"],
+    errorCodes: ["401", "404", "4XX", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -168,7 +148,7 @@ async function $do(
   const response = doResult.value;
 
   const [result] = await M.match<
-    models.User,
+    operations.UpdateFullNameResponse,
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -178,8 +158,8 @@ async function $do(
     | UnexpectedClientError
     | SDKValidationError
   >(
-    M.json(200, models.User$inboundSchema),
-    M.fail([400, 401, 403, 404, "4XX"]),
+    M.json(200, operations.UpdateFullNameResponse$inboundSchema),
+    M.fail([401, 404, "4XX"]),
     M.fail("5XX"),
   )(response, req);
   if (!result.ok) {

@@ -11,7 +11,7 @@ import { SDKValidationError } from "./errors/sdk-validation-error.js";
 /**
  * AI model configuration
  */
-export type LlmConfig = {
+export type ModelConfig = {
   modelKey?: string | undefined;
   temperature?: number | undefined;
   maxTokens?: number | undefined;
@@ -52,7 +52,7 @@ export type Agent = {
   /**
    * AI model configuration
    */
-  llmConfig?: LlmConfig | undefined;
+  modelConfig?: ModelConfig | undefined;
   /**
    * Whether agent is available to all org users
    */
@@ -64,20 +64,20 @@ export type Agent = {
 };
 
 /** @internal */
-export const LlmConfig$inboundSchema: z.ZodMiniType<LlmConfig, unknown> = z
+export const ModelConfig$inboundSchema: z.ZodMiniType<ModelConfig, unknown> = z
   .object({
     modelKey: types.optional(types.string()),
     temperature: types.optional(types.number()),
     maxTokens: types.optional(types.number()),
   });
 
-export function llmConfigFromJSON(
+export function modelConfigFromJSON(
   jsonString: string,
-): SafeParseResult<LlmConfig, SDKValidationError> {
+): SafeParseResult<ModelConfig, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => LlmConfig$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'LlmConfig' from JSON`,
+    (x) => ModelConfig$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ModelConfig' from JSON`,
   );
 }
 
@@ -89,7 +89,7 @@ export const Agent$inboundSchema: z.ZodMiniType<Agent, unknown> = z.object({
   systemPrompt: types.optional(types.string()),
   tools: types.optional(z.array(types.string())),
   knowledgeBases: types.optional(z.array(types.string())),
-  llmConfig: types.optional(z.lazy(() => LlmConfig$inboundSchema)),
+  modelConfig: types.optional(z.lazy(() => ModelConfig$inboundSchema)),
   isPublic: types.optional(types.boolean()),
   createdBy: types.optional(types.string()),
   orgId: types.optional(types.string()),

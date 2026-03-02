@@ -16,4 +16,4 @@ let value: GoogleAuthConfig = {
 
 | Field                                    | Type                                     | Required                                 | Description                              | Example                                  |
 | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- |
-| `clientId`                               | *string*                                 | :heavy_check_mark:                       | Google OAuth client ID                   | 123456789-abc.apps.googleusercontent.com |
+| `clientId`                               | *string*                                 | :heavy_minus_sign:                       | Google OAuth client ID                   | 123456789-abc.apps.googleusercontent.com |

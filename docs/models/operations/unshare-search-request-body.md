@@ -1,21 +1,17 @@
 # UnshareSearchRequestBody
 
-Request body for Revoke search access
+Request payload
 
 ## Example Usage
 
 ```typescript
 import { UnshareSearchRequestBody } from "pipeshub/models/operations";
 
-let value: UnshareSearchRequestBody = {
-  userIds: [
-    "<value 1>",
-  ],
-};
+let value: UnshareSearchRequestBody = {};
 ```
 
 ## Fields
 
 | Field              | Type               | Required           | Description        |
 | ------------------ | ------------------ | ------------------ | ------------------ |
-| `userIds`          | *string*[]         | :heavy_check_mark: | N/A                |
+| `userIds`          | *string*[]         | :heavy_minus_sign: | N/A                |

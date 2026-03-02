@@ -9,6 +9,7 @@ import * as openEnums from "../types/enums.js";
 import { OpenEnum } from "../types/enums.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
+import { Address, Address$inboundSchema } from "./address.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
 /**
@@ -65,6 +66,7 @@ export type Organization = {
    * Type of account
    */
   accountType: OrganizationAccountType;
+  permanentAddress?: Address | undefined;
   /**
    * Onboarding status
    */
@@ -74,13 +76,17 @@ export type Organization = {
    */
   isDeleted: boolean;
   /**
-   * Creation timestamp
+   * Document version (MongoDB)
    */
-  createdAt?: number | undefined;
+  v?: number | undefined;
   /**
-   * Last update timestamp
+   * Creation timestamp (ISO 8601)
    */
-  updatedAt?: number | undefined;
+  createdAt?: Date | undefined;
+  /**
+   * Last update timestamp (ISO 8601)
+   */
+  updatedAt?: Date | undefined;
 };
 
 /** @internal */
@@ -106,14 +112,17 @@ export const Organization$inboundSchema: z.ZodMiniType<Organization, unknown> =
       domain: types.string(),
       contactEmail: types.string(),
       accountType: OrganizationAccountType$inboundSchema,
+      permanentAddress: types.optional(Address$inboundSchema),
       onBoardingStatus: types.optional(OnBoardingStatus$inboundSchema),
       isDeleted: z._default(types.boolean(), false),
-      createdAt: types.optional(types.number()),
-      updatedAt: types.optional(types.number()),
+      __v: types.optional(types.number()),
+      createdAt: types.optional(types.date()),
+      updatedAt: types.optional(types.date()),
     }),
     z.transform((v) => {
       return remap$(v, {
         "_id": "id",
+        "__v": "v",
       });
     }),
   );

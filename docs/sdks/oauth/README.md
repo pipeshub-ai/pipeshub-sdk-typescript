@@ -1,12 +1,14 @@
-# Oauth
+# OAuth
 
 ## Overview
 
+OAuth 2.0 token exchange for third-party authentication providers
+
 ### Available Operations
 
-* [exchangeCode](#exchangecode) - Exchange OAuth authorization code for tokens
+* [exchangeOAuthCode](#exchangeoauthcode) - Exchange OAuth authorization code for tokens
 
-## exchangeCode
+## exchangeOAuthCode
 
 Exchange an OAuth authorization code for access and ID tokens.
 Used after the OAuth authorization flow redirects back to the application.
@@ -27,12 +29,10 @@ Used after the OAuth authorization flow redirects back to the application.
 ```typescript
 import { Pipeshub } from "pipeshub";
 
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new Pipeshub();
 
 async function run() {
-  const result = await pipeshub.oauth.exchangeCode({
+  const result = await pipeshub.oAuth.exchangeOAuthCode({
     code: "<value>",
     email: "Jason2@gmail.com",
     provider: "<value>",
@@ -51,16 +51,14 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "pipeshub/core.js";
-import { oauthExchangeCode } from "pipeshub/funcs/oauth-exchange-code.js";
+import { oAuthExchangeOAuthCode } from "pipeshub/funcs/o-auth-exchange-o-auth-code.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new PipeshubCore();
 
 async function run() {
-  const res = await oauthExchangeCode(pipeshub, {
+  const res = await oAuthExchangeOAuthCode(pipeshub, {
     code: "<value>",
     email: "Jason2@gmail.com",
     provider: "<value>",
@@ -70,7 +68,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("oauthExchangeCode failed:", res.error);
+    console.log("oAuthExchangeOAuthCode failed:", res.error);
   }
 }
 

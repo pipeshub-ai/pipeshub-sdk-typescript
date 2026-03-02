@@ -9,29 +9,15 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 
 export type ResumeCrawlingJobRequest = {
-  /**
-   * Connector type identifier
-   */
   connector: string;
-  /**
-   * Unique identifier of the connector instance
-   */
   connectorId: string;
 };
 
-export type ResumeCrawlingJobData = {
-  connector?: string | undefined;
-  orgId?: string | undefined;
-  resumedAt?: Date | undefined;
-};
-
 /**
- * Crawling job resumed successfully
+ * Crawling job resumed
  */
 export type ResumeCrawlingJobResponse = {
-  success?: boolean | undefined;
   message?: string | undefined;
-  data?: ResumeCrawlingJobData | undefined;
 };
 
 /** @internal */
@@ -58,33 +44,11 @@ export function resumeCrawlingJobRequestToJSON(
 }
 
 /** @internal */
-export const ResumeCrawlingJobData$inboundSchema: z.ZodMiniType<
-  ResumeCrawlingJobData,
-  unknown
-> = z.object({
-  connector: types.optional(types.string()),
-  orgId: types.optional(types.string()),
-  resumedAt: types.optional(types.date()),
-});
-
-export function resumeCrawlingJobDataFromJSON(
-  jsonString: string,
-): SafeParseResult<ResumeCrawlingJobData, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => ResumeCrawlingJobData$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'ResumeCrawlingJobData' from JSON`,
-  );
-}
-
-/** @internal */
 export const ResumeCrawlingJobResponse$inboundSchema: z.ZodMiniType<
   ResumeCrawlingJobResponse,
   unknown
 > = z.object({
-  success: types.optional(types.boolean()),
   message: types.optional(types.string()),
-  data: types.optional(z.lazy(() => ResumeCrawlingJobData$inboundSchema)),
 });
 
 export function resumeCrawlingJobResponseFromJSON(

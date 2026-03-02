@@ -20,6 +20,8 @@ export type GetModelsByTypeRequest = {
  * Models retrieved
  */
 export type GetModelsByTypeResponse = {
+  status?: string | undefined;
+  message?: string | undefined;
   models?: Array<models.AIModelProviderConfig> | undefined;
 };
 
@@ -49,6 +51,8 @@ export const GetModelsByTypeResponse$inboundSchema: z.ZodMiniType<
   GetModelsByTypeResponse,
   unknown
 > = z.object({
+  status: types.optional(types.string()),
+  message: types.optional(types.string()),
   models: types.optional(z.array(models.AIModelProviderConfig$inboundSchema)),
 });
 

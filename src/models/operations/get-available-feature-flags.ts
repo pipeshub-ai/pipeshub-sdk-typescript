@@ -13,7 +13,7 @@ import * as models from "../index.js";
  * Feature flags retrieved
  */
 export type GetAvailableFeatureFlagsResponse = {
-  featureFlags?: Array<models.FeatureFlag> | undefined;
+  flags?: Array<models.FeatureFlag> | undefined;
 };
 
 /** @internal */
@@ -21,7 +21,7 @@ export const GetAvailableFeatureFlagsResponse$inboundSchema: z.ZodMiniType<
   GetAvailableFeatureFlagsResponse,
   unknown
 > = z.object({
-  featureFlags: types.optional(z.array(models.FeatureFlag$inboundSchema)),
+  flags: types.optional(z.array(models.FeatureFlag$inboundSchema)),
 });
 
 export function getAvailableFeatureFlagsResponseFromJSON(

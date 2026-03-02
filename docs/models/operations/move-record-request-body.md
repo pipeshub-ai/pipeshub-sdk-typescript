@@ -1,19 +1,16 @@
 # MoveRecordRequestBody
 
-Target parent folder for the record
+Request payload
 
 ## Example Usage
 
 ```typescript
 import { MoveRecordRequestBody } from "pipeshub/models/operations";
 
-let value: MoveRecordRequestBody = {
-  newParentId: "<id>",
-};
+let value: MoveRecordRequestBody = {};
 ```
 
 ## Fields
 
-| Field                                                      | Type                                                       | Required                                                   | Description                                                |
-| ---------------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------- |
-| `newParentId`                                              | *string*                                                   | :heavy_check_mark:                                         | ID of the new parent folder, or null to move to root level |
+| Field       | Type        | Required    | Description |
+| ----------- | ----------- | ----------- | ----------- |

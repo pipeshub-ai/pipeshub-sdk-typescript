@@ -12,6 +12,6 @@ let value: ArchiveSearchRequest = {
 
 ## Fields
 
-| Field              | Type               | Required           | Description        |
-| ------------------ | ------------------ | ------------------ | ------------------ |
-| `searchId`         | *string*           | :heavy_check_mark: | N/A                |
+| Field                    | Type                     | Required                 | Description              |
+| ------------------------ | ------------------------ | ------------------------ | ------------------------ |
+| `searchId`               | *string*                 | :heavy_check_mark:       | Unique search identifier |

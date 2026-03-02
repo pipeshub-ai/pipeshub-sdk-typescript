@@ -15,7 +15,7 @@ export type PlatformSettings = {
   /**
    * Maximum file upload size in bytes. Default is 30MB (31457280 bytes). Maximum allowed is 1GB.
    */
-  fileUploadMaxSizeBytes: number;
+  fileUploadMaxSizeBytes?: number | undefined;
   /**
    * Key-value map of feature flags to enable/disable platform features.
    *
@@ -23,11 +23,11 @@ export type PlatformSettings = {
    * Available flags:
    * - ENABLE_BETA_CONNECTORS: Allow usage of beta connector integrations that may be unstable
    */
-  featureFlags: { [k: string]: boolean };
+  featureFlags?: { [k: string]: boolean } | undefined;
   /**
-   * Timestamp of last settings update (read-only, set automatically)
+   * Timestamp of last settings update (read-only, set automatically). May not be present in the response.
    */
-  updatedAt?: Date | undefined;
+  updatedAt?: Date | null | undefined;
 };
 
 /** @internal */
@@ -35,9 +35,9 @@ export const PlatformSettings$inboundSchema: z.ZodMiniType<
   PlatformSettings,
   unknown
 > = z.object({
-  fileUploadMaxSizeBytes: types.number(),
-  featureFlags: z.record(z.string(), types.boolean()),
-  updatedAt: types.optional(types.date()),
+  fileUploadMaxSizeBytes: types.optional(types.number()),
+  featureFlags: types.optional(z.record(z.string(), types.boolean())),
+  updatedAt: z.optional(z.nullable(types.date())),
 });
 
 export function platformSettingsFromJSON(

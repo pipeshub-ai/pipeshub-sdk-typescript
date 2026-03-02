@@ -3,55 +3,38 @@
  */
 
 import * as z from "zod/v4-mini";
+import { safeParse } from "../../lib/schemas.js";
 import { blobLikeSchema } from "../../types/blobs.js";
-import { ClosedEnum } from "../../types/enums.js";
+import { Result as SafeParseResult } from "../../types/fp.js";
+import * as types from "../../types/primitives.js";
+import { SDKValidationError } from "../errors/sdk-validation-error.js";
 
-/**
- * Type: 'business' for service account, 'individual' for user OAuth
- */
-export const UserType = {
-  Individual: "individual",
-  Business: "business",
-} as const;
-/**
- * Type: 'business' for service account, 'individual' for user OAuth
- */
-export type UserType = ClosedEnum<typeof UserType>;
-
-export type GoogleWorkspaceCredentials = {
+export type CreateGoogleWorkspaceCredentialsFile = {
   fileName: string;
   content: ReadableStream<Uint8Array> | Blob | ArrayBuffer | Uint8Array;
 };
 
-/**
- * Request body for Upload Google Workspace credentials
- */
 export type CreateGoogleWorkspaceCredentialsRequest = {
-  /**
-   * Type: 'business' for service account, 'individual' for user OAuth
-   */
-  userType: UserType;
-  /**
-   * JSON credentials file
-   */
-  googleWorkspaceCredentials: GoogleWorkspaceCredentials | Blob;
+  file?: CreateGoogleWorkspaceCredentialsFile | Blob | undefined;
+};
+
+/**
+ * Google Workspace credentials uploaded
+ */
+export type CreateGoogleWorkspaceCredentialsResponse = {
+  message?: string | undefined;
 };
 
 /** @internal */
-export const UserType$outboundSchema: z.ZodMiniEnum<typeof UserType> = z.enum(
-  UserType,
-);
-
-/** @internal */
-export type GoogleWorkspaceCredentials$Outbound = {
+export type CreateGoogleWorkspaceCredentialsFile$Outbound = {
   fileName: string;
   content: ReadableStream<Uint8Array> | Blob | ArrayBuffer | Uint8Array;
 };
 
 /** @internal */
-export const GoogleWorkspaceCredentials$outboundSchema: z.ZodMiniType<
-  GoogleWorkspaceCredentials$Outbound,
-  GoogleWorkspaceCredentials
+export const CreateGoogleWorkspaceCredentialsFile$outboundSchema: z.ZodMiniType<
+  CreateGoogleWorkspaceCredentialsFile$Outbound,
+  CreateGoogleWorkspaceCredentialsFile
 > = z.object({
   fileName: z.string(),
   content: z.union([
@@ -62,18 +45,19 @@ export const GoogleWorkspaceCredentials$outboundSchema: z.ZodMiniType<
   ]),
 });
 
-export function googleWorkspaceCredentialsToJSON(
-  googleWorkspaceCredentials: GoogleWorkspaceCredentials,
+export function createGoogleWorkspaceCredentialsFileToJSON(
+  createGoogleWorkspaceCredentialsFile: CreateGoogleWorkspaceCredentialsFile,
 ): string {
   return JSON.stringify(
-    GoogleWorkspaceCredentials$outboundSchema.parse(googleWorkspaceCredentials),
+    CreateGoogleWorkspaceCredentialsFile$outboundSchema.parse(
+      createGoogleWorkspaceCredentialsFile,
+    ),
   );
 }
 
 /** @internal */
 export type CreateGoogleWorkspaceCredentialsRequest$Outbound = {
-  userType: string;
-  googleWorkspaceCredentials: GoogleWorkspaceCredentials$Outbound | Blob;
+  file?: CreateGoogleWorkspaceCredentialsFile$Outbound | Blob | undefined;
 };
 
 /** @internal */
@@ -82,11 +66,12 @@ export const CreateGoogleWorkspaceCredentialsRequest$outboundSchema:
     CreateGoogleWorkspaceCredentialsRequest$Outbound,
     CreateGoogleWorkspaceCredentialsRequest
   > = z.object({
-    userType: UserType$outboundSchema,
-    googleWorkspaceCredentials: z.union([
-      z.lazy(() => GoogleWorkspaceCredentials$outboundSchema),
-      blobLikeSchema,
-    ]),
+    file: z.optional(
+      z.union([
+        z.lazy(() => CreateGoogleWorkspaceCredentialsFile$outboundSchema),
+        blobLikeSchema,
+      ]),
+    ),
   });
 
 export function createGoogleWorkspaceCredentialsRequestToJSON(
@@ -97,5 +82,27 @@ export function createGoogleWorkspaceCredentialsRequestToJSON(
     CreateGoogleWorkspaceCredentialsRequest$outboundSchema.parse(
       createGoogleWorkspaceCredentialsRequest,
     ),
+  );
+}
+
+/** @internal */
+export const CreateGoogleWorkspaceCredentialsResponse$inboundSchema:
+  z.ZodMiniType<CreateGoogleWorkspaceCredentialsResponse, unknown> = z.object({
+    message: types.optional(types.string()),
+  });
+
+export function createGoogleWorkspaceCredentialsResponseFromJSON(
+  jsonString: string,
+): SafeParseResult<
+  CreateGoogleWorkspaceCredentialsResponse,
+  SDKValidationError
+> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      CreateGoogleWorkspaceCredentialsResponse$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'CreateGoogleWorkspaceCredentialsResponse' from JSON`,
   );
 }

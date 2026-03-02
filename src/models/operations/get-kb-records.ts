@@ -3,7 +3,12 @@
  */
 
 import * as z from "zod/v4-mini";
+import { safeParse } from "../../lib/schemas.js";
 import { ClosedEnum } from "../../types/enums.js";
+import { Result as SafeParseResult } from "../../types/fp.js";
+import * as types from "../../types/primitives.js";
+import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
 
 export const GetKBRecordsSortOrder = {
   Asc: "asc",
@@ -44,6 +49,69 @@ export type GetKBRecordsRequest = {
   dateTo?: number | undefined;
   sortBy?: string | undefined;
   sortOrder?: GetKBRecordsSortOrder | undefined;
+};
+
+export type GetKBRecordsContainer = {
+  id?: string | undefined;
+  name?: string | undefined;
+  path?: string | undefined;
+  type?: string | undefined;
+  webUrl?: string | undefined;
+  recordGroupId?: string | undefined;
+};
+
+export type GetKBRecordsCounts = {
+  folders?: number | undefined;
+  records?: number | undefined;
+  totalItems?: number | undefined;
+  totalFolders?: number | undefined;
+  totalRecords?: number | undefined;
+};
+
+export type GetKBRecordsAvailableFilters = {};
+
+export type GetKBRecordsUserPermission = {
+  role?: string | undefined;
+  canUpload?: boolean | undefined;
+  canCreateFolders?: boolean | undefined;
+  canEdit?: boolean | undefined;
+  canDelete?: boolean | undefined;
+  canManagePermissions?: boolean | undefined;
+};
+
+export type GetKBRecordsPagination = {
+  page?: number | undefined;
+  limit?: number | undefined;
+  totalItems?: number | undefined;
+  totalPages?: number | undefined;
+  hasNext?: boolean | undefined;
+  hasPrev?: boolean | undefined;
+};
+
+/**
+ * Applied and available filters
+ */
+export type GetKBRecordsFilters = {};
+
+/**
+ * Successful operation
+ */
+export type GetKBRecordsResponse = {
+  success?: boolean | undefined;
+  container?: GetKBRecordsContainer | undefined;
+  folders?: Array<models.Folder> | undefined;
+  records?: Array<models.RecordT> | undefined;
+  level?: number | undefined;
+  totalCount?: number | undefined;
+  counts?: GetKBRecordsCounts | undefined;
+  availableFilters?: GetKBRecordsAvailableFilters | undefined;
+  paginationMode?: string | undefined;
+  userPermission?: GetKBRecordsUserPermission | undefined;
+  pagination?: GetKBRecordsPagination | undefined;
+  /**
+   * Applied and available filters
+   */
+  filters?: GetKBRecordsFilters | undefined;
 };
 
 /** @internal */
@@ -89,5 +157,163 @@ export function getKBRecordsRequestToJSON(
 ): string {
   return JSON.stringify(
     GetKBRecordsRequest$outboundSchema.parse(getKBRecordsRequest),
+  );
+}
+
+/** @internal */
+export const GetKBRecordsContainer$inboundSchema: z.ZodMiniType<
+  GetKBRecordsContainer,
+  unknown
+> = z.object({
+  id: types.optional(types.string()),
+  name: types.optional(types.string()),
+  path: types.optional(types.string()),
+  type: types.optional(types.string()),
+  webUrl: types.optional(types.string()),
+  recordGroupId: types.optional(types.string()),
+});
+
+export function getKBRecordsContainerFromJSON(
+  jsonString: string,
+): SafeParseResult<GetKBRecordsContainer, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetKBRecordsContainer$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetKBRecordsContainer' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetKBRecordsCounts$inboundSchema: z.ZodMiniType<
+  GetKBRecordsCounts,
+  unknown
+> = z.object({
+  folders: types.optional(types.number()),
+  records: types.optional(types.number()),
+  totalItems: types.optional(types.number()),
+  totalFolders: types.optional(types.number()),
+  totalRecords: types.optional(types.number()),
+});
+
+export function getKBRecordsCountsFromJSON(
+  jsonString: string,
+): SafeParseResult<GetKBRecordsCounts, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetKBRecordsCounts$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetKBRecordsCounts' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetKBRecordsAvailableFilters$inboundSchema: z.ZodMiniType<
+  GetKBRecordsAvailableFilters,
+  unknown
+> = z.object({});
+
+export function getKBRecordsAvailableFiltersFromJSON(
+  jsonString: string,
+): SafeParseResult<GetKBRecordsAvailableFilters, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetKBRecordsAvailableFilters$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetKBRecordsAvailableFilters' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetKBRecordsUserPermission$inboundSchema: z.ZodMiniType<
+  GetKBRecordsUserPermission,
+  unknown
+> = z.object({
+  role: types.optional(types.string()),
+  canUpload: types.optional(types.boolean()),
+  canCreateFolders: types.optional(types.boolean()),
+  canEdit: types.optional(types.boolean()),
+  canDelete: types.optional(types.boolean()),
+  canManagePermissions: types.optional(types.boolean()),
+});
+
+export function getKBRecordsUserPermissionFromJSON(
+  jsonString: string,
+): SafeParseResult<GetKBRecordsUserPermission, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetKBRecordsUserPermission$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetKBRecordsUserPermission' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetKBRecordsPagination$inboundSchema: z.ZodMiniType<
+  GetKBRecordsPagination,
+  unknown
+> = z.object({
+  page: types.optional(types.number()),
+  limit: types.optional(types.number()),
+  totalItems: types.optional(types.number()),
+  totalPages: types.optional(types.number()),
+  hasNext: types.optional(types.boolean()),
+  hasPrev: types.optional(types.boolean()),
+});
+
+export function getKBRecordsPaginationFromJSON(
+  jsonString: string,
+): SafeParseResult<GetKBRecordsPagination, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetKBRecordsPagination$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetKBRecordsPagination' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetKBRecordsFilters$inboundSchema: z.ZodMiniType<
+  GetKBRecordsFilters,
+  unknown
+> = z.object({});
+
+export function getKBRecordsFiltersFromJSON(
+  jsonString: string,
+): SafeParseResult<GetKBRecordsFilters, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetKBRecordsFilters$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetKBRecordsFilters' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetKBRecordsResponse$inboundSchema: z.ZodMiniType<
+  GetKBRecordsResponse,
+  unknown
+> = z.object({
+  success: types.optional(types.boolean()),
+  container: types.optional(z.lazy(() => GetKBRecordsContainer$inboundSchema)),
+  folders: types.optional(z.array(models.Folder$inboundSchema)),
+  records: types.optional(z.array(models.RecordT$inboundSchema)),
+  level: types.optional(types.number()),
+  totalCount: types.optional(types.number()),
+  counts: types.optional(z.lazy(() => GetKBRecordsCounts$inboundSchema)),
+  availableFilters: types.optional(
+    z.lazy(() => GetKBRecordsAvailableFilters$inboundSchema),
+  ),
+  paginationMode: types.optional(types.string()),
+  userPermission: types.optional(
+    z.lazy(() => GetKBRecordsUserPermission$inboundSchema),
+  ),
+  pagination: types.optional(
+    z.lazy(() => GetKBRecordsPagination$inboundSchema),
+  ),
+  filters: types.optional(z.lazy(() => GetKBRecordsFilters$inboundSchema)),
+});
+
+export function getKBRecordsResponseFromJSON(
+  jsonString: string,
+): SafeParseResult<GetKBRecordsResponse, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetKBRecordsResponse$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetKBRecordsResponse' from JSON`,
   );
 }

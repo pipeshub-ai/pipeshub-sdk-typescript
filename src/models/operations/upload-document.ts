@@ -3,95 +3,27 @@
  */
 
 import * as z from "zod/v4-mini";
-import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { blobLikeSchema } from "../../types/blobs.js";
-import { ClosedEnum } from "../../types/enums.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
+import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
-import * as models from "../index.js";
-
-/**
- * Default permission level for shared access
- */
-export const UploadDocumentPermissions = {
-  Owner: "owner",
-  Editor: "editor",
-  Commentator: "commentator",
-  Readonly: "readonly",
-} as const;
-/**
- * Default permission level for shared access
- */
-export type UploadDocumentPermissions = ClosedEnum<
-  typeof UploadDocumentPermissions
->;
-
-/**
- * Enable version control for this document
- */
-export const IsVersionedFile = {
-  True: "true",
-  False: "false",
-} as const;
-/**
- * Enable version control for this document
- */
-export type IsVersionedFile = ClosedEnum<typeof IsVersionedFile>;
 
 export type UploadDocumentFile = {
   fileName: string;
   content: ReadableStream<Uint8Array> | Blob | ArrayBuffer | Uint8Array;
 };
 
-/**
- * Request payload
- */
 export type UploadDocumentRequest = {
-  /**
-   * Display name for the document
-   */
-  documentName: string;
-  /**
-   * Virtual folder path for organization
-   */
-  documentPath?: string | undefined;
-  /**
-   * Alternative name for search/display
-   */
-  alternateDocumentName?: string | undefined;
-  /**
-   * Default permission level for shared access
-   */
-  permissions?: UploadDocumentPermissions | undefined;
-  /**
-   * JSON string of custom key-value metadata
-   */
-  customMetadata?: string | undefined;
-  /**
-   * Enable version control for this document
-   */
-  isVersionedFile: IsVersionedFile;
-  /**
-   * The file to upload (max 1GB)
-   */
-  file: UploadDocumentFile | Blob;
+  file?: UploadDocumentFile | Blob | undefined;
 };
 
+/**
+ * Document uploaded successfully
+ */
 export type UploadDocumentResponse = {
-  headers: { [k: string]: Array<string> };
-  result: models.Document;
+  message?: string | undefined;
 };
-
-/** @internal */
-export const UploadDocumentPermissions$outboundSchema: z.ZodMiniEnum<
-  typeof UploadDocumentPermissions
-> = z.enum(UploadDocumentPermissions);
-
-/** @internal */
-export const IsVersionedFile$outboundSchema: z.ZodMiniEnum<
-  typeof IsVersionedFile
-> = z.enum(IsVersionedFile);
 
 /** @internal */
 export type UploadDocumentFile$Outbound = {
@@ -123,13 +55,7 @@ export function uploadDocumentFileToJSON(
 
 /** @internal */
 export type UploadDocumentRequest$Outbound = {
-  documentName: string;
-  documentPath?: string | undefined;
-  alternateDocumentName?: string | undefined;
-  permissions: string;
-  customMetadata?: string | undefined;
-  isVersionedFile: string;
-  file: UploadDocumentFile$Outbound | Blob;
+  file?: UploadDocumentFile$Outbound | Blob | undefined;
 };
 
 /** @internal */
@@ -137,16 +63,9 @@ export const UploadDocumentRequest$outboundSchema: z.ZodMiniType<
   UploadDocumentRequest$Outbound,
   UploadDocumentRequest
 > = z.object({
-  documentName: z.string(),
-  documentPath: z.optional(z.string()),
-  alternateDocumentName: z.optional(z.string()),
-  permissions: z._default(UploadDocumentPermissions$outboundSchema, "owner"),
-  customMetadata: z.optional(z.string()),
-  isVersionedFile: IsVersionedFile$outboundSchema,
-  file: z.union([
-    z.lazy(() => UploadDocumentFile$outboundSchema),
-    blobLikeSchema,
-  ]),
+  file: z.optional(
+    z.union([z.lazy(() => UploadDocumentFile$outboundSchema), blobLikeSchema]),
+  ),
 });
 
 export function uploadDocumentRequestToJSON(
@@ -161,18 +80,9 @@ export function uploadDocumentRequestToJSON(
 export const UploadDocumentResponse$inboundSchema: z.ZodMiniType<
   UploadDocumentResponse,
   unknown
-> = z.pipe(
-  z.object({
-    Headers: z._default(z.record(z.string(), z.array(z.string())), {}),
-    Result: models.Document$inboundSchema,
-  }),
-  z.transform((v) => {
-    return remap$(v, {
-      "Headers": "headers",
-      "Result": "result",
-    });
-  }),
-);
+> = z.object({
+  message: types.optional(types.string()),
+});
 
 export function uploadDocumentResponseFromJSON(
   jsonString: string,

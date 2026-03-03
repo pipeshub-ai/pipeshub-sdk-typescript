@@ -5,7 +5,7 @@ OAuth configurations retrieved
 ## Example Usage
 
 ```typescript
-import { ListOAuthConfigsResponse } from "pipeshub/models/operations";
+import { ListOAuthConfigsResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: ListOAuthConfigsResponse = {
   oauthConfigs: [

@@ -5,7 +5,7 @@ Display picture removed successfully
 ## Example Usage
 
 ```typescript
-import { RemoveUserDisplayPictureResponse } from "pipeshub/models/operations";
+import { RemoveUserDisplayPictureResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: RemoveUserDisplayPictureResponse = {
   success: true,

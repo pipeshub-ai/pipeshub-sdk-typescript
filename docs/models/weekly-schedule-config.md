@@ -5,7 +5,7 @@ Run crawling job on specified days of the week
 ## Example Usage
 
 ```typescript
-import { WeeklyScheduleConfig } from "pipeshub/models";
+import { WeeklyScheduleConfig } from "@pipeshub-ai/sdk/models";
 
 let value: WeeklyScheduleConfig = {
   scheduleType: "weekly",

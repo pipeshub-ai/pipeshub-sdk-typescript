@@ -15,7 +15,7 @@ export type MicrosoftAuthConfig = {
   /**
    * Microsoft application client ID
    */
-  clientId: string;
+  clientId?: string | undefined;
   /**
    * Microsoft tenant ID
    */
@@ -27,12 +27,12 @@ export const MicrosoftAuthConfig$inboundSchema: z.ZodMiniType<
   MicrosoftAuthConfig,
   unknown
 > = z.object({
-  clientId: types.string(),
+  clientId: types.optional(types.string()),
   tenantId: z._default(types.string(), "common"),
 });
 /** @internal */
 export type MicrosoftAuthConfig$Outbound = {
-  clientId: string;
+  clientId?: string | undefined;
   tenantId: string;
 };
 
@@ -41,7 +41,7 @@ export const MicrosoftAuthConfig$outboundSchema: z.ZodMiniType<
   MicrosoftAuthConfig$Outbound,
   MicrosoftAuthConfig
 > = z.object({
-  clientId: z.string(),
+  clientId: z.optional(z.string()),
   tenantId: z._default(z.string(), "common"),
 });
 

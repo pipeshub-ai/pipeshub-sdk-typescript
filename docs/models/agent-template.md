@@ -7,7 +7,7 @@ configuration that can be customized when creating an agent instance.
 ## Example Usage
 
 ```typescript
-import { AgentTemplate } from "pipeshub/models";
+import { AgentTemplate } from "@pipeshub-ai/sdk/models";
 
 let value: AgentTemplate = {
   name: "Technical Support Template",

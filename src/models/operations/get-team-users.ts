@@ -4,65 +4,27 @@
 
 import * as z from "zod/v4-mini";
 import { safeParse } from "../../lib/schemas.js";
-import * as openEnums from "../../types/enums.js";
-import { OpenEnum } from "../../types/enums.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
-import * as models from "../index.js";
 
 export type GetTeamUsersRequest = {
-  /**
-   * Unique identifier of the team
-   */
   teamId: string;
-  /**
-   * Page number for pagination (1-based)
-   */
-  page?: number | undefined;
-  /**
-   * Number of users per page
-   */
-  limit?: number | undefined;
 };
 
-export const GetTeamUsersRole = {
-  Owner: "owner",
-  Admin: "admin",
-  Member: "member",
-  Viewer: "viewer",
-} as const;
-export type GetTeamUsersRole = OpenEnum<typeof GetTeamUsersRole>;
-
-export type GetTeamUsersData = {
-  /**
-   * User account in an organization
-   */
-  user?: models.User | undefined;
-  role?: GetTeamUsersRole | undefined;
-  joinedAt?: Date | undefined;
-};
-
-export type GetTeamUsersPagination = {
-  page?: number | undefined;
-  limit?: number | undefined;
-  total?: number | undefined;
-};
+export type GetTeamUsersData = {};
 
 /**
- * Team members retrieved successfully
+ * Team users retrieved successfully
  */
 export type GetTeamUsersResponse = {
   success?: boolean | undefined;
   data?: Array<GetTeamUsersData> | undefined;
-  pagination?: GetTeamUsersPagination | undefined;
 };
 
 /** @internal */
 export type GetTeamUsersRequest$Outbound = {
   teamId: string;
-  page: number;
-  limit: number;
 };
 
 /** @internal */
@@ -71,8 +33,6 @@ export const GetTeamUsersRequest$outboundSchema: z.ZodMiniType<
   GetTeamUsersRequest
 > = z.object({
   teamId: z.string(),
-  page: z._default(z.int(), 1),
-  limit: z._default(z.int(), 20),
 });
 
 export function getTeamUsersRequestToJSON(
@@ -84,20 +44,10 @@ export function getTeamUsersRequestToJSON(
 }
 
 /** @internal */
-export const GetTeamUsersRole$inboundSchema: z.ZodMiniType<
-  GetTeamUsersRole,
-  unknown
-> = openEnums.inboundSchema(GetTeamUsersRole);
-
-/** @internal */
 export const GetTeamUsersData$inboundSchema: z.ZodMiniType<
   GetTeamUsersData,
   unknown
-> = z.object({
-  user: types.optional(models.User$inboundSchema),
-  role: types.optional(GetTeamUsersRole$inboundSchema),
-  joinedAt: types.optional(types.date()),
-});
+> = z.object({});
 
 export function getTeamUsersDataFromJSON(
   jsonString: string,
@@ -110,35 +60,12 @@ export function getTeamUsersDataFromJSON(
 }
 
 /** @internal */
-export const GetTeamUsersPagination$inboundSchema: z.ZodMiniType<
-  GetTeamUsersPagination,
-  unknown
-> = z.object({
-  page: types.optional(types.number()),
-  limit: types.optional(types.number()),
-  total: types.optional(types.number()),
-});
-
-export function getTeamUsersPaginationFromJSON(
-  jsonString: string,
-): SafeParseResult<GetTeamUsersPagination, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => GetTeamUsersPagination$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetTeamUsersPagination' from JSON`,
-  );
-}
-
-/** @internal */
 export const GetTeamUsersResponse$inboundSchema: z.ZodMiniType<
   GetTeamUsersResponse,
   unknown
 > = z.object({
   success: types.optional(types.boolean()),
   data: types.optional(z.array(z.lazy(() => GetTeamUsersData$inboundSchema))),
-  pagination: types.optional(
-    z.lazy(() => GetTeamUsersPagination$inboundSchema),
-  ),
 });
 
 export function getTeamUsersResponseFromJSON(

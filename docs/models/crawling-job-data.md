@@ -5,7 +5,7 @@ Data payload stored with each crawling job in the queue
 ## Example Usage
 
 ```typescript
-import { CrawlingJobData } from "pipeshub/models";
+import { CrawlingJobData } from "@pipeshub-ai/sdk/models";
 
 let value: CrawlingJobData = {
   connector: "drive",

@@ -5,7 +5,7 @@ Authorization URL generated
 ## Example Usage
 
 ```typescript
-import { GetOAuthAuthorizationUrlResponse } from "pipeshub/models/operations";
+import { GetOAuthAuthorizationUrlResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetOAuthAuthorizationUrlResponse = {};
 ```

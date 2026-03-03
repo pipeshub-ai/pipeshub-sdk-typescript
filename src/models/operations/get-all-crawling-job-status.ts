@@ -14,7 +14,6 @@ import * as models from "../index.js";
  */
 export type GetAllCrawlingJobStatusResponse = {
   success?: boolean | undefined;
-  message?: string | undefined;
   data?: Array<models.JobStatus> | undefined;
 };
 
@@ -24,7 +23,6 @@ export const GetAllCrawlingJobStatusResponse$inboundSchema: z.ZodMiniType<
   unknown
 > = z.object({
   success: types.optional(types.boolean()),
-  message: types.optional(types.string()),
   data: types.optional(z.array(models.JobStatus$inboundSchema)),
 });
 

@@ -5,7 +5,7 @@ Run crawling job once at a specific future datetime
 ## Example Usage
 
 ```typescript
-import { OnceScheduleConfig } from "pipeshub/models";
+import { OnceScheduleConfig } from "@pipeshub-ai/sdk/models";
 
 let value: OnceScheduleConfig = {
   scheduleType: "once",

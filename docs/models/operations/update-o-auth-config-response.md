@@ -5,7 +5,7 @@ OAuth configuration updated
 ## Example Usage
 
 ```typescript
-import { UpdateOAuthConfigResponse } from "pipeshub/models/operations";
+import { UpdateOAuthConfigResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: UpdateOAuthConfigResponse = {
   oauthConfig: {

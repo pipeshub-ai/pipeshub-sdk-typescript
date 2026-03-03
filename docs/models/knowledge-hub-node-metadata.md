@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { KnowledgeHubNodeMetadata } from "pipeshub/models";
+import { KnowledgeHubNodeMetadata } from "@pipeshub-ai/sdk/models";
 
 let value: KnowledgeHubNodeMetadata = {};
 ```

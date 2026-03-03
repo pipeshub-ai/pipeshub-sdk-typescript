@@ -5,7 +5,7 @@ Run crawling job on a specified day of each month
 ## Example Usage
 
 ```typescript
-import { MonthlyScheduleConfig } from "pipeshub/models";
+import { MonthlyScheduleConfig } from "@pipeshub-ai/sdk/models";
 
 let value: MonthlyScheduleConfig = {
   scheduleType: "monthly",

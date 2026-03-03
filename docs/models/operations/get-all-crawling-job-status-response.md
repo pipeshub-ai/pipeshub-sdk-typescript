@@ -5,11 +5,9 @@ All job statuses retrieved successfully
 ## Example Usage
 
 ```typescript
-import { GetAllCrawlingJobStatusResponse } from "pipeshub/models/operations";
+import { GetAllCrawlingJobStatusResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetAllCrawlingJobStatusResponse = {
-  success: true,
-  message: "All job statuses retrieved successfully",
   data: [
     {
       id: "crawl-drive-507f1f77bcf86cd799439011-507f1f77bcf86cd799439012",
@@ -45,8 +43,7 @@ let value: GetAllCrawlingJobStatusResponse = {
 
 ## Fields
 
-| Field                                            | Type                                             | Required                                         | Description                                      | Example                                          |
-| ------------------------------------------------ | ------------------------------------------------ | ------------------------------------------------ | ------------------------------------------------ | ------------------------------------------------ |
-| `success`                                        | *boolean*                                        | :heavy_minus_sign:                               | N/A                                              | true                                             |
-| `message`                                        | *string*                                         | :heavy_minus_sign:                               | N/A                                              | All job statuses retrieved successfully          |
-| `data`                                           | [models.JobStatus](../../models/job-status.md)[] | :heavy_minus_sign:                               | N/A                                              |                                                  |
+| Field                                            | Type                                             | Required                                         | Description                                      |
+| ------------------------------------------------ | ------------------------------------------------ | ------------------------------------------------ | ------------------------------------------------ |
+| `success`                                        | *boolean*                                        | :heavy_minus_sign:                               | N/A                                              |
+| `data`                                           | [models.JobStatus](../../models/job-status.md)[] | :heavy_minus_sign:                               | N/A                                              |

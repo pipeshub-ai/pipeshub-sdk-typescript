@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { GetUserEmailByIdRequest } from "pipeshub/models/operations";
+import { GetUserEmailByIdRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetUserEmailByIdRequest = {
   id: "507f1f77bcf86cd799439011",

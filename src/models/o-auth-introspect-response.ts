@@ -49,9 +49,9 @@ export type OAuthIntrospectResponse = {
    */
   nbf?: number | undefined;
   /**
-   * Subject (user ID)
+   * User ID
    */
-  sub?: string | undefined;
+  userId?: string | undefined;
   /**
    * Audience (client ID)
    */
@@ -80,7 +80,7 @@ export const OAuthIntrospectResponse$inboundSchema: z.ZodMiniType<
     exp: types.optional(types.number()),
     iat: types.optional(types.number()),
     nbf: types.optional(types.number()),
-    sub: types.optional(types.string()),
+    user_id: types.optional(types.string()),
     aud: types.optional(types.string()),
     iss: types.optional(types.string()),
     jti: types.optional(types.string()),
@@ -89,6 +89,7 @@ export const OAuthIntrospectResponse$inboundSchema: z.ZodMiniType<
     return remap$(v, {
       "client_id": "clientId",
       "token_type": "tokenType",
+      "user_id": "userId",
     });
   }),
 );

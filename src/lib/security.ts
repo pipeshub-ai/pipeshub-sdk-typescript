@@ -3,7 +3,6 @@
  */
 
 import * as models from "../models/index.js";
-import { env } from "./env.js";
 
 type OAuth2PasswordFlow = {
   username: string;
@@ -198,8 +197,7 @@ export function resolveSecurity(
         applyBearer(state, spec);
         break;
       default:
-        spec satisfies never;
-        throw SecurityError.unrecognizedType(type);
+        throw SecurityError.unrecognizedType((spec satisfies never, type));
     }
   });
 
@@ -247,7 +245,16 @@ export function resolveGlobalSecurity(
       {
         fieldName: "Authorization",
         type: "http:bearer",
-        value: security?.bearerAuth ?? env().PIPESHUB_BEARER_AUTH,
+        value: security?.bearerAuth,
+      },
+    ],
+    [
+      {
+        type: "oauth2:client_credentials",
+        value: {
+          clientID: security?.oauth2?.clientID,
+          clientSecret: security?.oauth2?.clientSecret,
+        },
       },
     ],
   );

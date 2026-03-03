@@ -15,7 +15,7 @@ Current state of the job in the queue:<br>
 ## Example Usage
 
 ```typescript
-import { State } from "pipeshub/models";
+import { State } from "@pipeshub-ai/sdk/models";
 
 let value: State = "waiting";
 ```

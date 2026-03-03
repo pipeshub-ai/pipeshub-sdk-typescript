@@ -5,7 +5,7 @@ Credentials for OAuth authentication (Microsoft, Azure AD, generic OAuth)
 ## Example Usage
 
 ```typescript
-import { OAuthCredentials } from "pipeshub/models";
+import { OAuthCredentials } from "@pipeshub-ai/sdk/models";
 
 let value: OAuthCredentials = {
   accessToken: "<value>",

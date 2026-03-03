@@ -3,9 +3,23 @@
  */
 
 import * as z from "zod/v4-mini";
+import { safeParse } from "../../lib/schemas.js";
+import { Result as SafeParseResult } from "../../types/fp.js";
+import * as types from "../../types/primitives.js";
+import { SDKValidationError } from "../errors/sdk-validation-error.js";
 
 export type ArchiveSearchRequest = {
+  /**
+   * Unique search identifier
+   */
   searchId: string;
+};
+
+/**
+ * Search archived successfully
+ */
+export type ArchiveSearchResponse = {
+  message?: string | undefined;
 };
 
 /** @internal */
@@ -26,5 +40,23 @@ export function archiveSearchRequestToJSON(
 ): string {
   return JSON.stringify(
     ArchiveSearchRequest$outboundSchema.parse(archiveSearchRequest),
+  );
+}
+
+/** @internal */
+export const ArchiveSearchResponse$inboundSchema: z.ZodMiniType<
+  ArchiveSearchResponse,
+  unknown
+> = z.object({
+  message: types.optional(types.string()),
+});
+
+export function archiveSearchResponseFromJSON(
+  jsonString: string,
+): SafeParseResult<ArchiveSearchResponse, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => ArchiveSearchResponse$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ArchiveSearchResponse' from JSON`,
   );
 }

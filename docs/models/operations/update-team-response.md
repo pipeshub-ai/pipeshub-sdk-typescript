@@ -5,7 +5,7 @@ Team updated successfully
 ## Example Usage
 
 ```typescript
-import { UpdateTeamResponse } from "pipeshub/models/operations";
+import { UpdateTeamResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: UpdateTeamResponse = {
   success: true,

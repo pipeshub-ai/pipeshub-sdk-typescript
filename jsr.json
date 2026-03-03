@@ -1,8 +1,8 @@
 
 
 {
-  "name": "pipeshub",
-  "version": "0.1.1",
+  "name": "@pipeshub-ai/sdk",
+  "version": "1.0.0",
   "exports": {
     ".": "./src/index.ts",    
     "./models/errors": "./src/models/errors/index.ts",    

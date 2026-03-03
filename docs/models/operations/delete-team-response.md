@@ -5,7 +5,7 @@ Team deleted successfully
 ## Example Usage
 
 ```typescript
-import { DeleteTeamResponse } from "pipeshub/models/operations";
+import { DeleteTeamResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: DeleteTeamResponse = {
   success: true,

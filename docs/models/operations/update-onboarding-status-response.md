@@ -5,7 +5,7 @@ Onboarding status updated successfully
 ## Example Usage
 
 ```typescript
-import { UpdateOnboardingStatusResponse } from "pipeshub/models/operations";
+import { UpdateOnboardingStatusResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: UpdateOnboardingStatusResponse = {
   success: true,

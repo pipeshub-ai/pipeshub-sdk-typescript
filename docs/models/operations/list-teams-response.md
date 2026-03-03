@@ -5,7 +5,7 @@ Teams retrieved successfully
 ## Example Usage
 
 ```typescript
-import { ListTeamsResponse } from "pipeshub/models/operations";
+import { ListTeamsResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: ListTeamsResponse = {
   success: true,

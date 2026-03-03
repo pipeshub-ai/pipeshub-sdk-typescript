@@ -5,7 +5,7 @@ Team created successfully
 ## Example Usage
 
 ```typescript
-import { CreateTeamResponse } from "pipeshub/models/operations";
+import { CreateTeamResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: CreateTeamResponse = {
   success: true,

@@ -15,15 +15,15 @@ export type SSOAuthConfig = {
   /**
    * Identity provider SSO URL
    */
-  entryPoint: string;
+  entryPoint?: string | undefined;
   /**
    * X.509 certificate for signature validation (PEM format)
    */
-  certificate: string;
+  certificate?: string | undefined;
   /**
    * SAML attribute name for user email
    */
-  emailKey: string;
+  emailKey?: string | undefined;
 };
 
 /** @internal */
@@ -31,15 +31,15 @@ export const SSOAuthConfig$inboundSchema: z.ZodMiniType<
   SSOAuthConfig,
   unknown
 > = z.object({
-  entryPoint: types.string(),
-  certificate: types.string(),
-  emailKey: types.string(),
+  entryPoint: types.optional(types.string()),
+  certificate: types.optional(types.string()),
+  emailKey: types.optional(types.string()),
 });
 /** @internal */
 export type SSOAuthConfig$Outbound = {
-  entryPoint: string;
-  certificate: string;
-  emailKey: string;
+  entryPoint?: string | undefined;
+  certificate?: string | undefined;
+  emailKey?: string | undefined;
 };
 
 /** @internal */
@@ -47,9 +47,9 @@ export const SSOAuthConfig$outboundSchema: z.ZodMiniType<
   SSOAuthConfig$Outbound,
   SSOAuthConfig
 > = z.object({
-  entryPoint: z.string(),
-  certificate: z.string(),
-  emailKey: z.string(),
+  entryPoint: z.optional(z.string()),
+  certificate: z.optional(z.string()),
+  emailKey: z.optional(z.string()),
 });
 
 export function ssoAuthConfigToJSON(ssoAuthConfig: SSOAuthConfig): string {

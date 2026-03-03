@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { UpdateMessageFeedbackRequest } from "pipeshub/models/operations";
+import { UpdateMessageFeedbackRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: UpdateMessageFeedbackRequest = {
   conversationId: "<value>",

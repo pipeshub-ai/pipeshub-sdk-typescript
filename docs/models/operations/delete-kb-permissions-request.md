@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { DeleteKBPermissionsRequest } from "pipeshub/models/operations";
+import { DeleteKBPermissionsRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: DeleteKBPermissionsRequest = {
   kbId: "<id>",

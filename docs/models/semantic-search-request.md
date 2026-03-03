@@ -15,7 +15,7 @@ Use filters to narrow search scope to specific apps or knowledge bases.
 ## Example Usage
 
 ```typescript
-import { SemanticSearchRequest } from "pipeshub/models";
+import { SemanticSearchRequest } from "@pipeshub-ai/sdk/models";
 
 let value: SemanticSearchRequest = {
   query: "employee onboarding procedures",

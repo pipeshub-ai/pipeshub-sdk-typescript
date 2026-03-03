@@ -10,7 +10,7 @@ Permission level for shared users:
 ## Example Usage
 
 ```typescript
-import { ShareRequestAccessLevel } from "pipeshub/models";
+import { ShareRequestAccessLevel } from "@pipeshub-ai/sdk/models";
 
 let value: ShareRequestAccessLevel = "read";
 ```

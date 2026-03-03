@@ -5,7 +5,7 @@ Permissions list retrieved
 ## Example Usage
 
 ```typescript
-import { ListKBPermissionsResponse } from "pipeshub/models/operations";
+import { ListKBPermissionsResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: ListKBPermissionsResponse = {};
 ```

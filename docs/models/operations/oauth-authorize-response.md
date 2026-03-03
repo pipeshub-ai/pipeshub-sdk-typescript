@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { OauthAuthorizeResponse } from "pipeshub/models/operations";
+import { OauthAuthorizeResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: OauthAuthorizeResponse = {
   headers: {

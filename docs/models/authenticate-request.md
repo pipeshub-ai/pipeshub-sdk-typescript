@@ -14,7 +14,7 @@ Request to authenticate using specified method.
 ## Example Usage
 
 ```typescript
-import { AuthenticateRequest } from "pipeshub/models";
+import { AuthenticateRequest } from "@pipeshub-ai/sdk/models";
 
 let value: AuthenticateRequest = {
   method: "otp",

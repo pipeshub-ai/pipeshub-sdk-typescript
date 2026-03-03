@@ -5,7 +5,7 @@ Request to update filters and sync config (connector must be authenticated and i
 ## Example Usage
 
 ```typescript
-import { UpdateConnectorFiltersSyncRequest } from "pipeshub/models";
+import { UpdateConnectorFiltersSyncRequest } from "@pipeshub-ai/sdk/models";
 
 let value: UpdateConnectorFiltersSyncRequest = {
   sync: {

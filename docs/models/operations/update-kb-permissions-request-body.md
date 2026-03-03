@@ -5,7 +5,7 @@ Request body for Update permissions
 ## Example Usage
 
 ```typescript
-import { UpdateKBPermissionsRequestBody } from "pipeshub/models/operations";
+import { UpdateKBPermissionsRequestBody } from "@pipeshub-ai/sdk/models/operations";
 
 let value: UpdateKBPermissionsRequestBody = {
   role: "FILEORGANIZER",

@@ -5,7 +5,7 @@ Request to share a conversation or search with other users
 ## Example Usage
 
 ```typescript
-import { ShareRequest } from "pipeshub/models";
+import { ShareRequest } from "@pipeshub-ai/sdk/models";
 
 let value: ShareRequest = {
   userIds: [

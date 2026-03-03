@@ -5,7 +5,7 @@ Instances retrieved
 ## Example Usage
 
 ```typescript
-import { ListConnectorInstancesResponse } from "pipeshub/models/operations";
+import { ListConnectorInstancesResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: ListConnectorInstancesResponse = {
   connectors: [

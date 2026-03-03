@@ -5,7 +5,7 @@ OAuth configuration deleted
 ## Example Usage
 
 ```typescript
-import { DeleteOAuthConfigResponse } from "pipeshub/models/operations";
+import { DeleteOAuthConfigResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: DeleteOAuthConfigResponse = {};
 ```

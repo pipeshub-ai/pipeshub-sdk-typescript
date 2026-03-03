@@ -13,7 +13,7 @@ Error code. Common values:
 ## Example Usage
 
 ```typescript
-import { ErrorT } from "pipeshub/models";
+import { ErrorT } from "@pipeshub-ai/sdk/models";
 
 let value: ErrorT = "invalid_request";
 ```

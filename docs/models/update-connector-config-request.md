@@ -5,7 +5,7 @@ Request to update connector configuration (partial updates supported)
 ## Example Usage
 
 ```typescript
-import { UpdateConnectorConfigRequest } from "pipeshub/models";
+import { UpdateConnectorConfigRequest } from "@pipeshub-ai/sdk/models";
 
 let value: UpdateConnectorConfigRequest = {
   auth: {

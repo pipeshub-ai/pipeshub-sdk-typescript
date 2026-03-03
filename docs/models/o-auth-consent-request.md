@@ -5,7 +5,7 @@ Request to submit user consent for OAuth authorization
 ## Example Usage
 
 ```typescript
-import { OAuthConsentRequest } from "pipeshub/models";
+import { OAuthConsentRequest } from "@pipeshub-ai/sdk/models";
 
 let value: OAuthConsentRequest = {
   clientId: "<id>",

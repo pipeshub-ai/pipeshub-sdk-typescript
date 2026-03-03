@@ -7,7 +7,7 @@ Contains token metadata if active, or just `active: false` if not.
 ## Example Usage
 
 ```typescript
-import { OAuthIntrospectResponse } from "pipeshub/models";
+import { OAuthIntrospectResponse } from "@pipeshub-ai/sdk/models";
 
 let value: OAuthIntrospectResponse = {
   active: false,
@@ -26,7 +26,7 @@ let value: OAuthIntrospectResponse = {
 | `exp`                                   | *number*                                | :heavy_minus_sign:                      | Token expiration timestamp (Unix epoch) |
 | `iat`                                   | *number*                                | :heavy_minus_sign:                      | Token issuance timestamp (Unix epoch)   |
 | `nbf`                                   | *number*                                | :heavy_minus_sign:                      | Token not-before timestamp (Unix epoch) |
-| `sub`                                   | *string*                                | :heavy_minus_sign:                      | Subject (user ID)                       |
+| `userId`                                | *string*                                | :heavy_minus_sign:                      | User ID                                 |
 | `aud`                                   | *string*                                | :heavy_minus_sign:                      | Audience (client ID)                    |
 | `iss`                                   | *string*                                | :heavy_minus_sign:                      | Issuer URL                              |
 | `jti`                                   | *string*                                | :heavy_minus_sign:                      | Unique token identifier                 |

@@ -5,7 +5,7 @@ Sync configuration (schedule, options)
 ## Example Usage
 
 ```typescript
-import { ConnectorConfigSync } from "pipeshub/models";
+import { ConnectorConfigSync } from "@pipeshub-ai/sdk/models";
 
 let value: ConnectorConfigSync = {};
 ```

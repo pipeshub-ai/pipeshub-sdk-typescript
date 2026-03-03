@@ -5,7 +5,7 @@ Run crawling job using a custom cron expression for complex schedules
 ## Example Usage
 
 ```typescript
-import { CustomScheduleConfig } from "pipeshub/models";
+import { CustomScheduleConfig } from "@pipeshub-ai/sdk/models";
 
 let value: CustomScheduleConfig = {
   scheduleType: "custom",

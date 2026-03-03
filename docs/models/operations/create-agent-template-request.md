@@ -5,7 +5,7 @@ Request payload
 ## Example Usage
 
 ```typescript
-import { CreateAgentTemplateRequest } from "pipeshub/models/operations";
+import { CreateAgentTemplateRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: CreateAgentTemplateRequest = {
   name: "Customer Support Agent",

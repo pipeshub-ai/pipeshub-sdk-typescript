@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { ResendUserInviteRequest } from "pipeshub/models/operations";
+import { ResendUserInviteRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: ResendUserInviteRequest = {
   id: "507f1f77bcf86cd799439011",

@@ -5,7 +5,7 @@ Request body for Resync connector
 ## Example Usage
 
 ```typescript
-import { ResyncConnectorRequest } from "pipeshub/models/operations";
+import { ResyncConnectorRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: ResyncConnectorRequest = {
   connectorName: "GOOGLE_DRIVE",

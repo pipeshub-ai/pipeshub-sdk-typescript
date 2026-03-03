@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { GetAvailableModelsByTypeRequest } from "pipeshub/models/operations";
+import { GetAvailableModelsByTypeRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetAvailableModelsByTypeRequest = {
   modelType: "embedding",

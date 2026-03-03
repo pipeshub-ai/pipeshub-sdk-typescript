@@ -5,7 +5,7 @@ Permission configuration
 ## Example Usage
 
 ```typescript
-import { GetAgentPermissionsResponse } from "pipeshub/models/operations";
+import { GetAgentPermissionsResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetAgentPermissionsResponse = {};
 ```

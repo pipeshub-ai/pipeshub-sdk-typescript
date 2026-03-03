@@ -5,7 +5,7 @@ Name updated
 ## Example Usage
 
 ```typescript
-import { UpdateConnectorNameResponse } from "pipeshub/models/operations";
+import { UpdateConnectorNameResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: UpdateConnectorNameResponse = {
   connector: {

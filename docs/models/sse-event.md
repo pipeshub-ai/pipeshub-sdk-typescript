@@ -14,7 +14,7 @@ Server-Sent Event structure for streaming responses.<br><br>
 ## Example Usage
 
 ```typescript
-import { SSEEvent } from "pipeshub/models";
+import { SSEEvent } from "@pipeshub-ai/sdk/models";
 
 let value: SSEEvent = {};
 ```

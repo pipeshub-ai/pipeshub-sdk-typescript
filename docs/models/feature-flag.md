@@ -5,7 +5,7 @@ Platform feature flag definition
 ## Example Usage
 
 ```typescript
-import { FeatureFlag } from "pipeshub/models";
+import { FeatureFlag } from "@pipeshub-ai/sdk/models";
 
 let value: FeatureFlag = {
   key: "ENABLE_BETA_CONNECTORS",

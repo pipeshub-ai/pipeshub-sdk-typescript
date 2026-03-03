@@ -5,7 +5,7 @@ Reference to a source document cited in a response
 ## Example Usage
 
 ```typescript
-import { CitationReference } from "pipeshub/models";
+import { CitationReference } from "@pipeshub-ai/sdk/models";
 
 let value: CitationReference = {};
 ```

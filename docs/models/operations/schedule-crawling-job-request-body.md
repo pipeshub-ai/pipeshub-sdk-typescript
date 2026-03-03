@@ -5,7 +5,7 @@ Request payload
 ## Example Usage
 
 ```typescript
-import { ScheduleCrawlingJobRequestBody } from "pipeshub/models/operations";
+import { ScheduleCrawlingJobRequestBody } from "@pipeshub-ai/sdk/models/operations";
 
 let value: ScheduleCrawlingJobRequestBody = {
   scheduleConfig: {

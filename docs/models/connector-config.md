@@ -5,7 +5,7 @@ Configuration for a connector instance including auth, sync, and filter settings
 ## Example Usage
 
 ```typescript
-import { ConnectorConfig } from "pipeshub/models";
+import { ConnectorConfig } from "@pipeshub-ai/sdk/models";
 
 let value: ConnectorConfig = {
   scope: "team",

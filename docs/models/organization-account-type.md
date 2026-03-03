@@ -5,7 +5,7 @@ Type of account
 ## Example Usage
 
 ```typescript
-import { OrganizationAccountType } from "pipeshub/models";
+import { OrganizationAccountType } from "@pipeshub-ai/sdk/models";
 
 let value: OrganizationAccountType = "individual";
 ```

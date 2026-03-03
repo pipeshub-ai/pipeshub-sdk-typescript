@@ -5,7 +5,7 @@ Credentials for OTP authentication
 ## Example Usage
 
 ```typescript
-import { OtpCredentials } from "pipeshub/models";
+import { OtpCredentials } from "@pipeshub-ai/sdk/models";
 
 let value: OtpCredentials = {
   otp: "123456",

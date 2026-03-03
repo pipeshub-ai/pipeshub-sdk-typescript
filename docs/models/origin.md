@@ -8,7 +8,7 @@ Source of the record:
 ## Example Usage
 
 ```typescript
-import { Origin } from "pipeshub/models";
+import { Origin } from "@pipeshub-ai/sdk/models";
 
 let value: Origin = "UPLOAD";
 ```

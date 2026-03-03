@@ -5,7 +5,7 @@ SMTP email server configuration for sending system emails (invitations, notifica
 ## Example Usage
 
 ```typescript
-import { SMTPConfig } from "pipeshub/models";
+import { SMTPConfig } from "@pipeshub-ai/sdk/models";
 
 let value: SMTPConfig = {
   host: "smtp.gmail.com",

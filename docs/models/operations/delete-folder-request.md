@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { DeleteFolderRequest } from "pipeshub/models/operations";
+import { DeleteFolderRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: DeleteFolderRequest = {
   kbId: "<id>",

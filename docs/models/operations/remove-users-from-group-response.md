@@ -5,7 +5,7 @@ Users removed from group successfully
 ## Example Usage
 
 ```typescript
-import { RemoveUsersFromGroupResponse } from "pipeshub/models/operations";
+import { RemoveUsersFromGroupResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: RemoveUsersFromGroupResponse = {
   success: true,

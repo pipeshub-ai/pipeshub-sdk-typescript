@@ -6,23 +6,23 @@ AI-powered conversational chat management with citations and follow-up questions
 
 ### Available Operations
 
-* [create](#create) - Create a new AI conversation
-* [stream](#stream) - Create conversation with streaming response
-* [list](#list) - List all conversations
-* [listArchived](#listarchived) - List archived conversations
-* [get](#get) - Get conversation by ID
-* [delete](#delete) - Delete conversation
+* [createConversation](#createconversation) - Create a new AI conversation
+* [streamChat](#streamchat) - Create conversation with streaming response
+* [getAllConversations](#getallconversations) - List all conversations
+* [getArchivedConversations](#getarchivedconversations) - List archived conversations
+* [getConversationById](#getconversationbyid) - Get conversation by ID
+* [deleteConversationById](#deleteconversationbyid) - Delete conversation
 * [addMessage](#addmessage) - Add message to conversation
 * [addMessageStream](#addmessagestream) - Add message with streaming response
-* [share](#share) - Share conversation with users
-* [unshare](#unshare) - Revoke conversation access
-* [updateTitle](#updatetitle) - Update conversation title
-* [patchArchive](#patcharchive) - Archive conversation
-* [unarchive](#unarchive) - Unarchive conversation
+* [shareConversation](#shareconversation) - Share conversation with users
+* [updateConversationTitle](#updateconversationtitle) - Update conversation title
+* [archiveConversation](#archiveconversation) - Archive conversation
+* [unarchiveConversation](#unarchiveconversation) - Unarchive conversation
 * [regenerateAnswer](#regenerateanswer) - Regenerate AI response
 * [updateMessageFeedback](#updatemessagefeedback) - Submit feedback on AI response
+* [~~unshareConversationById~~](#unshareconversationbyid) - Unshare a conversation :warning: **Deprecated**
 
-## create
+## createConversation
 
 Start a new conversation with PipesHub's AI assistant.<br><br>
 <b>Overview:</b><br>
@@ -52,15 +52,16 @@ Each model may have different capabilities, speed, and accuracy trade-offs.
 
 <!-- UsageSnippet language="typescript" operationID="createConversation" method="post" path="/conversations/create" example="filtered" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.conversations.create({
+  const result = await pipeshub.conversations.createConversation({
     query: "Summarize the Q4 sales report",
     filters: {
       kb: [
@@ -81,18 +82,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { conversationsCreate } from "pipeshub/funcs/conversations-create.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { conversationsCreateConversation } from "@pipeshub-ai/sdk/funcs/conversations-create-conversation.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await conversationsCreate(pipeshub, {
+  const res = await conversationsCreateConversation(pipeshub, {
     query: "Summarize the Q4 sales report",
     filters: {
       kb: [
@@ -105,7 +107,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("conversationsCreate failed:", res.error);
+    console.log("conversationsCreateConversation failed:", res.error);
   }
 }
 
@@ -115,15 +117,16 @@ run();
 
 <!-- UsageSnippet language="typescript" operationID="createConversation" method="post" path="/conversations/create" example="simple" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.conversations.create({
+  const result = await pipeshub.conversations.createConversation({
     query: "What is our company's vacation policy?",
   });
 
@@ -138,25 +141,26 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { conversationsCreate } from "pipeshub/funcs/conversations-create.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { conversationsCreateConversation } from "@pipeshub-ai/sdk/funcs/conversations-create-conversation.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await conversationsCreate(pipeshub, {
+  const res = await conversationsCreateConversation(pipeshub, {
     query: "What is our company's vacation policy?",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("conversationsCreate failed:", res.error);
+    console.log("conversationsCreateConversation failed:", res.error);
   }
 }
 
@@ -182,7 +186,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## stream
+## streamChat
 
 Start a new conversation with real-time streaming response using Server-Sent Events (SSE).<br><br>
 <b>Overview:</b><br>
@@ -213,15 +217,16 @@ The conversation is marked as FAILED with the error reason stored.
 
 <!-- UsageSnippet language="typescript" operationID="streamChat" method="post" path="/conversations/stream" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.conversations.stream({
+  const result = await pipeshub.conversations.streamChat({
     query: "What are the key findings from our Q4 financial report?",
     recordIds: [
       "507f1f77bcf86cd799439011",
@@ -245,18 +250,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { conversationsStream } from "pipeshub/funcs/conversations-stream.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { conversationsStreamChat } from "@pipeshub-ai/sdk/funcs/conversations-stream-chat.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await conversationsStream(pipeshub, {
+  const res = await conversationsStreamChat(pipeshub, {
     query: "What are the key findings from our Q4 financial report?",
     recordIds: [
       "507f1f77bcf86cd799439011",
@@ -272,7 +278,7 @@ async function run() {
     console.log(event);
   }
   } else {
-    console.log("conversationsStream failed:", res.error);
+    console.log("conversationsStreamChat failed:", res.error);
   }
 }
 
@@ -298,7 +304,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## list
+## getAllConversations
 
 Retrieve all conversations for the authenticated user.<br><br>
 <b>Overview:</b><br>
@@ -317,15 +323,16 @@ Conversations are sorted by last activity timestamp (most recent first).
 
 <!-- UsageSnippet language="typescript" operationID="getAllConversations" method="get" path="/conversations" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.conversations.list();
+  const result = await pipeshub.conversations.getAllConversations();
 
   console.log(result);
 }
@@ -338,23 +345,24 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { conversationsList } from "pipeshub/funcs/conversations-list.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { conversationsGetAllConversations } from "@pipeshub-ai/sdk/funcs/conversations-get-all-conversations.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await conversationsList(pipeshub);
+  const res = await conversationsGetAllConversations(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("conversationsList failed:", res.error);
+    console.log("conversationsGetAllConversations failed:", res.error);
   }
 }
 
@@ -371,7 +379,7 @@ run();
 
 ### Response
 
-**Promise\<[models.Conversation[]](../../models/.md)\>**
+**Promise\<[operations.GetAllConversationsResponse](../../models/operations/get-all-conversations-response.md)\>**
 
 ### Errors
 
@@ -379,7 +387,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## listArchived
+## getArchivedConversations
 
 Retrieve all archived conversations for the authenticated user.<br><br>
 <b>Overview:</b><br>
@@ -394,15 +402,16 @@ to the active list.
 
 <!-- UsageSnippet language="typescript" operationID="getArchivedConversations" method="get" path="/conversations/show/archives" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.conversations.listArchived();
+  const result = await pipeshub.conversations.getArchivedConversations();
 
   console.log(result);
 }
@@ -415,23 +424,24 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { conversationsListArchived } from "pipeshub/funcs/conversations-list-archived.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { conversationsGetArchivedConversations } from "@pipeshub-ai/sdk/funcs/conversations-get-archived-conversations.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await conversationsListArchived(pipeshub);
+  const res = await conversationsGetArchivedConversations(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("conversationsListArchived failed:", res.error);
+    console.log("conversationsGetArchivedConversations failed:", res.error);
   }
 }
 
@@ -448,7 +458,7 @@ run();
 
 ### Response
 
-**Promise\<[models.Conversation[]](../../models/.md)\>**
+**Promise\<[operations.GetArchivedConversationsResponse](../../models/operations/get-archived-conversations-response.md)\>**
 
 ### Errors
 
@@ -456,7 +466,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## get
+## getConversationById
 
 Retrieve a specific conversation with its full message history.<br><br>
 <b>Overview:</b><br>
@@ -478,15 +488,16 @@ Users can access conversations they own or that have been shared with them.
 
 <!-- UsageSnippet language="typescript" operationID="getConversationById" method="get" path="/conversations/{conversationId}" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.conversations.get({
+  const result = await pipeshub.conversations.getConversationById({
     conversationId: "507f1f77bcf86cd799439011",
   });
 
@@ -501,25 +512,26 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { conversationsGet } from "pipeshub/funcs/conversations-get.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { conversationsGetConversationById } from "@pipeshub-ai/sdk/funcs/conversations-get-conversation-by-id.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await conversationsGet(pipeshub, {
+  const res = await conversationsGetConversationById(pipeshub, {
     conversationId: "507f1f77bcf86cd799439011",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("conversationsGet failed:", res.error);
+    console.log("conversationsGetConversationById failed:", res.error);
   }
 }
 
@@ -545,7 +557,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## delete
+## deleteConversationById
 
 Delete a conversation by its ID.<br><br>
 <b>Overview:</b><br>
@@ -560,15 +572,16 @@ Shared users cannot delete conversations.
 
 <!-- UsageSnippet language="typescript" operationID="deleteConversationById" method="delete" path="/conversations/{conversationId}" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.conversations.delete({
+  const result = await pipeshub.conversations.deleteConversationById({
     conversationId: "<value>",
   });
 
@@ -583,25 +596,26 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { conversationsDelete } from "pipeshub/funcs/conversations-delete.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { conversationsDeleteConversationById } from "@pipeshub-ai/sdk/funcs/conversations-delete-conversation-by-id.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await conversationsDelete(pipeshub, {
+  const res = await conversationsDeleteConversationById(pipeshub, {
     conversationId: "<value>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("conversationsDelete failed:", res.error);
+    console.log("conversationsDeleteConversationById failed:", res.error);
   }
 }
 
@@ -648,11 +662,12 @@ This allows switching models mid-conversation if needed.
 
 <!-- UsageSnippet language="typescript" operationID="addMessage" method="post" path="/conversations/{conversationId}/messages" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
@@ -674,14 +689,15 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { conversationsAddMessage } from "pipeshub/funcs/conversations-add-message.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { conversationsAddMessage } from "@pipeshub-ai/sdk/funcs/conversations-add-message.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
@@ -735,11 +751,12 @@ See <code>/conversations/stream</code> for event type documentation.
 
 <!-- UsageSnippet language="typescript" operationID="addMessageStream" method="post" path="/conversations/{conversationId}/messages/stream" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
@@ -763,14 +780,15 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { conversationsAddMessageStream } from "pipeshub/funcs/conversations-add-message-stream.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { conversationsAddMessageStream } from "@pipeshub-ai/sdk/funcs/conversations-add-message-stream.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
@@ -812,7 +830,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## share
+## shareConversation
 
 Share a conversation with other users in your organization.<br><br>
 <b>Overview:</b><br>
@@ -832,15 +850,16 @@ to the same organization.
 
 <!-- UsageSnippet language="typescript" operationID="shareConversation" method="post" path="/conversations/{conversationId}/share" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.conversations.share({
+  const result = await pipeshub.conversations.shareConversation({
     conversationId: "<value>",
     body: {
       userIds: [
@@ -860,18 +879,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { conversationsShare } from "pipeshub/funcs/conversations-share.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { conversationsShareConversation } from "@pipeshub-ai/sdk/funcs/conversations-share-conversation.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await conversationsShare(pipeshub, {
+  const res = await conversationsShareConversation(pipeshub, {
     conversationId: "<value>",
     body: {
       userIds: [
@@ -883,7 +903,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("conversationsShare failed:", res.error);
+    console.log("conversationsShareConversation failed:", res.error);
   }
 }
 
@@ -909,100 +929,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## unshare
-
-Remove sharing access from users.<br><br>
-<b>Overview:</b><br>
-Removes specified users from the conversation's sharedWith list.
-Those users will no longer be able to access the conversation.<br><br>
-<b>Permissions:</b><br>
-Only the conversation owner can revoke access.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="unshareConversation" method="post" path="/conversations/{conversationId}/unshare" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.conversations.unshare({
-    conversationId: "<value>",
-    body: {
-      userIds: [
-        "<value 1>",
-        "<value 2>",
-      ],
-    },
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { conversationsUnshare } from "pipeshub/funcs/conversations-unshare.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await conversationsUnshare(pipeshub, {
-    conversationId: "<value>",
-    body: {
-      userIds: [
-        "<value 1>",
-        "<value 2>",
-      ],
-    },
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("conversationsUnshare failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.UnshareConversationRequest](../../models/operations/unshare-conversation-request.md)                                                                               | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[models.Conversation](../../models/conversation.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## updateTitle
+## updateConversationTitle
 
 Update the title of a conversation.<br><br>
 <b>Overview:</b><br>
@@ -1019,15 +946,16 @@ Use this endpoint to set a custom, more descriptive title.<br><br>
 
 <!-- UsageSnippet language="typescript" operationID="updateConversationTitle" method="patch" path="/conversations/{conversationId}/title" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.conversations.updateTitle({
+  const result = await pipeshub.conversations.updateConversationTitle({
     conversationId: "<value>",
     body: {
       title: "Q4 Sales Analysis Discussion",
@@ -1045,18 +973,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { conversationsUpdateTitle } from "pipeshub/funcs/conversations-update-title.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { conversationsUpdateConversationTitle } from "@pipeshub-ai/sdk/funcs/conversations-update-conversation-title.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await conversationsUpdateTitle(pipeshub, {
+  const res = await conversationsUpdateConversationTitle(pipeshub, {
     conversationId: "<value>",
     body: {
       title: "Q4 Sales Analysis Discussion",
@@ -1066,7 +995,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("conversationsUpdateTitle failed:", res.error);
+    console.log("conversationsUpdateConversationTitle failed:", res.error);
   }
 }
 
@@ -1092,7 +1021,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## patchArchive
+## archiveConversation
 
 Archive a conversation to hide it from the main list.<br><br>
 <b>Overview:</b><br>
@@ -1106,15 +1035,16 @@ View archived conversations using <code>GET /conversations/show/archives</code>.
 
 <!-- UsageSnippet language="typescript" operationID="archiveConversation" method="patch" path="/conversations/{conversationId}/archive" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.conversations.patchArchive({
+  const result = await pipeshub.conversations.archiveConversation({
     conversationId: "<value>",
   });
 
@@ -1129,25 +1059,26 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { conversationsPatchArchive } from "pipeshub/funcs/conversations-patch-archive.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { conversationsArchiveConversation } from "@pipeshub-ai/sdk/funcs/conversations-archive-conversation.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await conversationsPatchArchive(pipeshub, {
+  const res = await conversationsArchiveConversation(pipeshub, {
     conversationId: "<value>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("conversationsPatchArchive failed:", res.error);
+    console.log("conversationsArchiveConversation failed:", res.error);
   }
 }
 
@@ -1173,7 +1104,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## unarchive
+## unarchiveConversation
 
 Restore an archived conversation to the active list.<br><br>
 <b>Overview:</b><br>
@@ -1184,15 +1115,16 @@ Removes the archived flag, making the conversation visible in the main list agai
 
 <!-- UsageSnippet language="typescript" operationID="unarchiveConversation" method="patch" path="/conversations/{conversationId}/unarchive" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.conversations.unarchive({
+  const result = await pipeshub.conversations.unarchiveConversation({
     conversationId: "<value>",
   });
 
@@ -1207,25 +1139,26 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { conversationsUnarchive } from "pipeshub/funcs/conversations-unarchive.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { conversationsUnarchiveConversation } from "@pipeshub-ai/sdk/funcs/conversations-unarchive-conversation.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await conversationsUnarchive(pipeshub, {
+  const res = await conversationsUnarchiveConversation(pipeshub, {
     conversationId: "<value>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("conversationsUnarchive failed:", res.error);
+    console.log("conversationsUnarchiveConversation failed:", res.error);
   }
 }
 
@@ -1272,11 +1205,12 @@ Specify <code>modelKey</code> to use a different model for regeneration.
 
 <!-- UsageSnippet language="typescript" operationID="regenerateAnswer" method="post" path="/conversations/{conversationId}/message/{messageId}/regenerate" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
@@ -1296,14 +1230,15 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { conversationsRegenerateAnswer } from "pipeshub/funcs/conversations-regenerate-answer.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { conversationsRegenerateAnswer } from "@pipeshub-ai/sdk/funcs/conversations-regenerate-answer.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
@@ -1364,11 +1299,12 @@ not on user queries or system messages.
 
 <!-- UsageSnippet language="typescript" operationID="updateMessageFeedback" method="post" path="/conversations/{conversationId}/message/{messageId}/feedback" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
@@ -1389,14 +1325,15 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { conversationsUpdateMessageFeedback } from "pipeshub/funcs/conversations-update-message-feedback.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { conversationsUpdateMessageFeedback } from "@pipeshub-ai/sdk/funcs/conversations-update-message-feedback.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
@@ -1428,6 +1365,87 @@ run();
 ### Response
 
 **Promise\<[models.Conversation](../../models/conversation.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
+## ~~unshareConversationById~~
+
+<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
+Revoke sharing for a conversation, making it private again.
+
+
+> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="unshareConversationById" method="post" path="/conversations/{conversationId}/unshare" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.conversations.unshareConversationById({
+    conversationId: "<value>",
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { conversationsUnshareConversationById } from "@pipeshub-ai/sdk/funcs/conversations-unshare-conversation-by-id.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const res = await conversationsUnshareConversationById(pipeshub, {
+    conversationId: "<value>",
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("conversationsUnshareConversationById failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.UnshareConversationByIdRequest](../../models/operations/unshare-conversation-by-id-request.md)                                                                     | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[operations.UnshareConversationByIdResponse](../../models/operations/unshare-conversation-by-id-response.md)\>**
 
 ### Errors
 

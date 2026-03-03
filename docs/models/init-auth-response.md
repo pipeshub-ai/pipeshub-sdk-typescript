@@ -5,7 +5,7 @@ Response containing available authentication methods and session info
 ## Example Usage
 
 ```typescript
-import { InitAuthResponse } from "pipeshub/models";
+import { InitAuthResponse } from "@pipeshub-ai/sdk/models";
 
 let value: InitAuthResponse = {
   currentStep: 0,

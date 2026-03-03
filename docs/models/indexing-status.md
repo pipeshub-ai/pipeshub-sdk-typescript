@@ -16,7 +16,7 @@ Current indexing/processing status:
 ## Example Usage
 
 ```typescript
-import { IndexingStatus } from "pipeshub/models";
+import { IndexingStatus } from "@pipeshub-ai/sdk/models";
 
 let value: IndexingStatus = "COMPLETED";
 ```

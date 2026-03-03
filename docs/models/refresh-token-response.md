@@ -5,7 +5,7 @@ Response with new access token
 ## Example Usage
 
 ```typescript
-import { RefreshTokenResponse } from "pipeshub/models";
+import { RefreshTokenResponse } from "@pipeshub-ai/sdk/models";
 
 let value: RefreshTokenResponse = {};
 ```

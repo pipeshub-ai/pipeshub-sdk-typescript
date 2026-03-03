@@ -5,7 +5,7 @@ Request body for Remove permissions
 ## Example Usage
 
 ```typescript
-import { DeleteKBPermissionsRequestBody } from "pipeshub/models/operations";
+import { DeleteKBPermissionsRequestBody } from "@pipeshub-ai/sdk/models/operations";
 
 let value: DeleteKBPermissionsRequestBody = {};
 ```

@@ -1,6 +1,6 @@
-# pipeshub Examples
+# @pipeshub-ai/sdk Examples
 
-This directory contains example scripts demonstrating how to use the pipeshub SDK.
+This directory contains example scripts demonstrating how to use the @pipeshub-ai/sdk SDK.
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This directory contains example scripts demonstrating how to use the pipeshub SD
    cp .env.template .env
    ```
 
-2. Edit `.env` and add your actual credentials (API keys, tokens, etc.)
+2. Edit `.env` and add your actual credentials
 
 ## Running the Examples
 

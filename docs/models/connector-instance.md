@@ -7,7 +7,7 @@ connection to an external service.
 ## Example Usage
 
 ```typescript
-import { ConnectorInstance } from "pipeshub/models";
+import { ConnectorInstance } from "@pipeshub-ai/sdk/models";
 
 let value: ConnectorInstance = {
   connectorId: "conn_abc123",

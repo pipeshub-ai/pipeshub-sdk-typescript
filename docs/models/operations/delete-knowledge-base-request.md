@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { DeleteKnowledgeBaseRequest } from "pipeshub/models/operations";
+import { DeleteKnowledgeBaseRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: DeleteKnowledgeBaseRequest = {
   kbId: "<id>",

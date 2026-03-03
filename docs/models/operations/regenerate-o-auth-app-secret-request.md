@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { RegenerateOAuthAppSecretRequest } from "pipeshub/models/operations";
+import { RegenerateOAuthAppSecretRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: RegenerateOAuthAppSecretRequest = {
   appId: "<id>",

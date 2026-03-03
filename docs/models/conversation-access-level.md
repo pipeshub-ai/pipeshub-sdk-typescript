@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { ConversationAccessLevel } from "pipeshub/models";
+import { ConversationAccessLevel } from "@pipeshub-ai/sdk/models";
 
 let value: ConversationAccessLevel = "write";
 ```

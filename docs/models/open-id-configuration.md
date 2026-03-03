@@ -7,7 +7,7 @@ Contains authorization server metadata.
 ## Example Usage
 
 ```typescript
-import { OpenIDConfiguration } from "pipeshub/models";
+import { OpenIDConfiguration } from "@pipeshub-ai/sdk/models";
 
 let value: OpenIDConfiguration = {
   scopesSupported: [
@@ -37,7 +37,7 @@ let value: OpenIDConfiguration = {
     "RS256",
   ],
   claimsSupported: [
-    "sub",
+    "user_id",
     "iss",
     "aud",
     "exp",
@@ -69,5 +69,5 @@ let value: OpenIDConfiguration = {
 | `tokenEndpointAuthMethodsSupported`                               | *string*[]                                                        | :heavy_minus_sign:                                                | Supported client authentication methods                           | [<br/>"client_secret_basic",<br/>"client_secret_post"<br/>]       |
 | `subjectTypesSupported`                                           | *string*[]                                                        | :heavy_minus_sign:                                                | Supported subject identifier types                                | [<br/>"public"<br/>]                                              |
 | `idTokenSigningAlgValuesSupported`                                | *string*[]                                                        | :heavy_minus_sign:                                                | Supported ID token signing algorithms                             | [<br/>"HS256",<br/>"RS256"<br/>]                                  |
-| `claimsSupported`                                                 | *string*[]                                                        | :heavy_minus_sign:                                                | Supported claims in ID tokens/UserInfo                            | [<br/>"sub",<br/>"iss",<br/>"aud",<br/>"exp",<br/>"iat",<br/>"email",<br/>"name"<br/>] |
+| `claimsSupported`                                                 | *string*[]                                                        | :heavy_minus_sign:                                                | Supported claims in ID tokens/UserInfo                            | [<br/>"user_id",<br/>"iss",<br/>"aud",<br/>"exp",<br/>"iat",<br/>"email",<br/>"name"<br/>] |
 | `codeChallengeMethodsSupported`                                   | *string*[]                                                        | :heavy_minus_sign:                                                | Supported PKCE code challenge methods                             | [<br/>"S256",<br/>"plain"<br/>]                                   |

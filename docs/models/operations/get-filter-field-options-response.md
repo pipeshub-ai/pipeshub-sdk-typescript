@@ -5,7 +5,7 @@ Options retrieved
 ## Example Usage
 
 ```typescript
-import { GetFilterFieldOptionsResponse } from "pipeshub/models/operations";
+import { GetFilterFieldOptionsResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetFilterFieldOptionsResponse = {};
 ```

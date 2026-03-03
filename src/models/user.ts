@@ -72,13 +72,17 @@ export type User = {
    */
   deletedBy?: string | undefined;
   /**
-   * Creation timestamp (milliseconds since epoch)
+   * Document version (MongoDB)
    */
-  createdAt?: number | undefined;
+  v?: number | undefined;
   /**
-   * Last update timestamp (milliseconds since epoch)
+   * Creation timestamp (ISO 8601)
    */
-  updatedAt?: number | undefined;
+  createdAt?: Date | undefined;
+  /**
+   * Last update timestamp (ISO 8601)
+   */
+  updatedAt?: Date | undefined;
 };
 
 /** @internal */
@@ -99,12 +103,14 @@ export const User$inboundSchema: z.ZodMiniType<User, unknown> = z.pipe(
     dataCollectionConsent: types.optional(types.boolean()),
     isDeleted: z._default(types.boolean(), false),
     deletedBy: types.optional(types.string()),
-    createdAt: types.optional(types.number()),
-    updatedAt: types.optional(types.number()),
+    __v: types.optional(types.number()),
+    createdAt: types.optional(types.date()),
+    updatedAt: types.optional(types.date()),
   }),
   z.transform((v) => {
     return remap$(v, {
       "_id": "id",
+      "__v": "v",
     });
   }),
 );

@@ -5,7 +5,7 @@ Logo deleted successfully
 ## Example Usage
 
 ```typescript
-import { DeleteOrganizationLogoResponse } from "pipeshub/models/operations";
+import { DeleteOrganizationLogoResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: DeleteOrganizationLogoResponse = {
   success: true,

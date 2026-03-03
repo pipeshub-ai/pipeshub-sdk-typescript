@@ -5,7 +5,7 @@ Permissions granted successfully
 ## Example Usage
 
 ```typescript
-import { CreateKBPermissionResponse } from "pipeshub/models/operations";
+import { CreateKBPermissionResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: CreateKBPermissionResponse = {};
 ```

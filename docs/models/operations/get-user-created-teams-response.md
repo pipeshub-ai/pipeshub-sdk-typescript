@@ -1,26 +1,18 @@
 # GetUserCreatedTeamsResponse
 
-User's created teams retrieved successfully
+User created teams retrieved successfully
 
 ## Example Usage
 
 ```typescript
-import { GetUserCreatedTeamsResponse } from "pipeshub/models/operations";
+import { GetUserCreatedTeamsResponse } from "@pipeshub-ai/sdk/models/operations";
 
-let value: GetUserCreatedTeamsResponse = {
-  success: true,
-  pagination: {
-    page: 1,
-    limit: 20,
-    total: 3,
-  },
-};
+let value: GetUserCreatedTeamsResponse = {};
 ```
 
 ## Fields
 
-| Field                                                                                                    | Type                                                                                                     | Required                                                                                                 | Description                                                                                              | Example                                                                                                  |
-| -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `success`                                                                                                | *boolean*                                                                                                | :heavy_minus_sign:                                                                                       | N/A                                                                                                      | true                                                                                                     |
-| `data`                                                                                                   | [operations.GetUserCreatedTeamsData](../../models/operations/get-user-created-teams-data.md)[]           | :heavy_minus_sign:                                                                                       | N/A                                                                                                      |                                                                                                          |
-| `pagination`                                                                                             | [operations.GetUserCreatedTeamsPagination](../../models/operations/get-user-created-teams-pagination.md) | :heavy_minus_sign:                                                                                       | N/A                                                                                                      |                                                                                                          |
+| Field                                 | Type                                  | Required                              | Description                           |
+| ------------------------------------- | ------------------------------------- | ------------------------------------- | ------------------------------------- |
+| `success`                             | *boolean*                             | :heavy_minus_sign:                    | N/A                                   |
+| `data`                                | [models.Team](../../models/team.md)[] | :heavy_minus_sign:                    | N/A                                   |

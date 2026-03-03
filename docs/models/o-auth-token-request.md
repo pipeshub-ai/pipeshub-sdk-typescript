@@ -7,7 +7,7 @@ Request body for exchanging authorization code or credentials for tokens.
 ## Example Usage
 
 ```typescript
-import { OAuthTokenRequest } from "pipeshub/models";
+import { OAuthTokenRequest } from "@pipeshub-ai/sdk/models";
 
 let value: OAuthTokenRequest = {
   grantType: "authorization_code",

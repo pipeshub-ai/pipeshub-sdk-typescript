@@ -5,7 +5,7 @@ Filters saved
 ## Example Usage
 
 ```typescript
-import { SaveConnectorFiltersResponse } from "pipeshub/models/operations";
+import { SaveConnectorFiltersResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: SaveConnectorFiltersResponse = {};
 ```

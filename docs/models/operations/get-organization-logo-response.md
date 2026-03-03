@@ -5,7 +5,7 @@ Logo URL retrieved successfully
 ## Example Usage
 
 ```typescript
-import { GetOrganizationLogoResponse } from "pipeshub/models/operations";
+import { GetOrganizationLogoResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetOrganizationLogoResponse = {
   success: true,

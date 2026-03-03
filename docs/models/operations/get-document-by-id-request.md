@@ -3,15 +3,15 @@
 ## Example Usage
 
 ```typescript
-import { GetDocumentByIdRequest } from "pipeshub/models/operations";
+import { GetDocumentByIdRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetDocumentByIdRequest = {
-  documentId: "507f1f77bcf86cd799439011",
+  documentId: "<id>",
 };
 ```
 
 ## Fields
 
-| Field                                       | Type                                        | Required                                    | Description                                 | Example                                     |
-| ------------------------------------------- | ------------------------------------------- | ------------------------------------------- | ------------------------------------------- | ------------------------------------------- |
-| `documentId`                                | *string*                                    | :heavy_check_mark:                          | Document ID (24-character MongoDB ObjectId) | 507f1f77bcf86cd799439011                    |
+| Field              | Type               | Required           | Description        |
+| ------------------ | ------------------ | ------------------ | ------------------ |
+| `documentId`       | *string*           | :heavy_check_mark: | N/A                |

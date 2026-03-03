@@ -1,21 +1,15 @@
 # RollBackToPreviousVersionRequestBody
 
-Request payload
-
 ## Example Usage
 
 ```typescript
-import { RollBackToPreviousVersionRequestBody } from "pipeshub/models/operations";
+import { RollBackToPreviousVersionRequestBody } from "@pipeshub-ai/sdk/models/operations";
 
-let value: RollBackToPreviousVersionRequestBody = {
-  version: "2",
-  note: "Reverting to version 2 due to incorrect data in version 3",
-};
+let value: RollBackToPreviousVersionRequestBody = {};
 ```
 
 ## Fields
 
-| Field                                                     | Type                                                      | Required                                                  | Description                                               | Example                                                   |
-| --------------------------------------------------------- | --------------------------------------------------------- | --------------------------------------------------------- | --------------------------------------------------------- | --------------------------------------------------------- |
-| `version`                                                 | *string*                                                  | :heavy_check_mark:                                        | Version number to rollback to (0-indexed)                 | 2                                                         |
-| `note`                                                    | *string*                                                  | :heavy_check_mark:                                        | Reason for rollback (required for audit trail)            | Reverting to version 2 due to incorrect data in version 3 |
+| Field                          | Type                           | Required                       | Description                    |
+| ------------------------------ | ------------------------------ | ------------------------------ | ------------------------------ |
+| `version`                      | *number*                       | :heavy_minus_sign:             | Version number to roll back to |

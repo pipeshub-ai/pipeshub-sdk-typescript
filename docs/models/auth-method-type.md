@@ -13,7 +13,7 @@ Type of authentication method:
 ## Example Usage
 
 ```typescript
-import { AuthMethodType } from "pipeshub/models";
+import { AuthMethodType } from "@pipeshub-ai/sdk/models";
 
 let value: AuthMethodType = "azureAd";
 ```

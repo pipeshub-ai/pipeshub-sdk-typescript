@@ -5,7 +5,7 @@ Conversation deleted successfully
 ## Example Usage
 
 ```typescript
-import { DeleteConversationByIdResponse } from "pipeshub/models/operations";
+import { DeleteConversationByIdResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: DeleteConversationByIdResponse = {
   message: "Conversation deleted successfully",

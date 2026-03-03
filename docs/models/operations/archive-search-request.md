@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { ArchiveSearchRequest } from "pipeshub/models/operations";
+import { ArchiveSearchRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: ArchiveSearchRequest = {
   searchId: "<value>",
@@ -12,6 +12,6 @@ let value: ArchiveSearchRequest = {
 
 ## Fields
 
-| Field              | Type               | Required           | Description        |
-| ------------------ | ------------------ | ------------------ | ------------------ |
-| `searchId`         | *string*           | :heavy_check_mark: | N/A                |
+| Field                    | Type                     | Required                 | Description              |
+| ------------------------ | ------------------------ | ------------------------ | ------------------------ |
+| `searchId`               | *string*                 | :heavy_check_mark:       | Unique search identifier |

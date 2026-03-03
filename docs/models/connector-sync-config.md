@@ -5,7 +5,7 @@ Synchronization configuration for a connector instance
 ## Example Usage
 
 ```typescript
-import { ConnectorSyncConfig } from "pipeshub/models";
+import { ConnectorSyncConfig } from "@pipeshub-ai/sdk/models";
 
 let value: ConnectorSyncConfig = {
   scheduledConfig: {

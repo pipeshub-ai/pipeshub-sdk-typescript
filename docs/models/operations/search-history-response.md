@@ -5,7 +5,7 @@ Search history with pagination
 ## Example Usage
 
 ```typescript
-import { SearchHistoryResponse } from "pipeshub/models/operations";
+import { SearchHistoryResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: SearchHistoryResponse = {};
 ```

@@ -5,7 +5,7 @@ Request to reset password using email token
 ## Example Usage
 
 ```typescript
-import { TokenPasswordResetRequest } from "pipeshub/models";
+import { TokenPasswordResetRequest } from "@pipeshub-ai/sdk/models";
 
 let value: TokenPasswordResetRequest = {
   password: "m4ilD96WLpv9o6z",

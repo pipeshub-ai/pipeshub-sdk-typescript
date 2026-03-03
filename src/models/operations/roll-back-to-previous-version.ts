@@ -7,51 +7,29 @@ import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
-import * as models from "../index.js";
 
-/**
- * Request payload
- */
 export type RollBackToPreviousVersionRequestBody = {
   /**
-   * Version number to rollback to (0-indexed)
+   * Version number to roll back to
    */
-  version: string;
-  /**
-   * Reason for rollback (required for audit trail)
-   */
-  note: string;
+  version?: number | undefined;
 };
 
 export type RollBackToPreviousVersionRequest = {
-  /**
-   * Document ID (24-character MongoDB ObjectId)
-   */
   documentId: string;
-  /**
-   * Request payload
-   */
-  body: RollBackToPreviousVersionRequestBody;
+  body?: RollBackToPreviousVersionRequestBody | undefined;
 };
 
 /**
  * Document rolled back successfully
  */
 export type RollBackToPreviousVersionResponse = {
-  success?: boolean | undefined;
   message?: string | undefined;
-  /**
-   * Represents a document stored in PipesHub storage system. Documents can be versioned to maintain complete history of changes. Supports multiple storage backends (S3, Azure Blob, Local).
-   *
-   * @remarks
-   */
-  data?: models.Document | undefined;
 };
 
 /** @internal */
 export type RollBackToPreviousVersionRequestBody$Outbound = {
-  version: string;
-  note: string;
+  version?: number | undefined;
 };
 
 /** @internal */
@@ -59,8 +37,7 @@ export const RollBackToPreviousVersionRequestBody$outboundSchema: z.ZodMiniType<
   RollBackToPreviousVersionRequestBody$Outbound,
   RollBackToPreviousVersionRequestBody
 > = z.object({
-  version: z.string(),
-  note: z.string(),
+  version: z.optional(z.int()),
 });
 
 export function rollBackToPreviousVersionRequestBodyToJSON(
@@ -76,7 +53,7 @@ export function rollBackToPreviousVersionRequestBodyToJSON(
 /** @internal */
 export type RollBackToPreviousVersionRequest$Outbound = {
   documentId: string;
-  body: RollBackToPreviousVersionRequestBody$Outbound;
+  body?: RollBackToPreviousVersionRequestBody$Outbound | undefined;
 };
 
 /** @internal */
@@ -85,7 +62,9 @@ export const RollBackToPreviousVersionRequest$outboundSchema: z.ZodMiniType<
   RollBackToPreviousVersionRequest
 > = z.object({
   documentId: z.string(),
-  body: z.lazy(() => RollBackToPreviousVersionRequestBody$outboundSchema),
+  body: z.optional(
+    z.lazy(() => RollBackToPreviousVersionRequestBody$outboundSchema),
+  ),
 });
 
 export function rollBackToPreviousVersionRequestToJSON(
@@ -103,9 +82,7 @@ export const RollBackToPreviousVersionResponse$inboundSchema: z.ZodMiniType<
   RollBackToPreviousVersionResponse,
   unknown
 > = z.object({
-  success: types.optional(types.boolean()),
   message: types.optional(types.string()),
-  data: types.optional(models.Document$inboundSchema),
 });
 
 export function rollBackToPreviousVersionResponseFromJSON(

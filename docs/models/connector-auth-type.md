@@ -13,7 +13,7 @@ Authentication method required by the connector:<br>
 ## Example Usage
 
 ```typescript
-import { ConnectorAuthType } from "pipeshub/models";
+import { ConnectorAuthType } from "@pipeshub-ai/sdk/models";
 
 let value: ConnectorAuthType = "OAUTH_ADMIN_CONSENT";
 ```

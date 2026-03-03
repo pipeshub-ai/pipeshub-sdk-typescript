@@ -5,7 +5,7 @@ Basic user information
 ## Example Usage
 
 ```typescript
-import { UserBasic } from "pipeshub/models";
+import { UserBasic } from "@pipeshub-ai/sdk/models";
 
 let value: UserBasic = {};
 ```

@@ -3,44 +3,40 @@
  */
 
 import * as z from "zod/v4-mini";
+import { safeParse } from "../../lib/schemas.js";
+import { Result as SafeParseResult } from "../../types/fp.js";
+import * as types from "../../types/primitives.js";
+import { SDKValidationError } from "../errors/sdk-validation-error.js";
 
 /**
- * Target parent folder for the record
+ * Request payload
  */
-export type MoveRecordRequestBody = {
-  /**
-   * ID of the new parent folder, or null to move to root level
-   */
-  newParentId: string | null;
-};
+export type MoveRecordRequestBody = {};
 
 export type MoveRecordRequest = {
-  /**
-   * Knowledge base ID
-   */
   kbId: string;
-  /**
-   * Record ID to move
-   */
   recordId: string;
   /**
-   * Target parent folder for the record
+   * Request payload
    */
   body: MoveRecordRequestBody;
 };
 
-/** @internal */
-export type MoveRecordRequestBody$Outbound = {
-  newParentId: string | null;
+/**
+ * Record moved successfully
+ */
+export type MoveRecordResponse = {
+  message?: string | undefined;
 };
+
+/** @internal */
+export type MoveRecordRequestBody$Outbound = {};
 
 /** @internal */
 export const MoveRecordRequestBody$outboundSchema: z.ZodMiniType<
   MoveRecordRequestBody$Outbound,
   MoveRecordRequestBody
-> = z.object({
-  newParentId: z.nullable(z.string()),
-});
+> = z.object({});
 
 export function moveRecordRequestBodyToJSON(
   moveRecordRequestBody: MoveRecordRequestBody,
@@ -72,5 +68,23 @@ export function moveRecordRequestToJSON(
 ): string {
   return JSON.stringify(
     MoveRecordRequest$outboundSchema.parse(moveRecordRequest),
+  );
+}
+
+/** @internal */
+export const MoveRecordResponse$inboundSchema: z.ZodMiniType<
+  MoveRecordResponse,
+  unknown
+> = z.object({
+  message: types.optional(types.string()),
+});
+
+export function moveRecordResponseFromJSON(
+  jsonString: string,
+): SafeParseResult<MoveRecordResponse, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => MoveRecordResponse$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'MoveRecordResponse' from JSON`,
   );
 }

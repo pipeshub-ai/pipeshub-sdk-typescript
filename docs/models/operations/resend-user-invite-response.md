@@ -5,7 +5,7 @@ Invitation resent successfully
 ## Example Usage
 
 ```typescript
-import { ResendUserInviteResponse } from "pipeshub/models/operations";
+import { ResendUserInviteResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: ResendUserInviteResponse = {
   success: true,

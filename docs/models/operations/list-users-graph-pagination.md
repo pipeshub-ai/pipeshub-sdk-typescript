@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { ListUsersGraphPagination } from "pipeshub/models/operations";
+import { ListUsersGraphPagination } from "@pipeshub-ai/sdk/models/operations";
 
 let value: ListUsersGraphPagination = {
   page: 1,

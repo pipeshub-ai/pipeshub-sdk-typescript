@@ -5,7 +5,7 @@ Crawling job scheduled successfully
 ## Example Usage
 
 ```typescript
-import { ScheduleCrawlingJobResponse } from "pipeshub/models/operations";
+import { ScheduleCrawlingJobResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: ScheduleCrawlingJobResponse = {
   success: true,

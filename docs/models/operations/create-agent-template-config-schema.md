@@ -5,7 +5,7 @@ JSON Schema for customization
 ## Example Usage
 
 ```typescript
-import { CreateAgentTemplateConfigSchema } from "pipeshub/models/operations";
+import { CreateAgentTemplateConfigSchema } from "@pipeshub-ai/sdk/models/operations";
 
 let value: CreateAgentTemplateConfigSchema = {};
 ```

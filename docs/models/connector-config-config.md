@@ -5,7 +5,7 @@ Configuration sections
 ## Example Usage
 
 ```typescript
-import { ConnectorConfigConfig } from "pipeshub/models";
+import { ConnectorConfigConfig } from "@pipeshub-ai/sdk/models";
 
 let value: ConnectorConfigConfig = {};
 ```

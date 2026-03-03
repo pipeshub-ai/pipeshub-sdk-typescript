@@ -5,7 +5,7 @@ Authentication type (required if connector supports multiple auth methods)
 ## Example Usage
 
 ```typescript
-import { AuthType } from "pipeshub/models";
+import { AuthType } from "@pipeshub-ai/sdk/models";
 
 let value: AuthType = "OAUTH";
 ```

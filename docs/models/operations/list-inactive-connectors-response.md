@@ -5,7 +5,7 @@ Inactive connectors retrieved
 ## Example Usage
 
 ```typescript
-import { ListInactiveConnectorsResponse } from "pipeshub/models/operations";
+import { ListInactiveConnectorsResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: ListInactiveConnectorsResponse = {
   connectors: [

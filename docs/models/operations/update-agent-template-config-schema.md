@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { UpdateAgentTemplateConfigSchema } from "pipeshub/models/operations";
+import { UpdateAgentTemplateConfigSchema } from "@pipeshub-ai/sdk/models/operations";
 
 let value: UpdateAgentTemplateConfigSchema = {};
 ```

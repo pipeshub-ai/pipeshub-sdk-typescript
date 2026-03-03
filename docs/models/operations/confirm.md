@@ -5,7 +5,7 @@ Must be "DELETE" to confirm deletion
 ## Example Usage
 
 ```typescript
-import { Confirm } from "pipeshub/models/operations";
+import { Confirm } from "@pipeshub-ai/sdk/models/operations";
 
 let value: Confirm = "DELETE";
 ```

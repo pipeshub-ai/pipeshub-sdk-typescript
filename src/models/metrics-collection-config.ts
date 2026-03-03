@@ -19,16 +19,16 @@ export type MetricsCollectionConfig = {
    * Master switch for metrics collection. When disabled, no metrics are collected or pushed.
    *
    * @remarks
-   * Default: true
+   * Default: "true"
    */
-  enableMetricCollection?: boolean | undefined;
+  enableMetricCollection?: string | undefined;
   /**
    * Interval in milliseconds between metrics pushes to the remote server.
    *
    * @remarks
    * Minimum: 1000ms (1 second), Default: 60000ms (1 minute)
    */
-  pushIntervalMs: number;
+  pushIntervalMs?: string | undefined;
   /**
    * URL of the metrics collection server. For self-hosted analytics, point this
    *
@@ -43,12 +43,6 @@ export type MetricsCollectionConfig = {
    */
   apiKey?: string | undefined;
   /**
-   * Unique identifier for this PipesHub instance. Auto-generated based on hostname.
-   *
-   * @remarks
-   */
-  instanceId?: string | undefined;
-  /**
    * Current application version for metrics tagging.
    */
   appVersion?: string | undefined;
@@ -59,11 +53,10 @@ export const MetricsCollectionConfig$inboundSchema: z.ZodMiniType<
   MetricsCollectionConfig,
   unknown
 > = z.object({
-  enableMetricCollection: types.optional(types.boolean()),
-  pushIntervalMs: z._default(types.number(), 60000),
+  enableMetricCollection: types.optional(types.string()),
+  pushIntervalMs: types.optional(types.string()),
   serverUrl: types.optional(types.string()),
   apiKey: types.optional(types.string()),
-  instanceId: types.optional(types.string()),
   appVersion: types.optional(types.string()),
 });
 

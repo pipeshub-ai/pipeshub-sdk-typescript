@@ -5,7 +5,7 @@ Upload limits retrieved
 ## Example Usage
 
 ```typescript
-import { GetUploadLimitsResponse } from "pipeshub/models/operations";
+import { GetUploadLimitsResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetUploadLimitsResponse = {
   maxFilesPerRequest: 1000,

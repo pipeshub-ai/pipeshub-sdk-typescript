@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { SignInViaSAMLResponse } from "pipeshub/models/operations";
+import { SignInViaSAMLResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: SignInViaSAMLResponse = {
   headers: {

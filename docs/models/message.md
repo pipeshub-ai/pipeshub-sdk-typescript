@@ -7,7 +7,7 @@ AI responses, system messages, or error notifications.
 ## Example Usage
 
 ```typescript
-import { Message } from "pipeshub/models";
+import { Message } from "@pipeshub-ai/sdk/models";
 
 let value: Message = {};
 ```

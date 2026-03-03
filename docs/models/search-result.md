@@ -7,7 +7,7 @@ document chunks with relevance scores.
 ## Example Usage
 
 ```typescript
-import { SearchResult } from "pipeshub/models";
+import { SearchResult } from "@pipeshub-ai/sdk/models";
 
 let value: SearchResult = {};
 ```

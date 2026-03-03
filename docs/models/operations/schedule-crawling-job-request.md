@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { ScheduleCrawlingJobRequest } from "pipeshub/models/operations";
+import { ScheduleCrawlingJobRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: ScheduleCrawlingJobRequest = {
   connector: "drive",

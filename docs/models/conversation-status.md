@@ -11,7 +11,7 @@ Current status of the conversation:
 ## Example Usage
 
 ```typescript
-import { ConversationStatus } from "pipeshub/models";
+import { ConversationStatus } from "@pipeshub-ai/sdk/models";
 
 let value: ConversationStatus = "COMPLETED";
 ```

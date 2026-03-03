@@ -11,7 +11,7 @@ Organization authentication configuration. Supports 1-3 authentication steps for
 ## Example Usage
 
 ```typescript
-import { AuthConfig } from "pipeshub/models";
+import { AuthConfig } from "@pipeshub-ai/sdk/models";
 
 let value: AuthConfig = {
   authMethods: [],

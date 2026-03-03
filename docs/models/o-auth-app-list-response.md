@@ -5,7 +5,7 @@ Paginated list of OAuth apps
 ## Example Usage
 
 ```typescript
-import { OAuthAppListResponse } from "pipeshub/models";
+import { OAuthAppListResponse } from "@pipeshub-ai/sdk/models";
 
 let value: OAuthAppListResponse = {};
 ```

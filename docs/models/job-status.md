@@ -5,7 +5,7 @@ Complete status information for a crawling job
 ## Example Usage
 
 ```typescript
-import { JobStatus } from "pipeshub/models";
+import { JobStatus } from "@pipeshub-ai/sdk/models";
 
 let value: JobStatus = {
   id: "crawl-drive-507f1f77bcf86cd799439011-507f1f77bcf86cd799439012",

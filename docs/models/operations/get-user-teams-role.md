@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { GetUserTeamsRole } from "pipeshub/models/operations";
+import { GetUserTeamsRole } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetUserTeamsRole = "admin";
 ```

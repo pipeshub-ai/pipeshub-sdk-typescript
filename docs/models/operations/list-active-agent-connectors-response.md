@@ -5,7 +5,7 @@ Active agent connectors retrieved
 ## Example Usage
 
 ```typescript
-import { ListActiveAgentConnectorsResponse } from "pipeshub/models/operations";
+import { ListActiveAgentConnectorsResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: ListActiveAgentConnectorsResponse = {
   connectors: [

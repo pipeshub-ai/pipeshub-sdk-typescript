@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { GetOAuthAppRequest } from "pipeshub/models/operations";
+import { GetOAuthAppRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetOAuthAppRequest = {
   appId: "<id>",

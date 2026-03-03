@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { DeleteAgentTemplateRequest } from "pipeshub/models/operations";
+import { DeleteAgentTemplateRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: DeleteAgentTemplateRequest = {
   templateId: "<id>",

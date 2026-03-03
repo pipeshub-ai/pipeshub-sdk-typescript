@@ -13,7 +13,7 @@ Type of message:
 ## Example Usage
 
 ```typescript
-import { MessageType } from "pipeshub/models";
+import { MessageType } from "@pipeshub-ai/sdk/models";
 
 let value: MessageType = "system";
 ```

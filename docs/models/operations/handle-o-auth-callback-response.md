@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { HandleOAuthCallbackResponse } from "pipeshub/models/operations";
+import { HandleOAuthCallbackResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: HandleOAuthCallbackResponse = {
   headers: {

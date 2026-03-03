@@ -5,7 +5,7 @@ Bulk invitation processed
 ## Example Usage
 
 ```typescript
-import { BulkInviteUsersResponse } from "pipeshub/models/operations";
+import { BulkInviteUsersResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: BulkInviteUsersResponse = {
   success: true,

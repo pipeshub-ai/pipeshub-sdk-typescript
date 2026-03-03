@@ -5,7 +5,7 @@ JSON Schema for sync configuration
 ## Example Usage
 
 ```typescript
-import { SyncSchema } from "pipeshub/models";
+import { SyncSchema } from "@pipeshub-ai/sdk/models";
 
 let value: SyncSchema = {};
 ```

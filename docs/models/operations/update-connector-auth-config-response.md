@@ -5,7 +5,7 @@ Auth configuration updated
 ## Example Usage
 
 ```typescript
-import { UpdateConnectorAuthConfigResponse } from "pipeshub/models/operations";
+import { UpdateConnectorAuthConfigResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: UpdateConnectorAuthConfigResponse = {
   config: {

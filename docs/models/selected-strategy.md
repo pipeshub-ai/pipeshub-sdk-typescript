@@ -5,7 +5,7 @@ Sync strategy: MANUAL (user-triggered), SCHEDULED (interval/cron), WEBHOOK (even
 ## Example Usage
 
 ```typescript
-import { SelectedStrategy } from "pipeshub/models";
+import { SelectedStrategy } from "@pipeshub-ai/sdk/models";
 
 let value: SelectedStrategy = "REALTIME";
 ```

@@ -14,7 +14,7 @@ The query is processed through PipesHub's AI pipeline which:
 ## Example Usage
 
 ```typescript
-import { CreateConversationRequest } from "pipeshub/models";
+import { CreateConversationRequest } from "@pipeshub-ai/sdk/models";
 
 let value: CreateConversationRequest = {
   query: "What are the key findings from our Q4 financial report?",

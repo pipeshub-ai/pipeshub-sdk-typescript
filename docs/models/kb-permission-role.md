@@ -1,11 +1,9 @@
 # KBPermissionRole
 
-Permission role
-
 ## Example Usage
 
 ```typescript
-import { KBPermissionRole } from "pipeshub/models";
+import { KBPermissionRole } from "@pipeshub-ai/sdk/models";
 
 let value: KBPermissionRole = "COMMENTER";
 ```

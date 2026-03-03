@@ -16,7 +16,7 @@ Authentication error response with details for debugging and user feedback.<br><
 ## Example Usage
 
 ```typescript
-import { AuthError } from "pipeshub/models/errors";
+import { AuthError } from "@pipeshub-ai/sdk/models/errors";
 
 // No examples available for this model
 ```

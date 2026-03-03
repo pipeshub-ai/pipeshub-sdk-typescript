@@ -5,7 +5,7 @@ User group deleted successfully
 ## Example Usage
 
 ```typescript
-import { DeleteUserGroupResponse } from "pipeshub/models/operations";
+import { DeleteUserGroupResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: DeleteUserGroupResponse = {
   success: true,

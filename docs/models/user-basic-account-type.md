@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { UserBasicAccountType } from "pipeshub/models";
+import { UserBasicAccountType } from "@pipeshub-ai/sdk/models";
 
 let value: UserBasicAccountType = "business";
 ```

@@ -5,7 +5,7 @@ All tokens revoked
 ## Example Usage
 
 ```typescript
-import { RevokeAllOAuthAppTokensResponse } from "pipeshub/models/operations";
+import { RevokeAllOAuthAppTokensResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: RevokeAllOAuthAppTokensResponse = {
   message: "All tokens revoked successfully",

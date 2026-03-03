@@ -5,7 +5,7 @@ Request body for Update agent template
 ## Example Usage
 
 ```typescript
-import { UpdateAgentTemplateRequestBody } from "pipeshub/models/operations";
+import { UpdateAgentTemplateRequestBody } from "@pipeshub-ai/sdk/models/operations";
 
 let value: UpdateAgentTemplateRequestBody = {};
 ```

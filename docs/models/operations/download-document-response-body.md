@@ -5,7 +5,7 @@ Download URL generated or file stream
 ## Example Usage
 
 ```typescript
-import { DownloadDocumentResponseBody } from "pipeshub/models/operations";
+import { DownloadDocumentResponseBody } from "@pipeshub-ai/sdk/models/operations";
 
 let value: DownloadDocumentResponseBody = {
   success: true,

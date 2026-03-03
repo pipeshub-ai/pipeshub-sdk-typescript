@@ -5,7 +5,7 @@ A single step in multi-factor authentication flow
 ## Example Usage
 
 ```typescript
-import { AuthStep } from "pipeshub/models";
+import { AuthStep } from "@pipeshub-ai/sdk/models";
 
 let value: AuthStep = {
   order: 267349,

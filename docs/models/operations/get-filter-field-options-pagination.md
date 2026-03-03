@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { GetFilterFieldOptionsPagination } from "pipeshub/models/operations";
+import { GetFilterFieldOptionsPagination } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetFilterFieldOptionsPagination = {};
 ```

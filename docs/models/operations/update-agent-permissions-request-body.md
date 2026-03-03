@@ -5,7 +5,7 @@ Request body for Update agent permissions
 ## Example Usage
 
 ```typescript
-import { UpdateAgentPermissionsRequestBody } from "pipeshub/models/operations";
+import { UpdateAgentPermissionsRequestBody } from "@pipeshub-ai/sdk/models/operations";
 
 let value: UpdateAgentPermissionsRequestBody = {};
 ```

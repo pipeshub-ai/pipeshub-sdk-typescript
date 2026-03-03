@@ -5,7 +5,7 @@ Request payload
 ## Example Usage
 
 ```typescript
-import { BulkInviteUsersRequest } from "pipeshub/models/operations";
+import { BulkInviteUsersRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: BulkInviteUsersRequest = {
   emails: [

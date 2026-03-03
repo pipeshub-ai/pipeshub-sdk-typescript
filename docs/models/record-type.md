@@ -13,7 +13,7 @@ Type of content:
 ## Example Usage
 
 ```typescript
-import { RecordType } from "pipeshub/models";
+import { RecordType } from "@pipeshub-ai/sdk/models";
 
 let value: RecordType = "FILE";
 ```

@@ -10,7 +10,7 @@ Scope determines visibility and access control for connectors:<br>
 ## Example Usage
 
 ```typescript
-import { ConnectorScope } from "pipeshub/models";
+import { ConnectorScope } from "@pipeshub-ai/sdk/models";
 
 let value: ConnectorScope = "team";
 ```

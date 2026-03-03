@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { GetModelsByTypeRequest } from "pipeshub/models/operations";
+import { GetModelsByTypeRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetModelsByTypeRequest = {
   modelType: "ocr",

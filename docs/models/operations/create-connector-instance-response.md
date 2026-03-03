@@ -5,7 +5,7 @@ Instance created
 ## Example Usage
 
 ```typescript
-import { CreateConnectorInstanceResponse } from "pipeshub/models/operations";
+import { CreateConnectorInstanceResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: CreateConnectorInstanceResponse = {
   connector: {

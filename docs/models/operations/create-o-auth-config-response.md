@@ -5,7 +5,7 @@ OAuth configuration created
 ## Example Usage
 
 ```typescript
-import { CreateOAuthConfigResponse } from "pipeshub/models/operations";
+import { CreateOAuthConfigResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: CreateOAuthConfigResponse = {
   oauthConfig: {

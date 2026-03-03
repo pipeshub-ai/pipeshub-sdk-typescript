@@ -5,7 +5,7 @@ Filter options retrieved
 ## Example Usage
 
 ```typescript
-import { GetConnectorFiltersResponse } from "pipeshub/models/operations";
+import { GetConnectorFiltersResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetConnectorFiltersResponse = {};
 ```

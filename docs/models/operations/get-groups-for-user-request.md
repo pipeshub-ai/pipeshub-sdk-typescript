@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { GetGroupsForUserRequest } from "pipeshub/models/operations";
+import { GetGroupsForUserRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetGroupsForUserRequest = {
   userId: "507f1f77bcf86cd799439012",

@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { GetAgentPermissionsAccessLevel } from "pipeshub/models/operations";
+import { GetAgentPermissionsAccessLevel } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetAgentPermissionsAccessLevel = "use";
 ```

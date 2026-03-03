@@ -5,7 +5,7 @@ Knowledge base deleted successfully
 ## Example Usage
 
 ```typescript
-import { DeleteKnowledgeBaseResponse } from "pipeshub/models/operations";
+import { DeleteKnowledgeBaseResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: DeleteKnowledgeBaseResponse = {
   success: true,

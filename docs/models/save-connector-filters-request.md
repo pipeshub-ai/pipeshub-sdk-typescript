@@ -5,7 +5,7 @@ Request to save filter selections for a connector
 ## Example Usage
 
 ```typescript
-import { SaveConnectorFiltersRequest } from "pipeshub/models";
+import { SaveConnectorFiltersRequest } from "@pipeshub-ai/sdk/models";
 
 let value: SaveConnectorFiltersRequest = {
   filters: {

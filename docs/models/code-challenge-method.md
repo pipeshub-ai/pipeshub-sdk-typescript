@@ -5,7 +5,7 @@ PKCE challenge method
 ## Example Usage
 
 ```typescript
-import { CodeChallengeMethod } from "pipeshub/models";
+import { CodeChallengeMethod } from "@pipeshub-ai/sdk/models";
 
 let value: CodeChallengeMethod = "plain";
 ```

@@ -5,7 +5,7 @@ A tool that agents can use to perform actions
 ## Example Usage
 
 ```typescript
-import { AgentTool } from "pipeshub/models";
+import { AgentTool } from "@pipeshub-ai/sdk/models";
 
 let value: AgentTool = {
   key: "web-search",

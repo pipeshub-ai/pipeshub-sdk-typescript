@@ -4,10 +4,11 @@
 
 import * as z from "zod/v4-mini";
 import { safeParse } from "../../lib/schemas.js";
+import * as openEnums from "../../types/enums.js";
+import { OpenEnum } from "../../types/enums.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
-import * as models from "../index.js";
 
 export type GetKnowledgeHubRootNodesRequest = {
   /**
@@ -26,11 +27,70 @@ export type GetKnowledgeHubRootNodesRequest = {
   q?: string | undefined;
 };
 
+export type CurrentNode = {};
+
+export type ParentNode = {};
+
+export const NodeType = {
+  Kb: "kb",
+  Folder: "folder",
+  Record: "record",
+  Connector: "connector",
+  App: "app",
+} as const;
+export type NodeType = OpenEnum<typeof NodeType>;
+
+export type Item = {
+  id?: string | undefined;
+  name?: string | undefined;
+  nodeType?: NodeType | undefined;
+  parentId?: string | null | undefined;
+  origin?: string | undefined;
+  connector?: string | undefined;
+  recordType?: string | null | undefined;
+  indexingStatus?: string | null | undefined;
+  createdAt?: number | undefined;
+  updatedAt?: number | undefined;
+  sizeInBytes?: number | null | undefined;
+  mimeType?: string | null | undefined;
+  extension?: string | null | undefined;
+  webUrl?: string | undefined;
+  hasChildren?: boolean | undefined;
+  sharingStatus?: string | undefined;
+};
+
+export type GetKnowledgeHubRootNodesPagination = {
+  page?: number | undefined;
+  limit?: number | undefined;
+  totalItems?: number | undefined;
+  totalPages?: number | undefined;
+  hasNext?: boolean | undefined;
+  hasPrev?: boolean | undefined;
+};
+
+export type GetKnowledgeHubRootNodesFilters = {};
+
+export type Breadcrumb = {};
+
+export type GetKnowledgeHubRootNodesCounts = {};
+
+export type Permissions = {};
+
 /**
  * Root nodes retrieved
  */
 export type GetKnowledgeHubRootNodesResponse = {
-  nodes?: Array<models.KnowledgeHubNode> | undefined;
+  success?: boolean | undefined;
+  error?: string | null | undefined;
+  id?: string | null | undefined;
+  currentNode?: CurrentNode | null | undefined;
+  parentNode?: ParentNode | null | undefined;
+  items?: Array<Item> | undefined;
+  pagination?: GetKnowledgeHubRootNodesPagination | undefined;
+  filters?: GetKnowledgeHubRootNodesFilters | null | undefined;
+  breadcrumbs?: Array<Breadcrumb> | null | undefined;
+  counts?: GetKnowledgeHubRootNodesCounts | null | undefined;
+  permissions?: Permissions | null | undefined;
 };
 
 /** @internal */
@@ -65,11 +125,175 @@ export function getKnowledgeHubRootNodesRequestToJSON(
 }
 
 /** @internal */
+export const CurrentNode$inboundSchema: z.ZodMiniType<CurrentNode, unknown> = z
+  .object({});
+
+export function currentNodeFromJSON(
+  jsonString: string,
+): SafeParseResult<CurrentNode, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => CurrentNode$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'CurrentNode' from JSON`,
+  );
+}
+
+/** @internal */
+export const ParentNode$inboundSchema: z.ZodMiniType<ParentNode, unknown> = z
+  .object({});
+
+export function parentNodeFromJSON(
+  jsonString: string,
+): SafeParseResult<ParentNode, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => ParentNode$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ParentNode' from JSON`,
+  );
+}
+
+/** @internal */
+export const NodeType$inboundSchema: z.ZodMiniType<NodeType, unknown> =
+  openEnums.inboundSchema(NodeType);
+
+/** @internal */
+export const Item$inboundSchema: z.ZodMiniType<Item, unknown> = z.object({
+  id: types.optional(types.string()),
+  name: types.optional(types.string()),
+  nodeType: types.optional(NodeType$inboundSchema),
+  parentId: z.optional(z.nullable(types.string())),
+  origin: types.optional(types.string()),
+  connector: types.optional(types.string()),
+  recordType: z.optional(z.nullable(types.string())),
+  indexingStatus: z.optional(z.nullable(types.string())),
+  createdAt: types.optional(types.number()),
+  updatedAt: types.optional(types.number()),
+  sizeInBytes: z.optional(z.nullable(types.number())),
+  mimeType: z.optional(z.nullable(types.string())),
+  extension: z.optional(z.nullable(types.string())),
+  webUrl: types.optional(types.string()),
+  hasChildren: types.optional(types.boolean()),
+  sharingStatus: types.optional(types.string()),
+});
+
+export function itemFromJSON(
+  jsonString: string,
+): SafeParseResult<Item, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Item$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Item' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetKnowledgeHubRootNodesPagination$inboundSchema: z.ZodMiniType<
+  GetKnowledgeHubRootNodesPagination,
+  unknown
+> = z.object({
+  page: types.optional(types.number()),
+  limit: types.optional(types.number()),
+  totalItems: types.optional(types.number()),
+  totalPages: types.optional(types.number()),
+  hasNext: types.optional(types.boolean()),
+  hasPrev: types.optional(types.boolean()),
+});
+
+export function getKnowledgeHubRootNodesPaginationFromJSON(
+  jsonString: string,
+): SafeParseResult<GetKnowledgeHubRootNodesPagination, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetKnowledgeHubRootNodesPagination$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetKnowledgeHubRootNodesPagination' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetKnowledgeHubRootNodesFilters$inboundSchema: z.ZodMiniType<
+  GetKnowledgeHubRootNodesFilters,
+  unknown
+> = z.object({});
+
+export function getKnowledgeHubRootNodesFiltersFromJSON(
+  jsonString: string,
+): SafeParseResult<GetKnowledgeHubRootNodesFilters, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetKnowledgeHubRootNodesFilters$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetKnowledgeHubRootNodesFilters' from JSON`,
+  );
+}
+
+/** @internal */
+export const Breadcrumb$inboundSchema: z.ZodMiniType<Breadcrumb, unknown> = z
+  .object({});
+
+export function breadcrumbFromJSON(
+  jsonString: string,
+): SafeParseResult<Breadcrumb, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Breadcrumb$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Breadcrumb' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetKnowledgeHubRootNodesCounts$inboundSchema: z.ZodMiniType<
+  GetKnowledgeHubRootNodesCounts,
+  unknown
+> = z.object({});
+
+export function getKnowledgeHubRootNodesCountsFromJSON(
+  jsonString: string,
+): SafeParseResult<GetKnowledgeHubRootNodesCounts, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetKnowledgeHubRootNodesCounts$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetKnowledgeHubRootNodesCounts' from JSON`,
+  );
+}
+
+/** @internal */
+export const Permissions$inboundSchema: z.ZodMiniType<Permissions, unknown> = z
+  .object({});
+
+export function permissionsFromJSON(
+  jsonString: string,
+): SafeParseResult<Permissions, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Permissions$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Permissions' from JSON`,
+  );
+}
+
+/** @internal */
 export const GetKnowledgeHubRootNodesResponse$inboundSchema: z.ZodMiniType<
   GetKnowledgeHubRootNodesResponse,
   unknown
 > = z.object({
-  nodes: types.optional(z.array(models.KnowledgeHubNode$inboundSchema)),
+  success: types.optional(types.boolean()),
+  error: z.optional(z.nullable(types.string())),
+  id: z.optional(z.nullable(types.string())),
+  currentNode: z.optional(z.nullable(z.lazy(() => CurrentNode$inboundSchema))),
+  parentNode: z.optional(z.nullable(z.lazy(() => ParentNode$inboundSchema))),
+  items: types.optional(z.array(z.lazy(() => Item$inboundSchema))),
+  pagination: types.optional(
+    z.lazy(() => GetKnowledgeHubRootNodesPagination$inboundSchema),
+  ),
+  filters: z.optional(
+    z.nullable(z.lazy(() => GetKnowledgeHubRootNodesFilters$inboundSchema)),
+  ),
+  breadcrumbs: z.optional(
+    z.nullable(z.array(z.lazy(() => Breadcrumb$inboundSchema))),
+  ),
+  counts: z.optional(
+    z.nullable(z.lazy(() => GetKnowledgeHubRootNodesCounts$inboundSchema)),
+  ),
+  permissions: z.optional(z.nullable(z.lazy(() => Permissions$inboundSchema))),
 });
 
 export function getKnowledgeHubRootNodesResponseFromJSON(

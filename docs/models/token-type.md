@@ -5,7 +5,7 @@ Type of token
 ## Example Usage
 
 ```typescript
-import { TokenType } from "pipeshub/models";
+import { TokenType } from "@pipeshub-ai/sdk/models";
 
 let value: TokenType = "refresh";
 ```

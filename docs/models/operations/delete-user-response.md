@@ -5,7 +5,7 @@ User deleted successfully
 ## Example Usage
 
 ```typescript
-import { DeleteUserResponse } from "pipeshub/models/operations";
+import { DeleteUserResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: DeleteUserResponse = {
   success: true,

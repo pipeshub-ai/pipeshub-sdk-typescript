@@ -5,7 +5,7 @@ Request to create OAuth configuration (admin only). Stores credentials that user
 ## Example Usage
 
 ```typescript
-import { CreateOAuthConfigRequest } from "pipeshub/models";
+import { CreateOAuthConfigRequest } from "@pipeshub-ai/sdk/models";
 
 let value: CreateOAuthConfigRequest = {
   oauthInstanceName: "Production Google OAuth Credentials",

@@ -5,7 +5,7 @@ Connector deleted
 ## Example Usage
 
 ```typescript
-import { DeleteConnectorInstanceResponse } from "pipeshub/models/operations";
+import { DeleteConnectorInstanceResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: DeleteConnectorInstanceResponse = {};
 ```

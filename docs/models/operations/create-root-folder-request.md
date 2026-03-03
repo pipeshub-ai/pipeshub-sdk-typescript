@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { CreateRootFolderRequest } from "pipeshub/models/operations";
+import { CreateRootFolderRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: CreateRootFolderRequest = {
   kbId: "<id>",

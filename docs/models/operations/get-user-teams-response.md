@@ -5,7 +5,7 @@ User's teams retrieved successfully
 ## Example Usage
 
 ```typescript
-import { GetUserTeamsResponse } from "pipeshub/models/operations";
+import { GetUserTeamsResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetUserTeamsResponse = {
   success: true,

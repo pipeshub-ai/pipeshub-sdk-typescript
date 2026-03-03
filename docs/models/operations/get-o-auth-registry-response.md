@@ -5,7 +5,7 @@ OAuth connector types retrieved
 ## Example Usage
 
 ```typescript
-import { GetOAuthRegistryResponse } from "pipeshub/models/operations";
+import { GetOAuthRegistryResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetOAuthRegistryResponse = {
   connectors: [

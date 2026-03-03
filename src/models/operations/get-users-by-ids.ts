@@ -7,37 +7,27 @@ import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
-import * as models from "../index.js";
 
 /**
  * Request payload
  */
 export type GetUsersByIdsRequest = {
-  /**
-   * Array of user IDs to retrieve
-   */
-  userIds: Array<string>;
+  ids?: Array<string> | undefined;
 };
+
+export type GetUsersByIdsData = {};
 
 /**
  * Users retrieved successfully
  */
 export type GetUsersByIdsResponse = {
   success?: boolean | undefined;
-  data?: Array<models.User> | undefined;
-  /**
-   * Number of IDs requested
-   */
-  requestedCount?: number | undefined;
-  /**
-   * Number of users found
-   */
-  foundCount?: number | undefined;
+  data?: Array<GetUsersByIdsData> | undefined;
 };
 
 /** @internal */
 export type GetUsersByIdsRequest$Outbound = {
-  userIds: Array<string>;
+  ids?: Array<string> | undefined;
 };
 
 /** @internal */
@@ -45,7 +35,7 @@ export const GetUsersByIdsRequest$outboundSchema: z.ZodMiniType<
   GetUsersByIdsRequest$Outbound,
   GetUsersByIdsRequest
 > = z.object({
-  userIds: z.array(z.string()),
+  ids: z.optional(z.array(z.string())),
 });
 
 export function getUsersByIdsRequestToJSON(
@@ -57,14 +47,28 @@ export function getUsersByIdsRequestToJSON(
 }
 
 /** @internal */
+export const GetUsersByIdsData$inboundSchema: z.ZodMiniType<
+  GetUsersByIdsData,
+  unknown
+> = z.object({});
+
+export function getUsersByIdsDataFromJSON(
+  jsonString: string,
+): SafeParseResult<GetUsersByIdsData, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetUsersByIdsData$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetUsersByIdsData' from JSON`,
+  );
+}
+
+/** @internal */
 export const GetUsersByIdsResponse$inboundSchema: z.ZodMiniType<
   GetUsersByIdsResponse,
   unknown
 > = z.object({
   success: types.optional(types.boolean()),
-  data: types.optional(z.array(models.User$inboundSchema)),
-  requestedCount: types.optional(types.number()),
-  foundCount: types.optional(types.number()),
+  data: types.optional(z.array(z.lazy(() => GetUsersByIdsData$inboundSchema))),
 });
 
 export function getUsersByIdsResponseFromJSON(

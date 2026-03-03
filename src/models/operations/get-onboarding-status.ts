@@ -4,86 +4,49 @@
 
 import * as z from "zod/v4-mini";
 import { safeParse } from "../../lib/schemas.js";
+import * as openEnums from "../../types/enums.js";
+import { OpenEnum } from "../../types/enums.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 
-export type Step = {
-  id?: string | undefined;
-  name?: string | undefined;
-  isCompleted?: boolean | undefined;
-  isRequired?: boolean | undefined;
-};
-
-export type GetOnboardingStatusData = {
-  /**
-   * Whether onboarding is fully complete
-   */
-  isCompleted?: boolean | undefined;
-  /**
-   * Current active onboarding step
-   */
-  currentStep?: string | undefined;
-  completedSteps?: Array<string> | undefined;
-  completionPercentage?: number | undefined;
-  steps?: Array<Step> | undefined;
-};
+/**
+ * Current onboarding status
+ */
+export const GetOnboardingStatusStatus = {
+  Configured: "configured",
+  NotConfigured: "notConfigured",
+  Skipped: "skipped",
+} as const;
+/**
+ * Current onboarding status
+ */
+export type GetOnboardingStatusStatus = OpenEnum<
+  typeof GetOnboardingStatusStatus
+>;
 
 /**
  * Onboarding status retrieved successfully
  */
 export type GetOnboardingStatusResponse = {
-  success?: boolean | undefined;
-  data?: GetOnboardingStatusData | undefined;
+  /**
+   * Current onboarding status
+   */
+  status?: GetOnboardingStatusStatus | undefined;
 };
 
 /** @internal */
-export const Step$inboundSchema: z.ZodMiniType<Step, unknown> = z.object({
-  id: types.optional(types.string()),
-  name: types.optional(types.string()),
-  isCompleted: types.optional(types.boolean()),
-  isRequired: types.optional(types.boolean()),
-});
-
-export function stepFromJSON(
-  jsonString: string,
-): SafeParseResult<Step, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => Step$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Step' from JSON`,
-  );
-}
-
-/** @internal */
-export const GetOnboardingStatusData$inboundSchema: z.ZodMiniType<
-  GetOnboardingStatusData,
+export const GetOnboardingStatusStatus$inboundSchema: z.ZodMiniType<
+  GetOnboardingStatusStatus,
   unknown
-> = z.object({
-  isCompleted: types.optional(types.boolean()),
-  currentStep: types.optional(types.string()),
-  completedSteps: types.optional(z.array(types.string())),
-  completionPercentage: types.optional(types.number()),
-  steps: types.optional(z.array(z.lazy(() => Step$inboundSchema))),
-});
-
-export function getOnboardingStatusDataFromJSON(
-  jsonString: string,
-): SafeParseResult<GetOnboardingStatusData, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => GetOnboardingStatusData$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetOnboardingStatusData' from JSON`,
-  );
-}
+> = openEnums.inboundSchema(GetOnboardingStatusStatus);
 
 /** @internal */
 export const GetOnboardingStatusResponse$inboundSchema: z.ZodMiniType<
   GetOnboardingStatusResponse,
   unknown
 > = z.object({
-  success: types.optional(types.boolean()),
-  data: types.optional(z.lazy(() => GetOnboardingStatusData$inboundSchema)),
+  status: types.optional(GetOnboardingStatusStatus$inboundSchema),
 });
 
 export function getOnboardingStatusResponseFromJSON(

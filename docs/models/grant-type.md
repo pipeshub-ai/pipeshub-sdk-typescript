@@ -9,7 +9,7 @@ OAuth grant type:
 ## Example Usage
 
 ```typescript
-import { GrantType } from "pipeshub/models";
+import { GrantType } from "@pipeshub-ai/sdk/models";
 
 let value: GrantType = "authorization_code";
 ```

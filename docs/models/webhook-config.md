@@ -5,7 +5,7 @@ Configuration for webhook-based sync
 ## Example Usage
 
 ```typescript
-import { WebhookConfig } from "pipeshub/models";
+import { WebhookConfig } from "@pipeshub-ai/sdk/models";
 
 let value: WebhookConfig = {
   events: [

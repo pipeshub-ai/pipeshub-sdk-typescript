@@ -5,7 +5,7 @@ Information about an issued token
 ## Example Usage
 
 ```typescript
-import { OAuthTokenListItem } from "pipeshub/models";
+import { OAuthTokenListItem } from "@pipeshub-ai/sdk/models";
 
 let value: OAuthTokenListItem = {};
 ```

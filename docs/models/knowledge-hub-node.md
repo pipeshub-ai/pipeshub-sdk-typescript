@@ -5,7 +5,7 @@ A node in the knowledge hub tree structure
 ## Example Usage
 
 ```typescript
-import { KnowledgeHubNode } from "pipeshub/models";
+import { KnowledgeHubNode } from "@pipeshub-ai/sdk/models";
 
 let value: KnowledgeHubNode = {};
 ```

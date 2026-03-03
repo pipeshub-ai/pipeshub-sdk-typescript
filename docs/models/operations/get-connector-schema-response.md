@@ -5,7 +5,7 @@ Schema retrieved
 ## Example Usage
 
 ```typescript
-import { GetConnectorSchemaResponse } from "pipeshub/models/operations";
+import { GetConnectorSchemaResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetConnectorSchemaResponse = {};
 ```

@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { UploadRecordsToFolderFile } from "pipeshub/models/operations";
+import { UploadRecordsToFolderFile } from "@pipeshub-ai/sdk/models/operations";
 
 // No examples available for this model
 ```

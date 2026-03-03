@@ -5,7 +5,7 @@ Run crawling job once per day at a specified time
 ## Example Usage
 
 ```typescript
-import { DailyScheduleConfig } from "pipeshub/models";
+import { DailyScheduleConfig } from "@pipeshub-ai/sdk/models";
 
 let value: DailyScheduleConfig = {
   scheduleType: "daily",

@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { DeleteOAuthConfigRequest } from "pipeshub/models/operations";
+import { DeleteOAuthConfigRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: DeleteOAuthConfigRequest = {
   connectorType: "<value>",

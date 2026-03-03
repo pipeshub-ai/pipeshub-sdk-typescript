@@ -5,7 +5,7 @@ Organization deleted successfully
 ## Example Usage
 
 ```typescript
-import { DeleteOrganizationResponse } from "pipeshub/models/operations";
+import { DeleteOrganizationResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: DeleteOrganizationResponse = {
   success: true,

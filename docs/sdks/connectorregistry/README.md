@@ -2,12 +2,14 @@
 
 ## Overview
 
+Browse available connector types and their configuration schemas
+
 ### Available Operations
 
-* [list](#list) - List available connector types
-* [getSchema](#getschema) - Get connector configuration schema
+* [getConnectorRegistry](#getconnectorregistry) - List available connector types
+* [getConnectorSchema](#getconnectorschema) - Get connector configuration schema
 
-## list
+## getConnectorRegistry
 
 Get all available connector types from the registry.<br><br>
 <b>Overview:</b><br>
@@ -30,15 +32,16 @@ Use <code>search</code> for full-text search across connector names.
 
 <!-- UsageSnippet language="typescript" operationID="getConnectorRegistry" method="get" path="/connectors/registry" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.connectorRegistry.list({
+  const result = await pipeshub.connectorRegistry.getConnectorRegistry({
     scope: "team",
   });
 
@@ -53,25 +56,26 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { connectorRegistryList } from "pipeshub/funcs/connector-registry-list.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { connectorRegistryGetConnectorRegistry } from "@pipeshub-ai/sdk/funcs/connector-registry-get-connector-registry.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await connectorRegistryList(pipeshub, {
+  const res = await connectorRegistryGetConnectorRegistry(pipeshub, {
     scope: "team",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("connectorRegistryList failed:", res.error);
+    console.log("connectorRegistryGetConnectorRegistry failed:", res.error);
   }
 }
 
@@ -97,7 +101,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getSchema
+## getConnectorSchema
 
 Get the configuration schema for a specific connector type.<br><br>
 <b>Overview:</b><br>
@@ -115,15 +119,16 @@ filter options. Use this to dynamically build configuration forms.<br><br>
 
 <!-- UsageSnippet language="typescript" operationID="getConnectorSchema" method="get" path="/connectors/registry/{connectorType}/schema" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.connectorRegistry.getSchema({
+  const result = await pipeshub.connectorRegistry.getConnectorSchema({
     connectorType: "google-drive",
   });
 
@@ -138,25 +143,26 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { connectorRegistryGetSchema } from "pipeshub/funcs/connector-registry-get-schema.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { connectorRegistryGetConnectorSchema } from "@pipeshub-ai/sdk/funcs/connector-registry-get-connector-schema.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await connectorRegistryGetSchema(pipeshub, {
+  const res = await connectorRegistryGetConnectorSchema(pipeshub, {
     connectorType: "google-drive",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("connectorRegistryGetSchema failed:", res.error);
+    console.log("connectorRegistryGetConnectorSchema failed:", res.error);
   }
 }
 

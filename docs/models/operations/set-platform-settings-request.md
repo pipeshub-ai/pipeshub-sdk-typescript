@@ -5,7 +5,7 @@ Request body for Update platform settings
 ## Example Usage
 
 ```typescript
-import { SetPlatformSettingsRequest } from "pipeshub/models/operations";
+import { SetPlatformSettingsRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: SetPlatformSettingsRequest = {
   fileUploadMaxSizeBytes: 31457280,

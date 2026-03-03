@@ -5,7 +5,7 @@ Result of a file upload operation
 ## Example Usage
 
 ```typescript
-import { UploadResult } from "pipeshub/models";
+import { UploadResult } from "@pipeshub-ai/sdk/models";
 
 let value: UploadResult = {
   message: "Files uploaded successfully",

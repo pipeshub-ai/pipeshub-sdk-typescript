@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { StreamRecordBufferRequest } from "pipeshub/models/operations";
+import { StreamRecordBufferRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: StreamRecordBufferRequest = {
   recordId: "<id>",

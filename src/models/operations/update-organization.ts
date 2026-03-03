@@ -32,7 +32,6 @@ export type UpdateOrganizationRequest = {
  * Organization updated successfully
  */
 export type UpdateOrganizationResponse = {
-  success?: boolean | undefined;
   message?: string | undefined;
   data?: models.Organization | undefined;
 };
@@ -69,7 +68,6 @@ export const UpdateOrganizationResponse$inboundSchema: z.ZodMiniType<
   UpdateOrganizationResponse,
   unknown
 > = z.object({
-  success: types.optional(types.boolean()),
   message: types.optional(types.string()),
   data: types.optional(models.Organization$inboundSchema),
 });

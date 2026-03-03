@@ -2,19 +2,21 @@
 
 ## Overview
 
+Create, manage, and delete connector instances for your organization
+
 ### Available Operations
 
-* [list](#list) - List connector instances
-* [create](#create) - Create connector instance
-* [listActive](#listactive) - List active connector instances
-* [listInactive](#listinactive) - List inactive connector instances
-* [listConfigured](#listconfigured) - List configured connector instances
-* [getActiveAgents](#getactiveagents) - List active agent connectors
-* [get](#get) - Get connector instance
-* [delete](#delete) - Delete connector instance
-* [updateName](#updatename) - Update connector instance name
+* [listConnectorInstances](#listconnectorinstances) - List connector instances
+* [createConnectorInstance](#createconnectorinstance) - Create connector instance
+* [listActiveConnectors](#listactiveconnectors) - List active connector instances
+* [listInactiveConnectors](#listinactiveconnectors) - List inactive connector instances
+* [listConfiguredConnectors](#listconfiguredconnectors) - List configured connector instances
+* [listActiveAgentConnectors](#listactiveagentconnectors) - List active agent connectors
+* [getConnectorInstance](#getconnectorinstance) - Get connector instance
+* [deleteConnectorInstance](#deleteconnectorinstance) - Delete connector instance
+* [updateConnectorName](#updateconnectorname) - Update connector instance name
 
-## list
+## listConnectorInstances
 
 Get all configured connector instances for your organization.<br><br>
 <b>Overview:</b><br>
@@ -33,15 +35,16 @@ are only visible to their creators.<br><br>
 
 <!-- UsageSnippet language="typescript" operationID="listConnectorInstances" method="get" path="/connectors" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.connectorInstances.list({
+  const result = await pipeshub.connectorInstances.listConnectorInstances({
     scope: "team",
   });
 
@@ -56,25 +59,26 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { connectorInstancesList } from "pipeshub/funcs/connector-instances-list.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { connectorInstancesListConnectorInstances } from "@pipeshub-ai/sdk/funcs/connector-instances-list-connector-instances.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await connectorInstancesList(pipeshub, {
+  const res = await connectorInstancesListConnectorInstances(pipeshub, {
     scope: "team",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("connectorInstancesList failed:", res.error);
+    console.log("connectorInstancesListConnectorInstances failed:", res.error);
   }
 }
 
@@ -100,7 +104,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## create
+## createConnectorInstance
 
 Create a new connector instance from a registry type.<br><br>
 <b>Overview:</b><br>
@@ -125,15 +129,16 @@ and filter setup before it can be activated.<br><br>
 
 <!-- UsageSnippet language="typescript" operationID="createConnectorInstance" method="post" path="/connectors" example="confluence" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.connectorInstances.create({
+  const result = await pipeshub.connectorInstances.createConnectorInstance({
     connectorType: "confluence",
     instanceName: "My Confluence",
     scope: "personal",
@@ -151,18 +156,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { connectorInstancesCreate } from "pipeshub/funcs/connector-instances-create.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { connectorInstancesCreateConnectorInstance } from "@pipeshub-ai/sdk/funcs/connector-instances-create-connector-instance.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await connectorInstancesCreate(pipeshub, {
+  const res = await connectorInstancesCreateConnectorInstance(pipeshub, {
     connectorType: "confluence",
     instanceName: "My Confluence",
     scope: "personal",
@@ -172,7 +178,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("connectorInstancesCreate failed:", res.error);
+    console.log("connectorInstancesCreateConnectorInstance failed:", res.error);
   }
 }
 
@@ -182,15 +188,16 @@ run();
 
 <!-- UsageSnippet language="typescript" operationID="createConnectorInstance" method="post" path="/connectors" example="googleDrive" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.connectorInstances.create({
+  const result = await pipeshub.connectorInstances.createConnectorInstance({
     connectorType: "google-drive",
     instanceName: "Company Google Drive",
     scope: "team",
@@ -208,18 +215,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { connectorInstancesCreate } from "pipeshub/funcs/connector-instances-create.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { connectorInstancesCreateConnectorInstance } from "@pipeshub-ai/sdk/funcs/connector-instances-create-connector-instance.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await connectorInstancesCreate(pipeshub, {
+  const res = await connectorInstancesCreateConnectorInstance(pipeshub, {
     connectorType: "google-drive",
     instanceName: "Company Google Drive",
     scope: "team",
@@ -229,7 +237,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("connectorInstancesCreate failed:", res.error);
+    console.log("connectorInstancesCreateConnectorInstance failed:", res.error);
   }
 }
 
@@ -255,7 +263,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## listActive
+## listActiveConnectors
 
 Get all active (enabled) connector instances.<br><br>
 <b>Overview:</b><br>
@@ -267,15 +275,16 @@ These are connectors currently syncing data or available to AI agents.
 
 <!-- UsageSnippet language="typescript" operationID="listActiveConnectors" method="get" path="/connectors/active" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.connectorInstances.listActive();
+  const result = await pipeshub.connectorInstances.listActiveConnectors();
 
   console.log(result);
 }
@@ -288,23 +297,24 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { connectorInstancesListActive } from "pipeshub/funcs/connector-instances-list-active.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { connectorInstancesListActiveConnectors } from "@pipeshub-ai/sdk/funcs/connector-instances-list-active-connectors.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await connectorInstancesListActive(pipeshub);
+  const res = await connectorInstancesListActiveConnectors(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("connectorInstancesListActive failed:", res.error);
+    console.log("connectorInstancesListActiveConnectors failed:", res.error);
   }
 }
 
@@ -329,7 +339,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## listInactive
+## listInactiveConnectors
 
 Get all inactive (disabled) connector instances.
 
@@ -337,15 +347,16 @@ Get all inactive (disabled) connector instances.
 
 <!-- UsageSnippet language="typescript" operationID="listInactiveConnectors" method="get" path="/connectors/inactive" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.connectorInstances.listInactive();
+  const result = await pipeshub.connectorInstances.listInactiveConnectors();
 
   console.log(result);
 }
@@ -358,23 +369,24 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { connectorInstancesListInactive } from "pipeshub/funcs/connector-instances-list-inactive.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { connectorInstancesListInactiveConnectors } from "@pipeshub-ai/sdk/funcs/connector-instances-list-inactive-connectors.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await connectorInstancesListInactive(pipeshub);
+  const res = await connectorInstancesListInactiveConnectors(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("connectorInstancesListInactive failed:", res.error);
+    console.log("connectorInstancesListInactiveConnectors failed:", res.error);
   }
 }
 
@@ -399,7 +411,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## listConfigured
+## listConfiguredConnectors
 
 Get all connector instances that have completed configuration.<br><br>
 <b>Overview:</b><br>
@@ -411,15 +423,16 @@ These have all required settings but may not be active yet.
 
 <!-- UsageSnippet language="typescript" operationID="listConfiguredConnectors" method="get" path="/connectors/configured" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.connectorInstances.listConfigured({
+  const result = await pipeshub.connectorInstances.listConfiguredConnectors({
     scope: "team",
   });
 
@@ -434,25 +447,26 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { connectorInstancesListConfigured } from "pipeshub/funcs/connector-instances-list-configured.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { connectorInstancesListConfiguredConnectors } from "@pipeshub-ai/sdk/funcs/connector-instances-list-configured-connectors.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await connectorInstancesListConfigured(pipeshub, {
+  const res = await connectorInstancesListConfiguredConnectors(pipeshub, {
     scope: "team",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("connectorInstancesListConfigured failed:", res.error);
+    console.log("connectorInstancesListConfiguredConnectors failed:", res.error);
   }
 }
 
@@ -478,7 +492,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getActiveAgents
+## listActiveAgentConnectors
 
 Get connector instances enabled for AI agent integration.<br><br>
 <b>Overview:</b><br>
@@ -490,15 +504,16 @@ These are available to AI agents for querying and actions.
 
 <!-- UsageSnippet language="typescript" operationID="listActiveAgentConnectors" method="get" path="/connectors/agents/active" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.connectorInstances.getActiveAgents({
+  const result = await pipeshub.connectorInstances.listActiveAgentConnectors({
     scope: "team",
   });
 
@@ -513,25 +528,26 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { connectorInstancesGetActiveAgents } from "pipeshub/funcs/connector-instances-get-active-agents.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { connectorInstancesListActiveAgentConnectors } from "@pipeshub-ai/sdk/funcs/connector-instances-list-active-agent-connectors.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await connectorInstancesGetActiveAgents(pipeshub, {
+  const res = await connectorInstancesListActiveAgentConnectors(pipeshub, {
     scope: "team",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("connectorInstancesGetActiveAgents failed:", res.error);
+    console.log("connectorInstancesListActiveAgentConnectors failed:", res.error);
   }
 }
 
@@ -557,7 +573,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## get
+## getConnectorInstance
 
 Retrieve a specific connector instance by ID.
 
@@ -565,15 +581,16 @@ Retrieve a specific connector instance by ID.
 
 <!-- UsageSnippet language="typescript" operationID="getConnectorInstance" method="get" path="/connectors/{connectorId}" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.connectorInstances.get({
+  const result = await pipeshub.connectorInstances.getConnectorInstance({
     connectorId: "conn_abc123",
   });
 
@@ -588,25 +605,26 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { connectorInstancesGet } from "pipeshub/funcs/connector-instances-get.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { connectorInstancesGetConnectorInstance } from "@pipeshub-ai/sdk/funcs/connector-instances-get-connector-instance.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await connectorInstancesGet(pipeshub, {
+  const res = await connectorInstancesGetConnectorInstance(pipeshub, {
     connectorId: "conn_abc123",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("connectorInstancesGet failed:", res.error);
+    console.log("connectorInstancesGetConnectorInstance failed:", res.error);
   }
 }
 
@@ -632,7 +650,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## delete
+## deleteConnectorInstance
 
 Delete a connector instance and all associated data.<br><br>
 <b>Warning:</b><br>
@@ -649,15 +667,16 @@ Synced records in knowledge bases are NOT deleted.<br><br>
 
 <!-- UsageSnippet language="typescript" operationID="deleteConnectorInstance" method="delete" path="/connectors/{connectorId}" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.connectorInstances.delete({
+  const result = await pipeshub.connectorInstances.deleteConnectorInstance({
     connectorId: "<id>",
   });
 
@@ -672,25 +691,26 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { connectorInstancesDelete } from "pipeshub/funcs/connector-instances-delete.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { connectorInstancesDeleteConnectorInstance } from "@pipeshub-ai/sdk/funcs/connector-instances-delete-connector-instance.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await connectorInstancesDelete(pipeshub, {
+  const res = await connectorInstancesDeleteConnectorInstance(pipeshub, {
     connectorId: "<id>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("connectorInstancesDelete failed:", res.error);
+    console.log("connectorInstancesDeleteConnectorInstance failed:", res.error);
   }
 }
 
@@ -716,7 +736,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## updateName
+## updateConnectorName
 
 Update the display name of a connector instance.<br><br>
 <b>Note:</b> This only updates the display name, not the connector configuration.
@@ -726,15 +746,16 @@ Update the display name of a connector instance.<br><br>
 
 <!-- UsageSnippet language="typescript" operationID="updateConnectorName" method="put" path="/connectors/{connectorId}/name" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.connectorInstances.updateName({
+  const result = await pipeshub.connectorInstances.updateConnectorName({
     connectorId: "<id>",
     body: {
       instanceName: "Sales Team Drive (Updated)",
@@ -752,18 +773,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { connectorInstancesUpdateName } from "pipeshub/funcs/connector-instances-update-name.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { connectorInstancesUpdateConnectorName } from "@pipeshub-ai/sdk/funcs/connector-instances-update-connector-name.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await connectorInstancesUpdateName(pipeshub, {
+  const res = await connectorInstancesUpdateConnectorName(pipeshub, {
     connectorId: "<id>",
     body: {
       instanceName: "Sales Team Drive (Updated)",
@@ -773,7 +795,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("connectorInstancesUpdateName failed:", res.error);
+    console.log("connectorInstancesUpdateConnectorName failed:", res.error);
   }
 }
 

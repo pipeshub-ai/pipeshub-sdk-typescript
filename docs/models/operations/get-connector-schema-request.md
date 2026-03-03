@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { GetConnectorSchemaRequest } from "pipeshub/models/operations";
+import { GetConnectorSchemaRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetConnectorSchemaRequest = {
   connectorType: "google-drive",

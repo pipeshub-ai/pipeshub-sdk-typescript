@@ -4,6 +4,7 @@
 
 import { SDKOptions } from "../lib/config.js";
 import { RequestInput } from "../lib/http.js";
+import { ClientCredentialsHook } from "./client-credentials.js";
 import {
   AfterErrorContext,
   AfterErrorHook,
@@ -28,7 +29,9 @@ export class SDKHooks implements Hooks {
   afterErrorHooks: AfterErrorHook[] = [];
 
   constructor() {
-    const presetHooks: Array<Hook> = [];
+    const presetHooks: Array<Hook> = [
+      new ClientCredentialsHook(),
+    ];
 
     for (const hook of presetHooks) {
       if ("sdkInit" in hook) {

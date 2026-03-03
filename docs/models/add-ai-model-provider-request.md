@@ -5,7 +5,7 @@ Request to add a new AI model provider
 ## Example Usage
 
 ```typescript
-import { AddAIModelProviderRequest } from "pipeshub/models";
+import { AddAIModelProviderRequest } from "@pipeshub-ai/sdk/models";
 
 let value: AddAIModelProviderRequest = {
   modelType: "slm",

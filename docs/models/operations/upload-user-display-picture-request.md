@@ -5,7 +5,7 @@ Request payload
 ## Example Usage
 
 ```typescript
-import { UploadUserDisplayPictureRequest } from "pipeshub/models/operations";
+import { UploadUserDisplayPictureRequest } from "@pipeshub-ai/sdk/models/operations";
 
 // No examples available for this model
 ```

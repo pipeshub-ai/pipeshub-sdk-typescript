@@ -5,7 +5,7 @@ AI-suggested follow-up question
 ## Example Usage
 
 ```typescript
-import { FollowUpQuestion } from "pipeshub/models";
+import { FollowUpQuestion } from "@pipeshub-ai/sdk/models";
 
 let value: FollowUpQuestion = {};
 ```

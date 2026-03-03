@@ -15,7 +15,7 @@ export type AzureAdAuthConfig = {
   /**
    * Azure AD application client ID
    */
-  clientId: string;
+  clientId?: string | undefined;
   /**
    * Azure AD tenant ID (use 'common' for multi-tenant)
    */
@@ -27,12 +27,12 @@ export const AzureAdAuthConfig$inboundSchema: z.ZodMiniType<
   AzureAdAuthConfig,
   unknown
 > = z.object({
-  clientId: types.string(),
+  clientId: types.optional(types.string()),
   tenantId: z._default(types.string(), "common"),
 });
 /** @internal */
 export type AzureAdAuthConfig$Outbound = {
-  clientId: string;
+  clientId?: string | undefined;
   tenantId: string;
 };
 
@@ -41,7 +41,7 @@ export const AzureAdAuthConfig$outboundSchema: z.ZodMiniType<
   AzureAdAuthConfig$Outbound,
   AzureAdAuthConfig
 > = z.object({
-  clientId: z.string(),
+  clientId: z.optional(z.string()),
   tenantId: z._default(z.string(), "common"),
 });
 

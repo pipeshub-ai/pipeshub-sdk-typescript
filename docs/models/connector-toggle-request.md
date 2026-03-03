@@ -5,7 +5,7 @@ Request to toggle connector active status
 ## Example Usage
 
 ```typescript
-import { ConnectorToggleRequest } from "pipeshub/models";
+import { ConnectorToggleRequest } from "@pipeshub-ai/sdk/models";
 
 let value: ConnectorToggleRequest = {
   type: "sync",

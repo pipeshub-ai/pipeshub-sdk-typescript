@@ -5,7 +5,7 @@ Request to initialize authentication session
 ## Example Usage
 
 ```typescript
-import { InitAuthRequest } from "pipeshub/models";
+import { InitAuthRequest } from "@pipeshub-ai/sdk/models";
 
 let value: InitAuthRequest = {
   email: "user@example.com",

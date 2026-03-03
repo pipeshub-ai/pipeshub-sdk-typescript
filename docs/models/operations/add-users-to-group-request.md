@@ -5,7 +5,7 @@ Request payload
 ## Example Usage
 
 ```typescript
-import { AddUsersToGroupRequest } from "pipeshub/models/operations";
+import { AddUsersToGroupRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: AddUsersToGroupRequest = {
   groupId: "507f1f77bcf86cd799439011",

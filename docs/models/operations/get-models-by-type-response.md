@@ -5,7 +5,7 @@ Models retrieved
 ## Example Usage
 
 ```typescript
-import { GetModelsByTypeResponse } from "pipeshub/models/operations";
+import { GetModelsByTypeResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetModelsByTypeResponse = {};
 ```
@@ -14,4 +14,6 @@ let value: GetModelsByTypeResponse = {};
 
 | Field                                                                      | Type                                                                       | Required                                                                   | Description                                                                |
 | -------------------------------------------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `status`                                                                   | *string*                                                                   | :heavy_minus_sign:                                                         | N/A                                                                        |
+| `message`                                                                  | *string*                                                                   | :heavy_minus_sign:                                                         | N/A                                                                        |
 | `models`                                                                   | [models.AIModelProviderConfig](../../models/ai-model-provider-config.md)[] | :heavy_minus_sign:                                                         | N/A                                                                        |

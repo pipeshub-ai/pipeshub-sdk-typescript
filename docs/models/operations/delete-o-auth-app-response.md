@@ -5,7 +5,7 @@ OAuth app deleted
 ## Example Usage
 
 ```typescript
-import { DeleteOAuthAppResponse } from "pipeshub/models/operations";
+import { DeleteOAuthAppResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: DeleteOAuthAppResponse = {
   message: "OAuth app deleted successfully",

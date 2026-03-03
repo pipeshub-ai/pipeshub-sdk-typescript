@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { Event } from "pipeshub/models";
+import { Event } from "@pipeshub-ai/sdk/models";
 
 let value: Event = "connected";
 ```

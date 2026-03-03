@@ -5,29 +5,16 @@
 import * as z from "zod/v4-mini";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
-import * as models from "../index.js";
 
 export type GetDocumentByIdRequest = {
-  /**
-   * Document ID (24-character MongoDB ObjectId)
-   */
   documentId: string;
 };
 
 /**
- * Document details retrieved successfully
+ * Document details retrieved
  */
-export type GetDocumentByIdResponse = {
-  success?: boolean | undefined;
-  /**
-   * Represents a document stored in PipesHub storage system. Documents can be versioned to maintain complete history of changes. Supports multiple storage backends (S3, Azure Blob, Local).
-   *
-   * @remarks
-   */
-  data?: models.Document | undefined;
-};
+export type GetDocumentByIdResponse = {};
 
 /** @internal */
 export type GetDocumentByIdRequest$Outbound = {
@@ -54,10 +41,7 @@ export function getDocumentByIdRequestToJSON(
 export const GetDocumentByIdResponse$inboundSchema: z.ZodMiniType<
   GetDocumentByIdResponse,
   unknown
-> = z.object({
-  success: types.optional(types.boolean()),
-  data: types.optional(models.Document$inboundSchema),
-});
+> = z.object({});
 
 export function getDocumentByIdResponseFromJSON(
   jsonString: string,

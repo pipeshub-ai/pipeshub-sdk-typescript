@@ -3,25 +3,38 @@
  */
 
 import * as z from "zod/v4-mini";
+import { safeParse } from "../../lib/schemas.js";
+import { Result as SafeParseResult } from "../../types/fp.js";
+import * as types from "../../types/primitives.js";
+import { SDKValidationError } from "../errors/sdk-validation-error.js";
 
 /**
- * Request body for Revoke agent access
+ * Request payload
  */
 export type UnshareAgentRequestBody = {
-  userIds: Array<string>;
+  userIds?: Array<string> | undefined;
+  teamIds?: Array<string> | undefined;
 };
 
 export type UnshareAgentRequest = {
   agentKey: string;
   /**
-   * Request body for Revoke agent access
+   * Request payload
    */
   body: UnshareAgentRequestBody;
 };
 
+/**
+ * Agent unshared successfully
+ */
+export type UnshareAgentResponse = {
+  message?: string | undefined;
+};
+
 /** @internal */
 export type UnshareAgentRequestBody$Outbound = {
-  userIds: Array<string>;
+  userIds?: Array<string> | undefined;
+  teamIds?: Array<string> | undefined;
 };
 
 /** @internal */
@@ -29,7 +42,8 @@ export const UnshareAgentRequestBody$outboundSchema: z.ZodMiniType<
   UnshareAgentRequestBody$Outbound,
   UnshareAgentRequestBody
 > = z.object({
-  userIds: z.array(z.string()),
+  userIds: z.optional(z.array(z.string())),
+  teamIds: z.optional(z.array(z.string())),
 });
 
 export function unshareAgentRequestBodyToJSON(
@@ -60,5 +74,23 @@ export function unshareAgentRequestToJSON(
 ): string {
   return JSON.stringify(
     UnshareAgentRequest$outboundSchema.parse(unshareAgentRequest),
+  );
+}
+
+/** @internal */
+export const UnshareAgentResponse$inboundSchema: z.ZodMiniType<
+  UnshareAgentResponse,
+  unknown
+> = z.object({
+  message: types.optional(types.string()),
+});
+
+export function unshareAgentResponseFromJSON(
+  jsonString: string,
+): SafeParseResult<UnshareAgentResponse, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => UnshareAgentResponse$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'UnshareAgentResponse' from JSON`,
   );
 }

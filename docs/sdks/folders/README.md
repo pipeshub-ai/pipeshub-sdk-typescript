@@ -6,13 +6,14 @@ Folder organization and management
 
 ### Available Operations
 
-* [create](#create) - Create root folder
-* [getContents](#getcontents) - Get folder contents
-* [update](#update) - Update folder
-* [delete](#delete) - Delete folder
+* [createRootFolder](#createrootfolder) - Create root folder
+* [getFolderContents](#getfoldercontents) - Get folder contents
+* [updateFolder](#updatefolder) - Update folder
+* [deleteFolder](#deletefolder) - Delete folder
+* [getFolderChildren](#getfolderchildren) - Get folder children (alias for folder contents)
 * [createSubfolder](#createsubfolder) - Create subfolder
 
-## create
+## createRootFolder
 
 Create a new folder at the root level of a knowledge base.<br><br>
 <b>Required Permission:</b> FILEORGANIZER or higher<br><br>
@@ -34,15 +35,16 @@ Create a new folder at the root level of a knowledge base.<br><br>
 
 <!-- UsageSnippet language="typescript" operationID="createRootFolder" method="post" path="/knowledgeBase/{kbId}/folder" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.folders.create({
+  const result = await pipeshub.folders.createRootFolder({
     kbId: "<id>",
     body: {
       folderName: "Project Documents",
@@ -60,18 +62,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { foldersCreate } from "pipeshub/funcs/folders-create.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { foldersCreateRootFolder } from "@pipeshub-ai/sdk/funcs/folders-create-root-folder.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await foldersCreate(pipeshub, {
+  const res = await foldersCreateRootFolder(pipeshub, {
     kbId: "<id>",
     body: {
       folderName: "Project Documents",
@@ -81,7 +84,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("foldersCreate failed:", res.error);
+    console.log("foldersCreateRootFolder failed:", res.error);
   }
 }
 
@@ -107,7 +110,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getContents
+## getFolderContents
 
 Retrieve the contents of a folder including subfolders and records.<br><br>
 <b>Overview:</b><br>
@@ -120,15 +123,16 @@ Use this endpoint to browse folder hierarchies. Response includes folder metadat
 
 <!-- UsageSnippet language="typescript" operationID="getFolderContents" method="get" path="/knowledgeBase/{kbId}/folder/{folderId}" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.folders.getContents({
+  const result = await pipeshub.folders.getFolderContents({
     kbId: "<id>",
     folderId: "<id>",
   });
@@ -144,18 +148,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { foldersGetContents } from "pipeshub/funcs/folders-get-contents.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { foldersGetFolderContents } from "@pipeshub-ai/sdk/funcs/folders-get-folder-contents.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await foldersGetContents(pipeshub, {
+  const res = await foldersGetFolderContents(pipeshub, {
     kbId: "<id>",
     folderId: "<id>",
   });
@@ -163,7 +168,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("foldersGetContents failed:", res.error);
+    console.log("foldersGetFolderContents failed:", res.error);
   }
 }
 
@@ -189,7 +194,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## update
+## updateFolder
 
 Rename a folder.<br><br>
 <b>Required Permission:</b> FILEORGANIZER or higher
@@ -199,15 +204,16 @@ Rename a folder.<br><br>
 
 <!-- UsageSnippet language="typescript" operationID="updateFolder" method="put" path="/knowledgeBase/{kbId}/folder/{folderId}" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.folders.update({
+  const result = await pipeshub.folders.updateFolder({
     kbId: "<id>",
     folderId: "<id>",
     body: {
@@ -226,18 +232,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { foldersUpdate } from "pipeshub/funcs/folders-update.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { foldersUpdateFolder } from "@pipeshub-ai/sdk/funcs/folders-update-folder.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await foldersUpdate(pipeshub, {
+  const res = await foldersUpdateFolder(pipeshub, {
     kbId: "<id>",
     folderId: "<id>",
     body: {
@@ -248,7 +255,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("foldersUpdate failed:", res.error);
+    console.log("foldersUpdateFolder failed:", res.error);
   }
 }
 
@@ -274,7 +281,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## delete
+## deleteFolder
 
 Delete a folder and all its contents.<br><br>
 <b>Required Permission:</b> FILEORGANIZER or higher<br><br>
@@ -287,15 +294,16 @@ All subfolders and records within will be permanently deleted.<br><br>
 
 <!-- UsageSnippet language="typescript" operationID="deleteFolder" method="delete" path="/knowledgeBase/{kbId}/folder/{folderId}" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  await pipeshub.folders.delete({
+  await pipeshub.folders.deleteFolder({
     kbId: "<id>",
     folderId: "<id>",
   });
@@ -311,18 +319,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { foldersDelete } from "pipeshub/funcs/folders-delete.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { foldersDeleteFolder } from "@pipeshub-ai/sdk/funcs/folders-delete-folder.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await foldersDelete(pipeshub, {
+  const res = await foldersDeleteFolder(pipeshub, {
     kbId: "<id>",
     folderId: "<id>",
   });
@@ -330,7 +339,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("foldersDelete failed:", res.error);
+    console.log("foldersDeleteFolder failed:", res.error);
   }
 }
 
@@ -356,6 +365,90 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
+## getFolderChildren
+
+Retrieve the children (subfolders and records) of a folder.<br><br>
+<b>Overview:</b><br>
+This is an alias endpoint for <code>/knowledgeBase/{kbId}/folder/{folderId}</code>. Returns paginated list of records within the folder, with same filtering options as KB-level record listing.<br><br>
+<b>Navigation:</b><br>
+Use this endpoint to browse folder hierarchies. Response includes folder metadata and child items.
+
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="getFolderChildren" method="get" path="/knowledgeBase/{kbId}/folder/{folderId}/children" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.folders.getFolderChildren({
+    kbId: "<id>",
+    folderId: "<id>",
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { foldersGetFolderChildren } from "@pipeshub-ai/sdk/funcs/folders-get-folder-children.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const res = await foldersGetFolderChildren(pipeshub, {
+    kbId: "<id>",
+    folderId: "<id>",
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("foldersGetFolderChildren failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.GetFolderChildrenRequest](../../models/operations/get-folder-children-request.md)                                                                                  | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[models.RecordsResponse](../../models/records-response.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
 ## createSubfolder
 
 Create a nested folder within an existing folder.<br><br>
@@ -368,11 +461,12 @@ Supports unlimited folder nesting depth for complex organizational structures.
 
 <!-- UsageSnippet language="typescript" operationID="createSubfolder" method="post" path="/knowledgeBase/{kbId}/folder/{folderId}/subfolder" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
@@ -395,14 +489,15 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { foldersCreateSubfolder } from "pipeshub/funcs/folders-create-subfolder.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { foldersCreateSubfolder } from "@pipeshub-ai/sdk/funcs/folders-create-subfolder.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {

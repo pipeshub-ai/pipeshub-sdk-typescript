@@ -5,7 +5,7 @@ Request payload
 ## Example Usage
 
 ```typescript
-import { UpdateOAuthConfigRequestBody } from "pipeshub/models/operations";
+import { UpdateOAuthConfigRequestBody } from "@pipeshub-ai/sdk/models/operations";
 
 let value: UpdateOAuthConfigRequestBody = {};
 ```

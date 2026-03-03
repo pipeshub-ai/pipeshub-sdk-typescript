@@ -5,7 +5,7 @@ Request to update connector instance name
 ## Example Usage
 
 ```typescript
-import { UpdateConnectorNameRequest } from "pipeshub/models";
+import { UpdateConnectorNameRequest } from "@pipeshub-ai/sdk/models";
 
 let value: UpdateConnectorNameRequest = {
   instanceName: "Sales Team Drive (Updated)",

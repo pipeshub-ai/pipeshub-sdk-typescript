@@ -2,13 +2,28 @@
 
 ## Overview
 
+OpenID Connect 1.0 endpoints for identity federation and discovery.
+
+**Discovery:**
+- `/.well-known/openid-configuration` - Authorization server metadata
+- `/.well-known/jwks.json` - Public keys for token verification
+
+**UserInfo:**
+- `/oauth2/userinfo` - Get authenticated user's profile information
+
+**Supported Claims:**
+- `user_id` - User identifier
+- `email`, `email_verified` - Email information
+- `name`, `given_name`, `family_name` - Name information
+
+
 ### Available Operations
 
-* [getUserInfo](#getuserinfo) - Get authenticated user information
-* [getConfiguration](#getconfiguration) - OpenID Connect Discovery
+* [oauthUserInfo](#oauthuserinfo) - Get authenticated user information
+* [openidConfiguration](#openidconfiguration) - OpenID Connect Discovery
 * [jwks](#jwks) - JSON Web Key Set
 
-## getUserInfo
+## oauthUserInfo
 
 OpenID Connect UserInfo Endpoint.
 <br><br>
@@ -16,7 +31,7 @@ Returns claims about the authenticated user. Requires a valid access token
 with the `openid` scope.
 <br><br>
 <b>Available Claims:</b><br>
-- `sub` - Subject identifier (user ID)<br>
+- `user_id` - User identifier<br>
 - `name`, `given_name`, `family_name` - Name claims (with `profile` scope)<br>
 - `email`, `email_verified` - Email claims (with `email` scope)
 <br><br>
@@ -26,17 +41,18 @@ Pass the access token as a Bearer token: `Authorization: Bearer {access_token}`
 
 ### Example Usage
 
-<!-- UsageSnippet language="typescript" operationID="oauthUserInfo" method="get" path="/oauth/userinfo" -->
+<!-- UsageSnippet language="typescript" operationID="oauthUserInfo" method="get" path="/oauth2/userinfo" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.openIDConnect.getUserInfo();
+  const result = await pipeshub.openIDConnect.oauthUserInfo();
 
   console.log(result);
 }
@@ -49,23 +65,24 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { openIDConnectGetUserInfo } from "pipeshub/funcs/open-id-connect-get-user-info.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { openIDConnectOauthUserInfo } from "@pipeshub-ai/sdk/funcs/open-id-connect-oauth-user-info.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await openIDConnectGetUserInfo(pipeshub);
+  const res = await openIDConnectOauthUserInfo(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("openIDConnectGetUserInfo failed:", res.error);
+    console.log("openIDConnectOauthUserInfo failed:", res.error);
   }
 }
 
@@ -90,7 +107,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getConfiguration
+## openidConfiguration
 
 OpenID Connect Discovery Endpoint (RFC 8414).
 <br><br>
@@ -109,14 +126,12 @@ endpoint URLs, supported features, and capabilities.
 
 <!-- UsageSnippet language="typescript" operationID="openidConfiguration" method="get" path="/.well-known/openid-configuration" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new Pipeshub();
 
 async function run() {
-  const result = await pipeshub.openIDConnect.getConfiguration();
+  const result = await pipeshub.openIDConnect.openidConfiguration();
 
   console.log(result);
 }
@@ -129,22 +144,20 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { openIDConnectGetConfiguration } from "pipeshub/funcs/open-id-connect-get-configuration.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { openIDConnectOpenidConfiguration } from "@pipeshub-ai/sdk/funcs/open-id-connect-openid-configuration.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new PipeshubCore();
 
 async function run() {
-  const res = await openIDConnectGetConfiguration(pipeshub);
+  const res = await openIDConnectOpenidConfiguration(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("openIDConnectGetConfiguration failed:", res.error);
+    console.log("openIDConnectOpenidConfiguration failed:", res.error);
   }
 }
 
@@ -191,11 +204,9 @@ and access tokens.
 
 <!-- UsageSnippet language="typescript" operationID="jwks" method="get" path="/.well-known/jwks.json" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new Pipeshub();
 
 async function run() {
   const result = await pipeshub.openIDConnect.jwks();
@@ -211,14 +222,12 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { openIDConnectJwks } from "pipeshub/funcs/open-id-connect-jwks.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { openIDConnectJwks } from "@pipeshub-ai/sdk/funcs/open-id-connect-jwks.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new PipeshubCore();
 
 async function run() {
   const res = await openIDConnectJwks(pipeshub);

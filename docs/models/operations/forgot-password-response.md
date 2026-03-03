@@ -5,7 +5,7 @@ Password reset email sent successfully (or email not found - same response for s
 ## Example Usage
 
 ```typescript
-import { ForgotPasswordResponse } from "pipeshub/models/operations";
+import { ForgotPasswordResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: ForgotPasswordResponse = {
   message: "Password reset email sent",

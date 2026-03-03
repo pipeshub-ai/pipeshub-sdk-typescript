@@ -7,10 +7,10 @@ Contains claims about the authenticated user.
 ## Example Usage
 
 ```typescript
-import { OAuthUserInfoResponse } from "pipeshub/models";
+import { OAuthUserInfoResponse } from "@pipeshub-ai/sdk/models";
 
 let value: OAuthUserInfoResponse = {
-  sub: "<value>",
+  userId: "<id>",
 };
 ```
 
@@ -18,7 +18,7 @@ let value: OAuthUserInfoResponse = {
 
 | Field                                      | Type                                       | Required                                   | Description                                |
 | ------------------------------------------ | ------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
-| `sub`                                      | *string*                                   | :heavy_check_mark:                         | Subject identifier (user ID)               |
+| `userId`                                   | *string*                                   | :heavy_check_mark:                         | User ID                                    |
 | `name`                                     | *string*                                   | :heavy_minus_sign:                         | Full name                                  |
 | `givenName`                                | *string*                                   | :heavy_minus_sign:                         | First name                                 |
 | `familyName`                               | *string*                                   | :heavy_minus_sign:                         | Last name                                  |

@@ -5,7 +5,7 @@ Request payload
 ## Example Usage
 
 ```typescript
-import { UploadOrganizationLogoRequest } from "pipeshub/models/operations";
+import { UploadOrganizationLogoRequest } from "@pipeshub-ai/sdk/models/operations";
 
 // No examples available for this model
 ```

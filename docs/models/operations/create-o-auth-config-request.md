@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { CreateOAuthConfigRequest } from "pipeshub/models/operations";
+import { CreateOAuthConfigRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: CreateOAuthConfigRequest = {
   connectorType: "<value>",

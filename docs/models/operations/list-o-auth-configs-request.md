@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { ListOAuthConfigsRequest } from "pipeshub/models/operations";
+import { ListOAuthConfigsRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: ListOAuthConfigsRequest = {};
 ```

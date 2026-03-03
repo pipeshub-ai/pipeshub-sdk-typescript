@@ -7,7 +7,7 @@ Contains public keys for verifying token signatures.
 ## Example Usage
 
 ```typescript
-import { Jwks } from "pipeshub/models";
+import { Jwks } from "@pipeshub-ai/sdk/models";
 
 let value: Jwks = {
   keys: [

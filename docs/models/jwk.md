@@ -7,7 +7,7 @@ Public key for verifying JWT signatures.
 ## Example Usage
 
 ```typescript
-import { Jwk } from "pipeshub/models";
+import { Jwk } from "@pipeshub-ai/sdk/models";
 
 let value: Jwk = {
   kty: "RSA",

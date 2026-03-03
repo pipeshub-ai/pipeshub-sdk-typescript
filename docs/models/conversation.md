@@ -8,7 +8,7 @@ shared, archived, and organized.
 ## Example Usage
 
 ```typescript
-import { Conversation } from "pipeshub/models";
+import { Conversation } from "@pipeshub-ai/sdk/models";
 
 let value: Conversation = {
   title: "Q4 Financial Report Discussion",

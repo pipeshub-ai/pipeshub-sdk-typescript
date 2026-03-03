@@ -3,8 +3,38 @@
  */
 
 import * as z from "zod/v4-mini";
+import { smartUnion } from "../../types/smart-union.js";
 
-export type UpdateAgentLlmConfig = {};
+export type UpdateAgentModel = {
+  modelKey?: string | undefined;
+  modelName?: string | undefined;
+  provider?: string | undefined;
+  isReasoning?: boolean | undefined;
+};
+
+export type UpdateAgentModelUnion = string | UpdateAgentModel;
+
+export type UpdateAgentTool = {
+  name?: string | undefined;
+  fullName?: string | undefined;
+  description?: string | undefined;
+};
+
+export type UpdateAgentToolset = {
+  name?: string | undefined;
+  displayName?: string | undefined;
+  type?: string | undefined;
+  instanceId?: string | undefined;
+  instanceName?: string | undefined;
+  tools?: Array<UpdateAgentTool> | undefined;
+};
+
+export type UpdateAgentFilters = { [k: string]: any } | string;
+
+export type UpdateAgentKnowledge = {
+  connectorId?: string | undefined;
+  filters?: { [k: string]: any } | string | undefined;
+};
 
 /**
  * Request body for Update agent
@@ -13,10 +43,13 @@ export type UpdateAgentRequestBody = {
   name?: string | undefined;
   description?: string | undefined;
   systemPrompt?: string | undefined;
-  tools?: Array<string> | undefined;
-  knowledgeBases?: Array<string> | undefined;
-  llmConfig?: UpdateAgentLlmConfig | undefined;
+  startMessage?: string | undefined;
+  instructions?: string | null | undefined;
+  models?: Array<string | UpdateAgentModel> | undefined;
+  toolsets?: Array<UpdateAgentToolset> | undefined;
+  knowledge?: Array<UpdateAgentKnowledge> | undefined;
   isPublic?: boolean | undefined;
+  shareWithOrg?: boolean | undefined;
 };
 
 export type UpdateAgentRequest = {
@@ -28,19 +61,140 @@ export type UpdateAgentRequest = {
 };
 
 /** @internal */
-export type UpdateAgentLlmConfig$Outbound = {};
+export type UpdateAgentModel$Outbound = {
+  modelKey?: string | undefined;
+  modelName?: string | undefined;
+  provider?: string | undefined;
+  isReasoning?: boolean | undefined;
+};
 
 /** @internal */
-export const UpdateAgentLlmConfig$outboundSchema: z.ZodMiniType<
-  UpdateAgentLlmConfig$Outbound,
-  UpdateAgentLlmConfig
-> = z.object({});
+export const UpdateAgentModel$outboundSchema: z.ZodMiniType<
+  UpdateAgentModel$Outbound,
+  UpdateAgentModel
+> = z.object({
+  modelKey: z.optional(z.string()),
+  modelName: z.optional(z.string()),
+  provider: z.optional(z.string()),
+  isReasoning: z.optional(z.boolean()),
+});
 
-export function updateAgentLlmConfigToJSON(
-  updateAgentLlmConfig: UpdateAgentLlmConfig,
+export function updateAgentModelToJSON(
+  updateAgentModel: UpdateAgentModel,
 ): string {
   return JSON.stringify(
-    UpdateAgentLlmConfig$outboundSchema.parse(updateAgentLlmConfig),
+    UpdateAgentModel$outboundSchema.parse(updateAgentModel),
+  );
+}
+
+/** @internal */
+export type UpdateAgentModelUnion$Outbound = string | UpdateAgentModel$Outbound;
+
+/** @internal */
+export const UpdateAgentModelUnion$outboundSchema: z.ZodMiniType<
+  UpdateAgentModelUnion$Outbound,
+  UpdateAgentModelUnion
+> = smartUnion([z.string(), z.lazy(() => UpdateAgentModel$outboundSchema)]);
+
+export function updateAgentModelUnionToJSON(
+  updateAgentModelUnion: UpdateAgentModelUnion,
+): string {
+  return JSON.stringify(
+    UpdateAgentModelUnion$outboundSchema.parse(updateAgentModelUnion),
+  );
+}
+
+/** @internal */
+export type UpdateAgentTool$Outbound = {
+  name?: string | undefined;
+  fullName?: string | undefined;
+  description?: string | undefined;
+};
+
+/** @internal */
+export const UpdateAgentTool$outboundSchema: z.ZodMiniType<
+  UpdateAgentTool$Outbound,
+  UpdateAgentTool
+> = z.object({
+  name: z.optional(z.string()),
+  fullName: z.optional(z.string()),
+  description: z.optional(z.string()),
+});
+
+export function updateAgentToolToJSON(
+  updateAgentTool: UpdateAgentTool,
+): string {
+  return JSON.stringify(UpdateAgentTool$outboundSchema.parse(updateAgentTool));
+}
+
+/** @internal */
+export type UpdateAgentToolset$Outbound = {
+  name?: string | undefined;
+  displayName?: string | undefined;
+  type?: string | undefined;
+  instanceId?: string | undefined;
+  instanceName?: string | undefined;
+  tools?: Array<UpdateAgentTool$Outbound> | undefined;
+};
+
+/** @internal */
+export const UpdateAgentToolset$outboundSchema: z.ZodMiniType<
+  UpdateAgentToolset$Outbound,
+  UpdateAgentToolset
+> = z.object({
+  name: z.optional(z.string()),
+  displayName: z.optional(z.string()),
+  type: z.optional(z.string()),
+  instanceId: z.optional(z.string()),
+  instanceName: z.optional(z.string()),
+  tools: z.optional(z.array(z.lazy(() => UpdateAgentTool$outboundSchema))),
+});
+
+export function updateAgentToolsetToJSON(
+  updateAgentToolset: UpdateAgentToolset,
+): string {
+  return JSON.stringify(
+    UpdateAgentToolset$outboundSchema.parse(updateAgentToolset),
+  );
+}
+
+/** @internal */
+export type UpdateAgentFilters$Outbound = { [k: string]: any } | string;
+
+/** @internal */
+export const UpdateAgentFilters$outboundSchema: z.ZodMiniType<
+  UpdateAgentFilters$Outbound,
+  UpdateAgentFilters
+> = smartUnion([z.record(z.string(), z.any()), z.string()]);
+
+export function updateAgentFiltersToJSON(
+  updateAgentFilters: UpdateAgentFilters,
+): string {
+  return JSON.stringify(
+    UpdateAgentFilters$outboundSchema.parse(updateAgentFilters),
+  );
+}
+
+/** @internal */
+export type UpdateAgentKnowledge$Outbound = {
+  connectorId?: string | undefined;
+  filters?: { [k: string]: any } | string | undefined;
+};
+
+/** @internal */
+export const UpdateAgentKnowledge$outboundSchema: z.ZodMiniType<
+  UpdateAgentKnowledge$Outbound,
+  UpdateAgentKnowledge
+> = z.object({
+  connectorId: z.optional(z.string()),
+  filters: z.optional(smartUnion([z.record(z.string(), z.any()), z.string()])),
+});
+
+export function updateAgentKnowledgeToJSON(
+  updateAgentKnowledge: UpdateAgentKnowledge,
+): string {
+  return JSON.stringify(
+    UpdateAgentKnowledge$outboundSchema.parse(updateAgentKnowledge),
   );
 }
 
@@ -49,10 +203,13 @@ export type UpdateAgentRequestBody$Outbound = {
   name?: string | undefined;
   description?: string | undefined;
   systemPrompt?: string | undefined;
-  tools?: Array<string> | undefined;
-  knowledgeBases?: Array<string> | undefined;
-  llmConfig?: UpdateAgentLlmConfig$Outbound | undefined;
+  startMessage?: string | undefined;
+  instructions?: string | null | undefined;
+  models?: Array<string | UpdateAgentModel$Outbound> | undefined;
+  toolsets?: Array<UpdateAgentToolset$Outbound> | undefined;
+  knowledge?: Array<UpdateAgentKnowledge$Outbound> | undefined;
   isPublic?: boolean | undefined;
+  shareWithOrg?: boolean | undefined;
 };
 
 /** @internal */
@@ -63,10 +220,22 @@ export const UpdateAgentRequestBody$outboundSchema: z.ZodMiniType<
   name: z.optional(z.string()),
   description: z.optional(z.string()),
   systemPrompt: z.optional(z.string()),
-  tools: z.optional(z.array(z.string())),
-  knowledgeBases: z.optional(z.array(z.string())),
-  llmConfig: z.optional(z.lazy(() => UpdateAgentLlmConfig$outboundSchema)),
+  startMessage: z.optional(z.string()),
+  instructions: z.optional(z.nullable(z.string())),
+  models: z.optional(
+    z.array(smartUnion([
+      z.string(),
+      z.lazy(() => UpdateAgentModel$outboundSchema),
+    ])),
+  ),
+  toolsets: z.optional(
+    z.array(z.lazy(() => UpdateAgentToolset$outboundSchema)),
+  ),
+  knowledge: z.optional(
+    z.array(z.lazy(() => UpdateAgentKnowledge$outboundSchema)),
+  ),
   isPublic: z.optional(z.boolean()),
+  shareWithOrg: z.optional(z.boolean()),
 });
 
 export function updateAgentRequestBodyToJSON(

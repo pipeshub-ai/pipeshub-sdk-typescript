@@ -7,7 +7,7 @@ Contains the access token and optional refresh/ID tokens.
 ## Example Usage
 
 ```typescript
-import { OAuthTokenResponse } from "pipeshub/models";
+import { OAuthTokenResponse } from "@pipeshub-ai/sdk/models";
 
 let value: OAuthTokenResponse = {
   tokenType: "Bearer",

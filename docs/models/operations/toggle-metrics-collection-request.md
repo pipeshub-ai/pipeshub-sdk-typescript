@@ -5,7 +5,7 @@ Request payload
 ## Example Usage
 
 ```typescript
-import { ToggleMetricsCollectionRequest } from "pipeshub/models/operations";
+import { ToggleMetricsCollectionRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: ToggleMetricsCollectionRequest = {
   enableMetricCollection: true,

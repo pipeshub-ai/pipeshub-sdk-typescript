@@ -5,7 +5,7 @@ Request payload
 ## Example Usage
 
 ```typescript
-import { UpdateUserGroupRequestBody } from "pipeshub/models/operations";
+import { UpdateUserGroupRequestBody } from "@pipeshub-ai/sdk/models/operations";
 
 let value: UpdateUserGroupRequestBody = {
   name: "Engineering Team - Updated",

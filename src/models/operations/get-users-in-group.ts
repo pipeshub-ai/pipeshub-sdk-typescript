@@ -7,44 +7,27 @@ import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
-import * as models from "../index.js";
 
 export type GetUsersInGroupRequest = {
   /**
    * Unique identifier of the user group
    */
   groupId: string;
-  /**
-   * Page number for pagination (1-based)
-   */
-  page?: number | undefined;
-  /**
-   * Number of users per page
-   */
-  limit?: number | undefined;
 };
 
-export type GetUsersInGroupPagination = {
-  page?: number | undefined;
-  limit?: number | undefined;
-  total?: number | undefined;
-  totalPages?: number | undefined;
-};
+export type GetUsersInGroupData = {};
 
 /**
  * Users in group retrieved successfully
  */
 export type GetUsersInGroupResponse = {
   success?: boolean | undefined;
-  data?: Array<models.User> | undefined;
-  pagination?: GetUsersInGroupPagination | undefined;
+  data?: Array<GetUsersInGroupData> | undefined;
 };
 
 /** @internal */
 export type GetUsersInGroupRequest$Outbound = {
   groupId: string;
-  page: number;
-  limit: number;
 };
 
 /** @internal */
@@ -53,8 +36,6 @@ export const GetUsersInGroupRequest$outboundSchema: z.ZodMiniType<
   GetUsersInGroupRequest
 > = z.object({
   groupId: z.string(),
-  page: z._default(z.int(), 1),
-  limit: z._default(z.int(), 20),
 });
 
 export function getUsersInGroupRequestToJSON(
@@ -66,23 +47,18 @@ export function getUsersInGroupRequestToJSON(
 }
 
 /** @internal */
-export const GetUsersInGroupPagination$inboundSchema: z.ZodMiniType<
-  GetUsersInGroupPagination,
+export const GetUsersInGroupData$inboundSchema: z.ZodMiniType<
+  GetUsersInGroupData,
   unknown
-> = z.object({
-  page: types.optional(types.number()),
-  limit: types.optional(types.number()),
-  total: types.optional(types.number()),
-  totalPages: types.optional(types.number()),
-});
+> = z.object({});
 
-export function getUsersInGroupPaginationFromJSON(
+export function getUsersInGroupDataFromJSON(
   jsonString: string,
-): SafeParseResult<GetUsersInGroupPagination, SDKValidationError> {
+): SafeParseResult<GetUsersInGroupData, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => GetUsersInGroupPagination$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetUsersInGroupPagination' from JSON`,
+    (x) => GetUsersInGroupData$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetUsersInGroupData' from JSON`,
   );
 }
 
@@ -92,9 +68,8 @@ export const GetUsersInGroupResponse$inboundSchema: z.ZodMiniType<
   unknown
 > = z.object({
   success: types.optional(types.boolean()),
-  data: types.optional(z.array(models.User$inboundSchema)),
-  pagination: types.optional(
-    z.lazy(() => GetUsersInGroupPagination$inboundSchema),
+  data: types.optional(
+    z.array(z.lazy(() => GetUsersInGroupData$inboundSchema)),
   ),
 });
 

@@ -5,7 +5,7 @@ URL configuration for frontend or connector
 ## Example Usage
 
 ```typescript
-import { URLConfig } from "pipeshub/models";
+import { URLConfig } from "@pipeshub-ai/sdk/models";
 
 let value: URLConfig = {
   url: "https://app.example.com",

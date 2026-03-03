@@ -5,7 +5,7 @@ Schema definition for configuring a connector type
 ## Example Usage
 
 ```typescript
-import { ConnectorSchema } from "pipeshub/models";
+import { ConnectorSchema } from "@pipeshub-ai/sdk/models";
 
 let value: ConnectorSchema = {};
 ```

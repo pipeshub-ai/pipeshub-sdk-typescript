@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { GetKnowledgeHubChildNodesRequest } from "pipeshub/models/operations";
+import { GetKnowledgeHubChildNodesRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetKnowledgeHubChildNodesRequest = {
   parentType: "<value>",

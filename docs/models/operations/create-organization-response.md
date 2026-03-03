@@ -5,7 +5,7 @@ Organization created successfully
 ## Example Usage
 
 ```typescript
-import { CreateOrganizationResponse } from "pipeshub/models/operations";
+import { CreateOrganizationResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: CreateOrganizationResponse = {
   success: true,

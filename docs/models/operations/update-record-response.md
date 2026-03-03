@@ -5,11 +5,11 @@ Record updated successfully
 ## Example Usage
 
 ```typescript
-import { UpdateRecordResponse } from "pipeshub/models/operations";
+import { UpdateRecordResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: UpdateRecordResponse = {
   record: {
-    key: "550e8400-e29b-41d4-a716-446655440000",
+    id: "550e8400-e29b-41d4-a716-446655440000",
     recordName: "Q4 Financial Report.pdf",
     externalRecordId: "507f1f77bcf86cd799439011",
     recordType: "FILE",
@@ -27,8 +27,8 @@ let value: UpdateRecordResponse = {
     mimeType: "application/pdf",
     sizeInBytes: 1048576,
     extension: "pdf",
-    sha256Hash:
-      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    type: "record",
+    ticketRecord: {},
   },
 };
 ```

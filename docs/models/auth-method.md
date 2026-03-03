@@ -5,7 +5,7 @@ Authentication method configuration
 ## Example Usage
 
 ```typescript
-import { AuthMethod } from "pipeshub/models";
+import { AuthMethod } from "@pipeshub-ai/sdk/models";
 
 let value: AuthMethod = {
   type: "microsoft",

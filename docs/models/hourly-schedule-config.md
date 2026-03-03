@@ -5,7 +5,7 @@ Run crawling job every X hours at a specified minute
 ## Example Usage
 
 ```typescript
-import { HourlyScheduleConfig } from "pipeshub/models";
+import { HourlyScheduleConfig } from "@pipeshub-ai/sdk/models";
 
 let value: HourlyScheduleConfig = {
   scheduleType: "hourly",

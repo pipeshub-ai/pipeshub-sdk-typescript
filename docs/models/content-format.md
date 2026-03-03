@@ -5,7 +5,7 @@ Format of the content for rendering
 ## Example Usage
 
 ```typescript
-import { ContentFormat } from "pipeshub/models";
+import { ContentFormat } from "@pipeshub-ai/sdk/models";
 
 let value: ContentFormat = "MARKDOWN";
 ```

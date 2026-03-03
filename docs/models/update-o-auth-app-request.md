@@ -5,7 +5,7 @@ Request to update an OAuth app
 ## Example Usage
 
 ```typescript
-import { UpdateOAuthAppRequest } from "pipeshub/models";
+import { UpdateOAuthAppRequest } from "@pipeshub-ai/sdk/models";
 
 let value: UpdateOAuthAppRequest = {};
 ```

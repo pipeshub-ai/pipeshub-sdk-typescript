@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { UploadResultStatus } from "pipeshub/models";
+import { UploadResultStatus } from "@pipeshub-ai/sdk/models";
 
 let value: UploadResultStatus = "success";
 ```

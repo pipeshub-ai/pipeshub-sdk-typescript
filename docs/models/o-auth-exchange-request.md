@@ -5,7 +5,7 @@ Request to exchange OAuth authorization code for tokens
 ## Example Usage
 
 ```typescript
-import { OAuthExchangeRequest } from "pipeshub/models";
+import { OAuthExchangeRequest } from "@pipeshub-ai/sdk/models";
 
 let value: OAuthExchangeRequest = {
   code: "<value>",

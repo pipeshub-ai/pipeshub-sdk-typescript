@@ -5,7 +5,7 @@ Request payload
 ## Example Usage
 
 ```typescript
-import { UpdateOnboardingStatusRequest } from "pipeshub/models/operations";
+import { UpdateOnboardingStatusRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: UpdateOnboardingStatusRequest = {
   stepId: "invite_team",

@@ -5,7 +5,7 @@ Response after successful password reset
 ## Example Usage
 
 ```typescript
-import { PasswordResetResponse } from "pipeshub/models";
+import { PasswordResetResponse } from "@pipeshub-ai/sdk/models";
 
 let value: PasswordResetResponse = {
   data: "password reset",

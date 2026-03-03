@@ -1,19 +1,17 @@
 # GetTokenFromCodeRequest
 
-Authorization code from Google OAuth consent
-
 ## Example Usage
 
 ```typescript
-import { GetTokenFromCodeRequest } from "pipeshub/models/operations";
+import { GetTokenFromCodeRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetTokenFromCodeRequest = {
-  code: "<value>",
+  tempCode: "<value>",
 };
 ```
 
 ## Fields
 
-| Field                                             | Type                                              | Required                                          | Description                                       |
-| ------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------- |
-| `code`                                            | *string*                                          | :heavy_check_mark:                                | Authorization code from Google OAuth consent flow |
+| Field                                                          | Type                                                           | Required                                                       | Description                                                    |
+| -------------------------------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------- |
+| `tempCode`                                                     | *string*                                                       | :heavy_check_mark:                                             | Google OAuth authorization code received from the consent flow |

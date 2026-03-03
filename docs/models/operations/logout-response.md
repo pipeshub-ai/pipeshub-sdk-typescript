@@ -5,7 +5,7 @@ Logged out successfully
 ## Example Usage
 
 ```typescript
-import { LogoutResponse } from "pipeshub/models/operations";
+import { LogoutResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: LogoutResponse = {
   message: "Logged out successfully",

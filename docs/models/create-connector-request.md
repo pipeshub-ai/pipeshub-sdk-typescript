@@ -5,7 +5,7 @@ Request to create a new connector instance
 ## Example Usage
 
 ```typescript
-import { CreateConnectorRequest } from "pipeshub/models";
+import { CreateConnectorRequest } from "@pipeshub-ai/sdk/models";
 
 let value: CreateConnectorRequest = {
   connectorType: "google-drive",

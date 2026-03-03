@@ -5,7 +5,7 @@ OAuth application credentials
 ## Example Usage
 
 ```typescript
-import { CreateOAuthConfigRequestConfig } from "pipeshub/models";
+import { CreateOAuthConfigRequestConfig } from "@pipeshub-ai/sdk/models";
 
 let value: CreateOAuthConfigRequestConfig = {
   clientId: "123456789-abc.apps.googleusercontent.com",

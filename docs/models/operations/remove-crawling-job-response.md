@@ -5,7 +5,7 @@ Crawling job removed successfully
 ## Example Usage
 
 ```typescript
-import { RemoveCrawlingJobResponse } from "pipeshub/models/operations";
+import { RemoveCrawlingJobResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: RemoveCrawlingJobResponse = {
   success: true,

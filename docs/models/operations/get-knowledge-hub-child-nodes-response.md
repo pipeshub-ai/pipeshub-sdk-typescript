@@ -5,7 +5,7 @@ Child nodes retrieved
 ## Example Usage
 
 ```typescript
-import { GetKnowledgeHubChildNodesResponse } from "pipeshub/models/operations";
+import { GetKnowledgeHubChildNodesResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetKnowledgeHubChildNodesResponse = {};
 ```

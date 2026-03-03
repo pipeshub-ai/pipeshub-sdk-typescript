@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { Pagination } from "pipeshub/models";
+import { Pagination } from "@pipeshub-ai/sdk/models";
 
 let value: Pagination = {};
 ```

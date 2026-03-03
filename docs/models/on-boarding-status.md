@@ -5,7 +5,7 @@ Onboarding status
 ## Example Usage
 
 ```typescript
-import { OnBoardingStatus } from "pipeshub/models";
+import { OnBoardingStatus } from "@pipeshub-ai/sdk/models";
 
 let value: OnBoardingStatus = "notConfigured";
 ```

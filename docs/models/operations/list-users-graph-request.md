@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { ListUsersGraphRequest } from "pipeshub/models/operations";
+import { ListUsersGraphRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: ListUsersGraphRequest = {
   search: "john",

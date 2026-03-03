@@ -29,31 +29,18 @@ import { Result } from "../types/fp.js";
  * Update user designation
  *
  * @remarks
- * Update the job title or designation of a user.<br><br>
- * <b>Overview:</b><br>
- * This endpoint updates the user's designation field, which typically represents their job title, role, or position within the organization.<br><br>
- * <b>Authorization:</b><br>
- * <ul>
- * <li><b>Self-update:</b> Users can update their own designation</li>
- * <li><b>Admin-update:</b> Admins can update any user's designation</li>
- * </ul>
- * <b>Common Values:</b><br>
- * <ul>
- * <li>Software Engineer</li>
- * <li>Product Manager</li>
- * <li>Team Lead</li>
- * <li>Director of Engineering</li>
- * </ul>
- * <b>Display:</b><br>
- * Designation is shown in user profiles, team views, and organizational charts.
+ * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
+ * Update the designation/title of a user.
+ *
+ * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
  */
 export function usersUpdateDesignation(
   client: PipeshubCore,
-  request: operations.UpdateUserDesignationRequest,
+  request: operations.UpdateDesignationRequest,
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    operations.UpdateUserDesignationResponse,
+    operations.UpdateDesignationResponse,
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -73,12 +60,12 @@ export function usersUpdateDesignation(
 
 async function $do(
   client: PipeshubCore,
-  request: operations.UpdateUserDesignationRequest,
+  request: operations.UpdateDesignationRequest,
   options?: RequestOptions,
 ): Promise<
   [
     Result<
-      operations.UpdateUserDesignationResponse,
+      operations.UpdateDesignationResponse,
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -94,7 +81,7 @@ async function $do(
   const parsed = safeParse(
     request,
     (value) =>
-      z.parse(operations.UpdateUserDesignationRequest$outboundSchema, value),
+      z.parse(operations.UpdateDesignationRequest$outboundSchema, value),
     "Input validation failed",
   );
   if (!parsed.ok) {
@@ -117,19 +104,18 @@ async function $do(
     Accept: "application/json",
   }));
 
-  const secConfig = await extractSecurity(client._options.bearerAuth);
-  const securityInput = secConfig == null ? {} : { bearerAuth: secConfig };
+  const securityInput = await extractSecurity(client._options.security);
   const requestSecurity = resolveGlobalSecurity(securityInput);
 
   const context = {
     options: client._options,
     baseURL: options?.serverURL ?? client._baseURL ?? "",
-    operationID: "updateUserDesignation",
-    oAuth2Scopes: null,
+    operationID: "updateDesignation",
+    oAuth2Scopes: ["user:write"],
 
     resolvedSecurity: requestSecurity,
 
-    securitySource: client._options.bearerAuth,
+    securitySource: client._options.security,
     retryConfig: options?.retries
       || client._options.retryConfig
       || { strategy: "none" },
@@ -153,7 +139,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["400", "401", "403", "404", "4XX", "5XX"],
+    errorCodes: ["401", "404", "4XX", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -163,7 +149,7 @@ async function $do(
   const response = doResult.value;
 
   const [result] = await M.match<
-    operations.UpdateUserDesignationResponse,
+    operations.UpdateDesignationResponse,
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -173,8 +159,8 @@ async function $do(
     | UnexpectedClientError
     | SDKValidationError
   >(
-    M.json(200, operations.UpdateUserDesignationResponse$inboundSchema),
-    M.fail([400, 401, 403, 404, "4XX"]),
+    M.json(200, operations.UpdateDesignationResponse$inboundSchema),
+    M.fail([401, 404, "4XX"]),
     M.fail("5XX"),
   )(response, req);
   if (!result.ok) {

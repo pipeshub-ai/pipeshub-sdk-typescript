@@ -7,7 +7,7 @@ Revokes an access or refresh token.
 ## Example Usage
 
 ```typescript
-import { OAuthRevokeRequest } from "pipeshub/models";
+import { OAuthRevokeRequest } from "@pipeshub-ai/sdk/models";
 
 let value: OAuthRevokeRequest = {
   token: "<value>",

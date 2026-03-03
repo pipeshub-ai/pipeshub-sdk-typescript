@@ -5,7 +5,7 @@ Request payload
 ## Example Usage
 
 ```typescript
-import { CreateRootFolderRequestBody } from "pipeshub/models/operations";
+import { CreateRootFolderRequestBody } from "@pipeshub-ai/sdk/models/operations";
 
 let value: CreateRootFolderRequestBody = {
   folderName: "Project Documents",

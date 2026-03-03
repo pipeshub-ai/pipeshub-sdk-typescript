@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { DownloadDocumentRequest } from "pipeshub/models/operations";
+import { DownloadDocumentRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: DownloadDocumentRequest = {
   documentId: "507f1f77bcf86cd799439011",

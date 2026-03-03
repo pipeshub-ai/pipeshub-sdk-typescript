@@ -5,7 +5,7 @@ Request payload
 ## Example Usage
 
 ```typescript
-import { UploadRecordsToKBRequestBody } from "pipeshub/models/operations";
+import { UploadRecordsToKBRequestBody } from "@pipeshub-ai/sdk/models/operations";
 
 let value: UploadRecordsToKBRequestBody = {
   files: [],

@@ -5,7 +5,7 @@ User group for organizing users within an organization
 ## Example Usage
 
 ```typescript
-import { UserGroup } from "pipeshub/models";
+import { UserGroup } from "@pipeshub-ai/sdk/models";
 
 let value: UserGroup = {
   type: "admin",

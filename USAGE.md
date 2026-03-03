@@ -1,13 +1,11 @@
 <!-- Start SDK Example Usage [usage] -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-});
+const pipeshub = new Pipeshub();
 
 async function run() {
-  const result = await pipeshub.userAccount.initializeAuth({
+  const result = await pipeshub.userAccount.initAuth({
     email: "user@example.com",
   });
 

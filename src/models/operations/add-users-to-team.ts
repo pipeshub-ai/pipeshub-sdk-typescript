@@ -4,46 +4,18 @@
 
 import * as z from "zod/v4-mini";
 import { safeParse } from "../../lib/schemas.js";
-import { ClosedEnum } from "../../types/enums.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 
 /**
- * Role to assign to the user
- */
-export const AddUsersToTeamRole = {
-  Admin: "admin",
-  Member: "member",
-  Viewer: "viewer",
-} as const;
-/**
- * Role to assign to the user
- */
-export type AddUsersToTeamRole = ClosedEnum<typeof AddUsersToTeamRole>;
-
-export type User = {
-  /**
-   * User ID to add to the team
-   */
-  userId: string;
-  /**
-   * Role to assign to the user
-   */
-  role?: AddUsersToTeamRole | undefined;
-};
-
-/**
  * Request payload
  */
 export type AddUsersToTeamRequestBody = {
-  users: Array<User>;
+  userIds?: Array<string> | undefined;
 };
 
 export type AddUsersToTeamRequest = {
-  /**
-   * Unique identifier of the team
-   */
   teamId: string;
   /**
    * Request payload
@@ -55,41 +27,12 @@ export type AddUsersToTeamRequest = {
  * Users added to team successfully
  */
 export type AddUsersToTeamResponse = {
-  success?: boolean | undefined;
   message?: string | undefined;
-  addedCount?: number | undefined;
-  /**
-   * Number of users already in the team
-   */
-  skippedCount?: number | undefined;
 };
-
-/** @internal */
-export const AddUsersToTeamRole$outboundSchema: z.ZodMiniEnum<
-  typeof AddUsersToTeamRole
-> = z.enum(AddUsersToTeamRole);
-
-/** @internal */
-export type User$Outbound = {
-  userId: string;
-  role: string;
-};
-
-/** @internal */
-export const User$outboundSchema: z.ZodMiniType<User$Outbound, User> = z.object(
-  {
-    userId: z.string(),
-    role: z._default(AddUsersToTeamRole$outboundSchema, "member"),
-  },
-);
-
-export function userToJSON(user: User): string {
-  return JSON.stringify(User$outboundSchema.parse(user));
-}
 
 /** @internal */
 export type AddUsersToTeamRequestBody$Outbound = {
-  users: Array<User$Outbound>;
+  userIds?: Array<string> | undefined;
 };
 
 /** @internal */
@@ -97,7 +40,7 @@ export const AddUsersToTeamRequestBody$outboundSchema: z.ZodMiniType<
   AddUsersToTeamRequestBody$Outbound,
   AddUsersToTeamRequestBody
 > = z.object({
-  users: z.array(z.lazy(() => User$outboundSchema)),
+  userIds: z.optional(z.array(z.string())),
 });
 
 export function addUsersToTeamRequestBodyToJSON(
@@ -136,10 +79,7 @@ export const AddUsersToTeamResponse$inboundSchema: z.ZodMiniType<
   AddUsersToTeamResponse,
   unknown
 > = z.object({
-  success: types.optional(types.boolean()),
   message: types.optional(types.string()),
-  addedCount: types.optional(types.number()),
-  skippedCount: types.optional(types.number()),
 });
 
 export function addUsersToTeamResponseFromJSON(

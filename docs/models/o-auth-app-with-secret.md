@@ -5,7 +5,7 @@ OAuth app details (without secret)
 ## Example Usage
 
 ```typescript
-import { OAuthAppWithSecret } from "pipeshub/models";
+import { OAuthAppWithSecret } from "@pipeshub-ai/sdk/models";
 
 let value: OAuthAppWithSecret = {
   clientSecret: "<value>",

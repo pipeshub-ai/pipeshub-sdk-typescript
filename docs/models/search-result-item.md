@@ -5,7 +5,7 @@ A single matching chunk from semantic search
 ## Example Usage
 
 ```typescript
-import { SearchResultItem } from "pipeshub/models";
+import { SearchResultItem } from "@pipeshub-ai/sdk/models";
 
 let value: SearchResultItem = {};
 ```

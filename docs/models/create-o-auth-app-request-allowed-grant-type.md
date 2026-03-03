@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { CreateOAuthAppRequestAllowedGrantType } from "pipeshub/models";
+import { CreateOAuthAppRequestAllowedGrantType } from "@pipeshub-ai/sdk/models";
 
 let value: CreateOAuthAppRequestAllowedGrantType = "authorization_code";
 ```

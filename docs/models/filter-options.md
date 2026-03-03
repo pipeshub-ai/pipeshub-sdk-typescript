@@ -5,7 +5,7 @@ Available filter options for a connector
 ## Example Usage
 
 ```typescript
-import { FilterOptions } from "pipeshub/models";
+import { FilterOptions } from "@pipeshub-ai/sdk/models";
 
 let value: FilterOptions = {};
 ```

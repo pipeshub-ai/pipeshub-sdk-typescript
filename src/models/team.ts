@@ -32,13 +32,13 @@ export type Team = {
    */
   userRoles?: Array<UserRole> | undefined;
   /**
-   * Creation timestamp
+   * Creation timestamp (ISO 8601)
    */
-  createdAt?: number | undefined;
+  createdAt?: Date | undefined;
   /**
-   * Last update timestamp
+   * Last update timestamp (ISO 8601)
    */
-  updatedAt?: number | undefined;
+  updatedAt?: Date | undefined;
 };
 
 /** @internal */
@@ -49,8 +49,8 @@ export const Team$inboundSchema: z.ZodMiniType<Team, unknown> = z.pipe(
     description: types.optional(types.string()),
     orgId: types.optional(types.string()),
     userRoles: types.optional(z.array(UserRole$inboundSchema)),
-    createdAt: types.optional(types.number()),
-    updatedAt: types.optional(types.number()),
+    createdAt: types.optional(types.date()),
+    updatedAt: types.optional(types.date()),
   }),
   z.transform((v) => {
     return remap$(v, {

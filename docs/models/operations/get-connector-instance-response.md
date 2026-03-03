@@ -5,7 +5,7 @@ Instance retrieved
 ## Example Usage
 
 ```typescript
-import { GetConnectorInstanceResponse } from "pipeshub/models/operations";
+import { GetConnectorInstanceResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetConnectorInstanceResponse = {
   connector: {

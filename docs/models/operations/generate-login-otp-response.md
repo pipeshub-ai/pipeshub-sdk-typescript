@@ -5,7 +5,7 @@ OTP generated and sent successfully
 ## Example Usage
 
 ```typescript
-import { GenerateLoginOtpResponse } from "pipeshub/models/operations";
+import { GenerateLoginOtpResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GenerateLoginOtpResponse = {
   message: "OTP sent to your email",

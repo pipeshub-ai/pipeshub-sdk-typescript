@@ -5,7 +5,7 @@ Connector type retrieved
 ## Example Usage
 
 ```typescript
-import { GetOAuthConnectorTypeResponse } from "pipeshub/models/operations";
+import { GetOAuthConnectorTypeResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetOAuthConnectorTypeResponse = {
   connector: {

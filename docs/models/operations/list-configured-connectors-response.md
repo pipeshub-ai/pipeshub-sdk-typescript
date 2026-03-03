@@ -5,7 +5,7 @@ Configured connectors retrieved
 ## Example Usage
 
 ```typescript
-import { ListConfiguredConnectorsResponse } from "pipeshub/models/operations";
+import { ListConfiguredConnectorsResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: ListConfiguredConnectorsResponse = {
   connectors: [

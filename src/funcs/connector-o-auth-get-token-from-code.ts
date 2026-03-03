@@ -26,21 +26,27 @@ import { APICall, APIPromise } from "../types/async.js";
 import { Result } from "../types/fp.js";
 
 /**
- * Exchange authorization code for tokens (legacy)
+ * Exchange Google authorization code for tokens
  *
  * @remarks
- * Exchange a Google Workspace authorization code for access and refresh tokens.<br><br>
- * <b>Note:</b> This is a legacy endpoint specific to Google Workspace connectors.
- * For new integrations, use the standard OAuth flow via
- * <code>/connectors/{connectorId}/oauth/authorize</code> and the callback.<br><br>
- * <b>Flow:</b><br>
+ * <b>⚠️ Deprecated:</b> Legacy Google Workspace token exchange endpoint. Use the generic
+ * OAuth flow via <code>/connectors/{connectorId}/oauth/authorize</code> instead.<br><br>
+ * <b>Overview:</b><br>
+ * Exchanges a Google OAuth authorization code for access and refresh tokens,
+ * stores the credentials, and enables the Google Workspace connector.<br><br>
+ * <b>What Happens:</b><br>
  * <ol>
- * <li>User completes Google Workspace OAuth consent in the browser</li>
- * <li>Browser receives authorization code</li>
- * <li>Frontend sends the code to this endpoint</li>
- * <li>Backend exchanges code for tokens and stores them</li>
+ * <li>Retrieves Google Workspace OAuth config (client ID/secret)</li>
+ * <li>Exchanges the authorization code for tokens via Google's token endpoint</li>
+ * <li>Verifies the ID token</li>
+ * <li>Stores access and refresh tokens in configuration manager</li>
+ * <li>Creates or enables the Google Workspace connector</li>
+ * <li>Publishes an AppEnabledEvent for the sync service</li>
  * </ol>
- * <b>Admin Only:</b> Requires admin privileges.
+ * <b>Admin Only:</b><br>
+ * Requires organization admin privileges.
+ *
+ * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
  */
 export function connectorOAuthGetTokenFromCode(
   client: PipeshubCore,
@@ -105,19 +111,18 @@ async function $do(
     Accept: "application/json",
   }));
 
-  const secConfig = await extractSecurity(client._options.bearerAuth);
-  const securityInput = secConfig == null ? {} : { bearerAuth: secConfig };
+  const securityInput = await extractSecurity(client._options.security);
   const requestSecurity = resolveGlobalSecurity(securityInput);
 
   const context = {
     options: client._options,
     baseURL: options?.serverURL ?? client._baseURL ?? "",
     operationID: "getTokenFromCode",
-    oAuth2Scopes: null,
+    oAuth2Scopes: ["connector:write"],
 
     resolvedSecurity: requestSecurity,
 
-    securitySource: client._options.bearerAuth,
+    securitySource: client._options.security,
     retryConfig: options?.retries
       || client._options.retryConfig
       || { strategy: "none" },
@@ -141,7 +146,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["400", "401", "403", "404", "4XX", "5XX"],
+    errorCodes: ["400", "401", "404", "4XX", "500", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -162,8 +167,9 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, operations.GetTokenFromCodeResponse$inboundSchema),
-    M.fail([400, 401, 403, 404, "4XX"]),
-    M.fail("5XX"),
+    M.json(201, operations.GetTokenFromCodeResponse$inboundSchema),
+    M.fail([400, 401, 404, "4XX"]),
+    M.fail([500, "5XX"]),
   )(response, req);
   if (!result.ok) {
     return [result, { status: "complete", request: req, response }];

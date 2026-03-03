@@ -5,7 +5,7 @@ Request payload
 ## Example Usage
 
 ```typescript
-import { UpdateRecordRequestBody } from "pipeshub/models/operations";
+import { UpdateRecordRequestBody } from "@pipeshub-ai/sdk/models/operations";
 
 // No examples available for this model
 ```

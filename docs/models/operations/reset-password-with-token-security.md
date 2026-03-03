@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { ResetPasswordWithTokenSecurity } from "pipeshub/models/operations";
+import { ResetPasswordWithTokenSecurity } from "@pipeshub-ai/sdk/models/operations";
 
 let value: ResetPasswordWithTokenSecurity = {
   scopedToken: "<value>",

@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { CreateSubfolderRequest } from "pipeshub/models/operations";
+import { CreateSubfolderRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: CreateSubfolderRequest = {
   kbId: "<id>",

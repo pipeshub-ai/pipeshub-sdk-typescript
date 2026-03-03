@@ -5,7 +5,7 @@ Request payload
 ## Example Usage
 
 ```typescript
-import { RemoveUsersFromGroupRequest } from "pipeshub/models/operations";
+import { RemoveUsersFromGroupRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: RemoveUsersFromGroupRequest = {
   groupId: "507f1f77bcf86cd799439011",

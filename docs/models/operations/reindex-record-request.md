@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { ReindexRecordRequest } from "pipeshub/models/operations";
+import { ReindexRecordRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: ReindexRecordRequest = {
   recordId: "<id>",

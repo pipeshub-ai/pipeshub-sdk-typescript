@@ -7,7 +7,7 @@ that can be configured as a connector instance.
 ## Example Usage
 
 ```typescript
-import { ConnectorType } from "pipeshub/models";
+import { ConnectorType } from "@pipeshub-ai/sdk/models";
 
 let value: ConnectorType = {
   connectorType: "google-drive",

@@ -5,7 +5,7 @@ Request to generate and send OTP
 ## Example Usage
 
 ```typescript
-import { OtpGenerateRequest } from "pipeshub/models";
+import { OtpGenerateRequest } from "@pipeshub-ai/sdk/models";
 
 let value: OtpGenerateRequest = {
   email: "Eliane55@yahoo.com",

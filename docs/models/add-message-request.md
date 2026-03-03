@@ -5,7 +5,7 @@ Request body for adding a message to an existing conversation
 ## Example Usage
 
 ```typescript
-import { AddMessageRequest } from "pipeshub/models";
+import { AddMessageRequest } from "@pipeshub-ai/sdk/models";
 
 let value: AddMessageRequest = {
   query: "Can you elaborate on the revenue trends?",

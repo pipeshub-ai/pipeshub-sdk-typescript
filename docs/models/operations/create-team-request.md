@@ -5,7 +5,7 @@ Request payload
 ## Example Usage
 
 ```typescript
-import { CreateTeamRequest } from "pipeshub/models/operations";
+import { CreateTeamRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: CreateTeamRequest = {
   name: "Engineering Team",

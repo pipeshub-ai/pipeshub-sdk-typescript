@@ -7,7 +7,7 @@ Standard error format for OAuth endpoints.
 ## Example Usage
 
 ```typescript
-import { OAuthErrorResponse } from "pipeshub/models/errors";
+import { OAuthErrorResponse } from "@pipeshub-ai/sdk/models/errors";
 
 // No examples available for this model
 ```

@@ -5,7 +5,7 @@ Configuration updated
 ## Example Usage
 
 ```typescript
-import { UpdateConnectorFiltersSyncConfigResponse } from "pipeshub/models/operations";
+import { UpdateConnectorFiltersSyncConfigResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: UpdateConnectorFiltersSyncConfigResponse = {
   config: {

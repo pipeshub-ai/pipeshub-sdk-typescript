@@ -5,7 +5,7 @@ List of user groups retrieved successfully
 ## Example Usage
 
 ```typescript
-import { GetAllUserGroupsResponse } from "pipeshub/models/operations";
+import { GetAllUserGroupsResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetAllUserGroupsResponse = {
   success: true,

@@ -5,7 +5,7 @@ Search history cleared
 ## Example Usage
 
 ```typescript
-import { DeleteAllSearchHistoryResponse } from "pipeshub/models/operations";
+import { DeleteAllSearchHistoryResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: DeleteAllSearchHistoryResponse = {
   message: "Search history cleared successfully",

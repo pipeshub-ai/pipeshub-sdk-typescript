@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { GetKnowledgeHubRootNodesRequest } from "pipeshub/models/operations";
+import { GetKnowledgeHubRootNodesRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetKnowledgeHubRootNodesRequest = {};
 ```

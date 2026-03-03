@@ -5,7 +5,7 @@ Pagination information for connector lists
 ## Example Usage
 
 ```typescript
-import { ConnectorPagination } from "pipeshub/models";
+import { ConnectorPagination } from "@pipeshub-ai/sdk/models";
 
 let value: ConnectorPagination = {};
 ```

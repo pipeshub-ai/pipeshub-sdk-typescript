@@ -5,7 +5,7 @@ User updated successfully
 ## Example Usage
 
 ```typescript
-import { UpdateUserResponse } from "pipeshub/models/operations";
+import { UpdateUserResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: UpdateUserResponse = {
   success: true,

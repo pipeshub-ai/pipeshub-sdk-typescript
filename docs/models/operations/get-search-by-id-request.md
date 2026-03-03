@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { GetSearchByIdRequest } from "pipeshub/models/operations";
+import { GetSearchByIdRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetSearchByIdRequest = {
   searchId: "<value>",

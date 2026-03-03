@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { AuthenticateRequest } from "pipeshub/models/operations";
+import { AuthenticateRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: AuthenticateRequest = {
   xSessionToken: "<value>",

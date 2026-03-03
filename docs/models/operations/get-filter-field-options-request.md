@@ -3,7 +3,7 @@
 ## Example Usage
 
 ```typescript
-import { GetFilterFieldOptionsRequest } from "pipeshub/models/operations";
+import { GetFilterFieldOptionsRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetFilterFieldOptionsRequest = {
   connectorId: "<id>",

@@ -2,17 +2,45 @@
 
 ## Overview
 
+Endpoints for scheduling, managing, and monitoring data crawling jobs for enterprise connectors.
+
+The Crawling Manager uses BullMQ (Redis-based queue) to schedule and execute crawling jobs that
+sync data from external connectors (Google Drive, OneDrive, Slack, Jira, etc.) into PipesHub's
+search index.
+
+**Key Features:**
+- Schedule recurring crawls (hourly, daily, weekly, monthly) or one-time crawls
+- Pause and resume crawling jobs without losing configuration
+- Priority-based job execution (1-10 scale)
+- Automatic retry with exponential backoff on failures
+- Per-connector job isolation and tracking
+
+**Access Control:**
+- Team-scoped connectors require admin privileges
+- Personal-scoped connectors can only be managed by the creator
+- All operations require valid JWT authentication
+
+**Schedule Types:**
+- `hourly`: Run every X hours at specified minute
+- `daily`: Run once per day at specified time
+- `weekly`: Run on specified days of the week
+- `monthly`: Run on specified day of the month
+- `custom`: Use cron expression for complex schedules
+- `once`: Run once at a specific future time
+
+
 ### Available Operations
 
-* [schedule](#schedule) - Schedule a crawling job
-* [getStatus](#getstatus) - Get crawling job status
-* [remove](#remove) - Remove a crawling job
-* [pause](#pause) - Pause a crawling job
-* [resume](#resume) - Resume a paused crawling job
-* [list](#list) - Get all crawling job statuses
-* [removeAll](#removeall) - Remove all crawling jobs
+* [scheduleCrawlingJob](#schedulecrawlingjob) - Schedule a crawling job
+* [getCrawlingJobStatus](#getcrawlingjobstatus) - Get crawling job status
+* [removeCrawlingJob](#removecrawlingjob) - Remove a crawling job
+* [~~getAllCrawlingJobStatus~~](#getallcrawlingjobstatus) - Get all crawling job statuses :warning: **Deprecated**
+* [~~removeAllCrawlingJob~~](#removeallcrawlingjob) - Remove all crawling jobs :warning: **Deprecated**
+* [~~pauseCrawlingJob~~](#pausecrawlingjob) - Pause a crawling job :warning: **Deprecated**
+* [~~resumeCrawlingJob~~](#resumecrawlingjob) - Resume a crawling job :warning: **Deprecated**
+* [~~getQueueStats~~](#getqueuestats) - Get queue statistics :warning: **Deprecated**
 
-## schedule
+## scheduleCrawlingJob
 
 Schedule a new crawling job for a specific connector instance.<br><br>
 
@@ -57,15 +85,16 @@ to the specified schedule configuration.<br><br>
 
 <!-- UsageSnippet language="typescript" operationID="scheduleCrawlingJob" method="post" path="/crawlingManager/{connector}/{connectorId}/schedule" example="customCron" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.crawlingJobs.schedule({
+  const result = await pipeshub.crawlingJobs.scheduleCrawlingJob({
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
     body: {
@@ -90,18 +119,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { crawlingJobsSchedule } from "pipeshub/funcs/crawling-jobs-schedule.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { crawlingJobsScheduleCrawlingJob } from "@pipeshub-ai/sdk/funcs/crawling-jobs-schedule-crawling-job.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await crawlingJobsSchedule(pipeshub, {
+  const res = await crawlingJobsScheduleCrawlingJob(pipeshub, {
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
     body: {
@@ -118,7 +148,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("crawlingJobsSchedule failed:", res.error);
+    console.log("crawlingJobsScheduleCrawlingJob failed:", res.error);
   }
 }
 
@@ -128,15 +158,16 @@ run();
 
 <!-- UsageSnippet language="typescript" operationID="scheduleCrawlingJob" method="post" path="/crawlingManager/{connector}/{connectorId}/schedule" example="dailySync" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.crawlingJobs.schedule({
+  const result = await pipeshub.crawlingJobs.scheduleCrawlingJob({
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
     body: {
@@ -161,18 +192,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { crawlingJobsSchedule } from "pipeshub/funcs/crawling-jobs-schedule.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { crawlingJobsScheduleCrawlingJob } from "@pipeshub-ai/sdk/funcs/crawling-jobs-schedule-crawling-job.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await crawlingJobsSchedule(pipeshub, {
+  const res = await crawlingJobsScheduleCrawlingJob(pipeshub, {
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
     body: {
@@ -189,7 +221,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("crawlingJobsSchedule failed:", res.error);
+    console.log("crawlingJobsScheduleCrawlingJob failed:", res.error);
   }
 }
 
@@ -199,15 +231,16 @@ run();
 
 <!-- UsageSnippet language="typescript" operationID="scheduleCrawlingJob" method="post" path="/crawlingManager/{connector}/{connectorId}/schedule" example="hourlySync" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.crawlingJobs.schedule({
+  const result = await pipeshub.crawlingJobs.scheduleCrawlingJob({
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
     body: {
@@ -234,18 +267,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { crawlingJobsSchedule } from "pipeshub/funcs/crawling-jobs-schedule.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { crawlingJobsScheduleCrawlingJob } from "@pipeshub-ai/sdk/funcs/crawling-jobs-schedule-crawling-job.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await crawlingJobsSchedule(pipeshub, {
+  const res = await crawlingJobsScheduleCrawlingJob(pipeshub, {
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
     body: {
@@ -264,7 +298,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("crawlingJobsSchedule failed:", res.error);
+    console.log("crawlingJobsScheduleCrawlingJob failed:", res.error);
   }
 }
 
@@ -274,15 +308,16 @@ run();
 
 <!-- UsageSnippet language="typescript" operationID="scheduleCrawlingJob" method="post" path="/crawlingManager/{connector}/{connectorId}/schedule" example="oneTimeSync" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.crawlingJobs.schedule({
+  const result = await pipeshub.crawlingJobs.scheduleCrawlingJob({
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
     body: {
@@ -307,18 +342,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { crawlingJobsSchedule } from "pipeshub/funcs/crawling-jobs-schedule.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { crawlingJobsScheduleCrawlingJob } from "@pipeshub-ai/sdk/funcs/crawling-jobs-schedule-crawling-job.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await crawlingJobsSchedule(pipeshub, {
+  const res = await crawlingJobsScheduleCrawlingJob(pipeshub, {
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
     body: {
@@ -335,7 +371,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("crawlingJobsSchedule failed:", res.error);
+    console.log("crawlingJobsScheduleCrawlingJob failed:", res.error);
   }
 }
 
@@ -345,15 +381,16 @@ run();
 
 <!-- UsageSnippet language="typescript" operationID="scheduleCrawlingJob" method="post" path="/crawlingManager/{connector}/{connectorId}/schedule" example="weeklySync" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.crawlingJobs.schedule({
+  const result = await pipeshub.crawlingJobs.scheduleCrawlingJob({
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
     body: {
@@ -383,18 +420,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { crawlingJobsSchedule } from "pipeshub/funcs/crawling-jobs-schedule.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { crawlingJobsScheduleCrawlingJob } from "@pipeshub-ai/sdk/funcs/crawling-jobs-schedule-crawling-job.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await crawlingJobsSchedule(pipeshub, {
+  const res = await crawlingJobsScheduleCrawlingJob(pipeshub, {
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
     body: {
@@ -416,7 +454,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("crawlingJobsSchedule failed:", res.error);
+    console.log("crawlingJobsScheduleCrawlingJob failed:", res.error);
   }
 }
 
@@ -442,7 +480,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## getStatus
+## getCrawlingJobStatus
 
 Retrieve the current status of a scheduled crawling job for a specific connector.<br><br>
 
@@ -468,15 +506,16 @@ Same as scheduling - team connectors require admin, personal connectors require 
 
 <!-- UsageSnippet language="typescript" operationID="getCrawlingJobStatus" method="get" path="/crawlingManager/{connector}/{connectorId}/schedule" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.crawlingJobs.getStatus({
+  const result = await pipeshub.crawlingJobs.getCrawlingJobStatus({
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
   });
@@ -492,18 +531,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { crawlingJobsGetStatus } from "pipeshub/funcs/crawling-jobs-get-status.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { crawlingJobsGetCrawlingJobStatus } from "@pipeshub-ai/sdk/funcs/crawling-jobs-get-crawling-job-status.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await crawlingJobsGetStatus(pipeshub, {
+  const res = await crawlingJobsGetCrawlingJobStatus(pipeshub, {
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
   });
@@ -511,7 +551,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("crawlingJobsGetStatus failed:", res.error);
+    console.log("crawlingJobsGetCrawlingJobStatus failed:", res.error);
   }
 }
 
@@ -537,7 +577,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## remove
+## removeCrawlingJob
 
 Permanently remove a scheduled crawling job for a specific connector.<br><br>
 
@@ -565,15 +605,16 @@ removing repeatable job configurations and cleaning up job history.<br><br>
 
 <!-- UsageSnippet language="typescript" operationID="removeCrawlingJob" method="delete" path="/crawlingManager/{connector}/{connectorId}/remove" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.crawlingJobs.remove({
+  const result = await pipeshub.crawlingJobs.removeCrawlingJob({
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
   });
@@ -589,18 +630,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { crawlingJobsRemove } from "pipeshub/funcs/crawling-jobs-remove.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { crawlingJobsRemoveCrawlingJob } from "@pipeshub-ai/sdk/funcs/crawling-jobs-remove-crawling-job.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await crawlingJobsRemove(pipeshub, {
+  const res = await crawlingJobsRemoveCrawlingJob(pipeshub, {
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
   });
@@ -608,7 +650,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("crawlingJobsRemove failed:", res.error);
+    console.log("crawlingJobsRemoveCrawlingJob failed:", res.error);
   }
 }
 
@@ -634,46 +676,180 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## pause
+## ~~getAllCrawlingJobStatus~~
 
-Pause a running or scheduled crawling job without losing its configuration.<br><br>
+<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
+Retrieve the status of all scheduled crawling jobs across the organization.
 
-<b>Overview:</b><br>
-Pausing a job stores its complete configuration and removes it from the active queue.
-The job can be resumed later with <code>POST /crawlingManager/{connector}/{connectorId}/resume</code>,
-which will restore the exact same schedule configuration.<br><br>
 
-<b>How Pausing Works:</b><br>
-<ol>
-<li>Current job configuration is stored in memory</li>
-<li>Active/repeatable job is removed from BullMQ queue</li>
-<li>Job state changes to "paused"</li>
-<li>No new job executions will occur until resumed</li>
-</ol>
+> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
 
-<b>Use Cases:</b><br>
-<ul>
-<li>Temporarily stop crawling during maintenance</li>
-<li>Pause data sync while investigating issues</li>
-<li>Stop crawling for a connector being reconfigured</li>
-</ul>
+### Example Usage
 
-<b>Note:</b> If a job is currently active (processing), it will complete before pausing.
+<!-- UsageSnippet language="typescript" operationID="getAllCrawlingJobStatus" method="get" path="/crawlingManager/schedule/all" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.crawlingJobs.getAllCrawlingJobStatus();
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { crawlingJobsGetAllCrawlingJobStatus } from "@pipeshub-ai/sdk/funcs/crawling-jobs-get-all-crawling-job-status.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const res = await crawlingJobsGetAllCrawlingJobStatus(pipeshub);
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("crawlingJobsGetAllCrawlingJobStatus failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[operations.GetAllCrawlingJobStatusResponse](../../models/operations/get-all-crawling-job-status-response.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
+## ~~removeAllCrawlingJob~~
+
+<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
+Remove all scheduled crawling jobs for the organization.
+
+
+> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="removeAllCrawlingJob" method="delete" path="/crawlingManager/schedule/all" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.crawlingJobs.removeAllCrawlingJob();
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { crawlingJobsRemoveAllCrawlingJob } from "@pipeshub-ai/sdk/funcs/crawling-jobs-remove-all-crawling-job.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const res = await crawlingJobsRemoveAllCrawlingJob(pipeshub);
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("crawlingJobsRemoveAllCrawlingJob failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[operations.RemoveAllCrawlingJobResponse](../../models/operations/remove-all-crawling-job-response.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
+## ~~pauseCrawlingJob~~
+
+<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
+Pause a running or scheduled crawling job for a specific connector.
+
+
+> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
 
 ### Example Usage
 
 <!-- UsageSnippet language="typescript" operationID="pauseCrawlingJob" method="post" path="/crawlingManager/{connector}/{connectorId}/pause" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.crawlingJobs.pause({
+  const result = await pipeshub.crawlingJobs.pauseCrawlingJob({
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
   });
@@ -689,18 +865,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { crawlingJobsPause } from "pipeshub/funcs/crawling-jobs-pause.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { crawlingJobsPauseCrawlingJob } from "@pipeshub-ai/sdk/funcs/crawling-jobs-pause-crawling-job.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await crawlingJobsPause(pipeshub, {
+  const res = await crawlingJobsPauseCrawlingJob(pipeshub, {
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
   });
@@ -708,7 +885,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("crawlingJobsPause failed:", res.error);
+    console.log("crawlingJobsPauseCrawlingJob failed:", res.error);
   }
 }
 
@@ -734,39 +911,28 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## resume
+## ~~resumeCrawlingJob~~
 
-Resume a previously paused crawling job using its stored configuration.<br><br>
+<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
+Resume a previously paused crawling job for a specific connector.
 
-<b>Overview:</b><br>
-Restores a paused job to active state using the exact configuration it had when paused.
-A new job is created in BullMQ with the same schedule settings.<br><br>
 
-<b>How Resuming Works:</b><br>
-<ol>
-<li>Retrieve stored job configuration from pause state</li>
-<li>Create new scheduled job with same configuration</li>
-<li>Remove from paused jobs tracking</li>
-<li>Job will execute according to its original schedule</li>
-</ol>
-
-<b>Note:</b> The job will resume according to its schedule, not immediately execute
-(unless it's a one-time job that hasn't run yet).
-
+> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
 
 ### Example Usage
 
 <!-- UsageSnippet language="typescript" operationID="resumeCrawlingJob" method="post" path="/crawlingManager/{connector}/{connectorId}/resume" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.crawlingJobs.resume({
+  const result = await pipeshub.crawlingJobs.resumeCrawlingJob({
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
   });
@@ -782,18 +948,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { crawlingJobsResume } from "pipeshub/funcs/crawling-jobs-resume.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { crawlingJobsResumeCrawlingJob } from "@pipeshub-ai/sdk/funcs/crawling-jobs-resume-crawling-job.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await crawlingJobsResume(pipeshub, {
+  const res = await crawlingJobsResumeCrawlingJob(pipeshub, {
     connector: "drive",
     connectorId: "507f1f77bcf86cd799439011",
   });
@@ -801,7 +968,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("crawlingJobsResume failed:", res.error);
+    console.log("crawlingJobsResumeCrawlingJob failed:", res.error);
   }
 }
 
@@ -827,42 +994,28 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## list
+## ~~getQueueStats~~
 
-Retrieve the status of all scheduled crawling jobs for the current organization.<br><br>
+<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
+Retrieve statistics for the crawling job queue including active, waiting, and completed job counts.
 
-<b>Overview:</b><br>
-Returns a list of all crawling jobs across all connectors for the authenticated user's
-organization. This includes active, waiting, paused, completed, and failed jobs.<br><br>
 
-<b>Response Details:</b><br>
-<ul>
-<li>Jobs are grouped by connector type</li>
-<li>Last 10 jobs per connector type are returned</li>
-<li>Includes both active queue jobs and paused jobs</li>
-</ul>
-
-<b>Use Cases:</b><br>
-<ul>
-<li>Dashboard overview of all crawling activities</li>
-<li>Monitoring job health across connectors</li>
-<li>Identifying failed or stuck jobs</li>
-</ul>
-
+> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
 
 ### Example Usage
 
-<!-- UsageSnippet language="typescript" operationID="getAllCrawlingJobStatus" method="get" path="/crawlingManager/schedule/all" -->
+<!-- UsageSnippet language="typescript" operationID="getQueueStats" method="get" path="/crawlingManager/stats" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.crawlingJobs.list();
+  const result = await pipeshub.crawlingJobs.getQueueStats();
 
   console.log(result);
 }
@@ -875,23 +1028,24 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { crawlingJobsList } from "pipeshub/funcs/crawling-jobs-list.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { crawlingJobsGetQueueStats } from "@pipeshub-ai/sdk/funcs/crawling-jobs-get-queue-stats.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await crawlingJobsList(pipeshub);
+  const res = await crawlingJobsGetQueueStats(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("crawlingJobsList failed:", res.error);
+    console.log("crawlingJobsGetQueueStats failed:", res.error);
   }
 }
 
@@ -908,93 +1062,7 @@ run();
 
 ### Response
 
-**Promise\<[operations.GetAllCrawlingJobStatusResponse](../../models/operations/get-all-crawling-job-status-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## removeAll
-
-Remove all scheduled crawling jobs for the current organization.<br><br>
-
-<b>Overview:</b><br>
-Bulk operation to remove all crawling jobs across all connectors for the organization.
-This is useful when decommissioning an organization or doing a complete reset.<br><br>
-
-<b>What Gets Removed:</b><br>
-<ul>
-<li>All active and waiting jobs</li>
-<li>All repeatable job configurations</li>
-<li>All paused jobs</li>
-<li>All job mappings for the organization</li>
-</ul>
-
-<b>Warning:</b> This operation cannot be undone. All job configurations will need
-to be recreated manually.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="removeAllCrawlingJobs" method="delete" path="/crawlingManager/schedule/all" -->
-```typescript
-import { Pipeshub } from "pipeshub";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const result = await pipeshub.crawlingJobs.removeAll();
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { crawlingJobsRemoveAll } from "pipeshub/funcs/crawling-jobs-remove-all.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
-});
-
-async function run() {
-  const res = await crawlingJobsRemoveAll(pipeshub);
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("crawlingJobsRemoveAll failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.RemoveAllCrawlingJobsResponse](../../models/operations/remove-all-crawling-jobs-response.md)\>**
+**Promise\<[operations.GetQueueStatsResponse](../../models/operations/get-queue-stats-response.md)\>**
 
 ### Errors
 

@@ -5,7 +5,7 @@ Hint about token type
 ## Example Usage
 
 ```typescript
-import { OAuthIntrospectRequestTokenTypeHint } from "pipeshub/models";
+import { OAuthIntrospectRequestTokenTypeHint } from "@pipeshub-ai/sdk/models";
 
 let value: OAuthIntrospectRequestTokenTypeHint = "refresh_token";
 ```

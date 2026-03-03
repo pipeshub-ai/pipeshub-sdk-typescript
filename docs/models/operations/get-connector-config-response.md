@@ -5,7 +5,7 @@ Configuration retrieved
 ## Example Usage
 
 ```typescript
-import { GetConnectorConfigResponse } from "pipeshub/models/operations";
+import { GetConnectorConfigResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetConnectorConfigResponse = {
   config: {

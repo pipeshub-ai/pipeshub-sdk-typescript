@@ -2,18 +2,20 @@
 
 ## Overview
 
+Conversations with custom AI agents including streaming and feedback
+
 ### Available Operations
 
-* [list](#list) - List agent conversations
-* [start](#start) - Create agent conversation
-* [stream](#stream) - Create agent conversation with streaming
-* [get](#get) - Get agent conversation
-* [delete](#delete) - Delete agent conversation
-* [addMessage](#addmessage) - Add message to agent conversation
-* [streamMessage](#streammessage) - Add message with streaming
-* [regenerate](#regenerate) - Regenerate agent response
+* [listAgentConversations](#listagentconversations) - List agent conversations
+* [createAgentConversation](#createagentconversation) - Create agent conversation
+* [streamAgentConversation](#streamagentconversation) - Create agent conversation with streaming
+* [getAgentConversation](#getagentconversation) - Get agent conversation
+* [deleteAgentConversation](#deleteagentconversation) - Delete agent conversation
+* [addAgentMessage](#addagentmessage) - Add message to agent conversation
+* [streamAgentMessage](#streamagentmessage) - Add message with streaming
+* [regenerateAgentAnswer](#regenerateagentanswer) - Regenerate agent response
 
-## list
+## listAgentConversations
 
 Get all conversations with a specific agent.<br><br>
 <b>Overview:</b><br>
@@ -25,15 +27,16 @@ Agent conversations maintain the agent's context and capabilities.
 
 <!-- UsageSnippet language="typescript" operationID="listAgentConversations" method="get" path="/agents/{agentKey}/conversations" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.agentConversations.list({
+  const result = await pipeshub.agentConversations.listAgentConversations({
     agentKey: "<value>",
   });
 
@@ -48,25 +51,26 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { agentConversationsList } from "pipeshub/funcs/agent-conversations-list.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { agentConversationsListAgentConversations } from "@pipeshub-ai/sdk/funcs/agent-conversations-list-agent-conversations.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await agentConversationsList(pipeshub, {
+  const res = await agentConversationsListAgentConversations(pipeshub, {
     agentKey: "<value>",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("agentConversationsList failed:", res.error);
+    console.log("agentConversationsListAgentConversations failed:", res.error);
   }
 }
 
@@ -84,7 +88,7 @@ run();
 
 ### Response
 
-**Promise\<[models.AgentConversation[]](../../models/.md)\>**
+**Promise\<[operations.ListAgentConversationsResponse](../../models/operations/list-agent-conversations-response.md)\>**
 
 ### Errors
 
@@ -92,7 +96,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## start
+## createAgentConversation
 
 Start a new conversation with an agent.<br><br>
 <b>Overview:</b><br>
@@ -104,15 +108,16 @@ its system prompt, tools, and knowledge base access.
 
 <!-- UsageSnippet language="typescript" operationID="createAgentConversation" method="post" path="/agents/{agentKey}/conversations" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.agentConversations.start({
+  const result = await pipeshub.agentConversations.createAgentConversation({
     agentKey: "<value>",
     body: {
       query: "What are the key findings from our Q4 financial report?",
@@ -137,18 +142,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { agentConversationsStart } from "pipeshub/funcs/agent-conversations-start.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { agentConversationsCreateAgentConversation } from "@pipeshub-ai/sdk/funcs/agent-conversations-create-agent-conversation.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await agentConversationsStart(pipeshub, {
+  const res = await agentConversationsCreateAgentConversation(pipeshub, {
     agentKey: "<value>",
     body: {
       query: "What are the key findings from our Q4 financial report?",
@@ -165,7 +171,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("agentConversationsStart failed:", res.error);
+    console.log("agentConversationsCreateAgentConversation failed:", res.error);
   }
 }
 
@@ -191,7 +197,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## stream
+## streamAgentConversation
 
 Start a new agent conversation with SSE streaming response.<br><br>
 <b>Overview:</b><br>
@@ -202,15 +208,16 @@ Same as POST /agents/{agentKey}/conversations but with real-time streaming.
 
 <!-- UsageSnippet language="typescript" operationID="streamAgentConversation" method="post" path="/agents/{agentKey}/conversations/stream" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.agentConversations.stream({
+  const result = await pipeshub.agentConversations.streamAgentConversation({
     agentKey: "<value>",
     body: {
       query: "What are the key findings from our Q4 financial report?",
@@ -237,18 +244,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { agentConversationsStream } from "pipeshub/funcs/agent-conversations-stream.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { agentConversationsStreamAgentConversation } from "@pipeshub-ai/sdk/funcs/agent-conversations-stream-agent-conversation.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await agentConversationsStream(pipeshub, {
+  const res = await agentConversationsStreamAgentConversation(pipeshub, {
     agentKey: "<value>",
     body: {
       query: "What are the key findings from our Q4 financial report?",
@@ -267,7 +275,7 @@ async function run() {
     console.log(event);
   }
   } else {
-    console.log("agentConversationsStream failed:", res.error);
+    console.log("agentConversationsStreamAgentConversation failed:", res.error);
   }
 }
 
@@ -293,7 +301,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## get
+## getAgentConversation
 
 Retrieve a specific agent conversation by ID.
 
@@ -301,15 +309,16 @@ Retrieve a specific agent conversation by ID.
 
 <!-- UsageSnippet language="typescript" operationID="getAgentConversation" method="get" path="/agents/{agentKey}/conversations/{conversationId}" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.agentConversations.get({
+  const result = await pipeshub.agentConversations.getAgentConversation({
     agentKey: "<value>",
     conversationId: "<value>",
   });
@@ -325,18 +334,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { agentConversationsGet } from "pipeshub/funcs/agent-conversations-get.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { agentConversationsGetAgentConversation } from "@pipeshub-ai/sdk/funcs/agent-conversations-get-agent-conversation.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await agentConversationsGet(pipeshub, {
+  const res = await agentConversationsGetAgentConversation(pipeshub, {
     agentKey: "<value>",
     conversationId: "<value>",
   });
@@ -344,7 +354,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("agentConversationsGet failed:", res.error);
+    console.log("agentConversationsGetAgentConversation failed:", res.error);
   }
 }
 
@@ -370,7 +380,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## delete
+## deleteAgentConversation
 
 Delete a conversation with an agent.
 
@@ -378,15 +388,16 @@ Delete a conversation with an agent.
 
 <!-- UsageSnippet language="typescript" operationID="deleteAgentConversation" method="delete" path="/agents/{agentKey}/conversations/{conversationId}" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  await pipeshub.agentConversations.delete({
+  await pipeshub.agentConversations.deleteAgentConversation({
     agentKey: "<value>",
     conversationId: "<value>",
   });
@@ -402,18 +413,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { agentConversationsDelete } from "pipeshub/funcs/agent-conversations-delete.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { agentConversationsDeleteAgentConversation } from "@pipeshub-ai/sdk/funcs/agent-conversations-delete-agent-conversation.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await agentConversationsDelete(pipeshub, {
+  const res = await agentConversationsDeleteAgentConversation(pipeshub, {
     agentKey: "<value>",
     conversationId: "<value>",
   });
@@ -421,7 +433,7 @@ async function run() {
     const { value: result } = res;
     
   } else {
-    console.log("agentConversationsDelete failed:", res.error);
+    console.log("agentConversationsDeleteAgentConversation failed:", res.error);
   }
 }
 
@@ -447,7 +459,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## addMessage
+## addAgentMessage
 
 Add a follow-up message to an agent conversation.
 
@@ -455,15 +467,16 @@ Add a follow-up message to an agent conversation.
 
 <!-- UsageSnippet language="typescript" operationID="addAgentMessage" method="post" path="/agents/{agentKey}/conversations/{conversationId}/messages" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.agentConversations.addMessage({
+  const result = await pipeshub.agentConversations.addAgentMessage({
     agentKey: "<value>",
     conversationId: "<value>",
     body: {
@@ -482,18 +495,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { agentConversationsAddMessage } from "pipeshub/funcs/agent-conversations-add-message.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { agentConversationsAddAgentMessage } from "@pipeshub-ai/sdk/funcs/agent-conversations-add-agent-message.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await agentConversationsAddMessage(pipeshub, {
+  const res = await agentConversationsAddAgentMessage(pipeshub, {
     agentKey: "<value>",
     conversationId: "<value>",
     body: {
@@ -504,7 +518,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("agentConversationsAddMessage failed:", res.error);
+    console.log("agentConversationsAddAgentMessage failed:", res.error);
   }
 }
 
@@ -530,7 +544,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## streamMessage
+## streamAgentMessage
 
 Add a message to agent conversation with SSE streaming response.
 
@@ -538,15 +552,16 @@ Add a message to agent conversation with SSE streaming response.
 
 <!-- UsageSnippet language="typescript" operationID="streamAgentMessage" method="post" path="/agents/{agentKey}/conversations/{conversationId}/messages/stream" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.agentConversations.streamMessage({
+  const result = await pipeshub.agentConversations.streamAgentMessage({
     agentKey: "<value>",
     conversationId: "<value>",
     body: {
@@ -567,18 +582,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { agentConversationsStreamMessage } from "pipeshub/funcs/agent-conversations-stream-message.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { agentConversationsStreamAgentMessage } from "@pipeshub-ai/sdk/funcs/agent-conversations-stream-agent-message.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await agentConversationsStreamMessage(pipeshub, {
+  const res = await agentConversationsStreamAgentMessage(pipeshub, {
     agentKey: "<value>",
     conversationId: "<value>",
     body: {
@@ -591,7 +607,7 @@ async function run() {
     console.log(event);
   }
   } else {
-    console.log("agentConversationsStreamMessage failed:", res.error);
+    console.log("agentConversationsStreamAgentMessage failed:", res.error);
   }
 }
 
@@ -617,7 +633,7 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## regenerate
+## regenerateAgentAnswer
 
 Regenerate the agent's response for a specific message.<br><br>
 <b>Overview:</b><br>
@@ -628,15 +644,16 @@ Similar to conversation regeneration but uses the agent's configuration.
 
 <!-- UsageSnippet language="typescript" operationID="regenerateAgentAnswer" method="post" path="/agents/{agentKey}/conversations/{conversationId}/message/{messageId}/regenerate" -->
 ```typescript
-import { Pipeshub } from "pipeshub";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const result = await pipeshub.agentConversations.regenerate({
+  const result = await pipeshub.agentConversations.regenerateAgentAnswer({
     agentKey: "<value>",
     conversationId: "<value>",
     messageId: "<value>",
@@ -653,18 +670,19 @@ run();
 The standalone function version of this method:
 
 ```typescript
-import { PipeshubCore } from "pipeshub/core.js";
-import { agentConversationsRegenerate } from "pipeshub/funcs/agent-conversations-regenerate.js";
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { agentConversationsRegenerateAgentAnswer } from "@pipeshub-ai/sdk/funcs/agent-conversations-regenerate-agent-answer.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore({
-  serverURL: "https://api.example.com",
-  bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "",
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
 });
 
 async function run() {
-  const res = await agentConversationsRegenerate(pipeshub, {
+  const res = await agentConversationsRegenerateAgentAnswer(pipeshub, {
     agentKey: "<value>",
     conversationId: "<value>",
     messageId: "<value>",
@@ -673,7 +691,7 @@ async function run() {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("agentConversationsRegenerate failed:", res.error);
+    console.log("agentConversationsRegenerateAgentAnswer failed:", res.error);
   }
 }
 

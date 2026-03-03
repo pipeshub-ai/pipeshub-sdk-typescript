@@ -1,8 +1,5 @@
 configVersion: 2.0.0
 generation:
-  devContainers:
-    enabled: true
-    schemaPath: .speakeasy/out.openapi.yaml
   sdkClassName: Pipeshub
   maintainOpenAPIOrder: true
   usageSnippets:
@@ -17,9 +14,10 @@ generation:
     securityFeb2025: true
     sharedErrorComponentsApr2025: true
     sharedNestedComponentsJan2026: true
+    nameOverrideFeb2026: true
   auth:
     oAuth2ClientCredentialsEnabled: true
-    oAuth2PasswordEnabled: true
+    oAuth2PasswordEnabled: false
     hoistGlobalSecurity: true
   inferSSEOverload: true
   sdkHooksConfigAccess: true
@@ -33,16 +31,18 @@ generation:
     generateNewTests: true
     skipResponseBodyAssertions: false
 typescript:
-  version: 0.1.1
+  version: 1.0.0
   acceptHeaderEnum: false
   additionalDependencies:
     dependencies: {}
+    dev: {}
     devDependencies: {}
+    main: {}
     peerDependencies: {}
   additionalPackageJSON: {}
   additionalScripts: {}
   alwaysIncludeInboundAndOutbound: false
-  author: Speakeasy
+  author: Pipeshub
   baseErrorName: PipeshubError
   clientServerStatusCodesAsErrors: true
   constFieldsAlwaysOptional: false
@@ -51,7 +51,6 @@ typescript:
   enableMCPServer: false
   enableReactQuery: false
   enumFormat: union
-  envVarPrefix: PIPESHUB
   exportZodModelNamespace: false
   flatAdditionalProperties: true
   flattenGlobalSecurity: true
@@ -79,7 +78,7 @@ typescript:
   moduleFormat: dual
   multipartArrayFormat: standard
   outputModelSuffix: output
-  packageName: pipeshub
+  packageName: '@pipeshub-ai/sdk'
   preApplyUnionDiscriminators: true
   preserveModelFieldNames: false
   responseFormat: flat

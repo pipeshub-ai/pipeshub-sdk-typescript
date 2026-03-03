@@ -103,10 +103,7 @@ export class SemanticSearch extends ClientSDK {
    * Get search by ID
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Retrieve a specific search result by its ID.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async getSearchById(
     request: operations.GetSearchByIdRequest,
@@ -123,10 +120,7 @@ export class SemanticSearch extends ClientSDK {
    * Delete search by ID
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Delete a specific search result by its ID.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async deleteSearchById(
     request: operations.DeleteSearchByIdRequest,
@@ -143,10 +137,7 @@ export class SemanticSearch extends ClientSDK {
    * Share a search
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Share a specific search result, making it accessible to other users.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async shareSearch(
     request: operations.ShareSearchRequest,
@@ -163,10 +154,7 @@ export class SemanticSearch extends ClientSDK {
    * Unshare a search
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Revoke sharing for a specific search result, making it private again.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async unshareSearch(
     request: operations.UnshareSearchRequest,
@@ -183,10 +171,7 @@ export class SemanticSearch extends ClientSDK {
    * Archive a search
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Archive a specific search result. Archived searches are hidden from the default search history view.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async archiveSearch(
     request: operations.ArchiveSearchRequest,
@@ -203,10 +188,7 @@ export class SemanticSearch extends ClientSDK {
    * Unarchive a search
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Restore a previously archived search result back to the active search history.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async unarchiveSearch(
     request: operations.UnarchiveSearchRequest,

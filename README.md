@@ -224,25 +224,15 @@ run();
 
 ### [ConfigurationManager](docs/sdks/configurationmanager/README.md)
 
-* [~~getAtlassianOauthConfig~~](docs/sdks/configurationmanager/README.md#getatlassianoauthconfig) - Get Atlassian OAuth config :warning: **Deprecated**
-* [~~setAtlassianOauthConfig~~](docs/sdks/configurationmanager/README.md#setatlassianoauthconfig) - Set Atlassian OAuth config :warning: **Deprecated**
-* [~~getOneDriveCredentials~~](docs/sdks/configurationmanager/README.md#getonedrivecredentials) - Get OneDrive credentials :warning: **Deprecated**
-* [~~setOneDriveCredentials~~](docs/sdks/configurationmanager/README.md#setonedrivecredentials) - Set OneDrive credentials :warning: **Deprecated**
-* [~~getSharePointCredentials~~](docs/sdks/configurationmanager/README.md#getsharepointcredentials) - Get SharePoint credentials :warning: **Deprecated**
-* [~~setSharePointCredentials~~](docs/sdks/configurationmanager/README.md#setsharepointcredentials) - Set SharePoint credentials :warning: **Deprecated**
-* [~~getGoogleWorkspaceCredentials~~](docs/sdks/configurationmanager/README.md#getgoogleworkspacecredentials) - Get Google Workspace credentials :warning: **Deprecated**
-* [~~createGoogleWorkspaceCredentials~~](docs/sdks/configurationmanager/README.md#creategoogleworkspacecredentials) - Upload Google Workspace credentials :warning: **Deprecated**
-* [~~getGoogleWorkspaceOauthConfig~~](docs/sdks/configurationmanager/README.md#getgoogleworkspaceoauthconfig) - Get Google Workspace OAuth config :warning: **Deprecated**
-* [~~setGoogleWorkspaceOauthConfig~~](docs/sdks/configurationmanager/README.md#setgoogleworkspaceoauthconfig) - Set Google Workspace OAuth config :warning: **Deprecated**
 * [getSlackBotConfigs](docs/sdks/configurationmanager/README.md#getslackbotconfigs) - Get Slack bot configurations
 * [createSlackBotConfig](docs/sdks/configurationmanager/README.md#createslackbotconfig) - Create Slack bot configuration
 * [updateSlackBotConfig](docs/sdks/configurationmanager/README.md#updateslackbotconfig) - Update Slack bot configuration
 * [deleteSlackBotConfig](docs/sdks/configurationmanager/README.md#deleteslackbotconfig) - Delete Slack bot configuration
-* [~~setMetricsCollectionPushInterval~~](docs/sdks/configurationmanager/README.md#setmetricscollectionpushinterval) - Set metrics push interval :warning: **Deprecated**
-* [~~setMetricsCollectionRemoteServer~~](docs/sdks/configurationmanager/README.md#setmetricscollectionremoteserver) - Set metrics remote server URL :warning: **Deprecated**
-* [~~getAIModelsConfig~~](docs/sdks/configurationmanager/README.md#getaimodelsconfig) - Get AI models configuration :warning: **Deprecated**
-* [~~createAIModelsConfig~~](docs/sdks/configurationmanager/README.md#createaimodelsconfig) - Create AI models configuration :warning: **Deprecated**
-* [~~getAIModelsProviders~~](docs/sdks/configurationmanager/README.md#getaimodelsproviders) - Get AI model providers :warning: **Deprecated**
+* [setMetricsCollectionPushInterval](docs/sdks/configurationmanager/README.md#setmetricscollectionpushinterval) - Set metrics push interval
+* [setMetricsCollectionRemoteServer](docs/sdks/configurationmanager/README.md#setmetricscollectionremoteserver) - Set metrics remote server URL
+* [getAIModelsConfig](docs/sdks/configurationmanager/README.md#getaimodelsconfig) - Get AI models configuration
+* [createAIModelsConfig](docs/sdks/configurationmanager/README.md#createaimodelsconfig) - Create AI models configuration
+* [getAIModelsProviders](docs/sdks/configurationmanager/README.md#getaimodelsproviders) - Get AI model providers
 
 ### [Connector](docs/sdks/connector/README.md)
 
@@ -307,33 +297,22 @@ run();
 * [unarchiveConversation](docs/sdks/conversations/README.md#unarchiveconversation) - Unarchive conversation
 * [regenerateAnswer](docs/sdks/conversations/README.md#regenerateanswer) - Regenerate AI response
 * [updateMessageFeedback](docs/sdks/conversations/README.md#updatemessagefeedback) - Submit feedback on AI response
-* [~~unshareConversationById~~](docs/sdks/conversations/README.md#unshareconversationbyid) - Unshare a conversation :warning: **Deprecated**
+* [unshareConversationById](docs/sdks/conversations/README.md#unshareconversationbyid) - Unshare a conversation
 
 ### [CrawlingJobs](docs/sdks/crawlingjobs/README.md)
 
 * [scheduleCrawlingJob](docs/sdks/crawlingjobs/README.md#schedulecrawlingjob) - Schedule a crawling job
 * [getCrawlingJobStatus](docs/sdks/crawlingjobs/README.md#getcrawlingjobstatus) - Get crawling job status
 * [removeCrawlingJob](docs/sdks/crawlingjobs/README.md#removecrawlingjob) - Remove a crawling job
-* [~~getAllCrawlingJobStatus~~](docs/sdks/crawlingjobs/README.md#getallcrawlingjobstatus) - Get all crawling job statuses :warning: **Deprecated**
-* [~~removeAllCrawlingJob~~](docs/sdks/crawlingjobs/README.md#removeallcrawlingjob) - Remove all crawling jobs :warning: **Deprecated**
-* [~~pauseCrawlingJob~~](docs/sdks/crawlingjobs/README.md#pausecrawlingjob) - Pause a crawling job :warning: **Deprecated**
-* [~~resumeCrawlingJob~~](docs/sdks/crawlingjobs/README.md#resumecrawlingjob) - Resume a crawling job :warning: **Deprecated**
-* [~~getQueueStats~~](docs/sdks/crawlingjobs/README.md#getqueuestats) - Get queue statistics :warning: **Deprecated**
+* [getAllCrawlingJobStatus](docs/sdks/crawlingjobs/README.md#getallcrawlingjobstatus) - Get all crawling job statuses
+* [removeAllCrawlingJob](docs/sdks/crawlingjobs/README.md#removeallcrawlingjob) - Remove all crawling jobs
+* [pauseCrawlingJob](docs/sdks/crawlingjobs/README.md#pausecrawlingjob) - Pause a crawling job
+* [resumeCrawlingJob](docs/sdks/crawlingjobs/README.md#resumecrawlingjob) - Resume a crawling job
+* [getQueueStats](docs/sdks/crawlingjobs/README.md#getqueuestats) - Get queue statistics
 
 ### [DocumentManagement](docs/sdks/documentmanagement/README.md)
 
 * [downloadDocument](docs/sdks/documentmanagement/README.md#downloaddocument) - Download document
-* [~~uploadDocument~~](docs/sdks/documentmanagement/README.md#uploaddocument) - Upload document :warning: **Deprecated**
-* [~~createPlaceholderDocument~~](docs/sdks/documentmanagement/README.md#createplaceholderdocument) - Create placeholder document :warning: **Deprecated**
-* [~~getDocumentById~~](docs/sdks/documentmanagement/README.md#getdocumentbyid) - Get document by ID :warning: **Deprecated**
-* [~~deleteDocumentById~~](docs/sdks/documentmanagement/README.md#deletedocumentbyid) - Delete document by ID :warning: **Deprecated**
-* [~~uploadNextVersionDocument~~](docs/sdks/documentmanagement/README.md#uploadnextversiondocument) - Upload next version of document :warning: **Deprecated**
-* [~~rollBackToPreviousVersion~~](docs/sdks/documentmanagement/README.md#rollbacktopreviousversion) - Roll back to previous version :warning: **Deprecated**
-* [~~getDocumentBuffer~~](docs/sdks/documentmanagement/README.md#getdocumentbuffer) - Get document buffer :warning: **Deprecated**
-* [~~createDocumentBufferMultipart~~](docs/sdks/documentmanagement/README.md#createdocumentbuffermultipart) - Create/update document buffer :warning: **Deprecated**
-* [~~createDocumentBufferRaw~~](docs/sdks/documentmanagement/README.md#createdocumentbufferraw) - Create/update document buffer :warning: **Deprecated**
-* [~~uploadDirectDocument~~](docs/sdks/documentmanagement/README.md#uploaddirectdocument) - Direct upload document :warning: **Deprecated**
-* [~~documentDiffChecker~~](docs/sdks/documentmanagement/README.md#documentdiffchecker) - Check if document is modified :warning: **Deprecated**
 
 ### [Folders](docs/sdks/folders/README.md)
 
@@ -352,7 +331,7 @@ run();
 * [updateKnowledgeBase](docs/sdks/knowledgebases/README.md#updateknowledgebase) - Update knowledge base
 * [deleteKnowledgeBase](docs/sdks/knowledgebases/README.md#deleteknowledgebase) - Delete knowledge base
 * [reindexFailedRecords](docs/sdks/knowledgebases/README.md#reindexfailedrecords) - Reindex failed records for connector
-* [~~moveRecord~~](docs/sdks/knowledgebases/README.md#moverecord) - Move record to another location :warning: **Deprecated**
+* [moveRecord](docs/sdks/knowledgebases/README.md#moverecord) - Move record to another location
 * [getKnowledgeHubRootNodes](docs/sdks/knowledgebases/README.md#getknowledgehubrootnodes) - Get knowledge hub root nodes
 * [getKnowledgeHubChildNodes](docs/sdks/knowledgebases/README.md#getknowledgehubchildnodes) - Get knowledge hub child nodes
 
@@ -411,7 +390,7 @@ run();
 
 * [getAuthMethods](docs/sdks/organizationauthconfig/README.md#getauthmethods) - Get organization authentication methods
 * [updateAuthMethod](docs/sdks/organizationauthconfig/README.md#updateauthmethod) - Update organization authentication methods
-* [~~setUpAuthConfig~~](docs/sdks/organizationauthconfig/README.md#setupauthconfig) - Set up auth configuration :warning: **Deprecated**
+* [setUpAuthConfig](docs/sdks/organizationauthconfig/README.md#setupauthconfig) - Set up auth configuration
 
 ### [Organizations](docs/sdks/organizations/README.md)
 
@@ -461,19 +440,19 @@ run();
 ### [Saml](docs/sdks/saml/README.md)
 
 * [signInViaSAML](docs/sdks/saml/README.md#signinviasaml) - Initiate SAML sign-in flow
-* [~~samlSignInCallback~~](docs/sdks/saml/README.md#samlsignincallback) - SAML sign-in callback :warning: **Deprecated**
+* [samlSignInCallback](docs/sdks/saml/README.md#samlsignincallback) - SAML sign-in callback
 
 ### [SemanticSearch](docs/sdks/semanticsearch/README.md)
 
 * [search](docs/sdks/semanticsearch/README.md#search) - Perform semantic search
 * [searchHistory](docs/sdks/semanticsearch/README.md#searchhistory) - Get search history
 * [deleteAllSearchHistory](docs/sdks/semanticsearch/README.md#deleteallsearchhistory) - Clear all search history
-* [~~getSearchById~~](docs/sdks/semanticsearch/README.md#getsearchbyid) - Get search by ID :warning: **Deprecated**
-* [~~deleteSearchById~~](docs/sdks/semanticsearch/README.md#deletesearchbyid) - Delete search by ID :warning: **Deprecated**
-* [~~shareSearch~~](docs/sdks/semanticsearch/README.md#sharesearch) - Share a search :warning: **Deprecated**
-* [~~unshareSearch~~](docs/sdks/semanticsearch/README.md#unsharesearch) - Unshare a search :warning: **Deprecated**
-* [~~archiveSearch~~](docs/sdks/semanticsearch/README.md#archivesearch) - Archive a search :warning: **Deprecated**
-* [~~unarchiveSearch~~](docs/sdks/semanticsearch/README.md#unarchivesearch) - Unarchive a search :warning: **Deprecated**
+* [getSearchById](docs/sdks/semanticsearch/README.md#getsearchbyid) - Get search by ID
+* [deleteSearchById](docs/sdks/semanticsearch/README.md#deletesearchbyid) - Delete search by ID
+* [shareSearch](docs/sdks/semanticsearch/README.md#sharesearch) - Share a search
+* [unshareSearch](docs/sdks/semanticsearch/README.md#unsharesearch) - Unshare a search
+* [archiveSearch](docs/sdks/semanticsearch/README.md#archivesearch) - Archive a search
+* [unarchiveSearch](docs/sdks/semanticsearch/README.md#unarchivesearch) - Unarchive a search
 
 ### [SMTPConfiguration](docs/sdks/smtpconfiguration/README.md)
 
@@ -492,11 +471,11 @@ run();
 * [updateTeam](docs/sdks/teams/README.md#updateteam) - Update team
 * [deleteTeam](docs/sdks/teams/README.md#deleteteam) - Delete team
 * [getUserTeams](docs/sdks/teams/README.md#getuserteams) - Get current user's teams
-* [~~getTeamUsers~~](docs/sdks/teams/README.md#getteamusers) - Get users in team :warning: **Deprecated**
-* [~~addUsersToTeam~~](docs/sdks/teams/README.md#adduserstoteam) - Add users to team :warning: **Deprecated**
-* [~~removeUserFromTeam~~](docs/sdks/teams/README.md#removeuserfromteam) - Remove user from team :warning: **Deprecated**
-* [~~updateTeamUsersPermissions~~](docs/sdks/teams/README.md#updateteamuserspermissions) - Update team users permissions :warning: **Deprecated**
-* [~~getUserCreatedTeams~~](docs/sdks/teams/README.md#getusercreatedteams) - Get user created teams :warning: **Deprecated**
+* [getTeamUsers](docs/sdks/teams/README.md#getteamusers) - Get users in team
+* [addUsersToTeam](docs/sdks/teams/README.md#adduserstoteam) - Add users to team
+* [removeUserFromTeam](docs/sdks/teams/README.md#removeuserfromteam) - Remove user from team
+* [updateTeamUsersPermissions](docs/sdks/teams/README.md#updateteamuserspermissions) - Update team users permissions
+* [getUserCreatedTeams](docs/sdks/teams/README.md#getusercreatedteams) - Get user created teams
 
 ### [ToolsetConfiguration](docs/sdks/toolsetconfiguration/README.md)
 
@@ -560,8 +539,8 @@ run();
 * [addUsersToGroup](docs/sdks/usergroups/README.md#adduserstogroup) - Add users to group
 * [removeUsersFromGroup](docs/sdks/usergroups/README.md#removeusersfromgroup) - Remove users from group
 * [getGroupsForUser](docs/sdks/usergroups/README.md#getgroupsforuser) - Get groups for a user
-* [~~getUsersInGroup~~](docs/sdks/usergroups/README.md#getusersingroup) - Get users in group :warning: **Deprecated**
-* [~~getGroupStatistics~~](docs/sdks/usergroups/README.md#getgroupstatistics) - Get group statistics :warning: **Deprecated**
+* [getUsersInGroup](docs/sdks/usergroups/README.md#getusersingroup) - Get users in group
+* [getGroupStatistics](docs/sdks/usergroups/README.md#getgroupstatistics) - Get group statistics
 
 ### [Users](docs/sdks/users/README.md)
 
@@ -571,7 +550,7 @@ run();
 * [updateUser](docs/sdks/users/README.md#updateuser) - Update user
 * [deleteUser](docs/sdks/users/README.md#deleteuser) - Delete user
 * [getUserEmailById](docs/sdks/users/README.md#getuseremailbyid) - Get user email by ID
-* [~~updateEmail~~](docs/sdks/users/README.md#updateemail) - Update user email :warning: **Deprecated**
+* [updateEmail](docs/sdks/users/README.md#updateemail) - Update user email
 * [uploadUserDisplayPicture](docs/sdks/users/README.md#uploaduserdisplaypicture) - Upload display picture
 * [getUserDisplayPicture](docs/sdks/users/README.md#getuserdisplaypicture) - Get display picture
 * [removeUserDisplayPicture](docs/sdks/users/README.md#removeuserdisplaypicture) - Remove display picture
@@ -580,13 +559,13 @@ run();
 * [listUsersGraph](docs/sdks/users/README.md#listusersgraph) - List users (paginated with graph data)
 * [unblockUser](docs/sdks/users/README.md#unblockuser) - Unblock a user in organization
 * [getAllUsersWithGroups](docs/sdks/users/README.md#getalluserswithgroups) - Get all users with groups
-* [~~getUsersByIds~~](docs/sdks/users/README.md#getusersbyids) - Get users by IDs :warning: **Deprecated**
-* [~~updateFullName~~](docs/sdks/users/README.md#updatefullname) - Update user full name :warning: **Deprecated**
-* [~~updateFirstName~~](docs/sdks/users/README.md#updatefirstname) - Update user first name :warning: **Deprecated**
-* [~~updateLastName~~](docs/sdks/users/README.md#updatelastname) - Update user last name :warning: **Deprecated**
-* [~~updateDesignation~~](docs/sdks/users/README.md#updatedesignation) - Update user designation :warning: **Deprecated**
-* [~~adminCheck~~](docs/sdks/users/README.md#admincheck) - Check if user is admin :warning: **Deprecated**
-* [~~getUserTeamsViaUsers~~](docs/sdks/users/README.md#getuserteamsviausers) - Get user teams :warning: **Deprecated**
+* [getUsersByIds](docs/sdks/users/README.md#getusersbyids) - Get users by IDs
+* [updateFullName](docs/sdks/users/README.md#updatefullname) - Update user full name
+* [updateFirstName](docs/sdks/users/README.md#updatefirstname) - Update user first name
+* [updateLastName](docs/sdks/users/README.md#updatelastname) - Update user last name
+* [updateDesignation](docs/sdks/users/README.md#updatedesignation) - Update user designation
+* [adminCheck](docs/sdks/users/README.md#admincheck) - Check if user is admin
+* [getUserTeamsViaUsers](docs/sdks/users/README.md#getuserteamsviausers) - Get user teams
 
 </details>
 <!-- End Available Resources and Operations [operations] -->
@@ -645,9 +624,14 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`authenticationConfigurationSetMicrosoftAuthConfig`](docs/sdks/authenticationconfiguration/README.md#setmicrosoftauthconfig) - Configure Microsoft authentication
 - [`authenticationConfigurationSetOAuthConfig`](docs/sdks/authenticationconfiguration/README.md#setoauthconfig) - Configure generic OAuth provider
 - [`authenticationConfigurationSetSsoAuthConfig`](docs/sdks/authenticationconfiguration/README.md#setssoauthconfig) - Configure SAML SSO authentication
+- [`configurationManagerCreateAIModelsConfig`](docs/sdks/configurationmanager/README.md#createaimodelsconfig) - Create AI models configuration
 - [`configurationManagerCreateSlackBotConfig`](docs/sdks/configurationmanager/README.md#createslackbotconfig) - Create Slack bot configuration
 - [`configurationManagerDeleteSlackBotConfig`](docs/sdks/configurationmanager/README.md#deleteslackbotconfig) - Delete Slack bot configuration
+- [`configurationManagerGetAIModelsConfig`](docs/sdks/configurationmanager/README.md#getaimodelsconfig) - Get AI models configuration
+- [`configurationManagerGetAIModelsProviders`](docs/sdks/configurationmanager/README.md#getaimodelsproviders) - Get AI model providers
 - [`configurationManagerGetSlackBotConfigs`](docs/sdks/configurationmanager/README.md#getslackbotconfigs) - Get Slack bot configurations
+- [`configurationManagerSetMetricsCollectionPushInterval`](docs/sdks/configurationmanager/README.md#setmetricscollectionpushinterval) - Set metrics push interval
+- [`configurationManagerSetMetricsCollectionRemoteServer`](docs/sdks/configurationmanager/README.md#setmetricscollectionremoteserver) - Set metrics remote server URL
 - [`configurationManagerUpdateSlackBotConfig`](docs/sdks/configurationmanager/README.md#updateslackbotconfig) - Update Slack bot configuration
 - [`connectorConfigurationGetConnectorConfig`](docs/sdks/connectorconfiguration/README.md#getconnectorconfig) - Get connector configuration
 - [`connectorConfigurationUpdateConnectorAuthConfig`](docs/sdks/connectorconfiguration/README.md#updateconnectorauthconfig) - Update authentication configuration
@@ -686,10 +670,16 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`conversationsShareConversation`](docs/sdks/conversations/README.md#shareconversation) - Share conversation with users
 - [`conversationsStreamChat`](docs/sdks/conversations/README.md#streamchat) - Create conversation with streaming response
 - [`conversationsUnarchiveConversation`](docs/sdks/conversations/README.md#unarchiveconversation) - Unarchive conversation
+- [`conversationsUnshareConversationById`](docs/sdks/conversations/README.md#unshareconversationbyid) - Unshare a conversation
 - [`conversationsUpdateConversationTitle`](docs/sdks/conversations/README.md#updateconversationtitle) - Update conversation title
 - [`conversationsUpdateMessageFeedback`](docs/sdks/conversations/README.md#updatemessagefeedback) - Submit feedback on AI response
+- [`crawlingJobsGetAllCrawlingJobStatus`](docs/sdks/crawlingjobs/README.md#getallcrawlingjobstatus) - Get all crawling job statuses
 - [`crawlingJobsGetCrawlingJobStatus`](docs/sdks/crawlingjobs/README.md#getcrawlingjobstatus) - Get crawling job status
+- [`crawlingJobsGetQueueStats`](docs/sdks/crawlingjobs/README.md#getqueuestats) - Get queue statistics
+- [`crawlingJobsPauseCrawlingJob`](docs/sdks/crawlingjobs/README.md#pausecrawlingjob) - Pause a crawling job
+- [`crawlingJobsRemoveAllCrawlingJob`](docs/sdks/crawlingjobs/README.md#removeallcrawlingjob) - Remove all crawling jobs
 - [`crawlingJobsRemoveCrawlingJob`](docs/sdks/crawlingjobs/README.md#removecrawlingjob) - Remove a crawling job
+- [`crawlingJobsResumeCrawlingJob`](docs/sdks/crawlingjobs/README.md#resumecrawlingjob) - Resume a crawling job
 - [`crawlingJobsScheduleCrawlingJob`](docs/sdks/crawlingjobs/README.md#schedulecrawlingjob) - Schedule a crawling job
 - [`documentManagementDownloadDocument`](docs/sdks/documentmanagement/README.md#downloaddocument) - Download document
 - [`foldersCreateRootFolder`](docs/sdks/folders/README.md#createrootfolder) - Create root folder
@@ -704,6 +694,7 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`knowledgeBasesGetKnowledgeHubChildNodes`](docs/sdks/knowledgebases/README.md#getknowledgehubchildnodes) - Get knowledge hub child nodes
 - [`knowledgeBasesGetKnowledgeHubRootNodes`](docs/sdks/knowledgebases/README.md#getknowledgehubrootnodes) - Get knowledge hub root nodes
 - [`knowledgeBasesListKnowledgeBases`](docs/sdks/knowledgebases/README.md#listknowledgebases) - List all knowledge bases
+- [`knowledgeBasesMoveRecord`](docs/sdks/knowledgebases/README.md#moverecord) - Move record to another location
 - [`knowledgeBasesReindexFailedRecords`](docs/sdks/knowledgebases/README.md#reindexfailedrecords) - Reindex failed records for connector
 - [`knowledgeBasesUpdateKnowledgeBase`](docs/sdks/knowledgebases/README.md#updateknowledgebase) - Update knowledge base
 - [`metricsCollectionGetMetricsCollection`](docs/sdks/metricscollection/README.md#getmetricscollection) - Get metrics collection configuration
@@ -740,6 +731,7 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`openIDConnectOauthUserInfo`](docs/sdks/openidconnect/README.md#oauthuserinfo) - Get authenticated user information
 - [`openIDConnectOpenidConfiguration`](docs/sdks/openidconnect/README.md#openidconfiguration) - OpenID Connect Discovery
 - [`organizationAuthConfigGetAuthMethods`](docs/sdks/organizationauthconfig/README.md#getauthmethods) - Get organization authentication methods
+- [`organizationAuthConfigSetUpAuthConfig`](docs/sdks/organizationauthconfig/README.md#setupauthconfig) - Set up auth configuration
 - [`organizationAuthConfigUpdateAuthMethod`](docs/sdks/organizationauthconfig/README.md#updateauthmethod) - Update organization authentication methods
 - [`organizationsCheckOrgExists`](docs/sdks/organizations/README.md#checkorgexists) - Check if organization exists
 - [`organizationsCreateOrganization`](docs/sdks/organizations/README.md#createorganization) - Create organization
@@ -771,19 +763,31 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`recordsGetRecordById`](docs/sdks/records/README.md#getrecordbyid) - Get record by ID
 - [`recordsStreamRecordBuffer`](docs/sdks/records/README.md#streamrecordbuffer) - Stream record content
 - [`recordsUpdateRecord`](docs/sdks/records/README.md#updaterecord) - Update record
+- [`samlSAMLSignInCallback`](docs/sdks/saml/README.md#samlsignincallback) - SAML sign-in callback
 - [`samlSignInViaSAML`](docs/sdks/saml/README.md#signinviasaml) - Initiate SAML sign-in flow
+- [`semanticSearchArchiveSearch`](docs/sdks/semanticsearch/README.md#archivesearch) - Archive a search
 - [`semanticSearchDeleteAllSearchHistory`](docs/sdks/semanticsearch/README.md#deleteallsearchhistory) - Clear all search history
+- [`semanticSearchDeleteSearchById`](docs/sdks/semanticsearch/README.md#deletesearchbyid) - Delete search by ID
+- [`semanticSearchGetSearchById`](docs/sdks/semanticsearch/README.md#getsearchbyid) - Get search by ID
 - [`semanticSearchSearch`](docs/sdks/semanticsearch/README.md#search) - Perform semantic search
 - [`semanticSearchSearchHistory`](docs/sdks/semanticsearch/README.md#searchhistory) - Get search history
+- [`semanticSearchShareSearch`](docs/sdks/semanticsearch/README.md#sharesearch) - Share a search
+- [`semanticSearchUnarchiveSearch`](docs/sdks/semanticsearch/README.md#unarchivesearch) - Unarchive a search
+- [`semanticSearchUnshareSearch`](docs/sdks/semanticsearch/README.md#unsharesearch) - Unshare a search
 - [`smtpConfigurationCreateSMTPConfig`](docs/sdks/smtpconfiguration/README.md#createsmtpconfig) - Create or update SMTP configuration
 - [`smtpConfigurationGetSMTPConfig`](docs/sdks/smtpconfiguration/README.md#getsmtpconfig) - Get SMTP configuration
 - [`storageConfigurationGetStorageConfig`](docs/sdks/storageconfiguration/README.md#getstorageconfig) - Get current storage configuration
+- [`teamsAddUsersToTeam`](docs/sdks/teams/README.md#adduserstoteam) - Add users to team
 - [`teamsCreateTeam`](docs/sdks/teams/README.md#createteam) - Create a team
 - [`teamsDeleteTeam`](docs/sdks/teams/README.md#deleteteam) - Delete team
 - [`teamsGetTeamById`](docs/sdks/teams/README.md#getteambyid) - Get team by ID
+- [`teamsGetTeamUsers`](docs/sdks/teams/README.md#getteamusers) - Get users in team
+- [`teamsGetUserCreatedTeams`](docs/sdks/teams/README.md#getusercreatedteams) - Get user created teams
 - [`teamsGetUserTeams`](docs/sdks/teams/README.md#getuserteams) - Get current user's teams
 - [`teamsListTeams`](docs/sdks/teams/README.md#listteams) - List teams
+- [`teamsRemoveUserFromTeam`](docs/sdks/teams/README.md#removeuserfromteam) - Remove user from team
 - [`teamsUpdateTeam`](docs/sdks/teams/README.md#updateteam) - Update team
+- [`teamsUpdateTeamUsersPermissions`](docs/sdks/teams/README.md#updateteamuserspermissions) - Update team users permissions
 - [`toolsetConfigurationDeleteToolsetConfig`](docs/sdks/toolsetconfiguration/README.md#deletetoolsetconfig) - Delete toolset configuration
 - [`toolsetConfigurationGetToolsetConfig`](docs/sdks/toolsetconfiguration/README.md#gettoolsetconfig) - Get toolset configuration
 - [`toolsetConfigurationUpdateToolsetConfig`](docs/sdks/toolsetconfiguration/README.md#updatetoolsetconfig) - Update toolset configuration
@@ -822,9 +826,12 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`userGroupsDeleteUserGroup`](docs/sdks/usergroups/README.md#deleteusergroup) - Delete user group
 - [`userGroupsGetAllUserGroups`](docs/sdks/usergroups/README.md#getallusergroups) - Get all user groups
 - [`userGroupsGetGroupsForUser`](docs/sdks/usergroups/README.md#getgroupsforuser) - Get groups for a user
+- [`userGroupsGetGroupStatistics`](docs/sdks/usergroups/README.md#getgroupstatistics) - Get group statistics
 - [`userGroupsGetUserGroupById`](docs/sdks/usergroups/README.md#getusergroupbyid) - Get user group by ID
+- [`userGroupsGetUsersInGroup`](docs/sdks/usergroups/README.md#getusersingroup) - Get users in group
 - [`userGroupsRemoveUsersFromGroup`](docs/sdks/usergroups/README.md#removeusersfromgroup) - Remove users from group
 - [`userGroupsUpdateUserGroup`](docs/sdks/usergroups/README.md#updateusergroup) - Update user group
+- [`usersAdminCheck`](docs/sdks/users/README.md#admincheck) - Check if user is admin
 - [`usersBulkInviteUsers`](docs/sdks/users/README.md#bulkinviteusers) - Bulk invite users
 - [`usersCreateUser`](docs/sdks/users/README.md#createuser) - Create a new user
 - [`usersDeleteUser`](docs/sdks/users/README.md#deleteuser) - Delete user
@@ -833,70 +840,21 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`usersGetUserById`](docs/sdks/users/README.md#getuserbyid) - Get user by ID
 - [`usersGetUserDisplayPicture`](docs/sdks/users/README.md#getuserdisplaypicture) - Get display picture
 - [`usersGetUserEmailById`](docs/sdks/users/README.md#getuseremailbyid) - Get user email by ID
+- [`usersGetUsersByIds`](docs/sdks/users/README.md#getusersbyids) - Get users by IDs
+- [`usersGetUserTeamsViaUsers`](docs/sdks/users/README.md#getuserteamsviausers) - Get user teams
 - [`usersListUsersGraph`](docs/sdks/users/README.md#listusersgraph) - List users (paginated with graph data)
 - [`usersRemoveUserDisplayPicture`](docs/sdks/users/README.md#removeuserdisplaypicture) - Remove display picture
 - [`usersResendUserInvite`](docs/sdks/users/README.md#resenduserinvite) - Resend user invite
 - [`usersUnblockUser`](docs/sdks/users/README.md#unblockuser) - Unblock a user in organization
+- [`usersUpdateDesignation`](docs/sdks/users/README.md#updatedesignation) - Update user designation
+- [`usersUpdateEmail`](docs/sdks/users/README.md#updateemail) - Update user email
+- [`usersUpdateFirstName`](docs/sdks/users/README.md#updatefirstname) - Update user first name
+- [`usersUpdateFullName`](docs/sdks/users/README.md#updatefullname) - Update user full name
+- [`usersUpdateLastName`](docs/sdks/users/README.md#updatelastname) - Update user last name
 - [`usersUpdateUser`](docs/sdks/users/README.md#updateuser) - Update user
 - [`usersUploadUserDisplayPicture`](docs/sdks/users/README.md#uploaduserdisplaypicture) - Upload display picture
-- ~~[`configurationManagerCreateAIModelsConfig`](docs/sdks/configurationmanager/README.md#createaimodelsconfig)~~ - Create AI models configuration :warning: **Deprecated**
-- ~~[`configurationManagerCreateGoogleWorkspaceCredentials`](docs/sdks/configurationmanager/README.md#creategoogleworkspacecredentials)~~ - Upload Google Workspace credentials :warning: **Deprecated**
-- ~~[`configurationManagerGetAIModelsConfig`](docs/sdks/configurationmanager/README.md#getaimodelsconfig)~~ - Get AI models configuration :warning: **Deprecated**
-- ~~[`configurationManagerGetAIModelsProviders`](docs/sdks/configurationmanager/README.md#getaimodelsproviders)~~ - Get AI model providers :warning: **Deprecated**
-- ~~[`configurationManagerGetAtlassianOauthConfig`](docs/sdks/configurationmanager/README.md#getatlassianoauthconfig)~~ - Get Atlassian OAuth config :warning: **Deprecated**
-- ~~[`configurationManagerGetGoogleWorkspaceCredentials`](docs/sdks/configurationmanager/README.md#getgoogleworkspacecredentials)~~ - Get Google Workspace credentials :warning: **Deprecated**
-- ~~[`configurationManagerGetGoogleWorkspaceOauthConfig`](docs/sdks/configurationmanager/README.md#getgoogleworkspaceoauthconfig)~~ - Get Google Workspace OAuth config :warning: **Deprecated**
-- ~~[`configurationManagerGetOneDriveCredentials`](docs/sdks/configurationmanager/README.md#getonedrivecredentials)~~ - Get OneDrive credentials :warning: **Deprecated**
-- ~~[`configurationManagerGetSharePointCredentials`](docs/sdks/configurationmanager/README.md#getsharepointcredentials)~~ - Get SharePoint credentials :warning: **Deprecated**
-- ~~[`configurationManagerSetAtlassianOauthConfig`](docs/sdks/configurationmanager/README.md#setatlassianoauthconfig)~~ - Set Atlassian OAuth config :warning: **Deprecated**
-- ~~[`configurationManagerSetGoogleWorkspaceOauthConfig`](docs/sdks/configurationmanager/README.md#setgoogleworkspaceoauthconfig)~~ - Set Google Workspace OAuth config :warning: **Deprecated**
-- ~~[`configurationManagerSetMetricsCollectionPushInterval`](docs/sdks/configurationmanager/README.md#setmetricscollectionpushinterval)~~ - Set metrics push interval :warning: **Deprecated**
-- ~~[`configurationManagerSetMetricsCollectionRemoteServer`](docs/sdks/configurationmanager/README.md#setmetricscollectionremoteserver)~~ - Set metrics remote server URL :warning: **Deprecated**
-- ~~[`configurationManagerSetOneDriveCredentials`](docs/sdks/configurationmanager/README.md#setonedrivecredentials)~~ - Set OneDrive credentials :warning: **Deprecated**
-- ~~[`configurationManagerSetSharePointCredentials`](docs/sdks/configurationmanager/README.md#setsharepointcredentials)~~ - Set SharePoint credentials :warning: **Deprecated**
 - ~~[`connectorOAuthGetTokenFromCode`](docs/sdks/connectoroauth/README.md#gettokenfromcode)~~ - Exchange Google authorization code for tokens :warning: **Deprecated**
-- ~~[`conversationsUnshareConversationById`](docs/sdks/conversations/README.md#unshareconversationbyid)~~ - Unshare a conversation :warning: **Deprecated**
-- ~~[`crawlingJobsGetAllCrawlingJobStatus`](docs/sdks/crawlingjobs/README.md#getallcrawlingjobstatus)~~ - Get all crawling job statuses :warning: **Deprecated**
-- ~~[`crawlingJobsGetQueueStats`](docs/sdks/crawlingjobs/README.md#getqueuestats)~~ - Get queue statistics :warning: **Deprecated**
-- ~~[`crawlingJobsPauseCrawlingJob`](docs/sdks/crawlingjobs/README.md#pausecrawlingjob)~~ - Pause a crawling job :warning: **Deprecated**
-- ~~[`crawlingJobsRemoveAllCrawlingJob`](docs/sdks/crawlingjobs/README.md#removeallcrawlingjob)~~ - Remove all crawling jobs :warning: **Deprecated**
-- ~~[`crawlingJobsResumeCrawlingJob`](docs/sdks/crawlingjobs/README.md#resumecrawlingjob)~~ - Resume a crawling job :warning: **Deprecated**
-- ~~[`documentManagementCreateDocumentBufferMultipart`](docs/sdks/documentmanagement/README.md#createdocumentbuffermultipart)~~ - Create/update document buffer :warning: **Deprecated**
-- ~~[`documentManagementCreateDocumentBufferRaw`](docs/sdks/documentmanagement/README.md#createdocumentbufferraw)~~ - Create/update document buffer :warning: **Deprecated**
-- ~~[`documentManagementCreatePlaceholderDocument`](docs/sdks/documentmanagement/README.md#createplaceholderdocument)~~ - Create placeholder document :warning: **Deprecated**
-- ~~[`documentManagementDeleteDocumentById`](docs/sdks/documentmanagement/README.md#deletedocumentbyid)~~ - Delete document by ID :warning: **Deprecated**
-- ~~[`documentManagementDocumentDiffChecker`](docs/sdks/documentmanagement/README.md#documentdiffchecker)~~ - Check if document is modified :warning: **Deprecated**
-- ~~[`documentManagementGetDocumentBuffer`](docs/sdks/documentmanagement/README.md#getdocumentbuffer)~~ - Get document buffer :warning: **Deprecated**
-- ~~[`documentManagementGetDocumentById`](docs/sdks/documentmanagement/README.md#getdocumentbyid)~~ - Get document by ID :warning: **Deprecated**
-- ~~[`documentManagementRollBackToPreviousVersion`](docs/sdks/documentmanagement/README.md#rollbacktopreviousversion)~~ - Roll back to previous version :warning: **Deprecated**
-- ~~[`documentManagementUploadDirectDocument`](docs/sdks/documentmanagement/README.md#uploaddirectdocument)~~ - Direct upload document :warning: **Deprecated**
-- ~~[`documentManagementUploadDocument`](docs/sdks/documentmanagement/README.md#uploaddocument)~~ - Upload document :warning: **Deprecated**
-- ~~[`documentManagementUploadNextVersionDocument`](docs/sdks/documentmanagement/README.md#uploadnextversiondocument)~~ - Upload next version of document :warning: **Deprecated**
-- ~~[`knowledgeBasesMoveRecord`](docs/sdks/knowledgebases/README.md#moverecord)~~ - Move record to another location :warning: **Deprecated**
-- ~~[`organizationAuthConfigSetUpAuthConfig`](docs/sdks/organizationauthconfig/README.md#setupauthconfig)~~ - Set up auth configuration :warning: **Deprecated**
-- ~~[`samlSAMLSignInCallback`](docs/sdks/saml/README.md#samlsignincallback)~~ - SAML sign-in callback :warning: **Deprecated**
-- ~~[`semanticSearchArchiveSearch`](docs/sdks/semanticsearch/README.md#archivesearch)~~ - Archive a search :warning: **Deprecated**
-- ~~[`semanticSearchDeleteSearchById`](docs/sdks/semanticsearch/README.md#deletesearchbyid)~~ - Delete search by ID :warning: **Deprecated**
-- ~~[`semanticSearchGetSearchById`](docs/sdks/semanticsearch/README.md#getsearchbyid)~~ - Get search by ID :warning: **Deprecated**
-- ~~[`semanticSearchShareSearch`](docs/sdks/semanticsearch/README.md#sharesearch)~~ - Share a search :warning: **Deprecated**
-- ~~[`semanticSearchUnarchiveSearch`](docs/sdks/semanticsearch/README.md#unarchivesearch)~~ - Unarchive a search :warning: **Deprecated**
-- ~~[`semanticSearchUnshareSearch`](docs/sdks/semanticsearch/README.md#unsharesearch)~~ - Unshare a search :warning: **Deprecated**
-- ~~[`teamsAddUsersToTeam`](docs/sdks/teams/README.md#adduserstoteam)~~ - Add users to team :warning: **Deprecated**
-- ~~[`teamsGetTeamUsers`](docs/sdks/teams/README.md#getteamusers)~~ - Get users in team :warning: **Deprecated**
-- ~~[`teamsGetUserCreatedTeams`](docs/sdks/teams/README.md#getusercreatedteams)~~ - Get user created teams :warning: **Deprecated**
-- ~~[`teamsRemoveUserFromTeam`](docs/sdks/teams/README.md#removeuserfromteam)~~ - Remove user from team :warning: **Deprecated**
-- ~~[`teamsUpdateTeamUsersPermissions`](docs/sdks/teams/README.md#updateteamuserspermissions)~~ - Update team users permissions :warning: **Deprecated**
 - ~~[`toolsetConfigurationSaveToolsetConfig`](docs/sdks/toolsetconfiguration/README.md#savetoolsetconfig)~~ - Save toolset configuration :warning: **Deprecated**
-- ~~[`userGroupsGetGroupStatistics`](docs/sdks/usergroups/README.md#getgroupstatistics)~~ - Get group statistics :warning: **Deprecated**
-- ~~[`userGroupsGetUsersInGroup`](docs/sdks/usergroups/README.md#getusersingroup)~~ - Get users in group :warning: **Deprecated**
-- ~~[`usersAdminCheck`](docs/sdks/users/README.md#admincheck)~~ - Check if user is admin :warning: **Deprecated**
-- ~~[`usersGetUsersByIds`](docs/sdks/users/README.md#getusersbyids)~~ - Get users by IDs :warning: **Deprecated**
-- ~~[`usersGetUserTeamsViaUsers`](docs/sdks/users/README.md#getuserteamsviausers)~~ - Get user teams :warning: **Deprecated**
-- ~~[`usersUpdateDesignation`](docs/sdks/users/README.md#updatedesignation)~~ - Update user designation :warning: **Deprecated**
-- ~~[`usersUpdateEmail`](docs/sdks/users/README.md#updateemail)~~ - Update user email :warning: **Deprecated**
-- ~~[`usersUpdateFirstName`](docs/sdks/users/README.md#updatefirstname)~~ - Update user first name :warning: **Deprecated**
-- ~~[`usersUpdateFullName`](docs/sdks/users/README.md#updatefullname)~~ - Update user full name :warning: **Deprecated**
-- ~~[`usersUpdateLastName`](docs/sdks/users/README.md#updatelastname)~~ - Update user last name :warning: **Deprecated**
 
 </details>
 <!-- End Standalone functions [standalone-funcs] -->
@@ -1113,11 +1071,11 @@ run();
 
 
 **Inherit from [`PipeshubError`](./src/models/errors/pipeshub-error.ts)**:
-* [`AuthError`](./src/models/errors/auth-error.ts): Authentication error response with details for debugging and user feedback.<br><br> <b>Common Error Codes:</b><br> <ul> <li><code>INVALID_CREDENTIALS</code> - Wrong password or OTP</li> <li><code>ACCOUNT_BLOCKED</code> - Account locked after 5 failed attempts</li> <li><code>SESSION_EXPIRED</code> - Session token has expired</li> <li><code>OTP_EXPIRED</code> - OTP code has expired (10 min validity)</li> <li><code>USER_NOT_FOUND</code> - Email not registered</li> <li><code>INVALID_TOKEN</code> - JWT token is invalid or malformed</li> <li><code>METHOD_NOT_ALLOWED</code> - Auth method not enabled for org</li> </ul>. Applicable to 7 of 291 methods.*
-* [`OAuthErrorResponse`](./src/models/errors/o-auth-error-response.ts): OAuth 2.0 Error Response (RFC 6749 Section 5.2). Standard error format for OAuth endpoints. Applicable to 5 of 291 methods.*
-* [`ResetPasswordBadRequestError`](./src/models/errors/reset-password-bad-request-error.ts): Invalid current password or weak new password. Status code `400`. Applicable to 1 of 291 methods.*
-* [`SamlSignInCallbackBadRequestError`](./src/models/errors/saml-sign-in-callback-bad-request-error.ts): Invalid SAML response. Status code `400`. Applicable to 1 of 291 methods.*
-* [`UnauthorizedError`](./src/models/errors/unauthorized-error.ts): SAML authentication failed. Status code `401`. Applicable to 1 of 291 methods.*
+* [`AuthError`](./src/models/errors/auth-error.ts): Authentication error response with details for debugging and user feedback.<br><br> <b>Common Error Codes:</b><br> <ul> <li><code>INVALID_CREDENTIALS</code> - Wrong password or OTP</li> <li><code>ACCOUNT_BLOCKED</code> - Account locked after 5 failed attempts</li> <li><code>SESSION_EXPIRED</code> - Session token has expired</li> <li><code>OTP_EXPIRED</code> - OTP code has expired (10 min validity)</li> <li><code>USER_NOT_FOUND</code> - Email not registered</li> <li><code>INVALID_TOKEN</code> - JWT token is invalid or malformed</li> <li><code>METHOD_NOT_ALLOWED</code> - Auth method not enabled for org</li> </ul>. Applicable to 7 of 270 methods.*
+* [`OAuthErrorResponse`](./src/models/errors/o-auth-error-response.ts): OAuth 2.0 Error Response (RFC 6749 Section 5.2). Standard error format for OAuth endpoints. Applicable to 5 of 270 methods.*
+* [`ResetPasswordBadRequestError`](./src/models/errors/reset-password-bad-request-error.ts): Invalid current password or weak new password. Status code `400`. Applicable to 1 of 270 methods.*
+* [`SamlSignInCallbackBadRequestError`](./src/models/errors/saml-sign-in-callback-bad-request-error.ts): Invalid SAML response. Status code `400`. Applicable to 1 of 270 methods.*
+* [`UnauthorizedError`](./src/models/errors/unauthorized-error.ts): SAML authentication failed. Status code `401`. Applicable to 1 of 270 methods.*
 * [`ResponseValidationError`](./src/models/errors/response-validation-error.ts): Type mismatch between the data returned from the server and the structure expected by the SDK. See `error.rawValue` for the raw value and `error.pretty()` for a nicely formatted multi-line string.
 
 </details>

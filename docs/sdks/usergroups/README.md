@@ -14,8 +14,8 @@ User group management operations
 * [addUsersToGroup](#adduserstogroup) - Add users to group
 * [removeUsersFromGroup](#removeusersfromgroup) - Remove users from group
 * [getGroupsForUser](#getgroupsforuser) - Get groups for a user
-* [~~getUsersInGroup~~](#getusersingroup) - Get users in group :warning: **Deprecated**
-* [~~getGroupStatistics~~](#getgroupstatistics) - Get group statistics :warning: **Deprecated**
+* [getUsersInGroup](#getusersingroup) - Get users in group
+* [getGroupStatistics](#getgroupstatistics) - Get group statistics
 
 ## createUserGroup
 
@@ -749,13 +749,10 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## ~~getUsersInGroup~~
+## getUsersInGroup
 
-<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
 Retrieve all users that belong to a specific user group.
 
-
-> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
 
 ### Example Usage
 
@@ -830,13 +827,10 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## ~~getGroupStatistics~~
+## getGroupStatistics
 
-<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
 Retrieve statistics for all user groups including member counts.
 
-
-> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
 
 ### Example Usage
 

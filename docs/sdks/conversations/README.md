@@ -20,7 +20,7 @@ AI-powered conversational chat management with citations and follow-up questions
 * [unarchiveConversation](#unarchiveconversation) - Unarchive conversation
 * [regenerateAnswer](#regenerateanswer) - Regenerate AI response
 * [updateMessageFeedback](#updatemessagefeedback) - Submit feedback on AI response
-* [~~unshareConversationById~~](#unshareconversationbyid) - Unshare a conversation :warning: **Deprecated**
+* [unshareConversationById](#unshareconversationbyid) - Unshare a conversation
 
 ## createConversation
 
@@ -1372,13 +1372,10 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## ~~unshareConversationById~~
+## unshareConversationById
 
-<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
 Revoke sharing for a conversation, making it private again.
 
-
-> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
 
 ### Example Usage
 

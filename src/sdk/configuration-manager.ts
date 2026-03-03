@@ -3,219 +3,19 @@
  */
 
 import { configurationManagerCreateAIModelsConfig } from "../funcs/configuration-manager-create-ai-models-config.js";
-import { configurationManagerCreateGoogleWorkspaceCredentials } from "../funcs/configuration-manager-create-google-workspace-credentials.js";
 import { configurationManagerCreateSlackBotConfig } from "../funcs/configuration-manager-create-slack-bot-config.js";
 import { configurationManagerDeleteSlackBotConfig } from "../funcs/configuration-manager-delete-slack-bot-config.js";
 import { configurationManagerGetAIModelsConfig } from "../funcs/configuration-manager-get-ai-models-config.js";
 import { configurationManagerGetAIModelsProviders } from "../funcs/configuration-manager-get-ai-models-providers.js";
-import { configurationManagerGetAtlassianOauthConfig } from "../funcs/configuration-manager-get-atlassian-oauth-config.js";
-import { configurationManagerGetGoogleWorkspaceCredentials } from "../funcs/configuration-manager-get-google-workspace-credentials.js";
-import { configurationManagerGetGoogleWorkspaceOauthConfig } from "../funcs/configuration-manager-get-google-workspace-oauth-config.js";
-import { configurationManagerGetOneDriveCredentials } from "../funcs/configuration-manager-get-one-drive-credentials.js";
-import { configurationManagerGetSharePointCredentials } from "../funcs/configuration-manager-get-share-point-credentials.js";
 import { configurationManagerGetSlackBotConfigs } from "../funcs/configuration-manager-get-slack-bot-configs.js";
-import { configurationManagerSetAtlassianOauthConfig } from "../funcs/configuration-manager-set-atlassian-oauth-config.js";
-import { configurationManagerSetGoogleWorkspaceOauthConfig } from "../funcs/configuration-manager-set-google-workspace-oauth-config.js";
 import { configurationManagerSetMetricsCollectionPushInterval } from "../funcs/configuration-manager-set-metrics-collection-push-interval.js";
 import { configurationManagerSetMetricsCollectionRemoteServer } from "../funcs/configuration-manager-set-metrics-collection-remote-server.js";
-import { configurationManagerSetOneDriveCredentials } from "../funcs/configuration-manager-set-one-drive-credentials.js";
-import { configurationManagerSetSharePointCredentials } from "../funcs/configuration-manager-set-share-point-credentials.js";
 import { configurationManagerUpdateSlackBotConfig } from "../funcs/configuration-manager-update-slack-bot-config.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
 import * as operations from "../models/operations/index.js";
 import { unwrapAsync } from "../types/fp.js";
 
 export class ConfigurationManager extends ClientSDK {
-  /**
-   * Get Atlassian OAuth config
-   *
-   * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
-   * Retrieve the Atlassian OAuth configuration for the organization.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
-   */
-  async getAtlassianOauthConfig(
-    options?: RequestOptions,
-  ): Promise<operations.GetAtlassianOauthConfigResponse> {
-    return unwrapAsync(configurationManagerGetAtlassianOauthConfig(
-      this,
-      options,
-    ));
-  }
-
-  /**
-   * Set Atlassian OAuth config
-   *
-   * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
-   * Configure Atlassian OAuth credentials for the organization.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
-   */
-  async setAtlassianOauthConfig(
-    request: operations.SetAtlassianOauthConfigRequest,
-    options?: RequestOptions,
-  ): Promise<operations.SetAtlassianOauthConfigResponse> {
-    return unwrapAsync(configurationManagerSetAtlassianOauthConfig(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
-   * Get OneDrive credentials
-   *
-   * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
-   * Retrieve OneDrive connector credentials.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
-   */
-  async getOneDriveCredentials(
-    options?: RequestOptions,
-  ): Promise<operations.GetOneDriveCredentialsResponse> {
-    return unwrapAsync(configurationManagerGetOneDriveCredentials(
-      this,
-      options,
-    ));
-  }
-
-  /**
-   * Set OneDrive credentials
-   *
-   * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
-   * Configure OneDrive connector credentials.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
-   */
-  async setOneDriveCredentials(
-    request: operations.SetOneDriveCredentialsRequest,
-    options?: RequestOptions,
-  ): Promise<operations.SetOneDriveCredentialsResponse> {
-    return unwrapAsync(configurationManagerSetOneDriveCredentials(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
-   * Get SharePoint credentials
-   *
-   * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
-   * Retrieve SharePoint connector credentials.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
-   */
-  async getSharePointCredentials(
-    options?: RequestOptions,
-  ): Promise<operations.GetSharePointCredentialsResponse> {
-    return unwrapAsync(configurationManagerGetSharePointCredentials(
-      this,
-      options,
-    ));
-  }
-
-  /**
-   * Set SharePoint credentials
-   *
-   * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
-   * Configure SharePoint connector credentials.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
-   */
-  async setSharePointCredentials(
-    request: operations.SetSharePointCredentialsRequest,
-    options?: RequestOptions,
-  ): Promise<operations.SetSharePointCredentialsResponse> {
-    return unwrapAsync(configurationManagerSetSharePointCredentials(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
-   * Get Google Workspace credentials
-   *
-   * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
-   * Retrieve Google Workspace service account credentials.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
-   */
-  async getGoogleWorkspaceCredentials(
-    options?: RequestOptions,
-  ): Promise<operations.GetGoogleWorkspaceCredentialsResponse> {
-    return unwrapAsync(configurationManagerGetGoogleWorkspaceCredentials(
-      this,
-      options,
-    ));
-  }
-
-  /**
-   * Upload Google Workspace credentials
-   *
-   * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
-   * Upload Google Workspace service account credentials file.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
-   */
-  async createGoogleWorkspaceCredentials(
-    request: operations.CreateGoogleWorkspaceCredentialsRequest,
-    options?: RequestOptions,
-  ): Promise<operations.CreateGoogleWorkspaceCredentialsResponse> {
-    return unwrapAsync(configurationManagerCreateGoogleWorkspaceCredentials(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
-   * Get Google Workspace OAuth config
-   *
-   * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
-   * Retrieve Google Workspace OAuth configuration.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
-   */
-  async getGoogleWorkspaceOauthConfig(
-    options?: RequestOptions,
-  ): Promise<operations.GetGoogleWorkspaceOauthConfigResponse> {
-    return unwrapAsync(configurationManagerGetGoogleWorkspaceOauthConfig(
-      this,
-      options,
-    ));
-  }
-
-  /**
-   * Set Google Workspace OAuth config
-   *
-   * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
-   * Configure Google Workspace OAuth settings.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
-   */
-  async setGoogleWorkspaceOauthConfig(
-    request: operations.SetGoogleWorkspaceOauthConfigRequest,
-    options?: RequestOptions,
-  ): Promise<operations.SetGoogleWorkspaceOauthConfigResponse> {
-    return unwrapAsync(configurationManagerSetGoogleWorkspaceOauthConfig(
-      this,
-      request,
-      options,
-    ));
-  }
-
   /**
    * Get Slack bot configurations
    *
@@ -286,10 +86,7 @@ export class ConfigurationManager extends ClientSDK {
    * Set metrics push interval
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Configure the interval for pushing metrics to the collection server.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async setMetricsCollectionPushInterval(
     request: operations.SetMetricsCollectionPushIntervalRequest,
@@ -306,10 +103,7 @@ export class ConfigurationManager extends ClientSDK {
    * Set metrics remote server URL
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Configure the remote server URL for metrics collection.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async setMetricsCollectionRemoteServer(
     request: operations.SetMetricsCollectionRemoteServerRequest,
@@ -326,10 +120,7 @@ export class ConfigurationManager extends ClientSDK {
    * Get AI models configuration
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Retrieve the AI models configuration for the organization.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async getAIModelsConfig(
     options?: RequestOptions,
@@ -344,10 +135,7 @@ export class ConfigurationManager extends ClientSDK {
    * Create AI models configuration
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Create or initialize AI models configuration for the organization.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async createAIModelsConfig(
     request: operations.CreateAIModelsConfigRequest,
@@ -364,10 +152,7 @@ export class ConfigurationManager extends ClientSDK {
    * Get AI model providers
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Retrieve all available AI model providers.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async getAIModelsProviders(
     options?: RequestOptions,

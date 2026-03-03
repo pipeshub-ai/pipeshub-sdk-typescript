@@ -142,10 +142,7 @@ export class CrawlingJobs extends ClientSDK {
    * Get all crawling job statuses
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Retrieve the status of all scheduled crawling jobs across the organization.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async getAllCrawlingJobStatus(
     options?: RequestOptions,
@@ -160,10 +157,7 @@ export class CrawlingJobs extends ClientSDK {
    * Remove all crawling jobs
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Remove all scheduled crawling jobs for the organization.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async removeAllCrawlingJob(
     options?: RequestOptions,
@@ -178,10 +172,7 @@ export class CrawlingJobs extends ClientSDK {
    * Pause a crawling job
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Pause a running or scheduled crawling job for a specific connector.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async pauseCrawlingJob(
     request: operations.PauseCrawlingJobRequest,
@@ -198,10 +189,7 @@ export class CrawlingJobs extends ClientSDK {
    * Resume a crawling job
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Resume a previously paused crawling job for a specific connector.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async resumeCrawlingJob(
     request: operations.ResumeCrawlingJobRequest,
@@ -218,10 +206,7 @@ export class CrawlingJobs extends ClientSDK {
    * Get queue statistics
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Retrieve statistics for the crawling job queue including active, waiting, and completed job counts.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async getQueueStats(
     options?: RequestOptions,

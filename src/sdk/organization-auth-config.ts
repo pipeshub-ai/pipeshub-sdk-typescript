@@ -102,10 +102,7 @@ export class OrganizationAuthConfig extends ClientSDK {
    * Set up auth configuration
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Set up or initialize the organization's authentication configuration.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async setUpAuthConfig(
     request: operations.SetUpAuthConfigRequest,

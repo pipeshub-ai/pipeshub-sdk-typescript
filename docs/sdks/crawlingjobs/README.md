@@ -34,11 +34,11 @@ search index.
 * [scheduleCrawlingJob](#schedulecrawlingjob) - Schedule a crawling job
 * [getCrawlingJobStatus](#getcrawlingjobstatus) - Get crawling job status
 * [removeCrawlingJob](#removecrawlingjob) - Remove a crawling job
-* [~~getAllCrawlingJobStatus~~](#getallcrawlingjobstatus) - Get all crawling job statuses :warning: **Deprecated**
-* [~~removeAllCrawlingJob~~](#removeallcrawlingjob) - Remove all crawling jobs :warning: **Deprecated**
-* [~~pauseCrawlingJob~~](#pausecrawlingjob) - Pause a crawling job :warning: **Deprecated**
-* [~~resumeCrawlingJob~~](#resumecrawlingjob) - Resume a crawling job :warning: **Deprecated**
-* [~~getQueueStats~~](#getqueuestats) - Get queue statistics :warning: **Deprecated**
+* [getAllCrawlingJobStatus](#getallcrawlingjobstatus) - Get all crawling job statuses
+* [removeAllCrawlingJob](#removeallcrawlingjob) - Remove all crawling jobs
+* [pauseCrawlingJob](#pausecrawlingjob) - Pause a crawling job
+* [resumeCrawlingJob](#resumecrawlingjob) - Resume a crawling job
+* [getQueueStats](#getqueuestats) - Get queue statistics
 
 ## scheduleCrawlingJob
 
@@ -676,13 +676,10 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## ~~getAllCrawlingJobStatus~~
+## getAllCrawlingJobStatus
 
-<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
 Retrieve the status of all scheduled crawling jobs across the organization.
 
-
-> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
 
 ### Example Usage
 
@@ -752,13 +749,10 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## ~~removeAllCrawlingJob~~
+## removeAllCrawlingJob
 
-<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
 Remove all scheduled crawling jobs for the organization.
 
-
-> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
 
 ### Example Usage
 
@@ -828,13 +822,10 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## ~~pauseCrawlingJob~~
+## pauseCrawlingJob
 
-<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
 Pause a running or scheduled crawling job for a specific connector.
 
-
-> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
 
 ### Example Usage
 
@@ -911,13 +902,10 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## ~~resumeCrawlingJob~~
+## resumeCrawlingJob
 
-<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
 Resume a previously paused crawling job for a specific connector.
 
-
-> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
 
 ### Example Usage
 
@@ -994,13 +982,10 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## ~~getQueueStats~~
+## getQueueStats
 
-<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
 Retrieve statistics for the crawling job queue including active, waiting, and completed job counts.
 
-
-> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
 
 ### Example Usage
 

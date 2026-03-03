@@ -243,10 +243,7 @@ export class UserGroups extends ClientSDK {
    * Get users in group
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Retrieve all users that belong to a specific user group.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async getUsersInGroup(
     request: operations.GetUsersInGroupRequest,
@@ -263,10 +260,7 @@ export class UserGroups extends ClientSDK {
    * Get group statistics
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Retrieve statistics for all user groups including member counts.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async getGroupStatistics(
     options?: RequestOptions,

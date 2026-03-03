@@ -15,7 +15,11 @@ export type CreateOAuthAppRequestAllowedGrantType = ClosedEnum<
 >;
 
 /**
- * Request to create a new OAuth app
+ * Request to create a new OAuth app.
+ *
+ * @remarks
+ * Redirect URIs are required only when `authorization_code` is included in `allowedGrantTypes`.
+ * If `authorization_code` is not enabled, redirect URIs are optional and will be ignored.
  */
 export type CreateOAuthAppRequest = {
   /**
@@ -27,11 +31,14 @@ export type CreateOAuthAppRequest = {
    */
   description?: string | undefined;
   /**
-   * Allowed redirect URIs (1-10 URIs)
+   * Allowed redirect URIs (up to 10). Required when `authorization_code` grant type is enabled.
+   *
+   * @remarks
+   * Not needed for apps using only `client_credentials` grant type.
    */
-  redirectUris: Array<string>;
+  redirectUris?: Array<string> | undefined;
   /**
-   * Allowed grant types. Defaults to all if not specified.
+   * Allowed grant types. Defaults to `["authorization_code", "refresh_token"]` if not specified.
    *
    * @remarks
    */
@@ -80,7 +87,7 @@ export const CreateOAuthAppRequestAllowedGrantType$outboundSchema:
 export type CreateOAuthAppRequest$Outbound = {
   name: string;
   description?: string | undefined;
-  redirectUris: Array<string>;
+  redirectUris?: Array<string> | undefined;
   allowedGrantTypes?: Array<string> | undefined;
   allowedScopes: Array<string>;
   homepageUrl?: string | undefined;
@@ -98,7 +105,7 @@ export const CreateOAuthAppRequest$outboundSchema: z.ZodMiniType<
 > = z.object({
   name: z.string(),
   description: z.optional(z.string()),
-  redirectUris: z.array(z.string()),
+  redirectUris: z.optional(z.array(z.string())),
   allowedGrantTypes: z.optional(
     z.array(CreateOAuthAppRequestAllowedGrantType$outboundSchema),
   ),

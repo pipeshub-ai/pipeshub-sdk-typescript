@@ -15,7 +15,11 @@ export type UpdateOAuthAppRequestAllowedGrantType = ClosedEnum<
 >;
 
 /**
- * Request to update an OAuth app
+ * Request to update an OAuth app.
+ *
+ * @remarks
+ * Redirect URIs are required when `authorization_code` grant type is enabled (either already set or being added).
+ * Existing redirect URIs are preserved in the database even if `authorization_code` is removed from grant types.
  */
 export type UpdateOAuthAppRequest = {
   /**
@@ -27,7 +31,10 @@ export type UpdateOAuthAppRequest = {
    */
   description?: string | undefined;
   /**
-   * Allowed redirect URIs
+   * Allowed redirect URIs (up to 10). Required when `authorization_code` grant type is enabled.
+   *
+   * @remarks
+   * Preserved in the database even if `authorization_code` is removed from grant types.
    */
   redirectUris?: Array<string> | undefined;
   allowedGrantTypes?: Array<UpdateOAuthAppRequestAllowedGrantType> | undefined;

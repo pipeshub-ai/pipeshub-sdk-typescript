@@ -277,10 +277,7 @@ export class Users extends ClientSDK {
    * Update user email
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Update the email address of a user.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async updateEmail(
     request: operations.UpdateEmailRequest,
@@ -569,10 +566,7 @@ export class Users extends ClientSDK {
    * Get users by IDs
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Retrieve multiple users by their IDs in a single request.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async getUsersByIds(
     request: operations.GetUsersByIdsRequest,
@@ -589,10 +583,7 @@ export class Users extends ClientSDK {
    * Update user full name
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Update the full name of a user.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async updateFullName(
     request: operations.UpdateFullNameRequest,
@@ -609,10 +600,7 @@ export class Users extends ClientSDK {
    * Update user first name
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Update the first name of a user.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async updateFirstName(
     request: operations.UpdateFirstNameRequest,
@@ -629,10 +617,7 @@ export class Users extends ClientSDK {
    * Update user last name
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Update the last name of a user.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async updateLastName(
     request: operations.UpdateLastNameRequest,
@@ -649,10 +634,7 @@ export class Users extends ClientSDK {
    * Update user designation
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Update the designation/title of a user.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async updateDesignation(
     request: operations.UpdateDesignationRequest,
@@ -669,10 +651,7 @@ export class Users extends ClientSDK {
    * Check if user is admin
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Check whether the specified user has admin privileges. Returns 200 OK if the user is an admin.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async adminCheck(
     request: operations.AdminCheckRequest,
@@ -689,10 +668,7 @@ export class Users extends ClientSDK {
    * Get user teams
    *
    * @remarks
-   * <b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
    * Retrieve teams associated with the authenticated user.
-   *
-   * @deprecated method: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   async getUserTeamsViaUsers(
     options?: RequestOptions,

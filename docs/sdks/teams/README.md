@@ -12,11 +12,11 @@ Team management operations
 * [updateTeam](#updateteam) - Update team
 * [deleteTeam](#deleteteam) - Delete team
 * [getUserTeams](#getuserteams) - Get current user's teams
-* [~~getTeamUsers~~](#getteamusers) - Get users in team :warning: **Deprecated**
-* [~~addUsersToTeam~~](#adduserstoteam) - Add users to team :warning: **Deprecated**
-* [~~removeUserFromTeam~~](#removeuserfromteam) - Remove user from team :warning: **Deprecated**
-* [~~updateTeamUsersPermissions~~](#updateteamuserspermissions) - Update team users permissions :warning: **Deprecated**
-* [~~getUserCreatedTeams~~](#getusercreatedteams) - Get user created teams :warning: **Deprecated**
+* [getTeamUsers](#getteamusers) - Get users in team
+* [addUsersToTeam](#adduserstoteam) - Add users to team
+* [removeUserFromTeam](#removeuserfromteam) - Remove user from team
+* [updateTeamUsersPermissions](#updateteamuserspermissions) - Update team users permissions
+* [getUserCreatedTeams](#getusercreatedteams) - Get user created teams
 
 ## createTeam
 
@@ -591,13 +591,10 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## ~~getTeamUsers~~
+## getTeamUsers
 
-<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
 Retrieve all users that belong to a specific team.
 
-
-> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
 
 ### Example Usage
 
@@ -672,13 +669,10 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## ~~addUsersToTeam~~
+## addUsersToTeam
 
-<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
 Add one or more users to a team.
 
-
-> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
 
 ### Example Usage
 
@@ -755,13 +749,10 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## ~~removeUserFromTeam~~
+## removeUserFromTeam
 
-<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
 Remove a user from a team.
 
-
-> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
 
 ### Example Usage
 
@@ -838,13 +829,10 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## ~~updateTeamUsersPermissions~~
+## updateTeamUsersPermissions
 
-<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
 Update permissions for users within a team.
 
-
-> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
 
 ### Example Usage
 
@@ -921,13 +909,10 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## ~~getUserCreatedTeams~~
+## getUserCreatedTeams
 
-<b>⚠️ Deprecated:</b> This endpoint is deprecated and will be removed in a future release.<br><br>
 Retrieve teams created by the authenticated user.
 
-
-> :warning: **DEPRECATED**: This will be removed in a future release, please migrate away from it as soon as possible.
 
 ### Example Usage
 

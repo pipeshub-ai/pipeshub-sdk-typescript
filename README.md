@@ -335,6 +335,11 @@ run();
 * [getKnowledgeHubRootNodes](docs/sdks/knowledgebases/README.md#getknowledgehubrootnodes) - Get knowledge hub root nodes
 * [getKnowledgeHubChildNodes](docs/sdks/knowledgebases/README.md#getknowledgehubchildnodes) - Get knowledge hub child nodes
 
+### [Mcp](docs/sdks/mcp/README.md)
+
+* [handleMCPRequest](docs/sdks/mcp/README.md#handlemcprequest) - Handle MCP JSON-RPC request
+* [handleMCPStreamingRequest](docs/sdks/mcp/README.md#handlemcpstreamingrequest) - MCP SSE streaming endpoint
+
 ### [MetricsCollection](docs/sdks/metricscollection/README.md)
 
 * [getMetricsCollection](docs/sdks/metricscollection/README.md#getmetricscollection) - Get metrics collection configuration
@@ -384,7 +389,9 @@ run();
 
 * [oauthUserInfo](docs/sdks/openidconnect/README.md#oauthuserinfo) - Get authenticated user information
 * [openidConfiguration](docs/sdks/openidconnect/README.md#openidconfiguration) - OpenID Connect Discovery
+* [oauthAuthorizationServerMetadata](docs/sdks/openidconnect/README.md#oauthauthorizationservermetadata) - OAuth 2.0 Authorization Server Metadata
 * [jwks](docs/sdks/openidconnect/README.md#jwks) - JSON Web Key Set
+* [oauthProtectedResource](docs/sdks/openidconnect/README.md#oauthprotectedresource) - OAuth Protected Resource Metadata
 
 ### [OrganizationAuthConfig](docs/sdks/organizationauthconfig/README.md)
 
@@ -697,6 +704,8 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`knowledgeBasesMoveRecord`](docs/sdks/knowledgebases/README.md#moverecord) - Move record to another location
 - [`knowledgeBasesReindexFailedRecords`](docs/sdks/knowledgebases/README.md#reindexfailedrecords) - Reindex failed records for connector
 - [`knowledgeBasesUpdateKnowledgeBase`](docs/sdks/knowledgebases/README.md#updateknowledgebase) - Update knowledge base
+- [`mcpHandleMCPRequest`](docs/sdks/mcp/README.md#handlemcprequest) - Handle MCP JSON-RPC request
+- [`mcpHandleMCPStreamingRequest`](docs/sdks/mcp/README.md#handlemcpstreamingrequest) - MCP SSE streaming endpoint
 - [`metricsCollectionGetMetricsCollection`](docs/sdks/metricscollection/README.md#getmetricscollection) - Get metrics collection configuration
 - [`metricsCollectionToggleMetricsCollection`](docs/sdks/metricscollection/README.md#togglemetricscollection) - Enable or disable metrics collection
 - [`oAuthAppsActivateOAuthApp`](docs/sdks/oauthapps/README.md#activateoauthapp) - Activate suspended OAuth app
@@ -728,6 +737,8 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`oAuthProviderOauthRevoke`](docs/sdks/oauthprovider/README.md#oauthrevoke) - Revoke an access or refresh token
 - [`oAuthProviderOauthToken`](docs/sdks/oauthprovider/README.md#oauthtoken) - Exchange authorization code for tokens
 - [`openIDConnectJwks`](docs/sdks/openidconnect/README.md#jwks) - JSON Web Key Set
+- [`openIDConnectOauthAuthorizationServerMetadata`](docs/sdks/openidconnect/README.md#oauthauthorizationservermetadata) - OAuth 2.0 Authorization Server Metadata
+- [`openIDConnectOauthProtectedResource`](docs/sdks/openidconnect/README.md#oauthprotectedresource) - OAuth Protected Resource Metadata
 - [`openIDConnectOauthUserInfo`](docs/sdks/openidconnect/README.md#oauthuserinfo) - Get authenticated user information
 - [`openIDConnectOpenidConfiguration`](docs/sdks/openidconnect/README.md#openidconfiguration) - OpenID Connect Discovery
 - [`organizationAuthConfigGetAuthMethods`](docs/sdks/organizationauthconfig/README.md#getauthmethods) - Get organization authentication methods
@@ -1071,11 +1082,11 @@ run();
 
 
 **Inherit from [`PipeshubError`](./src/models/errors/pipeshub-error.ts)**:
-* [`AuthError`](./src/models/errors/auth-error.ts): Authentication error response with details for debugging and user feedback.<br><br> <b>Common Error Codes:</b><br> <ul> <li><code>INVALID_CREDENTIALS</code> - Wrong password or OTP</li> <li><code>ACCOUNT_BLOCKED</code> - Account locked after 5 failed attempts</li> <li><code>SESSION_EXPIRED</code> - Session token has expired</li> <li><code>OTP_EXPIRED</code> - OTP code has expired (10 min validity)</li> <li><code>USER_NOT_FOUND</code> - Email not registered</li> <li><code>INVALID_TOKEN</code> - JWT token is invalid or malformed</li> <li><code>METHOD_NOT_ALLOWED</code> - Auth method not enabled for org</li> </ul>. Applicable to 7 of 270 methods.*
-* [`OAuthErrorResponse`](./src/models/errors/o-auth-error-response.ts): OAuth 2.0 Error Response (RFC 6749 Section 5.2). Standard error format for OAuth endpoints. Applicable to 5 of 270 methods.*
-* [`ResetPasswordBadRequestError`](./src/models/errors/reset-password-bad-request-error.ts): Invalid current password or weak new password. Status code `400`. Applicable to 1 of 270 methods.*
-* [`SamlSignInCallbackBadRequestError`](./src/models/errors/saml-sign-in-callback-bad-request-error.ts): Invalid SAML response. Status code `400`. Applicable to 1 of 270 methods.*
-* [`UnauthorizedError`](./src/models/errors/unauthorized-error.ts): SAML authentication failed. Status code `401`. Applicable to 1 of 270 methods.*
+* [`AuthError`](./src/models/errors/auth-error.ts): Authentication error response with details for debugging and user feedback.<br><br> <b>Common Error Codes:</b><br> <ul> <li><code>INVALID_CREDENTIALS</code> - Wrong password or OTP</li> <li><code>ACCOUNT_BLOCKED</code> - Account locked after 5 failed attempts</li> <li><code>SESSION_EXPIRED</code> - Session token has expired</li> <li><code>OTP_EXPIRED</code> - OTP code has expired (10 min validity)</li> <li><code>USER_NOT_FOUND</code> - Email not registered</li> <li><code>INVALID_TOKEN</code> - JWT token is invalid or malformed</li> <li><code>METHOD_NOT_ALLOWED</code> - Auth method not enabled for org</li> </ul>. Applicable to 7 of 274 methods.*
+* [`OAuthErrorResponse`](./src/models/errors/o-auth-error-response.ts): OAuth 2.0 Error Response (RFC 6749 Section 5.2). Standard error format for OAuth endpoints. Applicable to 5 of 274 methods.*
+* [`ResetPasswordBadRequestError`](./src/models/errors/reset-password-bad-request-error.ts): Invalid current password or weak new password. Status code `400`. Applicable to 1 of 274 methods.*
+* [`SamlSignInCallbackBadRequestError`](./src/models/errors/saml-sign-in-callback-bad-request-error.ts): Invalid SAML response. Status code `400`. Applicable to 1 of 274 methods.*
+* [`UnauthorizedError`](./src/models/errors/unauthorized-error.ts): SAML authentication failed. Status code `401`. Applicable to 1 of 274 methods.*
 * [`ResponseValidationError`](./src/models/errors/response-validation-error.ts): Type mismatch between the data returned from the server and the structure expected by the SDK. See `error.rawValue` for the raw value and `error.pretty()` for a nicely formatted multi-line string.
 
 </details>
@@ -1086,13 +1097,20 @@ run();
 <!-- Start Server Selection [server] -->
 ## Server Selection
 
-### Server Variables
+### Select Server by Index
 
-The default server `https://{instance_url}/api/v1` contains variables and is set to `https://https://app.pipeshub.com/api/v1` by default. To override default values, the following parameters are available when initializing the SDK client instance:
+You can override the default server globally by passing a server index to the `serverIdx: number` optional parameter when initializing the SDK client instance. The selected server will then be used as the default on the operations that use it. This table lists the indexes associated with the available servers:
 
-| Variable       | Parameter             | Default                      | Description                       |
-| -------------- | --------------------- | ---------------------------- | --------------------------------- |
-| `instance_url` | `instanceUrl: string` | `"https://app.pipeshub.com"` | Base server URL (without /api/v1) |
+| #   | Server                          | Variables      | Description                                       |
+| --- | ------------------------------- | -------------- | ------------------------------------------------- |
+| 0   | `https://{instance_url}/api/v1` | `instance_url` | Base API URL                                      |
+| 1   | `https://{instance_url}`        | `instance_url` | Root URL (used for MCP endpoints mounted at /mcp) |
+
+If the selected server has variables, you may override its default values through the additional parameters made available in the SDK constructor:
+
+| Variable       | Parameter             | Default                      | Description     |
+| -------------- | --------------------- | ---------------------------- | --------------- |
+| `instance_url` | `instanceUrl: string` | `"https://app.pipeshub.com"` | Base server URL |
 
 #### Example
 
@@ -1118,12 +1136,12 @@ run();
 
 ### Override Server URL Per-Client
 
-The default server can be overridden globally by passing a URL to the `serverURL: string` optional parameter when initializing the SDK client instance. For example:
+The default server can also be overridden globally by passing a URL to the `serverURL: string` optional parameter when initializing the SDK client instance. For example:
 ```typescript
 import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
-  serverURL: "https://https://app.pipeshub.com/api/v1",
+  serverURL: "https://https://app.pipeshub.com",
 });
 
 async function run() {

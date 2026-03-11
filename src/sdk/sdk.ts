@@ -21,6 +21,7 @@ import { CrawlingJobs } from "./crawling-jobs.js";
 import { DocumentManagement } from "./document-management.js";
 import { Folders } from "./folders.js";
 import { KnowledgeBases } from "./knowledge-bases.js";
+import { Mcp } from "./mcp.js";
 import { MetricsCollection } from "./metrics-collection.js";
 import { OAuthApps } from "./o-auth-apps.js";
 import { OAuthConfiguration } from "./o-auth-configuration.js";
@@ -272,5 +273,10 @@ export class Pipeshub extends ClientSDK {
   private _crawlingJobs?: CrawlingJobs;
   get crawlingJobs(): CrawlingJobs {
     return (this._crawlingJobs ??= new CrawlingJobs(this._options));
+  }
+
+  private _mcp?: Mcp;
+  get mcp(): Mcp {
+    return (this._mcp ??= new Mcp(this._options));
   }
 }

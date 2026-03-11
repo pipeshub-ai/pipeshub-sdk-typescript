@@ -3,6 +3,8 @@
  */
 
 import { openIDConnectJwks } from "../funcs/open-id-connect-jwks.js";
+import { openIDConnectOauthAuthorizationServerMetadata } from "../funcs/open-id-connect-oauth-authorization-server-metadata.js";
+import { openIDConnectOauthProtectedResource } from "../funcs/open-id-connect-oauth-protected-resource.js";
 import { openIDConnectOauthUserInfo } from "../funcs/open-id-connect-oauth-user-info.js";
 import { openIDConnectOpenidConfiguration } from "../funcs/open-id-connect-openid-configuration.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
@@ -62,6 +64,27 @@ export class OpenIDConnect extends ClientSDK {
   }
 
   /**
+   * OAuth 2.0 Authorization Server Metadata
+   *
+   * @remarks
+   * OAuth 2.0 Authorization Server Metadata Endpoint (RFC 8414).
+   * <br><br>
+   * Returns the same metadata as the OpenID Connect Discovery endpoint
+   * but at the RFC 8414 standard path. MCP clients like Claude Code use
+   * this endpoint for discovery instead of openid-configuration.
+   * <br><br>
+   * <b>Note:</b> This endpoint does not require authentication.
+   */
+  async oauthAuthorizationServerMetadata(
+    options?: RequestOptions,
+  ): Promise<models.OpenIDConfiguration> {
+    return unwrapAsync(openIDConnectOauthAuthorizationServerMetadata(
+      this,
+      options,
+    ));
+  }
+
+  /**
    * JSON Web Key Set
    *
    * @remarks
@@ -83,6 +106,31 @@ export class OpenIDConnect extends ClientSDK {
     options?: RequestOptions,
   ): Promise<models.Jwks> {
     return unwrapAsync(openIDConnectJwks(
+      this,
+      options,
+    ));
+  }
+
+  /**
+   * OAuth Protected Resource Metadata
+   *
+   * @remarks
+   * OAuth Protected Resource Metadata Endpoint (RFC 9728).
+   * <br><br>
+   * Returns metadata about the protected resource including the resource
+   * identifier, authorization servers, supported scopes, and bearer token methods.
+   * <br><br>
+   * <b>Use Cases:</b><br>
+   * - Discovering which authorization server to use for this resource<br>
+   * - Determining supported scopes and bearer token methods<br>
+   * - MCP client auto-configuration
+   * <br><br>
+   * <b>Note:</b> This endpoint does not require authentication.
+   */
+  async oauthProtectedResource(
+    options?: RequestOptions,
+  ): Promise<models.OAuthProtectedResourceMetadata> {
+    return unwrapAsync(openIDConnectOauthProtectedResource(
       this,
       options,
     ));

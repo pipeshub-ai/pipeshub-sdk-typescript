@@ -6,6 +6,8 @@ OpenID Connect 1.0 endpoints for identity federation and discovery.
 
 **Discovery:**
 - `/.well-known/openid-configuration` - Authorization server metadata
+- `/.well-known/oauth-authorization-server` - Authorization server metadata (RFC 8414)
+- `/.well-known/oauth-protected-resource/mcp` - Protected resource metadata (RFC 9728)
 - `/.well-known/jwks.json` - Public keys for token verification
 
 **UserInfo:**
@@ -21,7 +23,9 @@ OpenID Connect 1.0 endpoints for identity federation and discovery.
 
 * [oauthUserInfo](#oauthuserinfo) - Get authenticated user information
 * [openidConfiguration](#openidconfiguration) - OpenID Connect Discovery
+* [oauthAuthorizationServerMetadata](#oauthauthorizationservermetadata) - OAuth 2.0 Authorization Server Metadata
 * [jwks](#jwks) - JSON Web Key Set
+* [oauthProtectedResource](#oauthprotectedresource) - OAuth Protected Resource Metadata
 
 ## oauthUserInfo
 
@@ -183,6 +187,78 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
+## oauthAuthorizationServerMetadata
+
+OAuth 2.0 Authorization Server Metadata Endpoint (RFC 8414).
+<br><br>
+Returns the same metadata as the OpenID Connect Discovery endpoint
+but at the RFC 8414 standard path. MCP clients like Claude Code use
+this endpoint for discovery instead of openid-configuration.
+<br><br>
+<b>Note:</b> This endpoint does not require authentication.
+
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="oauthAuthorizationServerMetadata" method="get" path="/.well-known/oauth-authorization-server" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub();
+
+async function run() {
+  const result = await pipeshub.openIDConnect.oauthAuthorizationServerMetadata();
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { openIDConnectOauthAuthorizationServerMetadata } from "@pipeshub-ai/sdk/funcs/open-id-connect-oauth-authorization-server-metadata.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore();
+
+async function run() {
+  const res = await openIDConnectOauthAuthorizationServerMetadata(pipeshub);
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("openIDConnectOauthAuthorizationServerMetadata failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+| `options.serverURL`                                                                                                                                                            | *string*                                                                                                                                                                       | :heavy_minus_sign:                                                                                                                                                             | An optional server URL to use.                                                                                                                                                 |
+
+### Response
+
+**Promise\<[models.OpenIDConfiguration](../../models/open-id-configuration.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
 ## jwks
 
 JSON Web Key Set Endpoint (RFC 7517).
@@ -254,6 +330,82 @@ run();
 ### Response
 
 **Promise\<[models.Jwks](../../models/jwks.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
+## oauthProtectedResource
+
+OAuth Protected Resource Metadata Endpoint (RFC 9728).
+<br><br>
+Returns metadata about the protected resource including the resource
+identifier, authorization servers, supported scopes, and bearer token methods.
+<br><br>
+<b>Use Cases:</b><br>
+- Discovering which authorization server to use for this resource<br>
+- Determining supported scopes and bearer token methods<br>
+- MCP client auto-configuration
+<br><br>
+<b>Note:</b> This endpoint does not require authentication.
+
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="oauthProtectedResource" method="get" path="/.well-known/oauth-protected-resource/mcp" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub();
+
+async function run() {
+  const result = await pipeshub.openIDConnect.oauthProtectedResource();
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { openIDConnectOauthProtectedResource } from "@pipeshub-ai/sdk/funcs/open-id-connect-oauth-protected-resource.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore();
+
+async function run() {
+  const res = await openIDConnectOauthProtectedResource(pipeshub);
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("openIDConnectOauthProtectedResource failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+| `options.serverURL`                                                                                                                                                            | *string*                                                                                                                                                                       | :heavy_minus_sign:                                                                                                                                                             | An optional server URL to use.                                                                                                                                                 |
+
+### Response
+
+**Promise\<[models.OAuthProtectedResourceMetadata](../../models/o-auth-protected-resource-metadata.md)\>**
 
 ### Errors
 

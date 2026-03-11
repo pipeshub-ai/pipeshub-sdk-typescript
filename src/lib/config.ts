@@ -16,6 +16,10 @@ export const ServerList = [
    * Base API URL
    */
   "https://{instance_url}/api/v1",
+  /**
+   * Root URL (used for MCP endpoints mounted at /mcp)
+   */
+  "https://{instance_url}",
 ] as const;
 
 export type SDKOptions = {
@@ -56,6 +60,9 @@ export function serverURLFromOptions(options: SDKOptions): URL | null {
     {
       "instance_url": options.instanceUrl ?? "https://app.pipeshub.com",
     },
+    {
+      "instance_url": options.instanceUrl ?? "https://app.pipeshub.com",
+    },
   ];
   let params: Params = {};
 
@@ -75,7 +82,7 @@ export function serverURLFromOptions(options: SDKOptions): URL | null {
 export const SDK_METADATA = {
   language: "typescript",
   openapiDocVersion: "1.0.0",
-  sdkVersion: "1.0.1",
+  sdkVersion: "1.0.2",
   genVersion: "2.846.1",
-  userAgent: "speakeasy-sdk/typescript 1.0.1 2.846.1 1.0.0 @pipeshub-ai/sdk",
+  userAgent: "speakeasy-sdk/typescript 1.0.2 2.846.1 1.0.0 @pipeshub-ai/sdk",
 } as const;

@@ -75,6 +75,7 @@ export * from "./o-auth-exchange-request.js";
 export * from "./o-auth-exchange-response.js";
 export * from "./o-auth-introspect-request.js";
 export * from "./o-auth-introspect-response.js";
+export * from "./o-auth-protected-resource-metadata.js";
 export * from "./o-auth-revoke-request.js";
 export * from "./o-auth-token-list-item.js";
 export * from "./o-auth-token-request.js";

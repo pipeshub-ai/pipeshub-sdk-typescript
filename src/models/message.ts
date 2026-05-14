@@ -10,9 +10,17 @@ import { OpenEnum } from "../types/enums.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import {
+  AppliedFilters,
+  AppliedFilters$inboundSchema,
+} from "./applied-filters.js";
+import {
   CitationReference,
   CitationReference$inboundSchema,
 } from "./citation-reference.js";
+import {
+  ConversationModelInfo,
+  ConversationModelInfo$inboundSchema,
+} from "./conversation-model-info.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 import {
   FollowUpQuestion,
@@ -69,7 +77,7 @@ export const ContentFormat = {
  */
 export type ContentFormat = OpenEnum<typeof ContentFormat>;
 
-export type MessageMetadata = {
+export type Metadata = {
   /**
    * Time taken to generate response in milliseconds
    */
@@ -86,6 +94,39 @@ export type MessageMetadata = {
    * Additional context or reasoning
    */
   reason?: string | undefined;
+};
+
+export type ReferenceDatum = {
+  /**
+   * Display name shown to the user.
+   */
+  name?: string | undefined;
+  /**
+   * Technical identifier (numeric ID, UUID, etc.).
+   */
+  id?: string | undefined;
+  /**
+   * Item type (e.g. `project`, `issue`, `file`, `notebook`, `page`).
+   */
+  type?: string | undefined;
+  /**
+   * Source application (e.g. `jira`, `confluence`, `sharepoint`,
+   *
+   * @remarks
+   * `slack`, `drive`, `gmail`).
+   */
+  app?: string | undefined;
+  /**
+   * URL to open the item in a browser.
+   */
+  webUrl?: string | undefined;
+  /**
+   * App-specific fields keyed by name (e.g. `key` for a Jira project,
+   *
+   * @remarks
+   * `siteId` for a SharePoint document).
+   */
+  metadata?: { [k: string]: string } | undefined;
 };
 
 /**
@@ -136,7 +177,30 @@ export type Message = {
    * User feedback on this message
    */
   feedback?: Array<MessageFeedback> | undefined;
-  metadata?: MessageMetadata | undefined;
+  metadata?: Metadata | undefined;
+  /**
+   * AI model configuration recorded against a conversation or message.
+   */
+  modelInfo?: ConversationModelInfo | undefined;
+  /**
+   * Rich filter state selected by the user, used for display and persistence only.
+   *
+   * @remarks
+   * This mirrors the active selection shown in the UI and is distinct from the
+   * machine-readable `filters` field used for retrieval scoping.
+   */
+  appliedFilters?: AppliedFilters | undefined;
+  /**
+   * Reference identifiers extracted from tool responses, used to scope
+   *
+   * @remarks
+   * follow-up queries (for example Jira project keys or record IDs).
+   */
+  referenceData?: Array<ReferenceDatum> | undefined;
+  /**
+   * Files or media attached to this message
+   */
+  attachments?: Array<{ [k: string]: any }> | undefined;
   createdAt?: Date | undefined;
   updatedAt?: Date | undefined;
 };
@@ -152,23 +216,44 @@ export const ContentFormat$inboundSchema: z.ZodMiniType<
 > = openEnums.inboundSchema(ContentFormat);
 
 /** @internal */
-export const MessageMetadata$inboundSchema: z.ZodMiniType<
-  MessageMetadata,
-  unknown
-> = z.object({
-  processingTimeMs: types.optional(types.number()),
-  modelVersion: types.optional(types.string()),
-  aiTransactionId: types.optional(types.string()),
-  reason: types.optional(types.string()),
-});
+export const Metadata$inboundSchema: z.ZodMiniType<Metadata, unknown> = z
+  .object({
+    processingTimeMs: types.optional(types.number()),
+    modelVersion: types.optional(types.string()),
+    aiTransactionId: types.optional(types.string()),
+    reason: types.optional(types.string()),
+  });
 
-export function messageMetadataFromJSON(
+export function metadataFromJSON(
   jsonString: string,
-): SafeParseResult<MessageMetadata, SDKValidationError> {
+): SafeParseResult<Metadata, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => MessageMetadata$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'MessageMetadata' from JSON`,
+    (x) => Metadata$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Metadata' from JSON`,
+  );
+}
+
+/** @internal */
+export const ReferenceDatum$inboundSchema: z.ZodMiniType<
+  ReferenceDatum,
+  unknown
+> = z.object({
+  name: types.optional(types.string()),
+  id: types.optional(types.string()),
+  type: types.optional(types.string()),
+  app: types.optional(types.string()),
+  webUrl: types.optional(types.string()),
+  metadata: types.optional(z.record(z.string(), types.string())),
+});
+
+export function referenceDatumFromJSON(
+  jsonString: string,
+): SafeParseResult<ReferenceDatum, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => ReferenceDatum$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ReferenceDatum' from JSON`,
   );
 }
 
@@ -183,7 +268,13 @@ export const Message$inboundSchema: z.ZodMiniType<Message, unknown> = z.pipe(
     confidence: types.optional(types.string()),
     followUpQuestions: types.optional(z.array(FollowUpQuestion$inboundSchema)),
     feedback: types.optional(z.array(MessageFeedback$inboundSchema)),
-    metadata: types.optional(z.lazy(() => MessageMetadata$inboundSchema)),
+    metadata: types.optional(z.lazy(() => Metadata$inboundSchema)),
+    modelInfo: types.optional(ConversationModelInfo$inboundSchema),
+    appliedFilters: types.optional(AppliedFilters$inboundSchema),
+    referenceData: types.optional(z.array(z.lazy(() =>
+      ReferenceDatum$inboundSchema
+    ))),
+    attachments: types.optional(z.array(z.record(z.string(), z.any()))),
     createdAt: types.optional(types.date()),
     updatedAt: types.optional(types.date()),
   }),

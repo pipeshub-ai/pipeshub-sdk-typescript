@@ -39,28 +39,7 @@ export const Address$inboundSchema: z.ZodMiniType<Address, unknown> = z.object({
   postCode: types.optional(types.string()),
   country: types.optional(types.string()),
 });
-/** @internal */
-export type Address$Outbound = {
-  addressLine1?: string | undefined;
-  city?: string | undefined;
-  state?: string | undefined;
-  postCode?: string | undefined;
-  country?: string | undefined;
-};
 
-/** @internal */
-export const Address$outboundSchema: z.ZodMiniType<Address$Outbound, Address> =
-  z.object({
-    addressLine1: z.optional(z.string()),
-    city: z.optional(z.string()),
-    state: z.optional(z.string()),
-    postCode: z.optional(z.string()),
-    country: z.optional(z.string()),
-  });
-
-export function addressToJSON(address: Address): string {
-  return JSON.stringify(Address$outboundSchema.parse(address));
-}
 export function addressFromJSON(
   jsonString: string,
 ): SafeParseResult<Address, SDKValidationError> {

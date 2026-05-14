@@ -3,22 +3,324 @@
  */
 
 import * as z from "zod/v4-mini";
-import * as models from "../index.js";
+import { safeParse } from "../../lib/schemas.js";
+import * as openEnums from "../../types/enums.js";
+import { ClosedEnum, OpenEnum } from "../../types/enums.js";
+import { Result as SafeParseResult } from "../../types/fp.js";
+import * as types from "../../types/primitives.js";
+import { SDKValidationError } from "../errors/sdk-validation-error.js";
+
+export const CategoryRequest = {
+  IncorrectInformation: "incorrect_information",
+  MissingInformation: "missing_information",
+  IrrelevantInformation: "irrelevant_information",
+  UnclearExplanation: "unclear_explanation",
+  PoorCitations: "poor_citations",
+  ExcellentAnswer: "excellent_answer",
+  HelpfulCitations: "helpful_citations",
+  WellExplained: "well_explained",
+  Other: "other",
+} as const;
+export type CategoryRequest = ClosedEnum<typeof CategoryRequest>;
+
+/**
+ * Free-text comments grouped by sentiment.
+ */
+export type CommentsRequest = {
+  /**
+   * What was good about the response.
+   */
+  positive?: string | undefined;
+  /**
+   * What could be improved.
+   */
+  negative?: string | undefined;
+  /**
+   * Specific suggestions for improvement.
+   */
+  suggestions?: string | undefined;
+};
+
+/**
+ * Optional client-supplied telemetry.
+ */
+export type MetricsRequest = {
+  /**
+   * Total time the user spent reviewing the response, in milliseconds.
+   */
+  userInteractionTime?: number | undefined;
+  /**
+   * Opaque session identifier used by the client to group related feedback events.
+   */
+  feedbackSessionId?: string | undefined;
+};
+
+/**
+ * All fields are optional. An empty object is accepted and still
+ *
+ * @remarks
+ * records an entry stamped with the server-side `feedbackProvider`,
+ * `timestamp`, and `metrics`.
+ */
+export type UpdateMessageFeedbackRequestBody = {
+  /**
+   * Overall helpfulness signal (thumbs up/down).
+   */
+  isHelpful?: boolean | undefined;
+  /**
+   * Per-aspect ratings. Keys are arbitrary aspect names chosen
+   *
+   * @remarks
+   * by the client (typically `accuracy`, `relevance`,
+   * `completeness`, `clarity`); values are scores in the range
+   * 1–5.
+   */
+  ratings?: { [k: string]: number } | undefined;
+  /**
+   * Issue or positive categories that apply to the response.
+   */
+  categories?: Array<CategoryRequest> | undefined;
+  /**
+   * Free-text comments grouped by sentiment.
+   */
+  comments?: CommentsRequest | undefined;
+  /**
+   * Optional client-supplied telemetry.
+   */
+  metrics?: MetricsRequest | undefined;
+};
 
 export type UpdateMessageFeedbackRequest = {
+  /**
+   * Unique conversation identifier.
+   */
   conversationId: string;
+  /**
+   * Identifier of the bot-response message being rated.
+   */
   messageId: string;
   /**
    * Request payload
    */
-  body: models.MessageFeedback;
+  body: UpdateMessageFeedbackRequestBody;
 };
+
+export const CategoryResponse = {
+  IncorrectInformation: "incorrect_information",
+  MissingInformation: "missing_information",
+  IrrelevantInformation: "irrelevant_information",
+  UnclearExplanation: "unclear_explanation",
+  PoorCitations: "poor_citations",
+  ExcellentAnswer: "excellent_answer",
+  HelpfulCitations: "helpful_citations",
+  WellExplained: "well_explained",
+  Other: "other",
+} as const;
+export type CategoryResponse = OpenEnum<typeof CategoryResponse>;
+
+/**
+ * Echoed free-text comments from the request.
+ */
+export type CommentsResponse = {
+  positive?: string | undefined;
+  negative?: string | undefined;
+  suggestions?: string | undefined;
+};
+
+/**
+ * Telemetry recorded server-side alongside the feedback.
+ *
+ * @remarks
+ * Always present.
+ */
+export type MetricsResponse = {
+  /**
+   * Milliseconds between message creation and feedback
+   *
+   * @remarks
+   * submission. Always present.
+   */
+  timeToFeedback: number;
+  /**
+   * Echoed from `metrics.userInteractionTime` in the request when supplied.
+   */
+  userInteractionTime?: number | undefined;
+  /**
+   * Echoed from `metrics.feedbackSessionId` in the request when supplied.
+   */
+  feedbackSessionId?: string | undefined;
+  /**
+   * Value of the `User-Agent` request header captured server-side.
+   */
+  userAgent?: string | undefined;
+};
+
+/**
+ * The feedback entry just appended to the message. Echoes
+ *
+ * @remarks
+ * the fields supplied in the request plus server-stamped
+ * `feedbackProvider`, `timestamp`, and `metrics`.
+ */
+export type Feedback = {
+  /**
+   * Echoed from the request when supplied.
+   */
+  isHelpful?: boolean | undefined;
+  /**
+   * Echoed per-aspect ratings (values 1–5).
+   */
+  ratings?: { [k: string]: number } | undefined;
+  /**
+   * Echoed categories from the request.
+   */
+  categories?: Array<CategoryResponse> | undefined;
+  /**
+   * Echoed free-text comments from the request.
+   */
+  comments?: CommentsResponse | undefined;
+  /**
+   * User who submitted the feedback. Always present.
+   */
+  feedbackProvider: string;
+  /**
+   * Submission time as epoch milliseconds (not an ISO 8601
+   *
+   * @remarks
+   * datetime). Always present.
+   */
+  timestamp: number;
+  /**
+   * Telemetry recorded server-side alongside the feedback.
+   *
+   * @remarks
+   * Always present.
+   */
+  metrics: MetricsResponse;
+};
+
+export type UpdateMessageFeedbackMeta = {
+  /**
+   * Server-side request identifier. Read from the
+   *
+   * @remarks
+   * `X-Request-ID` header when supplied, otherwise
+   * auto-generated, so this field is always present.
+   */
+  requestId: string;
+  timestamp: Date;
+  /**
+   * Server-side processing time in milliseconds.
+   */
+  duration: number;
+};
+
+/**
+ * Feedback submitted successfully.
+ */
+export type UpdateMessageFeedbackResponse = {
+  /**
+   * Conversation the feedback was attached to.
+   */
+  conversationId: string;
+  /**
+   * Message the feedback was attached to.
+   */
+  messageId: string;
+  /**
+   * The feedback entry just appended to the message. Echoes
+   *
+   * @remarks
+   * the fields supplied in the request plus server-stamped
+   * `feedbackProvider`, `timestamp`, and `metrics`.
+   */
+  feedback: Feedback;
+  meta: UpdateMessageFeedbackMeta;
+};
+
+/** @internal */
+export const CategoryRequest$outboundSchema: z.ZodMiniEnum<
+  typeof CategoryRequest
+> = z.enum(CategoryRequest);
+
+/** @internal */
+export type CommentsRequest$Outbound = {
+  positive?: string | undefined;
+  negative?: string | undefined;
+  suggestions?: string | undefined;
+};
+
+/** @internal */
+export const CommentsRequest$outboundSchema: z.ZodMiniType<
+  CommentsRequest$Outbound,
+  CommentsRequest
+> = z.object({
+  positive: z.optional(z.string()),
+  negative: z.optional(z.string()),
+  suggestions: z.optional(z.string()),
+});
+
+export function commentsRequestToJSON(
+  commentsRequest: CommentsRequest,
+): string {
+  return JSON.stringify(CommentsRequest$outboundSchema.parse(commentsRequest));
+}
+
+/** @internal */
+export type MetricsRequest$Outbound = {
+  userInteractionTime?: number | undefined;
+  feedbackSessionId?: string | undefined;
+};
+
+/** @internal */
+export const MetricsRequest$outboundSchema: z.ZodMiniType<
+  MetricsRequest$Outbound,
+  MetricsRequest
+> = z.object({
+  userInteractionTime: z.optional(z.number()),
+  feedbackSessionId: z.optional(z.string()),
+});
+
+export function metricsRequestToJSON(metricsRequest: MetricsRequest): string {
+  return JSON.stringify(MetricsRequest$outboundSchema.parse(metricsRequest));
+}
+
+/** @internal */
+export type UpdateMessageFeedbackRequestBody$Outbound = {
+  isHelpful?: boolean | undefined;
+  ratings?: { [k: string]: number } | undefined;
+  categories?: Array<string> | undefined;
+  comments?: CommentsRequest$Outbound | undefined;
+  metrics?: MetricsRequest$Outbound | undefined;
+};
+
+/** @internal */
+export const UpdateMessageFeedbackRequestBody$outboundSchema: z.ZodMiniType<
+  UpdateMessageFeedbackRequestBody$Outbound,
+  UpdateMessageFeedbackRequestBody
+> = z.object({
+  isHelpful: z.optional(z.boolean()),
+  ratings: z.optional(z.record(z.string(), z.number())),
+  categories: z.optional(z.array(CategoryRequest$outboundSchema)),
+  comments: z.optional(z.lazy(() => CommentsRequest$outboundSchema)),
+  metrics: z.optional(z.lazy(() => MetricsRequest$outboundSchema)),
+});
+
+export function updateMessageFeedbackRequestBodyToJSON(
+  updateMessageFeedbackRequestBody: UpdateMessageFeedbackRequestBody,
+): string {
+  return JSON.stringify(
+    UpdateMessageFeedbackRequestBody$outboundSchema.parse(
+      updateMessageFeedbackRequestBody,
+    ),
+  );
+}
 
 /** @internal */
 export type UpdateMessageFeedbackRequest$Outbound = {
   conversationId: string;
   messageId: string;
-  body: models.MessageFeedback$Outbound;
+  body: UpdateMessageFeedbackRequestBody$Outbound;
 };
 
 /** @internal */
@@ -28,7 +330,7 @@ export const UpdateMessageFeedbackRequest$outboundSchema: z.ZodMiniType<
 > = z.object({
   conversationId: z.string(),
   messageId: z.string(),
-  body: models.MessageFeedback$outboundSchema,
+  body: z.lazy(() => UpdateMessageFeedbackRequestBody$outboundSchema),
 });
 
 export function updateMessageFeedbackRequestToJSON(
@@ -38,5 +340,115 @@ export function updateMessageFeedbackRequestToJSON(
     UpdateMessageFeedbackRequest$outboundSchema.parse(
       updateMessageFeedbackRequest,
     ),
+  );
+}
+
+/** @internal */
+export const CategoryResponse$inboundSchema: z.ZodMiniType<
+  CategoryResponse,
+  unknown
+> = openEnums.inboundSchema(CategoryResponse);
+
+/** @internal */
+export const CommentsResponse$inboundSchema: z.ZodMiniType<
+  CommentsResponse,
+  unknown
+> = z.object({
+  positive: types.optional(types.string()),
+  negative: types.optional(types.string()),
+  suggestions: types.optional(types.string()),
+});
+
+export function commentsResponseFromJSON(
+  jsonString: string,
+): SafeParseResult<CommentsResponse, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => CommentsResponse$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'CommentsResponse' from JSON`,
+  );
+}
+
+/** @internal */
+export const MetricsResponse$inboundSchema: z.ZodMiniType<
+  MetricsResponse,
+  unknown
+> = z.object({
+  timeToFeedback: types.number(),
+  userInteractionTime: types.optional(types.number()),
+  feedbackSessionId: types.optional(types.string()),
+  userAgent: types.optional(types.string()),
+});
+
+export function metricsResponseFromJSON(
+  jsonString: string,
+): SafeParseResult<MetricsResponse, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => MetricsResponse$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'MetricsResponse' from JSON`,
+  );
+}
+
+/** @internal */
+export const Feedback$inboundSchema: z.ZodMiniType<Feedback, unknown> = z
+  .object({
+    isHelpful: types.optional(types.boolean()),
+    ratings: types.optional(z.record(z.string(), types.number())),
+    categories: types.optional(z.array(CategoryResponse$inboundSchema)),
+    comments: types.optional(z.lazy(() => CommentsResponse$inboundSchema)),
+    feedbackProvider: types.string(),
+    timestamp: types.number(),
+    metrics: z.lazy(() => MetricsResponse$inboundSchema),
+  });
+
+export function feedbackFromJSON(
+  jsonString: string,
+): SafeParseResult<Feedback, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Feedback$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Feedback' from JSON`,
+  );
+}
+
+/** @internal */
+export const UpdateMessageFeedbackMeta$inboundSchema: z.ZodMiniType<
+  UpdateMessageFeedbackMeta,
+  unknown
+> = z.object({
+  requestId: types.string(),
+  timestamp: types.date(),
+  duration: types.number(),
+});
+
+export function updateMessageFeedbackMetaFromJSON(
+  jsonString: string,
+): SafeParseResult<UpdateMessageFeedbackMeta, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => UpdateMessageFeedbackMeta$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'UpdateMessageFeedbackMeta' from JSON`,
+  );
+}
+
+/** @internal */
+export const UpdateMessageFeedbackResponse$inboundSchema: z.ZodMiniType<
+  UpdateMessageFeedbackResponse,
+  unknown
+> = z.object({
+  conversationId: types.string(),
+  messageId: types.string(),
+  feedback: z.lazy(() => Feedback$inboundSchema),
+  meta: z.lazy(() => UpdateMessageFeedbackMeta$inboundSchema),
+});
+
+export function updateMessageFeedbackResponseFromJSON(
+  jsonString: string,
+): SafeParseResult<UpdateMessageFeedbackResponse, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => UpdateMessageFeedbackResponse$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'UpdateMessageFeedbackResponse' from JSON`,
   );
 }

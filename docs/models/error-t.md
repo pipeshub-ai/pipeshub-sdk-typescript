@@ -1,27 +1,20 @@
 # ErrorT
 
-Error code. Common values:
-- `invalid_request` - Missing or invalid parameter
-- `invalid_client` - Client authentication failed
-- `invalid_grant` - Invalid authorization code or refresh token
-- `unauthorized_client` - Client not authorized for this grant type
-- `unsupported_grant_type` - Grant type not supported
-- `invalid_scope` - Requested scope is invalid or exceeds allowed
-- `access_denied` - User denied authorization
-
-
 ## Example Usage
 
 ```typescript
 import { ErrorT } from "@pipeshub-ai/sdk/models";
 
-let value: ErrorT = "invalid_request";
+let value: ErrorT = {
+  code: "HTTP_BAD_REQUEST",
+  message: "Admin access required",
+};
 ```
 
-## Values
+## Fields
 
-This is an open enum. Unrecognized values will be captured as the `Unrecognized<string>` branded type.
-
-```typescript
-"invalid_request" | "invalid_client" | "invalid_grant" | "unauthorized_client" | "unsupported_grant_type" | "invalid_scope" | "access_denied" | "server_error" | Unrecognized<string>
-```
+| Field                                                                                                                                                                    | Type                                                                                                                                                                     | Required                                                                                                                                                                 | Description                                                                                                                                                              | Example                                                                                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `code`                                                                                                                                                                   | *string*                                                                                                                                                                 | :heavy_check_mark:                                                                                                                                                       | Machine-readable error code. For application errors it takes the form `HTTP_<VARIANT>`<br/>For unhandled runtime errors (e.g. database unavailable) it is `INTERNAL_ERROR`.<br/> | HTTP_BAD_REQUEST                                                                                                                                                         |
+| `message`                                                                                                                                                                | *string*                                                                                                                                                                 | :heavy_check_mark:                                                                                                                                                       | Human-readable description of the error                                                                                                                                  | Admin access required                                                                                                                                                    |
+| `metadata`                                                                                                                                                               | Record<string, *any*>                                                                                                                                                    | :heavy_minus_sign:                                                                                                                                                       | Additional context (only present in development environments)                                                                                                            |                                                                                                                                                                          |

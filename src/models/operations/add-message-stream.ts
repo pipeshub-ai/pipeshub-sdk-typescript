@@ -6,6 +6,12 @@ import * as z from "zod/v4-mini";
 import * as models from "../index.js";
 
 export type AddMessageStreamRequest = {
+  /**
+   * Identifier of the conversation to append the message to. The
+   *
+   * @remarks
+   * conversation must belong to the caller and must not be deleted.
+   */
   conversationId: string;
   /**
    * Request payload

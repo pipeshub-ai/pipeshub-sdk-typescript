@@ -4,102 +4,258 @@
 
 import * as z from "zod/v4-mini";
 import { safeParse } from "../../lib/schemas.js";
-import * as openEnums from "../../types/enums.js";
-import { OpenEnum } from "../../types/enums.js";
+import { ClosedEnum } from "../../types/enums.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 
+/**
+ * Field to sort results by. Omitted → default `updatedAt`.
+ *
+ * @remarks
+ * Unknown value → silently falls back to `name`.
+ */
+export const GetKnowledgeHubRootNodesSortBy = {
+  Name: "name",
+  CreatedAt: "createdAt",
+  UpdatedAt: "updatedAt",
+  Size: "size",
+  Type: "type",
+} as const;
+/**
+ * Field to sort results by. Omitted → default `updatedAt`.
+ *
+ * @remarks
+ * Unknown value → silently falls back to `name`.
+ */
+export type GetKnowledgeHubRootNodesSortBy = ClosedEnum<
+  typeof GetKnowledgeHubRootNodesSortBy
+>;
+
+/**
+ * Sort direction. Omitted → default `desc`.
+ *
+ * @remarks
+ * Unknown value → silently falls back to `asc`.
+ */
+export const GetKnowledgeHubRootNodesSortOrder = {
+  Asc: "asc",
+  Desc: "desc",
+} as const;
+/**
+ * Sort direction. Omitted → default `desc`.
+ *
+ * @remarks
+ * Unknown value → silently falls back to `asc`.
+ */
+export type GetKnowledgeHubRootNodesSortOrder = ClosedEnum<
+  typeof GetKnowledgeHubRootNodesSortOrder
+>;
+
 export type GetKnowledgeHubRootNodesRequest = {
   /**
-   * View mode
+   * When `true`, only nodes that have children are returned (useful for
+   *
+   * @remarks
+   * building sidebar / tree navigation). Leaf nodes are excluded.
    */
-  view?: string | undefined;
+  onlyContainers?: boolean | undefined;
+  /**
+   * Page number (1-indexed). Combined with `limit` to paginate results.
+   *
+   * @remarks
+   */
   page?: number | undefined;
+  /**
+   * Maximum number of items to return per page.
+   *
+   * @remarks
+   */
   limit?: number | undefined;
   /**
-   * Filter by node types (comma-separated)
+   * Field to sort results by. Omitted → default `updatedAt`.
+   *
+   * @remarks
+   * Unknown value → silently falls back to `name`.
+   */
+  sortBy?: GetKnowledgeHubRootNodesSortBy | undefined;
+  /**
+   * Sort direction. Omitted → default `desc`.
+   *
+   * @remarks
+   * Unknown value → silently falls back to `asc`.
+   */
+  sortOrder?: GetKnowledgeHubRootNodesSortOrder | undefined;
+  /**
+   * Full-text search query. Must be between 2 and 500 characters
+   *
+   * @remarks
+   * (inclusive). When provided, the endpoint searches across the entire
+   * node tree regardless of the current browse level.
+   */
+  q?: string | undefined;
+  /**
+   * Comma-separated list of node types to include. Invalid values are
+   *
+   * @remarks
+   * silently ignored. Maximum 100 items.
+   *
+   * Valid values: `folder`, `app`, `recordGroup`, `record`
    */
   nodeTypes?: string | undefined;
   /**
-   * Search query
+   * Comma-separated list of record types to include. Invalid values are
+   *
+   * @remarks
+   * silently ignored. Maximum 100 items.
+   *
+   * Valid values: `FILE`, `DRIVE`, `WEBPAGE`, `DATABASE`, `DATASOURCE`,
+   * `MESSAGE`, `MAIL`, `GROUP_MAIL`, `TICKET`, `COMMENT`,
+   * `INLINE_COMMENT`, `CONFLUENCE_PAGE`, `CONFLUENCE_BLOGPOST`,
+   * `SHAREPOINT_PAGE`, `SHAREPOINT_LIST`, `SHAREPOINT_LIST_ITEM`,
+   * `SHAREPOINT_DOCUMENT_LIBRARY`, `LINK`, `PROJECT`, `PULL_REQUEST`,
+   * `MEETING`, `PRODUCT`, `DEAL`, `CASE`, `TASK`, `ARTIFACT`,
+   * `CODE_FILE`, `SQL_TABLE`, `SQL_VIEW`, `OTHERS`
    */
-  q?: string | undefined;
+  recordTypes?: string | undefined;
+  /**
+   * Comma-separated list of origin types to include. Invalid values are
+   *
+   * @remarks
+   * silently ignored. Maximum 100 items.
+   *
+   * Valid values: `COLLECTION`, `CONNECTOR`
+   */
+  origins?: string | undefined;
+  /**
+   * Comma-separated list of connector instance IDs (UUIDs) to filter by.
+   *
+   * @remarks
+   * Maximum 100 items. No enum validation — any string is accepted, but
+   * non-existent IDs simply yield zero results.
+   */
+  connectorIds?: string | undefined;
+  /**
+   * Comma-separated list of indexing statuses to include. Invalid values
+   *
+   * @remarks
+   * are silently ignored. Maximum 100 items.
+   *
+   * Valid values: `NOT_STARTED`, `PAUSED`, `IN_PROGRESS`, `COMPLETED`,
+   * `FAILED`, `FILE_TYPE_NOT_SUPPORTED`, `AUTO_INDEX_OFF`, `EMPTY`,
+   * `ENABLE_MULTIMODAL_MODELS`, `QUEUED`
+   */
+  indexingStatus?: string | undefined;
+  /**
+   * Created-date range filter. Format: `gte:<epochMs>,lte:<epochMs>`.
+   *
+   * @remarks
+   * Both bounds are optional (you may send just `gte:...` or just
+   * `lte:...`). Timestamps must be in the range 0 to 9999999999999 and
+   * `gte` must be less than or equal to `lte` when both are present.
+   */
+  createdAt?: string | undefined;
+  /**
+   * Updated-date range filter. Same format and constraints as `createdAt`.
+   *
+   * @remarks
+   */
+  updatedAt?: string | undefined;
+  /**
+   * File-size range filter in bytes. Format: `gte:<bytes>,lte:<bytes>`.
+   *
+   * @remarks
+   * Both bounds are optional. Values must be non-negative and at most
+   * 1099511627776 (1 TB). `gte` must be less than or equal to `lte`
+   * when both are present.
+   */
+  size?: string | undefined;
+  /**
+   * Comma-separated list of additional response sections to include.
+   *
+   * @remarks
+   * Invalid values are silently ignored. Maximum 100 items.
+   *
+   * Valid values: `breadcrumbs`, `counts`, `availableFilters`, `permissions`
+   */
+  include?: string | undefined;
 };
 
-export type CurrentNode = {};
-
-export type ParentNode = {};
-
-export const NodeType = {
-  Kb: "kb",
-  Folder: "folder",
-  Record: "record",
-  Connector: "connector",
-  App: "app",
+export const GetKnowledgeHubRootNodesCodeHTTPInternalServerError = {
+  HttpInternalServerError: "HTTP_INTERNAL_SERVER_ERROR",
 } as const;
-export type NodeType = OpenEnum<typeof NodeType>;
+export type GetKnowledgeHubRootNodesCodeHTTPInternalServerError = ClosedEnum<
+  typeof GetKnowledgeHubRootNodesCodeHTTPInternalServerError
+>;
 
-export type Item = {
-  id?: string | undefined;
-  name?: string | undefined;
-  nodeType?: NodeType | undefined;
-  parentId?: string | null | undefined;
-  origin?: string | undefined;
-  connector?: string | undefined;
-  recordType?: string | null | undefined;
-  indexingStatus?: string | null | undefined;
-  createdAt?: number | undefined;
-  updatedAt?: number | undefined;
-  sizeInBytes?: number | null | undefined;
-  mimeType?: string | null | undefined;
-  extension?: string | null | undefined;
-  webUrl?: string | undefined;
-  hasChildren?: boolean | undefined;
-  sharingStatus?: string | undefined;
+export type GetKnowledgeHubRootNodesErrorHTTPInternalServerError = {
+  code: GetKnowledgeHubRootNodesCodeHTTPInternalServerError;
+  message: string;
 };
 
-export type GetKnowledgeHubRootNodesPagination = {
-  page?: number | undefined;
-  limit?: number | undefined;
-  totalItems?: number | undefined;
-  totalPages?: number | undefined;
-  hasNext?: boolean | undefined;
-  hasPrev?: boolean | undefined;
+export const GetKnowledgeHubRootNodesForbiddenCode = {
+  HttpForbidden: "HTTP_FORBIDDEN",
+} as const;
+export type GetKnowledgeHubRootNodesForbiddenCode = ClosedEnum<
+  typeof GetKnowledgeHubRootNodesForbiddenCode
+>;
+
+export type GetKnowledgeHubRootNodesErrorHTTPForbidden = {
+  code: GetKnowledgeHubRootNodesForbiddenCode;
+  message: string;
 };
 
-export type GetKnowledgeHubRootNodesFilters = {};
+export const GetKnowledgeHubRootNodesUnauthorizedCode = {
+  HttpUnauthorized: "HTTP_UNAUTHORIZED",
+} as const;
+export type GetKnowledgeHubRootNodesUnauthorizedCode = ClosedEnum<
+  typeof GetKnowledgeHubRootNodesUnauthorizedCode
+>;
 
-export type Breadcrumb = {};
+export type GetKnowledgeHubRootNodesErrorHTTPUnauthorized = {
+  code: GetKnowledgeHubRootNodesUnauthorizedCode;
+  message: string;
+};
 
-export type GetKnowledgeHubRootNodesCounts = {};
+export const GetKnowledgeHubRootNodesCodeHTTPBadRequest = {
+  HttpBadRequest: "HTTP_BAD_REQUEST",
+} as const;
+export type GetKnowledgeHubRootNodesCodeHTTPBadRequest = ClosedEnum<
+  typeof GetKnowledgeHubRootNodesCodeHTTPBadRequest
+>;
 
-export type Permissions = {};
-
-/**
- * Root nodes retrieved
- */
-export type GetKnowledgeHubRootNodesResponse = {
-  success?: boolean | undefined;
-  error?: string | null | undefined;
-  id?: string | null | undefined;
-  currentNode?: CurrentNode | null | undefined;
-  parentNode?: ParentNode | null | undefined;
-  items?: Array<Item> | undefined;
-  pagination?: GetKnowledgeHubRootNodesPagination | undefined;
-  filters?: GetKnowledgeHubRootNodesFilters | null | undefined;
-  breadcrumbs?: Array<Breadcrumb> | null | undefined;
-  counts?: GetKnowledgeHubRootNodesCounts | null | undefined;
-  permissions?: Permissions | null | undefined;
+export type GetKnowledgeHubRootNodesErrorHTTPBadRequest = {
+  code: GetKnowledgeHubRootNodesCodeHTTPBadRequest;
+  message: string;
 };
 
 /** @internal */
+export const GetKnowledgeHubRootNodesSortBy$outboundSchema: z.ZodMiniEnum<
+  typeof GetKnowledgeHubRootNodesSortBy
+> = z.enum(GetKnowledgeHubRootNodesSortBy);
+
+/** @internal */
+export const GetKnowledgeHubRootNodesSortOrder$outboundSchema: z.ZodMiniEnum<
+  typeof GetKnowledgeHubRootNodesSortOrder
+> = z.enum(GetKnowledgeHubRootNodesSortOrder);
+
+/** @internal */
 export type GetKnowledgeHubRootNodesRequest$Outbound = {
-  view?: string | undefined;
-  page?: number | undefined;
-  limit?: number | undefined;
-  nodeTypes?: string | undefined;
+  onlyContainers: boolean;
+  page: number;
+  limit: number;
+  sortBy: string;
+  sortOrder: string;
   q?: string | undefined;
+  nodeTypes?: string | undefined;
+  recordTypes?: string | undefined;
+  origins?: string | undefined;
+  connectorIds?: string | undefined;
+  indexingStatus?: string | undefined;
+  createdAt?: string | undefined;
+  updatedAt?: string | undefined;
+  size?: string | undefined;
+  include?: string | undefined;
 };
 
 /** @internal */
@@ -107,11 +263,27 @@ export const GetKnowledgeHubRootNodesRequest$outboundSchema: z.ZodMiniType<
   GetKnowledgeHubRootNodesRequest$Outbound,
   GetKnowledgeHubRootNodesRequest
 > = z.object({
-  view: z.optional(z.string()),
-  page: z.optional(z.int()),
-  limit: z.optional(z.int()),
-  nodeTypes: z.optional(z.string()),
+  onlyContainers: z._default(z.boolean(), false),
+  page: z._default(z.int(), 1),
+  limit: z._default(z.int(), 50),
+  sortBy: z._default(
+    GetKnowledgeHubRootNodesSortBy$outboundSchema,
+    "updatedAt",
+  ),
+  sortOrder: z._default(
+    GetKnowledgeHubRootNodesSortOrder$outboundSchema,
+    "desc",
+  ),
   q: z.optional(z.string()),
+  nodeTypes: z.optional(z.string()),
+  recordTypes: z.optional(z.string()),
+  origins: z.optional(z.string()),
+  connectorIds: z.optional(z.string()),
+  indexingStatus: z.optional(z.string()),
+  createdAt: z.optional(z.string()),
+  updatedAt: z.optional(z.string()),
+  size: z.optional(z.string()),
+  include: z.optional(z.string()),
 });
 
 export function getKnowledgeHubRootNodesRequestToJSON(
@@ -125,183 +297,120 @@ export function getKnowledgeHubRootNodesRequestToJSON(
 }
 
 /** @internal */
-export const CurrentNode$inboundSchema: z.ZodMiniType<CurrentNode, unknown> = z
-  .object({});
-
-export function currentNodeFromJSON(
-  jsonString: string,
-): SafeParseResult<CurrentNode, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => CurrentNode$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'CurrentNode' from JSON`,
-  );
-}
+export const GetKnowledgeHubRootNodesCodeHTTPInternalServerError$inboundSchema:
+  z.ZodMiniEnum<typeof GetKnowledgeHubRootNodesCodeHTTPInternalServerError> = z
+    .enum(GetKnowledgeHubRootNodesCodeHTTPInternalServerError);
 
 /** @internal */
-export const ParentNode$inboundSchema: z.ZodMiniType<ParentNode, unknown> = z
-  .object({});
+export const GetKnowledgeHubRootNodesErrorHTTPInternalServerError$inboundSchema:
+  z.ZodMiniType<GetKnowledgeHubRootNodesErrorHTTPInternalServerError, unknown> =
+    z.object({
+      code: GetKnowledgeHubRootNodesCodeHTTPInternalServerError$inboundSchema,
+      message: types.string(),
+    });
 
-export function parentNodeFromJSON(
+export function getKnowledgeHubRootNodesErrorHTTPInternalServerErrorFromJSON(
   jsonString: string,
-): SafeParseResult<ParentNode, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => ParentNode$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'ParentNode' from JSON`,
-  );
-}
-
-/** @internal */
-export const NodeType$inboundSchema: z.ZodMiniType<NodeType, unknown> =
-  openEnums.inboundSchema(NodeType);
-
-/** @internal */
-export const Item$inboundSchema: z.ZodMiniType<Item, unknown> = z.object({
-  id: types.optional(types.string()),
-  name: types.optional(types.string()),
-  nodeType: types.optional(NodeType$inboundSchema),
-  parentId: z.optional(z.nullable(types.string())),
-  origin: types.optional(types.string()),
-  connector: types.optional(types.string()),
-  recordType: z.optional(z.nullable(types.string())),
-  indexingStatus: z.optional(z.nullable(types.string())),
-  createdAt: types.optional(types.number()),
-  updatedAt: types.optional(types.number()),
-  sizeInBytes: z.optional(z.nullable(types.number())),
-  mimeType: z.optional(z.nullable(types.string())),
-  extension: z.optional(z.nullable(types.string())),
-  webUrl: types.optional(types.string()),
-  hasChildren: types.optional(types.boolean()),
-  sharingStatus: types.optional(types.string()),
-});
-
-export function itemFromJSON(
-  jsonString: string,
-): SafeParseResult<Item, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => Item$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Item' from JSON`,
-  );
-}
-
-/** @internal */
-export const GetKnowledgeHubRootNodesPagination$inboundSchema: z.ZodMiniType<
-  GetKnowledgeHubRootNodesPagination,
-  unknown
-> = z.object({
-  page: types.optional(types.number()),
-  limit: types.optional(types.number()),
-  totalItems: types.optional(types.number()),
-  totalPages: types.optional(types.number()),
-  hasNext: types.optional(types.boolean()),
-  hasPrev: types.optional(types.boolean()),
-});
-
-export function getKnowledgeHubRootNodesPaginationFromJSON(
-  jsonString: string,
-): SafeParseResult<GetKnowledgeHubRootNodesPagination, SDKValidationError> {
+): SafeParseResult<
+  GetKnowledgeHubRootNodesErrorHTTPInternalServerError,
+  SDKValidationError
+> {
   return safeParse(
     jsonString,
     (x) =>
-      GetKnowledgeHubRootNodesPagination$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetKnowledgeHubRootNodesPagination' from JSON`,
+      GetKnowledgeHubRootNodesErrorHTTPInternalServerError$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'GetKnowledgeHubRootNodesErrorHTTPInternalServerError' from JSON`,
   );
 }
 
 /** @internal */
-export const GetKnowledgeHubRootNodesFilters$inboundSchema: z.ZodMiniType<
-  GetKnowledgeHubRootNodesFilters,
-  unknown
-> = z.object({});
+export const GetKnowledgeHubRootNodesForbiddenCode$inboundSchema: z.ZodMiniEnum<
+  typeof GetKnowledgeHubRootNodesForbiddenCode
+> = z.enum(GetKnowledgeHubRootNodesForbiddenCode);
 
-export function getKnowledgeHubRootNodesFiltersFromJSON(
+/** @internal */
+export const GetKnowledgeHubRootNodesErrorHTTPForbidden$inboundSchema:
+  z.ZodMiniType<GetKnowledgeHubRootNodesErrorHTTPForbidden, unknown> = z.object(
+    {
+      code: GetKnowledgeHubRootNodesForbiddenCode$inboundSchema,
+      message: types.string(),
+    },
+  );
+
+export function getKnowledgeHubRootNodesErrorHTTPForbiddenFromJSON(
   jsonString: string,
-): SafeParseResult<GetKnowledgeHubRootNodesFilters, SDKValidationError> {
+): SafeParseResult<
+  GetKnowledgeHubRootNodesErrorHTTPForbidden,
+  SDKValidationError
+> {
   return safeParse(
     jsonString,
-    (x) => GetKnowledgeHubRootNodesFilters$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetKnowledgeHubRootNodesFilters' from JSON`,
+    (x) =>
+      GetKnowledgeHubRootNodesErrorHTTPForbidden$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'GetKnowledgeHubRootNodesErrorHTTPForbidden' from JSON`,
   );
 }
 
 /** @internal */
-export const Breadcrumb$inboundSchema: z.ZodMiniType<Breadcrumb, unknown> = z
-  .object({});
+export const GetKnowledgeHubRootNodesUnauthorizedCode$inboundSchema:
+  z.ZodMiniEnum<typeof GetKnowledgeHubRootNodesUnauthorizedCode> = z.enum(
+    GetKnowledgeHubRootNodesUnauthorizedCode,
+  );
 
-export function breadcrumbFromJSON(
+/** @internal */
+export const GetKnowledgeHubRootNodesErrorHTTPUnauthorized$inboundSchema:
+  z.ZodMiniType<GetKnowledgeHubRootNodesErrorHTTPUnauthorized, unknown> = z
+    .object({
+      code: GetKnowledgeHubRootNodesUnauthorizedCode$inboundSchema,
+      message: types.string(),
+    });
+
+export function getKnowledgeHubRootNodesErrorHTTPUnauthorizedFromJSON(
   jsonString: string,
-): SafeParseResult<Breadcrumb, SDKValidationError> {
+): SafeParseResult<
+  GetKnowledgeHubRootNodesErrorHTTPUnauthorized,
+  SDKValidationError
+> {
   return safeParse(
     jsonString,
-    (x) => Breadcrumb$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Breadcrumb' from JSON`,
+    (x) =>
+      GetKnowledgeHubRootNodesErrorHTTPUnauthorized$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'GetKnowledgeHubRootNodesErrorHTTPUnauthorized' from JSON`,
   );
 }
 
 /** @internal */
-export const GetKnowledgeHubRootNodesCounts$inboundSchema: z.ZodMiniType<
-  GetKnowledgeHubRootNodesCounts,
-  unknown
-> = z.object({});
-
-export function getKnowledgeHubRootNodesCountsFromJSON(
-  jsonString: string,
-): SafeParseResult<GetKnowledgeHubRootNodesCounts, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => GetKnowledgeHubRootNodesCounts$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetKnowledgeHubRootNodesCounts' from JSON`,
+export const GetKnowledgeHubRootNodesCodeHTTPBadRequest$inboundSchema:
+  z.ZodMiniEnum<typeof GetKnowledgeHubRootNodesCodeHTTPBadRequest> = z.enum(
+    GetKnowledgeHubRootNodesCodeHTTPBadRequest,
   );
-}
 
 /** @internal */
-export const Permissions$inboundSchema: z.ZodMiniType<Permissions, unknown> = z
-  .object({});
+export const GetKnowledgeHubRootNodesErrorHTTPBadRequest$inboundSchema:
+  z.ZodMiniType<GetKnowledgeHubRootNodesErrorHTTPBadRequest, unknown> = z
+    .object({
+      code: GetKnowledgeHubRootNodesCodeHTTPBadRequest$inboundSchema,
+      message: types.string(),
+    });
 
-export function permissionsFromJSON(
+export function getKnowledgeHubRootNodesErrorHTTPBadRequestFromJSON(
   jsonString: string,
-): SafeParseResult<Permissions, SDKValidationError> {
+): SafeParseResult<
+  GetKnowledgeHubRootNodesErrorHTTPBadRequest,
+  SDKValidationError
+> {
   return safeParse(
     jsonString,
-    (x) => Permissions$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Permissions' from JSON`,
-  );
-}
-
-/** @internal */
-export const GetKnowledgeHubRootNodesResponse$inboundSchema: z.ZodMiniType<
-  GetKnowledgeHubRootNodesResponse,
-  unknown
-> = z.object({
-  success: types.optional(types.boolean()),
-  error: z.optional(z.nullable(types.string())),
-  id: z.optional(z.nullable(types.string())),
-  currentNode: z.optional(z.nullable(z.lazy(() => CurrentNode$inboundSchema))),
-  parentNode: z.optional(z.nullable(z.lazy(() => ParentNode$inboundSchema))),
-  items: types.optional(z.array(z.lazy(() => Item$inboundSchema))),
-  pagination: types.optional(
-    z.lazy(() => GetKnowledgeHubRootNodesPagination$inboundSchema),
-  ),
-  filters: z.optional(
-    z.nullable(z.lazy(() => GetKnowledgeHubRootNodesFilters$inboundSchema)),
-  ),
-  breadcrumbs: z.optional(
-    z.nullable(z.array(z.lazy(() => Breadcrumb$inboundSchema))),
-  ),
-  counts: z.optional(
-    z.nullable(z.lazy(() => GetKnowledgeHubRootNodesCounts$inboundSchema)),
-  ),
-  permissions: z.optional(z.nullable(z.lazy(() => Permissions$inboundSchema))),
-});
-
-export function getKnowledgeHubRootNodesResponseFromJSON(
-  jsonString: string,
-): SafeParseResult<GetKnowledgeHubRootNodesResponse, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => GetKnowledgeHubRootNodesResponse$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetKnowledgeHubRootNodesResponse' from JSON`,
+    (x) =>
+      GetKnowledgeHubRootNodesErrorHTTPBadRequest$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'GetKnowledgeHubRootNodesErrorHTTPBadRequest' from JSON`,
   );
 }

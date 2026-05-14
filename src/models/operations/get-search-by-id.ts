@@ -3,12 +3,218 @@
  */
 
 import * as z from "zod/v4-mini";
+import { safeParse } from "../../lib/schemas.js";
+import * as openEnums from "../../types/enums.js";
+import { ClosedEnum, OpenEnum } from "../../types/enums.js";
+import { Result as SafeParseResult } from "../../types/fp.js";
+import * as types from "../../types/primitives.js";
+import { SDKValidationError } from "../errors/sdk-validation-error.js";
 
 export type GetSearchByIdRequest = {
   /**
    * Unique search identifier
    */
   searchId: string;
+};
+
+/**
+ * Machine-readable error code.
+ *
+ * @remarks
+ *
+ * - `HTTP_INTERNAL_SERVER_ERROR` — explicit
+ *   `InternalServerError` raised by the handler.
+ * - `INTERNAL_ERROR` — unhandled exception
+ *   caught by the global error middleware.
+ * - `MIDDLEWARE_ERROR` — the error middleware
+ *   itself failed while serializing the
+ *   response.
+ */
+export const InternalServerErrorErrorCode = {
+  HttpInternalServerError: "HTTP_INTERNAL_SERVER_ERROR",
+  InternalError: "INTERNAL_ERROR",
+  MiddlewareError: "MIDDLEWARE_ERROR",
+} as const;
+/**
+ * Machine-readable error code.
+ *
+ * @remarks
+ *
+ * - `HTTP_INTERNAL_SERVER_ERROR` — explicit
+ *   `InternalServerError` raised by the handler.
+ * - `INTERNAL_ERROR` — unhandled exception
+ *   caught by the global error middleware.
+ * - `MIDDLEWARE_ERROR` — the error middleware
+ *   itself failed while serializing the
+ *   response.
+ */
+export type InternalServerErrorErrorCode = OpenEnum<
+  typeof InternalServerErrorErrorCode
+>;
+
+export type GetSearchByIdInternalServerErrorError = {
+  /**
+   * Machine-readable error code.
+   *
+   * @remarks
+   *
+   * - `HTTP_INTERNAL_SERVER_ERROR` — explicit
+   *   `InternalServerError` raised by the handler.
+   * - `INTERNAL_ERROR` — unhandled exception
+   *   caught by the global error middleware.
+   * - `MIDDLEWARE_ERROR` — the error middleware
+   *   itself failed while serializing the
+   *   response.
+   */
+  code: InternalServerErrorErrorCode;
+  /**
+   * Human-readable description of the failure.
+   */
+  message: string;
+};
+
+/**
+ * Machine-readable error code. `HTTP_NOT_FOUND`
+ *
+ * @remarks
+ * is emitted when the addressed resource does
+ * not exist.
+ */
+export const GetSearchByIdNotFoundCode = {
+  HttpNotFound: "HTTP_NOT_FOUND",
+} as const;
+/**
+ * Machine-readable error code. `HTTP_NOT_FOUND`
+ *
+ * @remarks
+ * is emitted when the addressed resource does
+ * not exist.
+ */
+export type GetSearchByIdNotFoundCode = ClosedEnum<
+  typeof GetSearchByIdNotFoundCode
+>;
+
+export type GetSearchByIdNotFoundError = {
+  /**
+   * Machine-readable error code. `HTTP_NOT_FOUND`
+   *
+   * @remarks
+   * is emitted when the addressed resource does
+   * not exist.
+   */
+  code: GetSearchByIdNotFoundCode;
+  /**
+   * Human-readable description of the failure.
+   */
+  message: string;
+};
+
+/**
+ * Machine-readable error code. `HTTP_FORBIDDEN`
+ *
+ * @remarks
+ * is emitted when the bearer token is valid but
+ * lacks the required scope.
+ */
+export const GetSearchByIdForbiddenCode = {
+  HttpForbidden: "HTTP_FORBIDDEN",
+} as const;
+/**
+ * Machine-readable error code. `HTTP_FORBIDDEN`
+ *
+ * @remarks
+ * is emitted when the bearer token is valid but
+ * lacks the required scope.
+ */
+export type GetSearchByIdForbiddenCode = ClosedEnum<
+  typeof GetSearchByIdForbiddenCode
+>;
+
+export type GetSearchByIdErrorHTTPForbidden = {
+  /**
+   * Machine-readable error code. `HTTP_FORBIDDEN`
+   *
+   * @remarks
+   * is emitted when the bearer token is valid but
+   * lacks the required scope.
+   */
+  code: GetSearchByIdForbiddenCode;
+  /**
+   * Human-readable description of the failure.
+   */
+  message: string;
+};
+
+/**
+ * Machine-readable error code. `HTTP_UNAUTHORIZED`
+ *
+ * @remarks
+ * is emitted when the bearer token is missing,
+ * invalid, or expired.
+ */
+export const GetSearchByIdUnauthorizedCode = {
+  HttpUnauthorized: "HTTP_UNAUTHORIZED",
+} as const;
+/**
+ * Machine-readable error code. `HTTP_UNAUTHORIZED`
+ *
+ * @remarks
+ * is emitted when the bearer token is missing,
+ * invalid, or expired.
+ */
+export type GetSearchByIdUnauthorizedCode = ClosedEnum<
+  typeof GetSearchByIdUnauthorizedCode
+>;
+
+export type GetSearchByIdErrorHTTPUnauthorized = {
+  /**
+   * Machine-readable error code. `HTTP_UNAUTHORIZED`
+   *
+   * @remarks
+   * is emitted when the bearer token is missing,
+   * invalid, or expired.
+   */
+  code: GetSearchByIdUnauthorizedCode;
+  /**
+   * Human-readable description of the failure.
+   */
+  message: string;
+};
+
+/**
+ * Machine-readable error code. `VALIDATION_ERROR`
+ *
+ * @remarks
+ * is emitted when the request fails Zod
+ * validation.
+ */
+export const GetSearchByIdCodeValidationError = {
+  ValidationError: "VALIDATION_ERROR",
+} as const;
+/**
+ * Machine-readable error code. `VALIDATION_ERROR`
+ *
+ * @remarks
+ * is emitted when the request fails Zod
+ * validation.
+ */
+export type GetSearchByIdCodeValidationError = ClosedEnum<
+  typeof GetSearchByIdCodeValidationError
+>;
+
+export type GetSearchByIdErrorValidationError = {
+  /**
+   * Machine-readable error code. `VALIDATION_ERROR`
+   *
+   * @remarks
+   * is emitted when the request fails Zod
+   * validation.
+   */
+  code: GetSearchByIdCodeValidationError;
+  /**
+   * Human-readable description of the failure.
+   */
+  message: string;
 };
 
 /** @internal */
@@ -29,5 +235,128 @@ export function getSearchByIdRequestToJSON(
 ): string {
   return JSON.stringify(
     GetSearchByIdRequest$outboundSchema.parse(getSearchByIdRequest),
+  );
+}
+
+/** @internal */
+export const InternalServerErrorErrorCode$inboundSchema: z.ZodMiniType<
+  InternalServerErrorErrorCode,
+  unknown
+> = openEnums.inboundSchema(InternalServerErrorErrorCode);
+
+/** @internal */
+export const GetSearchByIdInternalServerErrorError$inboundSchema: z.ZodMiniType<
+  GetSearchByIdInternalServerErrorError,
+  unknown
+> = z.object({
+  code: InternalServerErrorErrorCode$inboundSchema,
+  message: types.string(),
+});
+
+export function getSearchByIdInternalServerErrorErrorFromJSON(
+  jsonString: string,
+): SafeParseResult<GetSearchByIdInternalServerErrorError, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetSearchByIdInternalServerErrorError$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetSearchByIdInternalServerErrorError' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetSearchByIdNotFoundCode$inboundSchema: z.ZodMiniEnum<
+  typeof GetSearchByIdNotFoundCode
+> = z.enum(GetSearchByIdNotFoundCode);
+
+/** @internal */
+export const GetSearchByIdNotFoundError$inboundSchema: z.ZodMiniType<
+  GetSearchByIdNotFoundError,
+  unknown
+> = z.object({
+  code: GetSearchByIdNotFoundCode$inboundSchema,
+  message: types.string(),
+});
+
+export function getSearchByIdNotFoundErrorFromJSON(
+  jsonString: string,
+): SafeParseResult<GetSearchByIdNotFoundError, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetSearchByIdNotFoundError$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetSearchByIdNotFoundError' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetSearchByIdForbiddenCode$inboundSchema: z.ZodMiniEnum<
+  typeof GetSearchByIdForbiddenCode
+> = z.enum(GetSearchByIdForbiddenCode);
+
+/** @internal */
+export const GetSearchByIdErrorHTTPForbidden$inboundSchema: z.ZodMiniType<
+  GetSearchByIdErrorHTTPForbidden,
+  unknown
+> = z.object({
+  code: GetSearchByIdForbiddenCode$inboundSchema,
+  message: types.string(),
+});
+
+export function getSearchByIdErrorHTTPForbiddenFromJSON(
+  jsonString: string,
+): SafeParseResult<GetSearchByIdErrorHTTPForbidden, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetSearchByIdErrorHTTPForbidden$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetSearchByIdErrorHTTPForbidden' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetSearchByIdUnauthorizedCode$inboundSchema: z.ZodMiniEnum<
+  typeof GetSearchByIdUnauthorizedCode
+> = z.enum(GetSearchByIdUnauthorizedCode);
+
+/** @internal */
+export const GetSearchByIdErrorHTTPUnauthorized$inboundSchema: z.ZodMiniType<
+  GetSearchByIdErrorHTTPUnauthorized,
+  unknown
+> = z.object({
+  code: GetSearchByIdUnauthorizedCode$inboundSchema,
+  message: types.string(),
+});
+
+export function getSearchByIdErrorHTTPUnauthorizedFromJSON(
+  jsonString: string,
+): SafeParseResult<GetSearchByIdErrorHTTPUnauthorized, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetSearchByIdErrorHTTPUnauthorized$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetSearchByIdErrorHTTPUnauthorized' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetSearchByIdCodeValidationError$inboundSchema: z.ZodMiniEnum<
+  typeof GetSearchByIdCodeValidationError
+> = z.enum(GetSearchByIdCodeValidationError);
+
+/** @internal */
+export const GetSearchByIdErrorValidationError$inboundSchema: z.ZodMiniType<
+  GetSearchByIdErrorValidationError,
+  unknown
+> = z.object({
+  code: GetSearchByIdCodeValidationError$inboundSchema,
+  message: types.string(),
+});
+
+export function getSearchByIdErrorValidationErrorFromJSON(
+  jsonString: string,
+): SafeParseResult<GetSearchByIdErrorValidationError, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetSearchByIdErrorValidationError$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetSearchByIdErrorValidationError' from JSON`,
   );
 }

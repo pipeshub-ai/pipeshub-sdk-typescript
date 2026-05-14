@@ -29,13 +29,19 @@ import { Result } from "../types/fp.js";
  * Delete conversation
  *
  * @remarks
- * Delete a conversation by its ID.<br><br>
- * <b>Overview:</b><br>
- * Performs a soft delete by setting <code>isDeleted: true</code>.
- * The conversation is removed from listings but preserved in the database.<br><br>
- * <b>Permissions:</b><br>
- * Only the conversation owner (initiator) can delete it.
- * Shared users cannot delete conversations.
+ * Delete a conversation by its ID.
+ *
+ * **Overview:**
+ *
+ * Performs a soft delete by setting `isDeleted: true`. The conversation is
+ * removed from listings but preserved in the database. All citations
+ * referenced by messages in the conversation are also soft-deleted.
+ *
+ * **Permissions:**
+ *
+ * The conversation initiator can always delete. Users the conversation has
+ * been shared with may delete it only when their `sharedWith.accessLevel`
+ * is `write`.
  */
 export function conversationsDeleteConversationById(
   client: PipeshubCore,
@@ -141,7 +147,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["401", "403", "404", "4XX", "5XX"],
+    errorCodes: ["400", "401", "403", "404", "4XX", "500", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -162,8 +168,8 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, operations.DeleteConversationByIdResponse$inboundSchema),
-    M.fail([401, 403, 404, "4XX"]),
-    M.fail("5XX"),
+    M.fail([400, 401, 403, 404, "4XX"]),
+    M.fail([500, "5XX"]),
   )(response, req);
   if (!result.ok) {
     return [result, { status: "complete", request: req, response }];

@@ -10,6 +10,7 @@ import * as z from "zod/v4-mini";
  * @remarks
  * Supports authorization_code (with PKCE) and client_credentials flows.
  * OAuth tokens are Bearer JWTs — use the same Authorization header as regular tokens.
+ * For **client_credentials**, machine JWTs may use `userId === client_id`; the Node gateway resolves the OAuth app creator and forwards **`x-oauth-user-id`** to Python where applicable — see **OAuth Provider** tag.
  */
 export type SchemeOauth2 = {
   clientID: string;

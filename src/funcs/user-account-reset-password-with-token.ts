@@ -32,17 +32,19 @@ import { Result } from "../types/fp.js";
  *
  * @remarks
  * Reset password using a token received via email from the forgot password flow.
- * <br><br>
- * <b>Password Requirements:</b><br>
- * - Minimum 8 characters<br>
- * - At least 1 uppercase letter<br>
- * - At least 1 lowercase letter<br>
- * - At least 1 number<br>
+ *
+ * **Password Requirements:**
+ *
+ * - Minimum 8 characters
+ * - At least 1 uppercase letter
+ * - At least 1 lowercase letter
+ * - At least 1 number
  * - At least 1 special character (#?!@$%^&*-)
- * <br><br>
- * <b>Security Notes:</b><br>
- * - Token is single-use and expires after a set time<br>
- * - A new access token is returned upon successful reset
+ *
+ * **Security Notes:**
+ *
+ * - Token is single-use and expires after a set time
+ * - Response body contains a confirmation string in `data`
  */
 export function userAccountResetPasswordWithToken(
   client: PipeshubCore,
@@ -51,8 +53,8 @@ export function userAccountResetPasswordWithToken(
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    models.PasswordResetResponse,
-    | errors.AuthError
+    models.DataStringResponse,
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -79,8 +81,8 @@ async function $do(
 ): Promise<
   [
     Result<
-      models.PasswordResetResponse,
-      | errors.AuthError
+      models.DataStringResponse,
+      | errors.ErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -153,7 +155,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["400", "401", "404", "4XX", "5XX"],
+    errorCodes: ["400", "401", "404", "4XX", "500", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -167,8 +169,8 @@ async function $do(
   };
 
   const [result] = await M.match<
-    models.PasswordResetResponse,
-    | errors.AuthError
+    models.DataStringResponse,
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -178,9 +180,10 @@ async function $do(
     | UnexpectedClientError
     | SDKValidationError
   >(
-    M.json(200, models.PasswordResetResponse$inboundSchema),
-    M.jsonErr(400, errors.AuthError$inboundSchema),
-    M.fail([401, 404, "4XX"]),
+    M.json(200, models.DataStringResponse$inboundSchema),
+    M.jsonErr([400, 401, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
+    M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });
   if (!result.ok) {

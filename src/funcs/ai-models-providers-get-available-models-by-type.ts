@@ -18,6 +18,7 @@ import {
   RequestTimeoutError,
   UnexpectedClientError,
 } from "../models/errors/http-client-errors.js";
+import * as errors from "../models/errors/index.js";
 import { PipeshubError } from "../models/errors/pipeshub-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { SDKValidationError } from "../models/errors/sdk-validation-error.js";
@@ -26,10 +27,27 @@ import { APICall, APIPromise } from "../types/async.js";
 import { Result } from "../types/fp.js";
 
 /**
- * Get available models for selection
+ * Get available models by type
  *
  * @remarks
- * Get available models in a flattened format for UI selection dropdowns.
+ * Returns a **flattened list** of individual AI models of the requested type,
+ * suitable for use in selection dropdowns and model-picker UIs.
+ *
+ * Each provider configuration entry may specify multiple comma-separated model
+ * names; this endpoint expands those into one object per model name so callers
+ * receive a flat, enumerable collection.
+ *
+ * **Flattening rules:**
+ * - Only the **first** model in a multi-model provider entry is marked
+ *   `isDefault: true`; all subsequent models from the same entry get `false`.
+ * - `modelFriendlyName` is included **only** when the provider entry contains
+ *   exactly one model name (not a comma-separated list).
+ * - When no providers of the requested type are configured the endpoint still
+ *   returns HTTP **200** with an empty `models` array — this is **not** an error.
+ *
+ * **Access control:** requires a valid bearer token. For OAuth tokens the
+ * `config:read` scope must be present; regular JWT bearer tokens pass through
+ * without scope enforcement.
  */
 export function aiModelsProvidersGetAvailableModelsByType(
   client: PipeshubCore,
@@ -38,6 +56,10 @@ export function aiModelsProvidersGetAvailableModelsByType(
 ): APIPromise<
   Result<
     operations.GetAvailableModelsByTypeResponse,
+    | errors.GetAvailableModelsByTypeBadRequestError
+    | errors.GetAvailableModelsByTypeUnauthorizedError
+    | errors.GetAvailableModelsByTypeForbiddenError
+    | errors.GetAvailableModelsByTypeInternalServerError
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -63,6 +85,10 @@ async function $do(
   [
     Result<
       operations.GetAvailableModelsByTypeResponse,
+      | errors.GetAvailableModelsByTypeBadRequestError
+      | errors.GetAvailableModelsByTypeUnauthorizedError
+      | errors.GetAvailableModelsByTypeForbiddenError
+      | errors.GetAvailableModelsByTypeInternalServerError
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -137,7 +163,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["401", "4XX", "5XX"],
+    errorCodes: ["400", "401", "403", "4XX", "500", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -146,8 +172,16 @@ async function $do(
   }
   const response = doResult.value;
 
+  const responseFields = {
+    HttpMeta: { Response: response, Request: req },
+  };
+
   const [result] = await M.match<
     operations.GetAvailableModelsByTypeResponse,
+    | errors.GetAvailableModelsByTypeBadRequestError
+    | errors.GetAvailableModelsByTypeUnauthorizedError
+    | errors.GetAvailableModelsByTypeForbiddenError
+    | errors.GetAvailableModelsByTypeInternalServerError
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -158,9 +192,22 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, operations.GetAvailableModelsByTypeResponse$inboundSchema),
-    M.fail([401, "4XX"]),
+    M.jsonErr(
+      400,
+      errors.GetAvailableModelsByTypeBadRequestError$inboundSchema,
+    ),
+    M.jsonErr(
+      401,
+      errors.GetAvailableModelsByTypeUnauthorizedError$inboundSchema,
+    ),
+    M.jsonErr(403, errors.GetAvailableModelsByTypeForbiddenError$inboundSchema),
+    M.jsonErr(
+      500,
+      errors.GetAvailableModelsByTypeInternalServerError$inboundSchema,
+    ),
+    M.fail("4XX"),
     M.fail("5XX"),
-  )(response, req);
+  )(response, req, { extraFields: responseFields });
   if (!result.ok) {
     return [result, { status: "complete", request: req, response }];
   }

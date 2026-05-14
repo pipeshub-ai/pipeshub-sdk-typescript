@@ -9,12 +9,8 @@ let value: InitAuthResponse = {
   headers: {
     "key": [
       "<value 1>",
-      "<value 2>",
     ],
     "key1": [
-      "<value 1>",
-    ],
-    "key2": [
       "<value 1>",
       "<value 2>",
     ],
@@ -27,6 +23,8 @@ let value: InitAuthResponse = {
       "otp",
     ],
     message: "Authentication initialized",
+    authProviders: {},
+    jitEnabled: false,
   },
 };
 ```

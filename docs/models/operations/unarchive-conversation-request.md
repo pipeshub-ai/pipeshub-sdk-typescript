@@ -12,6 +12,6 @@ let value: UnarchiveConversationRequest = {
 
 ## Fields
 
-| Field              | Type               | Required           | Description        |
-| ------------------ | ------------------ | ------------------ | ------------------ |
-| `conversationId`   | *string*           | :heavy_check_mark: | N/A                |
+| Field                   | Type                    | Required                | Description             |
+| ----------------------- | ----------------------- | ----------------------- | ----------------------- |
+| `conversationId`        | *string*                | :heavy_check_mark:      | Conversation identifier |

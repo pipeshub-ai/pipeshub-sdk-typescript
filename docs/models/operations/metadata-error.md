@@ -1,0 +1,24 @@
+# MetadataError
+
+## Example Usage
+
+```typescript
+import { MetadataError } from "@pipeshub-ai/sdk/models/operations";
+
+let value: MetadataError = {
+  field: "params.modelType",
+  message:
+    "Invalid enum value. Expected 'ocr' | 'embedding' | 'llm' | 'slm' | 'reasoning' | 'multiModal' | 'imageGeneration' | 'tts' | 'stt', received 'llmr'",
+  code: "INVALID_ENUM",
+  value: "",
+};
+```
+
+## Fields
+
+| Field                                                                                                                                              | Type                                                                                                                                               | Required                                                                                                                                           | Description                                                                                                                                        | Example                                                                                                                                            |
+| -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `field`                                                                                                                                            | *string*                                                                                                                                           | :heavy_check_mark:                                                                                                                                 | Dot-separated path to the failing field within the request (params, body, query).                                                                  | params.modelType                                                                                                                                   |
+| `message`                                                                                                                                          | *string*                                                                                                                                           | :heavy_check_mark:                                                                                                                                 | Human-readable Zod validation message.                                                                                                             | Invalid enum value. Expected 'ocr' \| 'embedding' \| 'llm' \| 'slm' \| 'reasoning' \| 'multiModal' \| 'imageGeneration' \| 'tts' \| 'stt', received 'llmr' |
+| `code`                                                                                                                                             | [operations.MetadataCode](../../models/operations/metadata-code.md)                                                                                | :heavy_check_mark:                                                                                                                                 | Machine-readable error code mapped from the Zod issue code.                                                                                        | INVALID_ENUM                                                                                                                                       |
+| `value`                                                                                                                                            | *string*                                                                                                                                           | :heavy_check_mark:                                                                                                                                 | The rejected value stringified. May be an empty string when the value is not easily serialisable.                                                  |                                                                                                                                                    |

@@ -5,12 +5,7 @@
 import * as z from "zod/v4-mini";
 import { safeParse } from "../lib/schemas.js";
 import { Result as SafeParseResult } from "../types/fp.js";
-import {
-  AuthStep,
-  AuthStep$inboundSchema,
-  AuthStep$Outbound,
-  AuthStep$outboundSchema,
-} from "./auth-step.js";
+import { AuthStep, AuthStep$inboundSchema } from "./auth-step.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
 /**
@@ -35,22 +30,7 @@ export const AuthConfig$inboundSchema: z.ZodMiniType<AuthConfig, unknown> = z
   .object({
     authMethods: z.array(AuthStep$inboundSchema),
   });
-/** @internal */
-export type AuthConfig$Outbound = {
-  authMethods: Array<AuthStep$Outbound>;
-};
 
-/** @internal */
-export const AuthConfig$outboundSchema: z.ZodMiniType<
-  AuthConfig$Outbound,
-  AuthConfig
-> = z.object({
-  authMethods: z.array(AuthStep$outboundSchema),
-});
-
-export function authConfigToJSON(authConfig: AuthConfig): string {
-  return JSON.stringify(AuthConfig$outboundSchema.parse(authConfig));
-}
 export function authConfigFromJSON(
   jsonString: string,
 ): SafeParseResult<AuthConfig, SDKValidationError> {

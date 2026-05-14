@@ -10,49 +10,148 @@ import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
-export const KnowledgeHubNodeType = {
-  Kb: "KB",
-  Folder: "FOLDER",
-  Record: "RECORD",
-  Connector: "CONNECTOR",
-  App: "APP",
+/**
+ * Type of the node.
+ */
+export const NodeType = {
+  App: "app",
+  RecordGroup: "recordGroup",
+  Folder: "folder",
+  Record: "record",
 } as const;
-export type KnowledgeHubNodeType = OpenEnum<typeof KnowledgeHubNodeType>;
-
-export type KnowledgeHubNodeMetadata = {};
+/**
+ * Type of the node.
+ */
+export type NodeType = OpenEnum<typeof NodeType>;
 
 /**
- * A node in the knowledge hub tree structure
+ * Origin type.
+ */
+export const Origin = {
+  Collection: "COLLECTION",
+  Connector: "CONNECTOR",
+} as const;
+/**
+ * Origin type.
+ */
+export type Origin = OpenEnum<typeof Origin>;
+
+/**
+ * Per-item permission when `include=permissions` is requested; otherwise `null`.
+ */
+export type Permission = {
+  role: string;
+  canEdit: boolean;
+  canDelete: boolean;
+};
+
+/**
+ * One element of `items`. The live API keeps keys stable and sets
+ *
+ * @remarks
+ * inapplicable values to JSON `null` (not omitted).
  */
 export type KnowledgeHubNode = {
-  id?: string | undefined;
-  name?: string | undefined;
-  type?: KnowledgeHubNodeType | undefined;
-  parentId?: string | undefined;
-  hasChildren?: boolean | undefined;
-  childCount?: number | undefined;
-  metadata?: KnowledgeHubNodeMetadata | undefined;
+  /**
+   * Unique identifier for the node.
+   */
+  id: string;
+  /**
+   * Display name of the node.
+   */
+  name: string;
+  /**
+   * Type of the node.
+   */
+  nodeType: NodeType;
+  /**
+   * Parent node ID, or `null` at the root browse level.
+   */
+  parentId: string | null;
+  /**
+   * Origin type.
+   */
+  origin: Origin;
+  /**
+   * Connector display name / key when applicable; otherwise `null`.
+   */
+  connector: string | null;
+  /**
+   * Record type when `nodeType` is `record`; otherwise `null`.
+   */
+  recordType: string | null;
+  /**
+   * Record group type when `nodeType` is `recordGroup`; otherwise `null`.
+   */
+  recordGroupType: string | null;
+  /**
+   * Indexing status when `nodeType` is `record`; otherwise `null`.
+   */
+  indexingStatus: string | null;
+  /**
+   * Failure or status reason when set; otherwise `null`.
+   */
+  reason: string | null;
+  /**
+   * True for internal/system nodes that do not originate from a source.
+   */
+  isInternal: boolean;
+  /**
+   * Creation timestamp (epoch ms).
+   */
+  createdAt: number;
+  /**
+   * Update timestamp (epoch ms).
+   */
+  updatedAt: number;
+  /**
+   * File size in bytes for file records; otherwise `null`.
+   */
+  sizeInBytes: number | null;
+  mimeType: string | null;
+  extension: string | null;
+  webUrl: string | null;
+  /**
+   * Whether the node has children (sidebar / tree).
+   */
+  hasChildren: boolean;
+  previewRenderable: boolean | null;
+  /**
+   * Per-item permission when `include=permissions` is requested; otherwise `null`.
+   */
+  permission: Permission | null;
+  /**
+   * Sharing status (e.g. `private`, `shared`, `team`, `workspace`) when
+   *
+   * @remarks
+   * applicable; otherwise `null`.
+   */
+  sharingStatus: string | null;
 };
 
 /** @internal */
-export const KnowledgeHubNodeType$inboundSchema: z.ZodMiniType<
-  KnowledgeHubNodeType,
-  unknown
-> = openEnums.inboundSchema(KnowledgeHubNodeType);
+export const NodeType$inboundSchema: z.ZodMiniType<NodeType, unknown> =
+  openEnums.inboundSchema(NodeType);
 
 /** @internal */
-export const KnowledgeHubNodeMetadata$inboundSchema: z.ZodMiniType<
-  KnowledgeHubNodeMetadata,
-  unknown
-> = z.object({});
+export const Origin$inboundSchema: z.ZodMiniType<Origin, unknown> = openEnums
+  .inboundSchema(Origin);
 
-export function knowledgeHubNodeMetadataFromJSON(
+/** @internal */
+export const Permission$inboundSchema: z.ZodMiniType<Permission, unknown> = z
+  .object({
+    role: types.string(),
+    canEdit: types.boolean(),
+    canDelete: types.boolean(),
+  });
+
+export function permissionFromJSON(
   jsonString: string,
-): SafeParseResult<KnowledgeHubNodeMetadata, SDKValidationError> {
+): SafeParseResult<Permission, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => KnowledgeHubNodeMetadata$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'KnowledgeHubNodeMetadata' from JSON`,
+    (x) => Permission$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Permission' from JSON`,
   );
 }
 
@@ -61,15 +160,27 @@ export const KnowledgeHubNode$inboundSchema: z.ZodMiniType<
   KnowledgeHubNode,
   unknown
 > = z.object({
-  id: types.optional(types.string()),
-  name: types.optional(types.string()),
-  type: types.optional(KnowledgeHubNodeType$inboundSchema),
-  parentId: types.optional(types.string()),
-  hasChildren: types.optional(types.boolean()),
-  childCount: types.optional(types.number()),
-  metadata: types.optional(
-    z.lazy(() => KnowledgeHubNodeMetadata$inboundSchema),
-  ),
+  id: types.string(),
+  name: types.string(),
+  nodeType: NodeType$inboundSchema,
+  parentId: types.nullable(types.string()),
+  origin: Origin$inboundSchema,
+  connector: types.nullable(types.string()),
+  recordType: types.nullable(types.string()),
+  recordGroupType: types.nullable(types.string()),
+  indexingStatus: types.nullable(types.string()),
+  reason: types.nullable(types.string()),
+  isInternal: types.boolean(),
+  createdAt: types.number(),
+  updatedAt: types.number(),
+  sizeInBytes: types.nullable(types.number()),
+  mimeType: types.nullable(types.string()),
+  extension: types.nullable(types.string()),
+  webUrl: types.nullable(types.string()),
+  hasChildren: types.boolean(),
+  previewRenderable: types.nullable(types.boolean()),
+  permission: types.nullable(z.lazy(() => Permission$inboundSchema)),
+  sharingStatus: types.nullable(types.string()),
 });
 
 export function knowledgeHubNodeFromJSON(

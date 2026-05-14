@@ -3,7 +3,8 @@
  */
 
 import * as z from "zod/v4-mini";
-import { ClosedEnum } from "../types/enums.js";
+import * as openEnums from "../types/enums.js";
+import { OpenEnum } from "../types/enums.js";
 
 /**
  * Type of AI model
@@ -15,13 +16,18 @@ export const ModelType = {
   Slm: "slm",
   Reasoning: "reasoning",
   MultiModal: "multiModal",
+  ImageGeneration: "imageGeneration",
+  Tts: "tts",
+  Stt: "stt",
 } as const;
 /**
  * Type of AI model
  */
-export type ModelType = ClosedEnum<typeof ModelType>;
+export type ModelType = OpenEnum<typeof ModelType>;
 
 /** @internal */
-export const ModelType$outboundSchema: z.ZodMiniEnum<typeof ModelType> = z.enum(
-  ModelType,
-);
+export const ModelType$inboundSchema: z.ZodMiniType<ModelType, unknown> =
+  openEnums.inboundSchema(ModelType);
+/** @internal */
+export const ModelType$outboundSchema: z.ZodMiniType<string, ModelType> =
+  openEnums.outboundSchema(ModelType);

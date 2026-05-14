@@ -2,215 +2,69 @@
 
 ## Overview
 
-AI-powered conversational chat management with citations and follow-up questions
-
 ### Available Operations
 
-* [createConversation](#createconversation) - Create a new AI conversation
 * [streamChat](#streamchat) - Create conversation with streaming response
 * [getAllConversations](#getallconversations) - List all conversations
 * [getArchivedConversations](#getarchivedconversations) - List archived conversations
+* [searchArchivedConversations](#searcharchivedconversations) - Search archived conversations
 * [getConversationById](#getconversationbyid) - Get conversation by ID
 * [deleteConversationById](#deleteconversationbyid) - Delete conversation
-* [addMessage](#addmessage) - Add message to conversation
-* [addMessageStream](#addmessagestream) - Add message with streaming response
-* [shareConversation](#shareconversation) - Share conversation with users
+* [addMessageStream](#addmessagestream) - Add message to a conversation with streaming response
 * [updateConversationTitle](#updateconversationtitle) - Update conversation title
 * [archiveConversation](#archiveconversation) - Archive conversation
 * [unarchiveConversation](#unarchiveconversation) - Unarchive conversation
 * [regenerateAnswer](#regenerateanswer) - Regenerate AI response
 * [updateMessageFeedback](#updatemessagefeedback) - Submit feedback on AI response
-* [unshareConversationById](#unshareconversationbyid) - Unshare a conversation
-
-## createConversation
-
-Start a new conversation with PipesHub's AI assistant.<br><br>
-<b>Overview:</b><br>
-This endpoint creates a new conversation session and processes the initial query.
-The AI searches your organization's knowledge bases for relevant information and
-generates a response with citations to source documents.<br><br>
-<b>How It Works:</b><br>
-<ol>
-<li>Your query is analyzed and converted to semantic embeddings</li>
-<li>Relevant content is retrieved from indexed knowledge bases</li>
-<li>The AI generates a response using the retrieved context</li>
-<li>Citations link back to source documents for verification</li>
-<li>Follow-up questions are suggested based on the conversation</li>
-</ol>
-<b>Filtering Options:</b><br>
-<ul>
-<li><b>recordIds:</b> Limit search to specific documents</li>
-<li><b>filters.apps:</b> Search only specific connector apps</li>
-<li><b>filters.kb:</b> Search only specific knowledge bases</li>
-</ul>
-<b>Model Selection:</b><br>
-Use <code>modelKey</code> to select different AI models configured for your organization.
-Each model may have different capabilities, speed, and accuracy trade-offs.
-
-
-### Example Usage: filtered
-
-<!-- UsageSnippet language="typescript" operationID="createConversation" method="post" path="/conversations/create" example="filtered" -->
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-
-const pipeshub = new Pipeshub({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const result = await pipeshub.conversations.createConversation({
-    query: "Summarize the Q4 sales report",
-    filters: {
-      kb: [
-        "550e8400-e29b-41d4-a716-446655440000",
-      ],
-    },
-    modelKey: "gpt-4-turbo",
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
-import { conversationsCreateConversation } from "@pipeshub-ai/sdk/funcs/conversations-create-conversation.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const res = await conversationsCreateConversation(pipeshub, {
-    query: "Summarize the Q4 sales report",
-    filters: {
-      kb: [
-        "550e8400-e29b-41d4-a716-446655440000",
-      ],
-    },
-    modelKey: "gpt-4-turbo",
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("conversationsCreateConversation failed:", res.error);
-  }
-}
-
-run();
-```
-### Example Usage: simple
-
-<!-- UsageSnippet language="typescript" operationID="createConversation" method="post" path="/conversations/create" example="simple" -->
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-
-const pipeshub = new Pipeshub({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const result = await pipeshub.conversations.createConversation({
-    query: "What is our company's vacation policy?",
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
-import { conversationsCreateConversation } from "@pipeshub-ai/sdk/funcs/conversations-create-conversation.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const res = await conversationsCreateConversation(pipeshub, {
-    query: "What is our company's vacation policy?",
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("conversationsCreateConversation failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [models.CreateConversationRequest](../../models/create-conversation-request.md)                                                                                                | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[models.Conversation](../../models/conversation.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## streamChat
 
-Start a new conversation with real-time streaming response using Server-Sent Events (SSE).<br><br>
-<b>Overview:</b><br>
-This endpoint works like <code>/conversations/create</code> but streams the AI response
-in real-time as it's generated, providing a more interactive user experience.<br><br>
-<b>SSE Event Types:</b><br>
-<ul>
-<li><code>connected</code> - Connection established, processing started</li>
-<li><code>chunk</code> - Partial response text (stream these to show typing effect)</li>
-<li><code>citation</code> - Citation reference found during generation</li>
-<li><code>complete</code> - Final message with full response, citations, and follow-up questions</li>
-<li><code>error</code> - Error occurred during processing</li>
-</ul>
-<b>Client Implementation:</b><br>
-<code>
-const eventSource = new EventSource('/conversations/stream');<br>
-eventSource.onmessage = (event) => {<br>
-&nbsp;&nbsp;const data = JSON.parse(event.data);<br>
-&nbsp;&nbsp;// Handle different event types<br>
-};
-</code><br><br>
-<b>Error Handling:</b><br>
-If an error occurs mid-stream, an <code>error</code> event is sent and the stream closes.
-The conversation is marked as FAILED with the error reason stored.
+Start a new conversation and stream the AI response over Server-Sent
+Events (SSE). Behaves like `POST /conversations` but emits tokens,
+tool activity, and status updates incrementally instead of returning
+a single JSON response at the end.
+
+**Lifecycle**
+
+1. The server validates `query`, persists an in-progress
+   conversation, then opens the SSE stream with HTTP `200`.
+2. A `connected` event is emitted immediately with the new
+   `conversationId` so the client can link the stream (sidebar,
+   parallel tabs, deep links) without an extra request.
+3. AI-backend events stream through (token chunks, tool calls,
+   status, etc.).
+4. On success a single `complete` event is emitted carrying the
+   full persisted conversation.
+5. On failure an `error` event is emitted and the conversation is
+   marked FAILED before the stream closes.
+
+**Event vocabulary**
+
+Three events have stable, server-defined `data` shapes:
+
+- `connected` — `{ "message": string, "conversationId": string,
+  "title": string }`
+- `complete` — `{ "conversation": Conversation,
+  "meta": { "requestId": string, "timestamp": string,
+  "duration": number } }`
+- `error` — `{ "error": string, "details"?: string }`
+
+The forwarded events are `status`, `answer_chunk`, `tool_calls`,
+`restreaming`, `metadata`, and `tool_execution_complete`. Their
+payloads come from the Python query service and may evolve. Note
+that raw `tool_call` / `tool_success` / `tool_error` / `tool_result`
+events emitted by the LLM tool runtime are rewrapped as `status` by
+the upstream wrapper before they reach this route, so clients on
+`/conversations/stream` never see those names directly. Clients
+should ignore unknown event names rather than treating them as
+errors.
+
+**Agent mode**
+
+When `chatMode` selects an agent mode (for example `agent:auto`),
+the optional `tools` list restricts which tools the agent may
+invoke for this turn. Outside agent modes the `tools` field is
+ignored.
 
 
 ### Example Usage
@@ -234,7 +88,14 @@ async function run() {
     ],
     modelKey: "gpt-4-turbo",
     modelName: "GPT-4 Turbo",
+    modelFriendlyName: "GPT-4 Turbo",
     chatMode: "balanced",
+    timezone: "America/New_York",
+    currentTime: new Date("2026-04-12T16:00:00+05:30"),
+    tools: [
+      "jira.create_issue",
+      "confluence.search_content",
+    ],
   });
 
   for await (const event of result) {
@@ -270,7 +131,14 @@ async function run() {
     ],
     modelKey: "gpt-4-turbo",
     modelName: "GPT-4 Turbo",
+    modelFriendlyName: "GPT-4 Turbo",
     chatMode: "balanced",
+    timezone: "America/New_York",
+    currentTime: new Date("2026-04-12T16:00:00+05:30"),
+    tools: [
+      "jira.create_issue",
+      "confluence.search_content",
+    ],
   });
   if (res.ok) {
     const { value: result } = res;
@@ -296,7 +164,7 @@ run();
 
 ### Response
 
-**Promise\<[EventStream<models.SSEEvent>](../../models/.md)\>**
+**Promise\<[EventStream<models.AssistantStreamSSEEvent>](../../models/.md)\>**
 
 ### Errors
 
@@ -306,17 +174,24 @@ run();
 
 ## getAllConversations
 
-Retrieve all conversations for the authenticated user.<br><br>
-<b>Overview:</b><br>
-Returns a list of all conversations owned by or shared with the current user.
-Conversations are returned with their messages, status, and metadata.<br><br>
-<b>Filtering:</b><br>
-<ul>
-<li>Only non-archived conversations are returned by default</li>
-<li>Use <code>/conversations/show/archives</code> for archived conversations</li>
-</ul>
-<b>Sorting:</b><br>
-Conversations are sorted by last activity timestamp (most recent first).
+Retrieve paginated conversations for the authenticated user.
+
+**Overview:**
+
+Use the optional `source` query parameter to choose which list to return:
+`owned` — only conversations you own (`userId` matches the current user).
+`shared` — conversations where you have recipient access
+(`isShared` and your user appears in `sharedWith`), without the owner-only branch.
+Defaults to `owned` when omitted. Each call returns one list; call twice if you need both.
+
+**Filtering:**
+
+- Only non-archived conversations are returned by default
+- Use `/conversations/show/archives` for archived conversations
+
+**Sorting:**
+
+Conversations are sorted by last activity timestamp (most recent first) by default.
 
 
 ### Example Usage
@@ -332,7 +207,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.conversations.getAllConversations();
+  const result = await pipeshub.conversations.getAllConversations({});
 
   console.log(result);
 }
@@ -357,7 +232,7 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await conversationsGetAllConversations(pipeshub);
+  const res = await conversationsGetAllConversations(pipeshub, {});
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
@@ -373,6 +248,7 @@ run();
 
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.GetAllConversationsRequest](../../models/operations/get-all-conversations-request.md)                                                                              | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -389,12 +265,23 @@ run();
 
 ## getArchivedConversations
 
-Retrieve all archived conversations for the authenticated user.<br><br>
-<b>Overview:</b><br>
+Retrieve all archived conversations for the authenticated user.
+
+**Overview:**
+
 Archived conversations are hidden from the main list but preserved for reference.
-This endpoint returns only conversations where <code>isArchived: true</code>.<br><br>
-<b>Unarchiving:</b><br>
-Use <code>PATCH /conversations/{id}/unarchive</code> to restore a conversation
+This endpoint returns only conversations where `isArchived: true` and `archivedBy`
+is set. Results include conversations the caller owns and those shared with them.
+
+**Filtering and sorting:**
+
+Results can be narrowed using `search`, `shared`, `startDate`, `endDate`, and
+`conversationId`. Sorting is controlled by `sortBy` and `sortOrder`. Pagination
+is controlled by `page` and `limit`.
+
+**Unarchiving:**
+
+Use `PATCH /conversations/{conversationId}/unarchive` to restore a conversation
 to the active list.
 
 
@@ -411,7 +298,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.conversations.getArchivedConversations();
+  const result = await pipeshub.conversations.getArchivedConversations({});
 
   console.log(result);
 }
@@ -436,7 +323,7 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await conversationsGetArchivedConversations(pipeshub);
+  const res = await conversationsGetArchivedConversations(pipeshub, {});
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
@@ -452,6 +339,7 @@ run();
 
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.GetArchivedConversationsRequest](../../models/operations/get-archived-conversations-request.md)                                                                    | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -466,21 +354,126 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
+## searchArchivedConversations
+
+Search across all archived conversations (assistant and agent) for the authenticated user.
+
+**Overview:**
+
+Performs a case-insensitive substring match against conversation titles and message content
+across both assistant (`Conversation`) and agent (`AgentConversation`) archived collections.
+Results are merged server-side and sorted by `lastActivityAt` descending.
+
+**Search parameter:**
+
+The `search` query parameter is required, must be a non-empty string, and is capped at
+1000 characters. Requests that omit it or exceed the cap return `400`.
+
+**Pagination:**
+
+Results are paginated using `page` and `limit`. The response includes a `pagination`
+block with total counts and a `summary` block that breaks matches down by source.
+
+**Item shape:**
+
+Each item is a conversation list entry (no `messages` payload — that field is omitted
+for performance) tagged with `source`, plus computed `isOwner`, `accessLevel`,
+`archivedAt`, and `archivedBy`. `agentKey` is present only when `source` is `agent`.
+
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="searchArchivedConversations" method="get" path="/conversations/show/archives/search" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.conversations.searchArchivedConversations({
+    search: "<value>",
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { conversationsSearchArchivedConversations } from "@pipeshub-ai/sdk/funcs/conversations-search-archived-conversations.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const res = await conversationsSearchArchivedConversations(pipeshub, {
+    search: "<value>",
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("conversationsSearchArchivedConversations failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.SearchArchivedConversationsRequest](../../models/operations/search-archived-conversations-request.md)                                                              | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[operations.SearchArchivedConversationsResponse](../../models/operations/search-archived-conversations-response.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
 ## getConversationById
 
-Retrieve a specific conversation with its full message history.<br><br>
-<b>Overview:</b><br>
+Retrieve a specific conversation with its full message history.
+
+**Overview:**
+
 Returns the complete conversation including all messages, citations,
-feedback, and metadata. Messages can be paginated for long conversations.<br><br>
-<b>Message Pagination:</b><br>
+feedback, and metadata. Messages can be paginated for long conversations.
+
+**Message Pagination:**
+
 For conversations with many messages, use pagination parameters:
-<ul>
-<li><code>page</code>: Page number (default: 1)</li>
-<li><code>limit</code>: Messages per page (default: 10)</li>
-<li><code>sortBy</code>: Sort field (default: createdAt)</li>
-<li><code>sortOrder</code>: 'asc' or 'desc' (default: desc)</li>
-</ul>
-<b>Access Control:</b><br>
+
+- `page`: Page number (default: 1)
+- `limit`: Messages per page (default: 10)
+- `sortBy`: Sort field (default: createdAt)
+- `sortOrder`: 'asc' or 'desc' (default: desc)
+
+**Access Control:**
+
 Users can access conversations they own or that have been shared with them.
 
 
@@ -559,13 +552,19 @@ run();
 
 ## deleteConversationById
 
-Delete a conversation by its ID.<br><br>
-<b>Overview:</b><br>
-Performs a soft delete by setting <code>isDeleted: true</code>.
-The conversation is removed from listings but preserved in the database.<br><br>
-<b>Permissions:</b><br>
-Only the conversation owner (initiator) can delete it.
-Shared users cannot delete conversations.
+Delete a conversation by its ID.
+
+**Overview:**
+
+Performs a soft delete by setting `isDeleted: true`. The conversation is
+removed from listings but preserved in the database. All citations
+referenced by messages in the conversation are also soft-deleted.
+
+**Permissions:**
+
+The conversation initiator can always delete. Users the conversation has
+been shared with may delete it only when their `sharedWith.accessLevel`
+is `write`.
 
 
 ### Example Usage
@@ -641,110 +640,19 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## addMessage
-
-Add a follow-up message to an existing conversation.<br><br>
-<b>Overview:</b><br>
-Continues an existing conversation by adding a new user query.
-The AI maintains context from previous messages when generating the response.<br><br>
-<b>Context Handling:</b><br>
-<ul>
-<li>Previous messages provide context for the new query</li>
-<li>Citations from earlier messages may be referenced</li>
-<li>The AI can refer back to previous topics discussed</li>
-</ul>
-<b>Model Override:</b><br>
-You can specify a different model for this message using <code>modelKey</code>.
-This allows switching models mid-conversation if needed.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="addMessage" method="post" path="/conversations/{conversationId}/messages" -->
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-
-const pipeshub = new Pipeshub({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const result = await pipeshub.conversations.addMessage({
-    conversationId: "<value>",
-    body: {
-      query: "Can you elaborate on the revenue trends?",
-    },
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
-import { conversationsAddMessage } from "@pipeshub-ai/sdk/funcs/conversations-add-message.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const res = await conversationsAddMessage(pipeshub, {
-    conversationId: "<value>",
-    body: {
-      query: "Can you elaborate on the revenue trends?",
-    },
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("conversationsAddMessage failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.AddMessageRequest](../../models/operations/add-message-request.md)                                                                                                 | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[models.Conversation](../../models/conversation.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
 ## addMessageStream
 
-Add a follow-up message to an existing conversation with real-time SSE streaming.<br><br>
-<b>Overview:</b><br>
-Same as <code>POST /conversations/{id}/messages</code> but with streaming response.
-Provides real-time feedback as the AI generates its response.<br><br>
-<b>SSE Events:</b><br>
-See <code>/conversations/stream</code> for event type documentation.
+Add a follow-up message to an existing conversation and stream the
+assistant's response over Server-Sent Events.
+
+Functionally equivalent to `POST /conversations/{conversationId}/messages`
+but the response is delivered as an SSE stream so clients can render
+the answer incrementally.
+
+The wire vocabulary is described by `AssistantMessageStreamSSEEvent`.
+It is the same event set as `/conversations/stream`; only the
+`connected` and `complete` payloads differ because the conversation
+already exists when this route is called.
 
 
 ### Example Usage
@@ -764,6 +672,12 @@ async function run() {
     conversationId: "<value>",
     body: {
       query: "Can you elaborate on the revenue trends?",
+      timezone: "America/New_York",
+      currentTime: new Date("2026-04-12T16:00:00+05:30"),
+      tools: [
+        "jira.create_issue",
+        "confluence.search_content",
+      ],
     },
   });
 
@@ -796,6 +710,12 @@ async function run() {
     conversationId: "<value>",
     body: {
       query: "Can you elaborate on the revenue trends?",
+      timezone: "America/New_York",
+      currentTime: new Date("2026-04-12T16:00:00+05:30"),
+      tools: [
+        "jira.create_issue",
+        "confluence.search_content",
+      ],
     },
   });
   if (res.ok) {
@@ -822,106 +742,7 @@ run();
 
 ### Response
 
-**Promise\<[EventStream<models.SSEEvent>](../../models/.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## shareConversation
-
-Share a conversation with other users in your organization.<br><br>
-<b>Overview:</b><br>
-Allows the conversation owner to grant access to other users.
-Shared users can view the conversation and optionally add messages.<br><br>
-<b>Access Levels:</b><br>
-<ul>
-<li><code>read</code> - Can view conversation and messages (default)</li>
-<li><code>write</code> - Can view and add new messages</li>
-</ul>
-<b>Permissions:</b><br>
-Only the conversation initiator (owner) can share. Users must belong
-to the same organization.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="shareConversation" method="post" path="/conversations/{conversationId}/share" -->
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-
-const pipeshub = new Pipeshub({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const result = await pipeshub.conversations.shareConversation({
-    conversationId: "<value>",
-    body: {
-      userIds: [
-        "507f1f77bcf86cd799439011",
-      ],
-    },
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
-import { conversationsShareConversation } from "@pipeshub-ai/sdk/funcs/conversations-share-conversation.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const res = await conversationsShareConversation(pipeshub, {
-    conversationId: "<value>",
-    body: {
-      userIds: [
-        "507f1f77bcf86cd799439011",
-      ],
-    },
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("conversationsShareConversation failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.ShareConversationRequest](../../models/operations/share-conversation-request.md)                                                                                   | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[models.Conversation](../../models/conversation.md)\>**
+**Promise\<[EventStream<models.AssistantMessageStreamSSEEvent>](../../models/.md)\>**
 
 ### Errors
 
@@ -931,15 +752,22 @@ run();
 
 ## updateConversationTitle
 
-Update the title of a conversation.<br><br>
-<b>Overview:</b><br>
+Update the title of a conversation.
+
+**Overview:**
+
 Conversation titles are auto-generated from the first query by default.
-Use this endpoint to set a custom, more descriptive title.<br><br>
-<b>Title Limits:</b><br>
-<ul>
-<li>Minimum: 1 character</li>
-<li>Maximum: 200 characters</li>
-</ul>
+Use this endpoint to set a custom, more descriptive title.
+
+**Title limits:**
+
+- Minimum: 1 character
+- Maximum: 200 characters
+
+**Permissions:**
+
+The conversation must exist, belong to the calling user's organization,
+be owned by the caller (matched on `userId`), and not be soft-deleted.
 
 
 ### Example Usage
@@ -1013,7 +841,7 @@ run();
 
 ### Response
 
-**Promise\<[models.Conversation](../../models/conversation.md)\>**
+**Promise\<[operations.UpdateConversationTitleResponse](../../models/operations/update-conversation-title-response.md)\>**
 
 ### Errors
 
@@ -1023,12 +851,22 @@ run();
 
 ## archiveConversation
 
-Archive a conversation to hide it from the main list.<br><br>
-<b>Overview:</b><br>
+Archive a conversation to hide it from the main list.
+
+**Overview:**
+
 Archived conversations are preserved but hidden from the default conversation list.
-Use archiving to clean up your workspace without permanently deleting conversations.<br><br>
-<b>Retrieval:</b><br>
-View archived conversations using <code>GET /conversations/show/archives</code>.
+Use archiving to clean up your workspace without permanently deleting conversations.
+
+**Access:**
+
+The caller must be the conversation's initiator, or be listed in `sharedWith`
+with `accessLevel: write`. Already-archived conversations return `400`.
+
+**Retrieval:**
+
+View archived conversations using `GET /conversations/show/archives`.
+Restore one with `PATCH /conversations/{conversationId}/unarchive`.
 
 
 ### Example Usage
@@ -1096,7 +934,7 @@ run();
 
 ### Response
 
-**Promise\<[models.Conversation](../../models/conversation.md)\>**
+**Promise\<[operations.ArchiveConversationResponse](../../models/operations/archive-conversation-response.md)\>**
 
 ### Errors
 
@@ -1106,9 +944,11 @@ run();
 
 ## unarchiveConversation
 
-Restore an archived conversation to the active list.<br><br>
-<b>Overview:</b><br>
-Removes the archived flag, making the conversation visible in the main list again.
+Restore an archived conversation.
+
+- Path params: `conversationId`
+- Query params: none
+- Body: none
 
 
 ### Example Usage
@@ -1176,7 +1016,7 @@ run();
 
 ### Response
 
-**Promise\<[models.Conversation](../../models/conversation.md)\>**
+**Promise\<[operations.UnarchiveConversationResponse](../../models/operations/unarchive-conversation-response.md)\>**
 
 ### Errors
 
@@ -1186,19 +1026,44 @@ run();
 
 ## regenerateAnswer
 
-Regenerate the AI response for a specific message.<br><br>
-<b>Overview:</b><br>
+Regenerate the AI response for a specific message and stream the new
+answer over Server-Sent Events.
+
+**Overview:**
+
 If you're not satisfied with an AI response, use this endpoint to generate
-a new answer. The AI will re-process the original query and may produce
-a different response.<br><br>
-<b>Use Cases:</b><br>
-<ul>
-<li>Response was incomplete or unclear</li>
-<li>Want to try a different AI model</li>
-<li>New documents have been indexed since original response</li>
-</ul>
-<b>Model Override:</b><br>
-Specify <code>modelKey</code> to use a different model for regeneration.
+a new answer. The original user query is re-processed and a new bot
+response replaces the previous one in place.
+
+**Constraints:**
+
+- Only the *last* message of the conversation can be regenerated.
+- The target message must be of type `bot_response`.
+
+**Use Cases:**
+
+- Response was incomplete or unclear
+- Want to try a different AI model
+- New documents have been indexed since original response
+
+**Model Override:**
+
+Specify `modelKey` to use a different model for regeneration.
+
+**Streaming:**
+
+The response is delivered as an SSE (`text/event-stream`) stream. The
+exact event vocabulary depends on `chatMode`:
+
+- For non-agent modes (e.g. `internal_search`, `web_search`) the
+  request is dispatched to the assistant chat backend.
+- For agent modes (e.g. `agent:auto`) the request is dispatched to
+  the agent backend with a placeholder agent built from the caller's
+  workspace, which can additionally emit `tool_result` and
+  `tool_execution_complete` events.
+
+See `SSEEvent` for the full union of event names this endpoint can
+emit across both backends.
 
 
 ### Example Usage
@@ -1217,9 +1082,23 @@ async function run() {
   const result = await pipeshub.conversations.regenerateAnswer({
     conversationId: "<value>",
     messageId: "<value>",
+    body: {
+      modelKey: "05438a37-68f2-4641-a8dc-6c47e63278ca",
+      modelName: "gpt-5.4-mini",
+      modelFriendlyName: "mini",
+      chatMode: "internal_search",
+      timezone: "Asia/Calcutta",
+      currentTime: new Date("2026-05-11T15:43:21+05:30"),
+      tools: [
+        "jira.create_issue",
+        "confluence.search_content",
+      ],
+    },
   });
 
-  console.log(result);
+  for await (const event of result) {
+    console.log(event);
+  }
 }
 
 run();
@@ -1245,10 +1124,24 @@ async function run() {
   const res = await conversationsRegenerateAnswer(pipeshub, {
     conversationId: "<value>",
     messageId: "<value>",
+    body: {
+      modelKey: "05438a37-68f2-4641-a8dc-6c47e63278ca",
+      modelName: "gpt-5.4-mini",
+      modelFriendlyName: "mini",
+      chatMode: "internal_search",
+      timezone: "Asia/Calcutta",
+      currentTime: new Date("2026-05-11T15:43:21+05:30"),
+      tools: [
+        "jira.create_issue",
+        "confluence.search_content",
+      ],
+    },
   });
   if (res.ok) {
     const { value: result } = res;
-    console.log(result);
+    for await (const event of result) {
+    console.log(event);
+  }
   } else {
     console.log("conversationsRegenerateAnswer failed:", res.error);
   }
@@ -1268,7 +1161,7 @@ run();
 
 ### Response
 
-**Promise\<[models.Conversation](../../models/conversation.md)\>**
+**Promise\<[EventStream<models.SSEEvent>](../../models/.md)\>**
 
 ### Errors
 
@@ -1278,21 +1171,29 @@ run();
 
 ## updateMessageFeedback
 
-Provide feedback on an AI-generated response.<br><br>
-<b>Overview:</b><br>
-Feedback helps improve AI response quality over time. You can rate
-various aspects of the response and provide detailed comments.<br><br>
-<b>Feedback Options:</b><br>
-<ul>
-<li><b>isHelpful:</b> Overall thumbs up/down</li>
-<li><b>ratings:</b> 1-5 scale for accuracy, relevance, completeness, clarity</li>
-<li><b>categories:</b> Issue categories (incorrect info, too verbose, etc.)</li>
-<li><b>comments:</b> Free-text positive/negative feedback and suggestions</li>
-<li><b>citationFeedback:</b> Rate individual citations</li>
-</ul>
-<b>Restrictions:</b><br>
-Feedback can only be submitted on <code>bot_response</code> messages,
-not on user queries or system messages.
+Append a feedback entry to a bot-response message.
+
+**Overview**
+
+Feedback helps improve AI response quality over time. You can record an
+overall helpfulness signal, per-aspect ratings, issue categories, and
+free-text comments. Each call appends a new entry to the message;
+previous entries are preserved.
+
+**Feedback options**
+
+- `isHelpful` — overall thumbs up/down.
+- `ratings` — 1–5 scores keyed by an aspect name you choose
+  (e.g. `accuracy`, `relevance`, `completeness`, `clarity`).
+- `categories` — issue or positive categories from a fixed list.
+- `comments` — free-text `positive`, `negative`, and `suggestions`.
+- `metrics` — optional client-side telemetry
+  (`userInteractionTime`, `feedbackSessionId`).
+
+**Restrictions**
+
+Feedback can only be submitted on `bot_response` messages — user
+queries and system messages are rejected with `400`.
 
 
 ### Example Usage
@@ -1364,85 +1265,7 @@ run();
 
 ### Response
 
-**Promise\<[models.Conversation](../../models/conversation.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## unshareConversationById
-
-Revoke sharing for a conversation, making it private again.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="unshareConversationById" method="post" path="/conversations/{conversationId}/unshare" -->
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-
-const pipeshub = new Pipeshub({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const result = await pipeshub.conversations.unshareConversationById({
-    conversationId: "<value>",
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
-import { conversationsUnshareConversationById } from "@pipeshub-ai/sdk/funcs/conversations-unshare-conversation-by-id.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const res = await conversationsUnshareConversationById(pipeshub, {
-    conversationId: "<value>",
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("conversationsUnshareConversationById failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.UnshareConversationByIdRequest](../../models/operations/unshare-conversation-by-id-request.md)                                                                     | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.UnshareConversationByIdResponse](../../models/operations/unshare-conversation-by-id-response.md)\>**
+**Promise\<[operations.UpdateMessageFeedbackResponse](../../models/operations/update-message-feedback-response.md)\>**
 
 ### Errors
 

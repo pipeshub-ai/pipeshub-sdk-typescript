@@ -15,14 +15,14 @@ import { SDKValidationError } from "./errors/sdk-validation-error.js";
 /**
  * Type of account
  */
-export const OrganizationAccountType = {
+export const AccountType = {
   Individual: "individual",
   Business: "business",
 } as const;
 /**
  * Type of account
  */
-export type OrganizationAccountType = OpenEnum<typeof OrganizationAccountType>;
+export type AccountType = OpenEnum<typeof AccountType>;
 
 /**
  * Onboarding status
@@ -65,7 +65,7 @@ export type Organization = {
   /**
    * Type of account
    */
-  accountType: OrganizationAccountType;
+  accountType: AccountType;
   permanentAddress?: Address | undefined;
   /**
    * Onboarding status
@@ -90,10 +90,8 @@ export type Organization = {
 };
 
 /** @internal */
-export const OrganizationAccountType$inboundSchema: z.ZodMiniType<
-  OrganizationAccountType,
-  unknown
-> = openEnums.inboundSchema(OrganizationAccountType);
+export const AccountType$inboundSchema: z.ZodMiniType<AccountType, unknown> =
+  openEnums.inboundSchema(AccountType);
 
 /** @internal */
 export const OnBoardingStatus$inboundSchema: z.ZodMiniType<
@@ -111,7 +109,7 @@ export const Organization$inboundSchema: z.ZodMiniType<Organization, unknown> =
       shortName: types.optional(types.string()),
       domain: types.string(),
       contactEmail: types.string(),
-      accountType: OrganizationAccountType$inboundSchema,
+      accountType: AccountType$inboundSchema,
       permanentAddress: types.optional(Address$inboundSchema),
       onBoardingStatus: types.optional(OnBoardingStatus$inboundSchema),
       isDeleted: z._default(types.boolean(), false),

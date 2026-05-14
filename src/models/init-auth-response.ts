@@ -14,7 +14,7 @@ import {
 } from "./auth-providers.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
-export const InitAuthResponseAllowedMethod = {
+export const AllowedMethod = {
   SamlSso: "samlSso",
   Otp: "otp",
   Password: "password",
@@ -23,9 +23,7 @@ export const InitAuthResponseAllowedMethod = {
   AzureAd: "azureAd",
   Oauth: "oauth",
 } as const;
-export type InitAuthResponseAllowedMethod = OpenEnum<
-  typeof InitAuthResponseAllowedMethod
->;
+export type AllowedMethod = OpenEnum<typeof AllowedMethod>;
 
 /**
  * Response containing available authentication methods and session info
@@ -34,38 +32,41 @@ export type InitAuthResponse = {
   /**
    * Current authentication step (0-indexed). Always 0 for initial response.
    */
-  currentStep?: number | undefined;
+  currentStep: number;
   /**
    * List of allowed authentication methods for the current step
    */
-  allowedMethods?: Array<InitAuthResponseAllowedMethod> | undefined;
+  allowedMethods: Array<AllowedMethod>;
   /**
    * Response message
    */
-  message?: string | undefined;
+  message: string;
   /**
    * Configuration for external authentication providers (returned when those methods are allowed)
    */
-  authProviders?: AuthProviders | undefined;
+  authProviders: AuthProviders;
+  /**
+   * True when at least one allowed external provider has JIT provisioning enabled
+   */
+  jitEnabled: boolean;
 };
 
 /** @internal */
-export const InitAuthResponseAllowedMethod$inboundSchema: z.ZodMiniType<
-  InitAuthResponseAllowedMethod,
+export const AllowedMethod$inboundSchema: z.ZodMiniType<
+  AllowedMethod,
   unknown
-> = openEnums.inboundSchema(InitAuthResponseAllowedMethod);
+> = openEnums.inboundSchema(AllowedMethod);
 
 /** @internal */
 export const InitAuthResponse$inboundSchema: z.ZodMiniType<
   InitAuthResponse,
   unknown
 > = z.object({
-  currentStep: types.optional(types.number()),
-  allowedMethods: types.optional(
-    z.array(InitAuthResponseAllowedMethod$inboundSchema),
-  ),
-  message: types.optional(types.string()),
-  authProviders: types.optional(AuthProviders$inboundSchema),
+  currentStep: types.number(),
+  allowedMethods: z.array(AllowedMethod$inboundSchema),
+  message: types.string(),
+  authProviders: AuthProviders$inboundSchema,
+  jitEnabled: types.boolean(),
 });
 
 export function initAuthResponseFromJSON(

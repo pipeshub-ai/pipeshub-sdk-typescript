@@ -5,15 +5,13 @@
 ```typescript
 import { Filter } from "@pipeshub-ai/sdk/models";
 
-let value: Filter = {};
+let value: Filter = "sortOrder";
 ```
 
-## Fields
+## Values
 
-| Field                                                        | Type                                                         | Required                                                     | Description                                                  |
-| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| `key`                                                        | *string*                                                     | :heavy_minus_sign:                                           | Filter field key                                             |
-| `label`                                                      | *string*                                                     | :heavy_minus_sign:                                           | Display label                                                |
-| `type`                                                       | [models.FilterOptionsType](../models/filter-options-type.md) | :heavy_minus_sign:                                           | Filter input type                                            |
-| `options`                                                    | [models.Option](../models/option.md)[]                       | :heavy_minus_sign:                                           | N/A                                                          |
-| `dynamic`                                                    | *boolean*                                                    | :heavy_minus_sign:                                           | Whether options are loaded dynamically                       |
+This is an open enum. Unrecognized values will be captured as the `Unrecognized<string>` branded type.
+
+```typescript
+"page" | "limit" | "search" | "shared" | "tags" | "minMessages" | "sortBy" | "sortOrder" | "startDate" | "endDate" | "messageType" | "dateRange" | Unrecognized<string>
+```

@@ -29,19 +29,24 @@ import { Result } from "../types/fp.js";
  * Get conversation by ID
  *
  * @remarks
- * Retrieve a specific conversation with its full message history.<br><br>
- * <b>Overview:</b><br>
+ * Retrieve a specific conversation with its full message history.
+ *
+ * **Overview:**
+ *
  * Returns the complete conversation including all messages, citations,
- * feedback, and metadata. Messages can be paginated for long conversations.<br><br>
- * <b>Message Pagination:</b><br>
+ * feedback, and metadata. Messages can be paginated for long conversations.
+ *
+ * **Message Pagination:**
+ *
  * For conversations with many messages, use pagination parameters:
- * <ul>
- * <li><code>page</code>: Page number (default: 1)</li>
- * <li><code>limit</code>: Messages per page (default: 10)</li>
- * <li><code>sortBy</code>: Sort field (default: createdAt)</li>
- * <li><code>sortOrder</code>: 'asc' or 'desc' (default: desc)</li>
- * </ul>
- * <b>Access Control:</b><br>
+ *
+ * - `page`: Page number (default: 1)
+ * - `limit`: Messages per page (default: 10)
+ * - `sortBy`: Sort field (default: createdAt)
+ * - `sortOrder`: 'asc' or 'desc' (default: desc)
+ *
+ * **Access Control:**
+ *
  * Users can access conversations they own or that have been shared with them.
  */
 export function conversationsGetConversationById(
@@ -110,10 +115,15 @@ async function $do(
   const path = pathToFunc("/conversations/{conversationId}")(pathParams);
 
   const query = encodeFormQuery({
+    "endDate": payload.endDate,
     "limit": payload.limit,
+    "messageType": payload.messageType,
     "page": payload.page,
+    "search": payload.search,
+    "shared": payload.shared,
     "sortBy": payload.sortBy,
     "sortOrder": payload.sortOrder,
+    "startDate": payload.startDate,
   });
 
   const headers = new Headers(compactMap({

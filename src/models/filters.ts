@@ -3,13 +3,22 @@
  */
 
 import * as z from "zod/v4-mini";
-import { AppType, AppType$outboundSchema } from "./app-type.js";
 
+/**
+ * App connector instance ids and knowledge-base / record-group ids that narrow retrieval
+ *
+ * @remarks
+ * for a turn. For **org assistant** chat streams, send explicit `apps` / `kb` lists.
+ * For **agent** chat streams, send explicit id lists, or **omit** `filters` (and `tools`)
+ * to let the service use the agent’s stored knowledge and tool configuration. Sending
+ * `{ "apps": [], "kb": [] }` on an agent stream means **no** knowledge sources for that
+ * turn (it is not “full org default”).
+ */
 export type Filters = {
   /**
-   * Filter by application types
+   * Filter by application connector instance IDs
    */
-  apps?: Array<AppType> | undefined;
+  apps?: Array<string> | undefined;
   /**
    * Filter by knowledge base IDs
    */
@@ -25,7 +34,7 @@ export type Filters$Outbound = {
 /** @internal */
 export const Filters$outboundSchema: z.ZodMiniType<Filters$Outbound, Filters> =
   z.object({
-    apps: z.optional(z.array(AppType$outboundSchema)),
+    apps: z.optional(z.array(z.string())),
     kb: z.optional(z.array(z.string())),
   });
 

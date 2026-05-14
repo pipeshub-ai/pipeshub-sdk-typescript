@@ -4,10 +4,125 @@
 
 import * as z from "zod/v4-mini";
 import { safeParse } from "../../lib/schemas.js";
+import * as openEnums from "../../types/enums.js";
+import { ClosedEnum, OpenEnum } from "../../types/enums.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
+
+/**
+ * `owned` — owner list (`userId` filter only).
+ *
+ * @remarks
+ * `shared` — explicit share grant list (`isShared` + `sharedWith`).
+ * Defaults to `owned` when omitted.
+ */
+export const QueryParamSource = {
+  Owned: "owned",
+  Shared: "shared",
+} as const;
+/**
+ * `owned` — owner list (`userId` filter only).
+ *
+ * @remarks
+ * `shared` — explicit share grant list (`isShared` + `sharedWith`).
+ * Defaults to `owned` when omitted.
+ */
+export type QueryParamSource = ClosedEnum<typeof QueryParamSource>;
+
+/**
+ * Sort field. Invalid values fall back to `lastActivityAt`.
+ */
+export const GetAllConversationsSortByEnum = {
+  CreatedAt: "createdAt",
+  LastActivityAt: "lastActivityAt",
+  Title: "title",
+} as const;
+/**
+ * Sort field. Invalid values fall back to `lastActivityAt`.
+ */
+export type GetAllConversationsSortByEnum = ClosedEnum<
+  typeof GetAllConversationsSortByEnum
+>;
+
+/**
+ * Sort direction. Defaults to `desc` unless set to `asc`.
+ */
+export const GetAllConversationsSortOrderEnum = {
+  Asc: "asc",
+  Desc: "desc",
+} as const;
+/**
+ * Sort direction. Defaults to `desc` unless set to `asc`.
+ */
+export type GetAllConversationsSortOrderEnum = ClosedEnum<
+  typeof GetAllConversationsSortOrderEnum
+>;
+
+export type GetAllConversationsRequest = {
+  /**
+   * `owned` — owner list (`userId` filter only).
+   *
+   * @remarks
+   * `shared` — explicit share grant list (`isShared` + `sharedWith`).
+   * Defaults to `owned` when omitted.
+   */
+  source?: QueryParamSource | undefined;
+  /**
+   * Page number (1-based). Defaults to 1.
+   */
+  page?: number | undefined;
+  /**
+   * Page size. Defaults to 20; capped by the server (max 100).
+   */
+  limit?: number | undefined;
+  /**
+   * Sort field. Invalid values fall back to `lastActivityAt`.
+   */
+  sortBy?: GetAllConversationsSortByEnum | undefined;
+  /**
+   * Sort direction. Defaults to `desc` unless set to `asc`.
+   */
+  sortOrder?: GetAllConversationsSortOrderEnum | undefined;
+  /**
+   * When set, restricts results to that conversation ID (if visible under the chosen `source`).
+   */
+  conversationId?: string | undefined;
+  /**
+   * Case-insensitive match on title and message content (max 1000 characters).
+   */
+  search?: string | undefined;
+  /**
+   * Filter by `createdAt` ≥ this ISO date.
+   */
+  startDate?: Date | undefined;
+  /**
+   * Filter by `createdAt` ≤ this ISO date.
+   */
+  endDate?: Date | undefined;
+  /**
+   * When set, filters by `isShared`. Accepts case-insensitive
+   *
+   * @remarks
+   * `true`/`false`, or `1`/`0`.
+   */
+  shared?: string | undefined;
+};
+
+/**
+ * Echoes the requested `source` query value.
+ */
+export const GetAllConversationsSourceResponse = {
+  Owned: "owned",
+  Shared: "shared",
+} as const;
+/**
+ * Echoes the requested `source` query value.
+ */
+export type GetAllConversationsSourceResponse = OpenEnum<
+  typeof GetAllConversationsSourceResponse
+>;
 
 export type GetAllConversationsPagination = {
   page?: number | undefined;
@@ -18,10 +133,196 @@ export type GetAllConversationsPagination = {
   hasPrevPage?: boolean | undefined;
 };
 
+export type ValuesDateRange = {
+  start?: string | null | undefined;
+  end?: string | null | undefined;
+};
+
 /**
- * Applied and available filters
+ * Current value for each applied filter. Only keys
+ *
+ * @remarks
+ * present in `filters` are populated; others are
+ * omitted.
  */
-export type GetAllConversationsFilters = {};
+export type Values = {
+  search?: string | undefined;
+  shared?: string | undefined;
+  tags?: string | undefined;
+  minMessages?: string | undefined;
+  sortBy?: string | undefined;
+  sortOrder?: string | undefined;
+  startDate?: string | undefined;
+  endDate?: string | undefined;
+  messageType?: string | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
+  dateRange?: ValuesDateRange | undefined;
+};
+
+export type GetAllConversationsApplied = {
+  /**
+   * Names of filters currently applied.
+   */
+  filters: Array<string>;
+  /**
+   * Current value for each applied filter. Only keys
+   *
+   * @remarks
+   * present in `filters` are populated; others are
+   * omitted.
+   */
+  values: Values;
+};
+
+export type GetAllConversationsShared = {
+  /**
+   * Accepted values for the `shared` query param.
+   */
+  values?: Array<string> | undefined;
+  description?: string | undefined;
+  current?: string | null | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetAllConversationsTags = {
+  type?: string | undefined;
+  description?: string | undefined;
+  current?: string | null | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetAllConversationsMinMessages = {
+  type?: string | undefined;
+  description?: string | undefined;
+  current?: number | null | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetAllConversationsSearch = {
+  type?: string | undefined;
+  description?: string | undefined;
+  current?: string | null | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetAllConversationsPage = {
+  type?: string | undefined;
+  current?: number | undefined;
+  min?: number | undefined;
+  max?: number | undefined;
+  default?: number | undefined;
+  description?: string | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetAllConversationsLimit = {
+  type?: string | undefined;
+  current?: number | undefined;
+  min?: number | undefined;
+  max?: number | undefined;
+  default?: number | undefined;
+  description?: string | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetAllConversationsAvailablePagination = {
+  page?: GetAllConversationsPage | undefined;
+  limit?: GetAllConversationsLimit | undefined;
+};
+
+export type GetAllConversationsSortingSortBy = {
+  values?: Array<string> | undefined;
+  default?: string | undefined;
+  description?: string | undefined;
+  current?: string | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetAllConversationsSortingSortOrder = {
+  values?: Array<string> | undefined;
+  default?: string | undefined;
+  description?: string | undefined;
+  current?: string | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetAllConversationsSorting = {
+  sortBy?: GetAllConversationsSortingSortBy | undefined;
+  sortOrder?: GetAllConversationsSortingSortOrder | undefined;
+};
+
+export type GetAllConversationsCurrent = {
+  start?: string | null | undefined;
+  end?: string | null | undefined;
+};
+
+export type GetAllConversationsDateFiltersDateRange = {
+  type?: string | undefined;
+  description?: string | undefined;
+  format?: string | undefined;
+  current?: GetAllConversationsCurrent | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetAllConversationsDateFilters = {
+  dateRange?: GetAllConversationsDateFiltersDateRange | undefined;
+};
+
+export type GetAllConversationsMessageType = {
+  values?: Array<string> | undefined;
+  description?: string | undefined;
+  current?: string | null | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetAllConversationsMessageFilters = {
+  messageType?: GetAllConversationsMessageType | undefined;
+};
+
+export type GetAllConversationsSortingMessagesSortBy = {
+  values?: Array<string> | undefined;
+  default?: string | undefined;
+  description?: string | undefined;
+  current?: string | undefined;
+};
+
+export type GetAllConversationsSortingMessagesSortOrder = {
+  values?: Array<string> | undefined;
+  default?: string | undefined;
+  description?: string | undefined;
+  current?: string | undefined;
+};
+
+export type GetAllConversationsSortingMessages = {
+  sortBy?: GetAllConversationsSortingMessagesSortBy | undefined;
+  sortOrder?: GetAllConversationsSortingMessagesSortOrder | undefined;
+};
+
+export type GetAllConversationsAvailable = {
+  shared: GetAllConversationsShared;
+  tags: GetAllConversationsTags;
+  minMessages: GetAllConversationsMinMessages;
+  search: GetAllConversationsSearch;
+  pagination: GetAllConversationsAvailablePagination;
+  sorting: GetAllConversationsSorting;
+  dateFilters: GetAllConversationsDateFilters;
+  messageFilters: GetAllConversationsMessageFilters;
+  sortingMessages: GetAllConversationsSortingMessages;
+};
+
+/**
+ * Filter introspection block. `applied` summarises the
+ *
+ * @remarks
+ * filters active on this request; `available` catalogues
+ * every supported filter with its current value and whether
+ * it is applied.
+ */
+export type GetAllConversationsFilters = {
+  applied: GetAllConversationsApplied;
+  available: GetAllConversationsAvailable;
+};
 
 export type GetAllConversationsMeta = {
   requestId?: string | undefined;
@@ -30,18 +331,86 @@ export type GetAllConversationsMeta = {
 };
 
 /**
- * List of conversations
+ * List of conversations for the requested source
  */
 export type GetAllConversationsResponse = {
-  conversations?: Array<models.Conversation> | undefined;
-  sharedWithMeConversations?: Array<models.Conversation> | undefined;
-  pagination?: GetAllConversationsPagination | undefined;
+  conversations: Array<models.ConversationListItem>;
   /**
-   * Applied and available filters
+   * Echoes the requested `source` query value.
    */
-  filters?: GetAllConversationsFilters | undefined;
-  meta?: GetAllConversationsMeta | undefined;
+  source: GetAllConversationsSourceResponse;
+  pagination: GetAllConversationsPagination;
+  /**
+   * Filter introspection block. `applied` summarises the
+   *
+   * @remarks
+   * filters active on this request; `available` catalogues
+   * every supported filter with its current value and whether
+   * it is applied.
+   */
+  filters: GetAllConversationsFilters;
+  meta: GetAllConversationsMeta;
 };
+
+/** @internal */
+export const QueryParamSource$outboundSchema: z.ZodMiniEnum<
+  typeof QueryParamSource
+> = z.enum(QueryParamSource);
+
+/** @internal */
+export const GetAllConversationsSortByEnum$outboundSchema: z.ZodMiniEnum<
+  typeof GetAllConversationsSortByEnum
+> = z.enum(GetAllConversationsSortByEnum);
+
+/** @internal */
+export const GetAllConversationsSortOrderEnum$outboundSchema: z.ZodMiniEnum<
+  typeof GetAllConversationsSortOrderEnum
+> = z.enum(GetAllConversationsSortOrderEnum);
+
+/** @internal */
+export type GetAllConversationsRequest$Outbound = {
+  source: string;
+  page?: number | undefined;
+  limit?: number | undefined;
+  sortBy?: string | undefined;
+  sortOrder?: string | undefined;
+  conversationId?: string | undefined;
+  search?: string | undefined;
+  startDate?: string | undefined;
+  endDate?: string | undefined;
+  shared?: string | undefined;
+};
+
+/** @internal */
+export const GetAllConversationsRequest$outboundSchema: z.ZodMiniType<
+  GetAllConversationsRequest$Outbound,
+  GetAllConversationsRequest
+> = z.object({
+  source: z._default(QueryParamSource$outboundSchema, "owned"),
+  page: z.optional(z.int()),
+  limit: z.optional(z.int()),
+  sortBy: z.optional(GetAllConversationsSortByEnum$outboundSchema),
+  sortOrder: z.optional(GetAllConversationsSortOrderEnum$outboundSchema),
+  conversationId: z.optional(z.string()),
+  search: z.optional(z.string()),
+  startDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
+  endDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
+  shared: z.optional(z.string()),
+});
+
+export function getAllConversationsRequestToJSON(
+  getAllConversationsRequest: GetAllConversationsRequest,
+): string {
+  return JSON.stringify(
+    GetAllConversationsRequest$outboundSchema.parse(getAllConversationsRequest),
+  );
+}
+
+/** @internal */
+export const GetAllConversationsSourceResponse$inboundSchema: z.ZodMiniType<
+  GetAllConversationsSourceResponse,
+  unknown
+> = openEnums.inboundSchema(GetAllConversationsSourceResponse);
 
 /** @internal */
 export const GetAllConversationsPagination$inboundSchema: z.ZodMiniType<
@@ -67,10 +436,508 @@ export function getAllConversationsPaginationFromJSON(
 }
 
 /** @internal */
+export const ValuesDateRange$inboundSchema: z.ZodMiniType<
+  ValuesDateRange,
+  unknown
+> = z.object({
+  start: z.optional(z.nullable(types.string())),
+  end: z.optional(z.nullable(types.string())),
+});
+
+export function valuesDateRangeFromJSON(
+  jsonString: string,
+): SafeParseResult<ValuesDateRange, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => ValuesDateRange$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ValuesDateRange' from JSON`,
+  );
+}
+
+/** @internal */
+export const Values$inboundSchema: z.ZodMiniType<Values, unknown> = z.object({
+  search: types.optional(types.string()),
+  shared: types.optional(types.string()),
+  tags: types.optional(types.string()),
+  minMessages: types.optional(types.string()),
+  sortBy: types.optional(types.string()),
+  sortOrder: types.optional(types.string()),
+  startDate: types.optional(types.string()),
+  endDate: types.optional(types.string()),
+  messageType: types.optional(types.string()),
+  page: types.optional(types.number()),
+  limit: types.optional(types.number()),
+  dateRange: types.optional(z.lazy(() => ValuesDateRange$inboundSchema)),
+});
+
+export function valuesFromJSON(
+  jsonString: string,
+): SafeParseResult<Values, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Values$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Values' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAllConversationsApplied$inboundSchema: z.ZodMiniType<
+  GetAllConversationsApplied,
+  unknown
+> = z.object({
+  filters: z.array(types.string()),
+  values: z.lazy(() => Values$inboundSchema),
+});
+
+export function getAllConversationsAppliedFromJSON(
+  jsonString: string,
+): SafeParseResult<GetAllConversationsApplied, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetAllConversationsApplied$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetAllConversationsApplied' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAllConversationsShared$inboundSchema: z.ZodMiniType<
+  GetAllConversationsShared,
+  unknown
+> = z.object({
+  values: types.optional(z.array(types.string())),
+  description: types.optional(types.string()),
+  current: z.optional(z.nullable(types.string())),
+  applied: types.optional(types.boolean()),
+});
+
+export function getAllConversationsSharedFromJSON(
+  jsonString: string,
+): SafeParseResult<GetAllConversationsShared, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetAllConversationsShared$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetAllConversationsShared' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAllConversationsTags$inboundSchema: z.ZodMiniType<
+  GetAllConversationsTags,
+  unknown
+> = z.object({
+  type: types.optional(types.string()),
+  description: types.optional(types.string()),
+  current: z.optional(z.nullable(types.string())),
+  applied: types.optional(types.boolean()),
+});
+
+export function getAllConversationsTagsFromJSON(
+  jsonString: string,
+): SafeParseResult<GetAllConversationsTags, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetAllConversationsTags$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetAllConversationsTags' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAllConversationsMinMessages$inboundSchema: z.ZodMiniType<
+  GetAllConversationsMinMessages,
+  unknown
+> = z.object({
+  type: types.optional(types.string()),
+  description: types.optional(types.string()),
+  current: z.optional(z.nullable(types.number())),
+  applied: types.optional(types.boolean()),
+});
+
+export function getAllConversationsMinMessagesFromJSON(
+  jsonString: string,
+): SafeParseResult<GetAllConversationsMinMessages, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetAllConversationsMinMessages$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetAllConversationsMinMessages' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAllConversationsSearch$inboundSchema: z.ZodMiniType<
+  GetAllConversationsSearch,
+  unknown
+> = z.object({
+  type: types.optional(types.string()),
+  description: types.optional(types.string()),
+  current: z.optional(z.nullable(types.string())),
+  applied: types.optional(types.boolean()),
+});
+
+export function getAllConversationsSearchFromJSON(
+  jsonString: string,
+): SafeParseResult<GetAllConversationsSearch, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetAllConversationsSearch$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetAllConversationsSearch' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAllConversationsPage$inboundSchema: z.ZodMiniType<
+  GetAllConversationsPage,
+  unknown
+> = z.object({
+  type: types.optional(types.string()),
+  current: types.optional(types.number()),
+  min: types.optional(types.number()),
+  max: types.optional(types.number()),
+  default: types.optional(types.number()),
+  description: types.optional(types.string()),
+  applied: types.optional(types.boolean()),
+});
+
+export function getAllConversationsPageFromJSON(
+  jsonString: string,
+): SafeParseResult<GetAllConversationsPage, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetAllConversationsPage$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetAllConversationsPage' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAllConversationsLimit$inboundSchema: z.ZodMiniType<
+  GetAllConversationsLimit,
+  unknown
+> = z.object({
+  type: types.optional(types.string()),
+  current: types.optional(types.number()),
+  min: types.optional(types.number()),
+  max: types.optional(types.number()),
+  default: types.optional(types.number()),
+  description: types.optional(types.string()),
+  applied: types.optional(types.boolean()),
+});
+
+export function getAllConversationsLimitFromJSON(
+  jsonString: string,
+): SafeParseResult<GetAllConversationsLimit, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetAllConversationsLimit$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetAllConversationsLimit' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAllConversationsAvailablePagination$inboundSchema:
+  z.ZodMiniType<GetAllConversationsAvailablePagination, unknown> = z.object({
+    page: types.optional(z.lazy(() => GetAllConversationsPage$inboundSchema)),
+    limit: types.optional(z.lazy(() => GetAllConversationsLimit$inboundSchema)),
+  });
+
+export function getAllConversationsAvailablePaginationFromJSON(
+  jsonString: string,
+): SafeParseResult<GetAllConversationsAvailablePagination, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetAllConversationsAvailablePagination$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetAllConversationsAvailablePagination' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAllConversationsSortingSortBy$inboundSchema: z.ZodMiniType<
+  GetAllConversationsSortingSortBy,
+  unknown
+> = z.object({
+  values: types.optional(z.array(types.string())),
+  default: types.optional(types.string()),
+  description: types.optional(types.string()),
+  current: types.optional(types.string()),
+  applied: types.optional(types.boolean()),
+});
+
+export function getAllConversationsSortingSortByFromJSON(
+  jsonString: string,
+): SafeParseResult<GetAllConversationsSortingSortBy, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetAllConversationsSortingSortBy$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetAllConversationsSortingSortBy' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAllConversationsSortingSortOrder$inboundSchema: z.ZodMiniType<
+  GetAllConversationsSortingSortOrder,
+  unknown
+> = z.object({
+  values: types.optional(z.array(types.string())),
+  default: types.optional(types.string()),
+  description: types.optional(types.string()),
+  current: types.optional(types.string()),
+  applied: types.optional(types.boolean()),
+});
+
+export function getAllConversationsSortingSortOrderFromJSON(
+  jsonString: string,
+): SafeParseResult<GetAllConversationsSortingSortOrder, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetAllConversationsSortingSortOrder$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetAllConversationsSortingSortOrder' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAllConversationsSorting$inboundSchema: z.ZodMiniType<
+  GetAllConversationsSorting,
+  unknown
+> = z.object({
+  sortBy: types.optional(
+    z.lazy(() => GetAllConversationsSortingSortBy$inboundSchema),
+  ),
+  sortOrder: types.optional(
+    z.lazy(() => GetAllConversationsSortingSortOrder$inboundSchema),
+  ),
+});
+
+export function getAllConversationsSortingFromJSON(
+  jsonString: string,
+): SafeParseResult<GetAllConversationsSorting, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetAllConversationsSorting$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetAllConversationsSorting' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAllConversationsCurrent$inboundSchema: z.ZodMiniType<
+  GetAllConversationsCurrent,
+  unknown
+> = z.object({
+  start: z.optional(z.nullable(types.string())),
+  end: z.optional(z.nullable(types.string())),
+});
+
+export function getAllConversationsCurrentFromJSON(
+  jsonString: string,
+): SafeParseResult<GetAllConversationsCurrent, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetAllConversationsCurrent$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetAllConversationsCurrent' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAllConversationsDateFiltersDateRange$inboundSchema:
+  z.ZodMiniType<GetAllConversationsDateFiltersDateRange, unknown> = z.object({
+    type: types.optional(types.string()),
+    description: types.optional(types.string()),
+    format: types.optional(types.string()),
+    current: types.optional(
+      z.lazy(() => GetAllConversationsCurrent$inboundSchema),
+    ),
+    applied: types.optional(types.boolean()),
+  });
+
+export function getAllConversationsDateFiltersDateRangeFromJSON(
+  jsonString: string,
+): SafeParseResult<
+  GetAllConversationsDateFiltersDateRange,
+  SDKValidationError
+> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetAllConversationsDateFiltersDateRange$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'GetAllConversationsDateFiltersDateRange' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAllConversationsDateFilters$inboundSchema: z.ZodMiniType<
+  GetAllConversationsDateFilters,
+  unknown
+> = z.object({
+  dateRange: types.optional(
+    z.lazy(() => GetAllConversationsDateFiltersDateRange$inboundSchema),
+  ),
+});
+
+export function getAllConversationsDateFiltersFromJSON(
+  jsonString: string,
+): SafeParseResult<GetAllConversationsDateFilters, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetAllConversationsDateFilters$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetAllConversationsDateFilters' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAllConversationsMessageType$inboundSchema: z.ZodMiniType<
+  GetAllConversationsMessageType,
+  unknown
+> = z.object({
+  values: types.optional(z.array(types.string())),
+  description: types.optional(types.string()),
+  current: z.optional(z.nullable(types.string())),
+  applied: types.optional(types.boolean()),
+});
+
+export function getAllConversationsMessageTypeFromJSON(
+  jsonString: string,
+): SafeParseResult<GetAllConversationsMessageType, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetAllConversationsMessageType$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetAllConversationsMessageType' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAllConversationsMessageFilters$inboundSchema: z.ZodMiniType<
+  GetAllConversationsMessageFilters,
+  unknown
+> = z.object({
+  messageType: types.optional(
+    z.lazy(() => GetAllConversationsMessageType$inboundSchema),
+  ),
+});
+
+export function getAllConversationsMessageFiltersFromJSON(
+  jsonString: string,
+): SafeParseResult<GetAllConversationsMessageFilters, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetAllConversationsMessageFilters$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetAllConversationsMessageFilters' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAllConversationsSortingMessagesSortBy$inboundSchema:
+  z.ZodMiniType<GetAllConversationsSortingMessagesSortBy, unknown> = z.object({
+    values: types.optional(z.array(types.string())),
+    default: types.optional(types.string()),
+    description: types.optional(types.string()),
+    current: types.optional(types.string()),
+  });
+
+export function getAllConversationsSortingMessagesSortByFromJSON(
+  jsonString: string,
+): SafeParseResult<
+  GetAllConversationsSortingMessagesSortBy,
+  SDKValidationError
+> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetAllConversationsSortingMessagesSortBy$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'GetAllConversationsSortingMessagesSortBy' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAllConversationsSortingMessagesSortOrder$inboundSchema:
+  z.ZodMiniType<GetAllConversationsSortingMessagesSortOrder, unknown> = z
+    .object({
+      values: types.optional(z.array(types.string())),
+      default: types.optional(types.string()),
+      description: types.optional(types.string()),
+      current: types.optional(types.string()),
+    });
+
+export function getAllConversationsSortingMessagesSortOrderFromJSON(
+  jsonString: string,
+): SafeParseResult<
+  GetAllConversationsSortingMessagesSortOrder,
+  SDKValidationError
+> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetAllConversationsSortingMessagesSortOrder$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'GetAllConversationsSortingMessagesSortOrder' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAllConversationsSortingMessages$inboundSchema: z.ZodMiniType<
+  GetAllConversationsSortingMessages,
+  unknown
+> = z.object({
+  sortBy: types.optional(
+    z.lazy(() => GetAllConversationsSortingMessagesSortBy$inboundSchema),
+  ),
+  sortOrder: types.optional(
+    z.lazy(() => GetAllConversationsSortingMessagesSortOrder$inboundSchema),
+  ),
+});
+
+export function getAllConversationsSortingMessagesFromJSON(
+  jsonString: string,
+): SafeParseResult<GetAllConversationsSortingMessages, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetAllConversationsSortingMessages$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetAllConversationsSortingMessages' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAllConversationsAvailable$inboundSchema: z.ZodMiniType<
+  GetAllConversationsAvailable,
+  unknown
+> = z.object({
+  shared: z.lazy(() => GetAllConversationsShared$inboundSchema),
+  tags: z.lazy(() => GetAllConversationsTags$inboundSchema),
+  minMessages: z.lazy(() => GetAllConversationsMinMessages$inboundSchema),
+  search: z.lazy(() => GetAllConversationsSearch$inboundSchema),
+  pagination: z.lazy(() =>
+    GetAllConversationsAvailablePagination$inboundSchema
+  ),
+  sorting: z.lazy(() => GetAllConversationsSorting$inboundSchema),
+  dateFilters: z.lazy(() => GetAllConversationsDateFilters$inboundSchema),
+  messageFilters: z.lazy(() => GetAllConversationsMessageFilters$inboundSchema),
+  sortingMessages: z.lazy(() =>
+    GetAllConversationsSortingMessages$inboundSchema
+  ),
+});
+
+export function getAllConversationsAvailableFromJSON(
+  jsonString: string,
+): SafeParseResult<GetAllConversationsAvailable, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetAllConversationsAvailable$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetAllConversationsAvailable' from JSON`,
+  );
+}
+
+/** @internal */
 export const GetAllConversationsFilters$inboundSchema: z.ZodMiniType<
   GetAllConversationsFilters,
   unknown
-> = z.object({});
+> = z.object({
+  applied: z.lazy(() => GetAllConversationsApplied$inboundSchema),
+  available: z.lazy(() => GetAllConversationsAvailable$inboundSchema),
+});
 
 export function getAllConversationsFiltersFromJSON(
   jsonString: string,
@@ -107,17 +974,11 @@ export const GetAllConversationsResponse$inboundSchema: z.ZodMiniType<
   GetAllConversationsResponse,
   unknown
 > = z.object({
-  conversations: types.optional(z.array(models.Conversation$inboundSchema)),
-  sharedWithMeConversations: types.optional(
-    z.array(models.Conversation$inboundSchema),
-  ),
-  pagination: types.optional(
-    z.lazy(() => GetAllConversationsPagination$inboundSchema),
-  ),
-  filters: types.optional(
-    z.lazy(() => GetAllConversationsFilters$inboundSchema),
-  ),
-  meta: types.optional(z.lazy(() => GetAllConversationsMeta$inboundSchema)),
+  conversations: z.array(models.ConversationListItem$inboundSchema),
+  source: GetAllConversationsSourceResponse$inboundSchema,
+  pagination: z.lazy(() => GetAllConversationsPagination$inboundSchema),
+  filters: z.lazy(() => GetAllConversationsFilters$inboundSchema),
+  meta: z.lazy(() => GetAllConversationsMeta$inboundSchema),
 });
 
 export function getAllConversationsResponseFromJSON(

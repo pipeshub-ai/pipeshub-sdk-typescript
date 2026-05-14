@@ -1,0 +1,19 @@
+# GetArchivedConversationsDateRange
+
+## Example Usage
+
+```typescript
+import { GetArchivedConversationsDateRange } from "@pipeshub-ai/sdk/models/operations";
+
+let value: GetArchivedConversationsDateRange = {};
+```
+
+## Fields
+
+| Field                                                                                                                           | Type                                                                                                                            | Required                                                                                                                        | Description                                                                                                                     |
+| ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `type`                                                                                                                          | *string*                                                                                                                        | :heavy_minus_sign:                                                                                                              | N/A                                                                                                                             |
+| `description`                                                                                                                   | *string*                                                                                                                        | :heavy_minus_sign:                                                                                                              | N/A                                                                                                                             |
+| `format`                                                                                                                        | *string*                                                                                                                        | :heavy_minus_sign:                                                                                                              | Expected date format for `startDate` and `endDate` inputs                                                                       |
+| `current`                                                                                                                       | [operations.GetArchivedConversationsDateRangeCurrent](../../models/operations/get-archived-conversations-date-range-current.md) | :heavy_minus_sign:                                                                                                              | N/A                                                                                                                             |
+| `applied`                                                                                                                       | *boolean*                                                                                                                       | :heavy_minus_sign:                                                                                                              | N/A                                                                                                                             |

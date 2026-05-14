@@ -4,7 +4,7 @@
 
 import * as z from "zod/v4-mini";
 import { PipeshubCore } from "../core.js";
-import { encodeSimple } from "../lib/encodings.js";
+import { encodeFormQuery, encodeSimple } from "../lib/encodings.js";
 import * as M from "../lib/matchers.js";
 import { compactMap } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
@@ -29,7 +29,13 @@ import { Result } from "../types/fp.js";
  * Delete search by ID
  *
  * @remarks
- * Delete a specific search result by its ID.
+ * Permanently delete a single persisted search row, plus every
+ * citation row referenced by its `citationIds`. The caller must
+ * either own the row or have it shared with them.
+ *
+ * Scoped to the caller's org and limited to rows where
+ * `isDeleted: false` and `isArchived: false`; archived or
+ * already-deleted rows surface as `404`.
  */
 export function semanticSearchDeleteSearchById(
   client: PipeshubCore,
@@ -96,6 +102,13 @@ async function $do(
 
   const path = pathToFunc("/search/{searchId}")(pathParams);
 
+  const query = encodeFormQuery({
+    "endDate": payload.endDate,
+    "search": payload.search,
+    "shared": payload.shared,
+    "startDate": payload.startDate,
+  });
+
   const headers = new Headers(compactMap({
     Accept: "application/json",
   }));
@@ -124,6 +137,7 @@ async function $do(
     baseURL: options?.serverURL,
     path: path,
     headers: headers,
+    query: query,
     body: body,
     userAgent: client._options.userAgent,
     timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1,
@@ -135,7 +149,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["401", "404", "4XX", "5XX"],
+    errorCodes: ["400", "401", "403", "404", "4XX", "500", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -156,8 +170,8 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, operations.DeleteSearchByIdResponse$inboundSchema),
-    M.fail([401, 404, "4XX"]),
-    M.fail("5XX"),
+    M.fail([400, 401, 403, 404, "4XX"]),
+    M.fail([500, "5XX"]),
   )(response, req);
   if (!result.ok) {
     return [result, { status: "complete", request: req, response }];

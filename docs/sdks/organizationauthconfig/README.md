@@ -2,8 +2,6 @@
 
 ## Overview
 
-Admin configuration of authentication methods including MFA steps and allowed providers
-
 ### Available Operations
 
 * [getAuthMethods](#getauthmethods) - Get organization authentication methods
@@ -13,23 +11,25 @@ Admin configuration of authentication methods including MFA steps and allowed pr
 ## getAuthMethods
 
 Retrieve the configured authentication methods for the organization.
-<br><br>
-<b>Response Structure:</b><br>
-Returns an array of authentication steps, each containing:<br>
-- <code>order</code>: Step number (1-3)<br>
-- <code>allowedMethods</code>: Array of methods allowed for that step
-<br><br>
-<b>Example Response:</b><br>
-<pre>
+
+**Response Structure:**
+
+Returns an array of authentication steps, each containing:
+- `order`: Step number (1-3)
+- `allowedMethods`: Array of methods allowed for that step
+
+**Example Response:**
+
+```json
 {
   "authMethods": [
     { "order": 1, "allowedMethods": [{ "type": "password" }, { "type": "google" }] },
     { "order": 2, "allowedMethods": [{ "type": "otp" }] }
   ]
 }
-</pre>
-<br>
-<b>Admin Access Required:</b> Only organization admins can view auth configuration.
+```
+
+**Admin Access Required:** Only organization admins can view auth configuration.
 
 
 ### Example Usage
@@ -98,49 +98,53 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 401, 404               | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## updateAuthMethod
 
 Update the authentication methods configuration for an organization.
 This allows admins to configure single or multi-factor authentication.
-<br><br>
-<b>Validation Rules:</b><br>
-- Minimum 1 step, maximum 3 steps<br>
-- Each step must have a unique order (1, 2, or 3)<br>
-- No duplicate methods within the same step<br>
-- No method can appear in multiple steps<br>
+
+**Validation Rules:**
+- Minimum 1 step, maximum 3 steps
+- Each step must have a unique order (1, 2, or 3)
+- No duplicate methods within the same step
+- No method can appear in multiple steps
 - Each step must have at least one allowed method
-<br><br>
-<b>Available Methods:</b><br>
-- <code>password</code>: Email/password authentication<br>
-- <code>otp</code>: One-time password via email<br>
-- <code>google</code>: Google OAuth 2.0<br>
-- <code>microsoft</code>: Microsoft OAuth 2.0<br>
-- <code>azureAd</code>: Azure Active Directory<br>
-- <code>samlSso</code>: SAML 2.0 Single Sign-On<br>
-- <code>oauth</code>: Generic OAuth 2.0 provider
-<br><br>
-<b>Example - Single Factor (Password or Google):</b><br>
-<pre>
+
+**Available Methods:**
+- `password`: Email/password authentication
+- `otp`: One-time password via email
+- `google`: Google OAuth 2.0
+- `microsoft`: Microsoft OAuth 2.0
+- `azureAd`: Azure Active Directory
+- `samlSso`: SAML 2.0 Single Sign-On
+- `oauth`: Generic OAuth 2.0 provider
+
+**Example - Single Factor (Password or Google):**
+
+```json
 {
-  "authMethods": [
+  "authMethod": [
     { "order": 1, "allowedMethods": [{ "type": "password" }, { "type": "google" }] }
   ]
 }
-</pre>
-<br>
-<b>Example - Two Factor (Password + OTP):</b><br>
-<pre>
+```
+
+**Example - Two Factor (Password + OTP):**
+
+```json
 {
-  "authMethods": [
+  "authMethod": [
     { "order": 1, "allowedMethods": [{ "type": "password" }] },
     { "order": 2, "allowedMethods": [{ "type": "otp" }] }
   ]
 }
-</pre>
-<br>
-<b>Admin Access Required:</b> Only organization admins can update auth configuration.
+```
+
+**Admin Access Required:** Only organization admins can update auth configuration.
 
 
 ### Example Usage
@@ -157,7 +161,7 @@ const pipeshub = new Pipeshub({
 
 async function run() {
   const result = await pipeshub.organizationAuthConfig.updateAuthMethod({
-    authMethods: [
+    authMethod: [
       {
         order: 195644,
         allowedMethods: [
@@ -193,7 +197,7 @@ const pipeshub = new PipeshubCore({
 
 async function run() {
   const res = await organizationAuthConfigUpdateAuthMethod(pipeshub, {
-    authMethods: [
+    authMethod: [
       {
         order: 195644,
         allowedMethods: [
@@ -219,20 +223,21 @@ run();
 
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [models.AuthConfig](../../models/auth-config.md)                                                                                                                               | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `request`                                                                                                                                                                      | [operations.UpdateAuthMethodRequest](../../models/operations/update-auth-method-request.md)                                                                                    | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
 
 ### Response
 
-**Promise\<[operations.UpdateAuthMethodResponse](../../models/operations/update-auth-method-response.md)\>**
+**Promise\<[models.UpdateAuthMethodResponse](../../models/update-auth-method-response.md)\>**
 
 ### Errors
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.AuthError            | 400                         | application/json            |
+| errors.ErrorResponse        | 400, 401, 404               | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## setUpAuthConfig
@@ -242,7 +247,7 @@ Set up or initialize the organization's authentication configuration.
 
 ### Example Usage
 
-<!-- UsageSnippet language="typescript" operationID="setUpAuthConfig" method="post" path="/orgAuthConfig/" -->
+<!-- UsageSnippet language="typescript" operationID="setUpAuthConfig" method="post" path="/orgAuthConfig" -->
 ```typescript
 import { Pipeshub } from "@pipeshub-ai/sdk";
 
@@ -253,7 +258,11 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.organizationAuthConfig.setUpAuthConfig({});
+  const result = await pipeshub.organizationAuthConfig.setUpAuthConfig({
+    contactEmail: "Buster_Waelchi@yahoo.com",
+    registeredName: "<value>",
+    adminFullName: "<value>",
+  });
 
   console.log(result);
 }
@@ -278,7 +287,11 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await organizationAuthConfigSetUpAuthConfig(pipeshub, {});
+  const res = await organizationAuthConfigSetUpAuthConfig(pipeshub, {
+    contactEmail: "Buster_Waelchi@yahoo.com",
+    registeredName: "<value>",
+    adminFullName: "<value>",
+  });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
@@ -294,17 +307,19 @@ run();
 
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.SetUpAuthConfigRequest](../../models/operations/set-up-auth-config-request.md)                                                                                     | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `request`                                                                                                                                                                      | [models.OrgAuthConfigCreateRequest](../../models/org-auth-config-create-request.md)                                                                                            | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
 
 ### Response
 
-**Promise\<[operations.SetUpAuthConfigResponse](../../models/operations/set-up-auth-config-response.md)\>**
+**Promise\<[models.OrgAuthConfigSetupResponse](../../models/org-auth-config-setup-response.md)\>**
 
 ### Errors
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 401, 404               | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |

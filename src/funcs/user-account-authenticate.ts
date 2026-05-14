@@ -31,28 +31,32 @@ import { Result } from "../types/fp.js";
  *
  * @remarks
  * Authenticate a user using the specified method and credentials.
- * Requires a valid session token from <code>/initAuth</code>.
- * <br><br>
- * <b>Credential Formats by Method:</b><br>
- * - <code>password</code>: <code>{ "credentials": { "password": "your-password" } }</code><br>
- * - <code>otp</code>: <code>{ "credentials": { "otp": "123456" } }</code> (6-digit code, valid for 10 minutes)<br>
- * - <code>google</code>: <code>{ "credentials": "google-id-token-string" }</code><br>
- * - <code>microsoft</code>: <code>{ "credentials": { "accessToken": "...", "idToken": "..." } }</code><br>
- * - <code>azureAd</code>: <code>{ "credentials": { "accessToken": "...", "idToken": "..." } }</code><br>
- * - <code>oauth</code>: <code>{ "credentials": { "accessToken": "...", "idToken": "..." } }</code><br>
- * - <code>samlSso</code>: Handled via redirect flow (use <code>/saml/signIn</code> instead)
- * <br><br>
- * <b>Multi-Step Response:</b><br>
- * If organization uses MFA, successful authentication returns:<br>
- * - <code>status: "success"</code> with <code>nextStep</code> and <code>allowedMethods</code> for next step
- * <br><br>
- * <b>Fully Authenticated Response:</b><br>
- * After completing all steps:<br>
- * - <code>message: "Fully authenticated"</code> with <code>accessToken</code> (1hr) and <code>refreshToken</code> (7d)
- * <br><br>
- * <b>Security:</b><br>
- * - Account locks after 5 consecutive failed attempts<br>
- * - CAPTCHA may be required if enabled (pass <code>cf-turnstile-response</code>)
+ * Requires a valid session token from `/initAuth`.
+ *
+ * **Credential Formats by Method:**
+ *
+ * - `password`: `{ "credentials": { "password": "your-password" } }`
+ * - `otp`: `{ "credentials": { "otp": "123456" } }` (6-digit code, valid for 10 minutes)
+ * - `google`: `{ "credentials": "google-id-token-string" }`
+ * - `microsoft`: `{ "credentials": { "accessToken": "...", "idToken": "..." } }`
+ * - `azureAd`: `{ "credentials": { "accessToken": "...", "idToken": "..." } }`
+ * - `oauth`: `{ "credentials": { "accessToken": "...", "idToken": "..." } }`
+ * - `samlSso`: Handled via redirect flow (use `/saml/signIn` instead)
+ *
+ * **Multi-Step Response:**
+ *
+ * If organization uses MFA, successful authentication returns:
+ * - `status: "success"` with `nextStep` and `allowedMethods` for next step
+ *
+ * **Fully Authenticated Response:**
+ *
+ * After completing all steps:
+ * - `message: "Fully authenticated"` with `accessToken` (1hr) and `refreshToken` (7d)
+ *
+ * **Security:**
+ *
+ * - Account locks after 5 consecutive failed attempts
+ * - CAPTCHA may be required if enabled (pass `cf-turnstile-response`)
  */
 export function userAccountAuthenticate(
   client: PipeshubCore,
@@ -61,7 +65,7 @@ export function userAccountAuthenticate(
 ): APIPromise<
   Result<
     models.AuthenticateResponse,
-    | errors.AuthError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -87,7 +91,7 @@ async function $do(
   [
     Result<
       models.AuthenticateResponse,
-      | errors.AuthError
+      | errors.ErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -154,7 +158,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["400", "401", "403", "404", "410", "4XX", "5XX"],
+    errorCodes: ["400", "401", "404", "410", "4XX", "500", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -169,7 +173,7 @@ async function $do(
 
   const [result] = await M.match<
     models.AuthenticateResponse,
-    | errors.AuthError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -180,7 +184,8 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.AuthenticateResponse$inboundSchema),
-    M.jsonErr([400, 401, 403, 404, 410], errors.AuthError$inboundSchema),
+    M.jsonErr([400, 401, 404, 410], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

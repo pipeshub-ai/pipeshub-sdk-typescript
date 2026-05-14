@@ -1,6 +1,6 @@
 # DeleteSearchByIdResponse
 
-Search deleted successfully
+Search deleted successfully.
 
 ## Example Usage
 
@@ -8,12 +8,12 @@ Search deleted successfully
 import { DeleteSearchByIdResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: DeleteSearchByIdResponse = {
-  message: "Search deleted successfully",
+  message: "<value>",
 };
 ```
 
 ## Fields
 
-| Field                       | Type                        | Required                    | Description                 | Example                     |
-| --------------------------- | --------------------------- | --------------------------- | --------------------------- | --------------------------- |
-| `message`                   | *string*                    | :heavy_minus_sign:          | N/A                         | Search deleted successfully |
+| Field              | Type               | Required           | Description        |
+| ------------------ | ------------------ | ------------------ | ------------------ |
+| `message`          | *string*           | :heavy_check_mark: | N/A                |

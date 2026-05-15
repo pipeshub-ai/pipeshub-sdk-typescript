@@ -15,7 +15,8 @@ let value: ResetPasswordRequest = {
 
 ## Fields
 
-| Field              | Type               | Required           | Description        |
-| ------------------ | ------------------ | ------------------ | ------------------ |
-| `currentPassword`  | *string*           | :heavy_check_mark: | N/A                |
-| `newPassword`      | *string*           | :heavy_check_mark: | N/A                |
+| Field                                                                                  | Type                                                                                   | Required                                                                               | Description                                                                            |
+| -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `currentPassword`                                                                      | *string*                                                                               | :heavy_check_mark:                                                                     | N/A                                                                                    |
+| `newPassword`                                                                          | *string*                                                                               | :heavy_check_mark:                                                                     | N/A                                                                                    |
+| `cfTurnstileResponse`                                                                  | *string*                                                                               | :heavy_minus_sign:                                                                     | Cloudflare Turnstile CAPTCHA token (required when Turnstile is configured server-side) |

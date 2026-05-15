@@ -10,44 +10,66 @@ import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
-export const Event = {
+export const SSEEventEvent = {
   Connected: "connected",
-  Chunk: "chunk",
-  Citation: "citation",
+  Status: "status",
+  AnswerChunk: "answer_chunk",
+  ToolCall: "tool_call",
+  ToolCalls: "tool_calls",
+  ToolResult: "tool_result",
+  ToolSuccess: "tool_success",
+  ToolError: "tool_error",
+  ToolExecutionComplete: "tool_execution_complete",
+  Restreaming: "restreaming",
+  Metadata: "metadata",
   Complete: "complete",
   Error: "error",
 } as const;
-export type Event = OpenEnum<typeof Event>;
+export type SSEEventEvent = OpenEnum<typeof SSEEventEvent>;
 
 /**
- * Server-Sent Event structure for streaming responses.<br><br>
+ * Server-Sent Event envelope for streaming chat responses.
  *
  * @remarks
- * <b>Event Types:</b>
- * <ul>
- * <li><code>connected</code> - Initial connection established</li>
- * <li><code>chunk</code> - Partial response content</li>
- * <li><code>citation</code> - Citation reference</li>
- * <li><code>complete</code> - Final response with all data</li>
- * <li><code>error</code> - Error occurred during streaming</li>
- * </ul>
+ *
+ * `data` is a JSON-encoded string whose shape depends on `event`.
+ * Three events are emitted by the API layer and have stable shapes
+ * documented on the streaming routes:
+ *
+ * - `connected` — fired once on connection. Carries the newly created
+ *   `conversationId` and `title` so the client can link the stream to
+ *   a row before any tokens arrive.
+ * - `complete` — fired once after the AI backend finishes. Carries the
+ *   full persisted `conversation` and a `meta` block with `requestId`,
+ *   `timestamp` and `duration`.
+ * - `error` — fired when the stream fails. Carries an `error` message
+ *   and optional `details`. The conversation row is marked FAILED
+ *   before the stream closes.
+ *
+ * All other events are forwarded verbatim from the AI backend; their
+ * payloads are AI-backend defined and may evolve. Currently observed
+ * names include `status`, `answer_chunk`, `tool_call`, `tool_calls`,
+ * `tool_result`, `tool_success`, `tool_error`,
+ * `tool_execution_complete`, `restreaming`, and `metadata`.
  */
 export type SSEEvent = {
-  event?: Event | undefined;
+  event?: SSEEventEvent | undefined;
   /**
-   * JSON-encoded event payload
+   * JSON-encoded event payload. Shape depends on `event`.
    */
   data?: string | undefined;
 };
 
 /** @internal */
-export const Event$inboundSchema: z.ZodMiniType<Event, unknown> = openEnums
-  .inboundSchema(Event);
+export const SSEEventEvent$inboundSchema: z.ZodMiniType<
+  SSEEventEvent,
+  unknown
+> = openEnums.inboundSchema(SSEEventEvent);
 
 /** @internal */
 export const SSEEvent$inboundSchema: z.ZodMiniType<SSEEvent, unknown> = z
   .object({
-    event: types.optional(Event$inboundSchema),
+    event: types.optional(SSEEventEvent$inboundSchema),
     data: types.optional(types.string()),
   });
 

@@ -30,32 +30,42 @@ import { Result } from "../types/fp.js";
  * Initialize authentication session
  *
  * @remarks
- * Initialize an authentication session for a user by email address.
- * This is the first step in the multi-step authentication flow.
- * <br><br>
- * <b>Flow:</b><br>
- * 1. Call this endpoint with the user's email<br>
- * 2. Receive a session token in the <code>x-session-token</code> response header<br>
- * 3. Use the session token in subsequent <code>/authenticate</code> calls<br>
- * 4. The response includes <code>allowedMethods</code> for the first authentication step
- * <br><br>
- * <b>Session Token:</b><br>
- * - Stored in response header <code>x-session-token</code><br>
- * - Required for all subsequent authentication requests<br>
- * - Expires after a configured timeout period
- * <br><br>
- * <b>Multi-Factor Authentication:</b><br>
- * If the organization has MFA configured, you'll need to complete multiple
- * authentication steps. Each step completion returns the next step's allowed methods.
+ * Start a server-side authentication session and discover which sign-in methods are
+ * configured for the organization. This is the first step in the multi-step login flow.
+ *
+ * **Request body (optional)**
+ *
+ * - You may omit the body, send an empty JSON object `{}`, or send `{ "email": "..." }`.
+ * - `email` in the body is optional and kept for legacy reasons; omitting it does not prevent
+ *   initialization. The web client typically calls this endpoint without a body and sends
+ *   `email` on `/authenticate` instead.
+ * - When provided, `email` is stored on the session for correlation with subsequent steps.
+ *
+ * **Flow:**
+ *
+ * 1. Call this endpoint (optional JSON body as above).
+ * 2. Receive a session token in the `x-session-token` response header.
+ * 3. Send that token on subsequent `/authenticate` requests (`x-session-token` header).
+ * 4. Use `allowedMethods` and `authProviders` from the response to render the login UI.
+ *
+ * **Session token**
+ *
+ * - Returned as header `x-session-token`.
+ * - Required for `/authenticate` (and related steps) until it expires.
+ *
+ * **Multi-factor authentication**
+ *
+ * If the organization has MFA, complete multiple authentication steps; each step may
+ * return the next step's allowed methods.
  */
 export function userAccountInitAuth(
   client: PipeshubCore,
-  request: models.InitAuthRequest,
+  request?: models.InitAuthRequest | undefined,
   options?: RequestOptions,
 ): APIPromise<
   Result<
     operations.InitAuthResponse,
-    | errors.AuthError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -75,13 +85,13 @@ export function userAccountInitAuth(
 
 async function $do(
   client: PipeshubCore,
-  request: models.InitAuthRequest,
+  request?: models.InitAuthRequest | undefined,
   options?: RequestOptions,
 ): Promise<
   [
     Result<
       operations.InitAuthResponse,
-      | errors.AuthError
+      | errors.ErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -96,14 +106,17 @@ async function $do(
 > {
   const parsed = safeParse(
     request,
-    (value) => z.parse(models.InitAuthRequest$outboundSchema, value),
+    (value) =>
+      z.parse(z.optional(models.InitAuthRequest$outboundSchema), value),
     "Input validation failed",
   );
   if (!parsed.ok) {
     return [parsed, { status: "invalid" }];
   }
   const payload = parsed.value;
-  const body = encodeJSON("body", payload, { explode: true });
+  const body = payload === undefined
+    ? null
+    : encodeJSON("body", payload, { explode: true });
 
   const path = pathToFunc("/userAccount/initAuth")();
 
@@ -143,7 +156,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["400", "403", "404", "4XX", "5XX"],
+    errorCodes: ["400", "4XX", "500", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -158,7 +171,7 @@ async function $do(
 
   const [result] = await M.match<
     operations.InitAuthResponse,
-    | errors.AuthError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -172,7 +185,8 @@ async function $do(
       hdrs: true,
       key: "Result",
     }),
-    M.jsonErr([400, 403, 404], errors.AuthError$inboundSchema),
+    M.jsonErr(400, errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

@@ -3,10 +3,7 @@
  */
 
 import * as z from "zod/v4-mini";
-import { safeParse } from "../../lib/schemas.js";
-import { Result as SafeParseResult } from "../../types/fp.js";
-import * as types from "../../types/primitives.js";
-import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import { remap as remap$ } from "../../lib/primitives.js";
 
 /**
  * Request payload
@@ -14,52 +11,40 @@ import { SDKValidationError } from "../errors/sdk-validation-error.js";
 export type ResetPasswordRequest = {
   currentPassword: string;
   newPassword: string;
-};
-
-/**
- * Password reset successfully
- */
-export type ResetPasswordResponse = {
-  message?: string | undefined;
+  /**
+   * Cloudflare Turnstile CAPTCHA token (required when Turnstile is configured server-side)
+   */
+  cfTurnstileResponse?: string | undefined;
 };
 
 /** @internal */
 export type ResetPasswordRequest$Outbound = {
   currentPassword: string;
   newPassword: string;
+  "cf-turnstile-response"?: string | undefined;
 };
 
 /** @internal */
 export const ResetPasswordRequest$outboundSchema: z.ZodMiniType<
   ResetPasswordRequest$Outbound,
   ResetPasswordRequest
-> = z.object({
-  currentPassword: z.string(),
-  newPassword: z.string(),
-});
+> = z.pipe(
+  z.object({
+    currentPassword: z.string(),
+    newPassword: z.string(),
+    cfTurnstileResponse: z.optional(z.string()),
+  }),
+  z.transform((v) => {
+    return remap$(v, {
+      cfTurnstileResponse: "cf-turnstile-response",
+    });
+  }),
+);
 
 export function resetPasswordRequestToJSON(
   resetPasswordRequest: ResetPasswordRequest,
 ): string {
   return JSON.stringify(
     ResetPasswordRequest$outboundSchema.parse(resetPasswordRequest),
-  );
-}
-
-/** @internal */
-export const ResetPasswordResponse$inboundSchema: z.ZodMiniType<
-  ResetPasswordResponse,
-  unknown
-> = z.object({
-  message: types.optional(types.string()),
-});
-
-export function resetPasswordResponseFromJSON(
-  jsonString: string,
-): SafeParseResult<ResetPasswordResponse, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => ResetPasswordResponse$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'ResetPasswordResponse' from JSON`,
   );
 }

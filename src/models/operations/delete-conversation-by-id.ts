@@ -4,6 +4,7 @@
 
 import * as z from "zod/v4-mini";
 import { safeParse } from "../../lib/schemas.js";
+import { ClosedEnum } from "../../types/enums.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
@@ -16,10 +17,58 @@ export type DeleteConversationByIdRequest = {
 };
 
 /**
+ * Outcome of the operation
+ */
+export const DeleteConversationByIdStatus = {
+  Deleted: "deleted",
+} as const;
+/**
+ * Outcome of the operation
+ */
+export type DeleteConversationByIdStatus = ClosedEnum<
+  typeof DeleteConversationByIdStatus
+>;
+
+export type DeleteConversationByIdMeta = {
+  /**
+   * Server-assigned identifier for the request
+   */
+  requestId?: string | undefined;
+  /**
+   * Server time the response was produced
+   */
+  timestamp?: Date | undefined;
+  /**
+   * Server processing time in milliseconds
+   */
+  duration?: number | undefined;
+};
+
+/**
  * Conversation deleted successfully
  */
 export type DeleteConversationByIdResponse = {
-  message?: string | undefined;
+  /**
+   * Identifier of the conversation that was deleted
+   */
+  id?: string | undefined;
+  /**
+   * Outcome of the operation
+   */
+  status?: DeleteConversationByIdStatus | undefined;
+  /**
+   * Timestamp when the conversation was marked deleted
+   */
+  deletedAt?: Date | undefined;
+  /**
+   * Identifier of the user who performed the delete
+   */
+  deletedBy?: string | undefined;
+  /**
+   * Number of citations soft-deleted alongside the conversation
+   */
+  citationsDeleted?: number | undefined;
+  meta?: DeleteConversationByIdMeta | undefined;
 };
 
 /** @internal */
@@ -46,11 +95,41 @@ export function deleteConversationByIdRequestToJSON(
 }
 
 /** @internal */
+export const DeleteConversationByIdStatus$inboundSchema: z.ZodMiniEnum<
+  typeof DeleteConversationByIdStatus
+> = z.enum(DeleteConversationByIdStatus);
+
+/** @internal */
+export const DeleteConversationByIdMeta$inboundSchema: z.ZodMiniType<
+  DeleteConversationByIdMeta,
+  unknown
+> = z.object({
+  requestId: types.optional(types.string()),
+  timestamp: types.optional(types.date()),
+  duration: types.optional(types.number()),
+});
+
+export function deleteConversationByIdMetaFromJSON(
+  jsonString: string,
+): SafeParseResult<DeleteConversationByIdMeta, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => DeleteConversationByIdMeta$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'DeleteConversationByIdMeta' from JSON`,
+  );
+}
+
+/** @internal */
 export const DeleteConversationByIdResponse$inboundSchema: z.ZodMiniType<
   DeleteConversationByIdResponse,
   unknown
 > = z.object({
-  message: types.optional(types.string()),
+  id: types.optional(types.string()),
+  status: types.optional(DeleteConversationByIdStatus$inboundSchema),
+  deletedAt: types.optional(types.date()),
+  deletedBy: types.optional(types.string()),
+  citationsDeleted: types.optional(types.number()),
+  meta: types.optional(z.lazy(() => DeleteConversationByIdMeta$inboundSchema)),
 });
 
 export function deleteConversationByIdResponseFromJSON(

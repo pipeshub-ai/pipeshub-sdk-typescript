@@ -4,6 +4,7 @@
 
 import * as z from "zod/v4-mini";
 import { safeParse } from "../../lib/schemas.js";
+import { ClosedEnum } from "../../types/enums.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
@@ -16,10 +17,52 @@ export type ArchiveSearchRequest = {
 };
 
 /**
+ * Resulting status of the search after the operation.
+ */
+export const ArchiveSearchStatus = {
+  Archived: "archived",
+} as const;
+/**
+ * Resulting status of the search after the operation.
+ */
+export type ArchiveSearchStatus = ClosedEnum<typeof ArchiveSearchStatus>;
+
+export type ArchiveSearchMeta = {
+  /**
+   * Server-assigned request identifier for tracing. Omitted when not available.
+   */
+  requestId?: string | undefined;
+  /**
+   * Server timestamp when the response was produced.
+   */
+  timestamp: Date;
+  /**
+   * Time taken to process the request, in milliseconds.
+   */
+  duration: number;
+};
+
+/**
  * Search archived successfully
  */
 export type ArchiveSearchResponse = {
-  message?: string | undefined;
+  /**
+   * Unique identifier of the archived search.
+   */
+  id: string;
+  /**
+   * Resulting status of the search after the operation.
+   */
+  status: ArchiveSearchStatus;
+  /**
+   * User ID of the user who archived the search.
+   */
+  archivedBy: string;
+  /**
+   * Timestamp when the search was archived.
+   */
+  archivedAt: Date;
+  meta: ArchiveSearchMeta;
 };
 
 /** @internal */
@@ -44,11 +87,40 @@ export function archiveSearchRequestToJSON(
 }
 
 /** @internal */
+export const ArchiveSearchStatus$inboundSchema: z.ZodMiniEnum<
+  typeof ArchiveSearchStatus
+> = z.enum(ArchiveSearchStatus);
+
+/** @internal */
+export const ArchiveSearchMeta$inboundSchema: z.ZodMiniType<
+  ArchiveSearchMeta,
+  unknown
+> = z.object({
+  requestId: types.optional(types.string()),
+  timestamp: types.date(),
+  duration: types.number(),
+});
+
+export function archiveSearchMetaFromJSON(
+  jsonString: string,
+): SafeParseResult<ArchiveSearchMeta, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => ArchiveSearchMeta$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ArchiveSearchMeta' from JSON`,
+  );
+}
+
+/** @internal */
 export const ArchiveSearchResponse$inboundSchema: z.ZodMiniType<
   ArchiveSearchResponse,
   unknown
 > = z.object({
-  message: types.optional(types.string()),
+  id: types.string(),
+  status: ArchiveSearchStatus$inboundSchema,
+  archivedBy: types.string(),
+  archivedAt: types.date(),
+  meta: z.lazy(() => ArchiveSearchMeta$inboundSchema),
 });
 
 export function archiveSearchResponseFromJSON(

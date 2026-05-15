@@ -3,33 +3,551 @@
  */
 
 import * as z from "zod/v4-mini";
+import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
+import * as openEnums from "../../types/enums.js";
+import { ClosedEnum, OpenEnum } from "../../types/enums.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
-export type GetArchivedConversationsPagination = {
+/**
+ * Field to sort by
+ */
+export const GetArchivedConversationsSortByEnum = {
+  CreatedAt: "createdAt",
+  LastActivityAt: "lastActivityAt",
+  Title: "title",
+} as const;
+/**
+ * Field to sort by
+ */
+export type GetArchivedConversationsSortByEnum = ClosedEnum<
+  typeof GetArchivedConversationsSortByEnum
+>;
+
+/**
+ * Sort direction
+ */
+export const GetArchivedConversationsSortOrderEnum = {
+  Asc: "asc",
+  Desc: "desc",
+} as const;
+/**
+ * Sort direction
+ */
+export type GetArchivedConversationsSortOrderEnum = ClosedEnum<
+  typeof GetArchivedConversationsSortOrderEnum
+>;
+
+export type GetArchivedConversationsRequest = {
+  /**
+   * Page number (1-indexed)
+   */
   page?: number | undefined;
+  /**
+   * Items per page
+   */
   limit?: number | undefined;
-  totalCount?: number | undefined;
-  totalPages?: number | undefined;
-  hasNextPage?: boolean | undefined;
-  hasPrevPage?: boolean | undefined;
+  /**
+   * Field to sort by
+   */
+  sortBy?: GetArchivedConversationsSortByEnum | undefined;
+  /**
+   * Sort direction
+   */
+  sortOrder?: GetArchivedConversationsSortOrderEnum | undefined;
+  /**
+   * Case-insensitive substring match against title and message content (max 1000 chars)
+   */
+  search?: string | undefined;
+  /**
+   * Filter by shared status
+   */
+  shared?: boolean | undefined;
+  /**
+   * Include conversations created on or after this timestamp
+   */
+  startDate?: Date | undefined;
+  /**
+   * Include conversations created on or before this timestamp
+   */
+  endDate?: Date | undefined;
+  /**
+   * Restrict results to a single conversation by identifier
+   */
+  conversationId?: string | undefined;
 };
 
 /**
- * Applied and available filters
+ * Current status of the conversation:
+ *
+ * @remarks
+ * - `None` — no activity yet
+ * - `Inprogress` — AI is processing
+ * - `Complete` — response ready
+ * - `Failed` — error occurred
  */
-export type GetArchivedConversationsFilters = {};
+export const GetArchivedConversationsStatus = {
+  None: "None",
+  Inprogress: "Inprogress",
+  Complete: "Complete",
+  Failed: "Failed",
+} as const;
+/**
+ * Current status of the conversation:
+ *
+ * @remarks
+ * - `None` — no activity yet
+ * - `Inprogress` — AI is processing
+ * - `Complete` — response ready
+ * - `Failed` — error occurred
+ */
+export type GetArchivedConversationsStatus = OpenEnum<
+  typeof GetArchivedConversationsStatus
+>;
 
-export type Summary = {
+/**
+ * AI model configuration used
+ */
+export type GetArchivedConversationsModelInfo = {
+  modelKey?: string | undefined;
+  modelName?: string | undefined;
+  /**
+   * Friendly display name of the selected model
+   */
+  modelFriendlyName?: string | undefined;
+  modelProvider?: string | undefined;
+  chatMode?: string | undefined;
+};
+
+export const GetArchivedConversationsSharedWithAccessLevel = {
+  Read: "read",
+  Write: "write",
+} as const;
+export type GetArchivedConversationsSharedWithAccessLevel = OpenEnum<
+  typeof GetArchivedConversationsSharedWithAccessLevel
+>;
+
+export type GetArchivedConversationsSharedWith = {
+  userId?: string | undefined;
+  accessLevel?: GetArchivedConversationsSharedWithAccessLevel | undefined;
+};
+
+export type GetArchivedConversationsConversationError = {
+  message: string;
+  errorType?: string | undefined;
+  timestamp?: Date | undefined;
+  messageId?: string | undefined;
+  stack?: string | undefined;
+  metadata?: { [k: string]: any } | undefined;
+};
+
+/**
+ * Computed per request. The requester's effective access level:
+ *
+ * @remarks
+ * their entry in `sharedWith`, or `read` by default.
+ */
+export const GetArchivedConversationsAccessLevel = {
+  Read: "read",
+  Write: "write",
+} as const;
+/**
+ * Computed per request. The requester's effective access level:
+ *
+ * @remarks
+ * their entry in `sharedWith`, or `read` by default.
+ */
+export type GetArchivedConversationsAccessLevel = OpenEnum<
+  typeof GetArchivedConversationsAccessLevel
+>;
+
+/**
+ * A conversation represents a chat session between a user and the AI.
+ *
+ * @remarks
+ * Conversations maintain context across multiple messages and can be
+ * shared, archived, and organized.
+ */
+export type GetArchivedConversationsConversation = {
+  /**
+   * Unique conversation identifier
+   */
+  id?: string | undefined;
+  /**
+   * ID of the user who owns this conversation
+   */
+  userId?: string | undefined;
+  /**
+   * Organization this conversation belongs to
+   */
+  orgId?: string | undefined;
+  /**
+   * Conversation title, auto-generated from first query
+   *
+   * @remarks
+   * or manually updated
+   */
+  title?: string | undefined;
+  /**
+   * User who started the conversation
+   */
+  initiator?: string | undefined;
+  /**
+   * All messages in this conversation
+   */
+  messages?: Array<models.Message> | undefined;
+  /**
+   * Current status of the conversation:
+   *
+   * @remarks
+   * - `None` — no activity yet
+   * - `Inprogress` — AI is processing
+   * - `Complete` — response ready
+   * - `Failed` — error occurred
+   */
+  status?: GetArchivedConversationsStatus | undefined;
+  /**
+   * Error description, populated only when `status` is `Failed`.
+   */
+  failReason?: string | undefined;
+  /**
+   * AI model configuration used
+   */
+  modelInfo?: GetArchivedConversationsModelInfo | undefined;
+  /**
+   * Whether this conversation is shared with others
+   */
+  isShared: boolean;
+  /**
+   * Shareable link if conversation is shared
+   */
+  shareLink?: string | undefined;
+  /**
+   * Users this conversation is shared with
+   */
+  sharedWith?: Array<GetArchivedConversationsSharedWith> | undefined;
+  /**
+   * Whether this conversation is archived
+   */
+  isArchived: boolean;
+  /**
+   * User ID of the last user who archived this row, or `null` after
+   *
+   * @remarks
+   * unarchive cleared the archive state. Absent on rows that have
+   * never been archived.
+   */
+  archivedBy?: string | null | undefined;
+  /**
+   * Whether this conversation has been soft-deleted.
+   */
+  isDeleted: boolean;
+  /**
+   * User who soft-deleted this conversation.
+   */
+  deletedBy?: string | undefined;
+  /**
+   * Errors recorded against this conversation (e.g. failed message generations).
+   */
+  conversationErrors?:
+    | Array<GetArchivedConversationsConversationError>
+    | undefined;
+  /**
+   * Free-form metadata attached to the conversation.
+   */
+  metadata?: { [k: string]: any } | undefined;
+  /**
+   * Unix timestamp of last activity
+   */
+  lastActivityAt?: number | undefined;
+  createdAt?: Date | undefined;
+  updatedAt?: Date | undefined;
+  /**
+   * Computed per request. `true` when the requesting user is the
+   *
+   * @remarks
+   * conversation's `initiator`.
+   */
+  isOwner?: boolean | undefined;
+  /**
+   * Computed per request. The requester's effective access level:
+   *
+   * @remarks
+   * their entry in `sharedWith`, or `read` by default.
+   */
+  accessLevel?: GetArchivedConversationsAccessLevel | undefined;
+  /**
+   * Timestamp when the conversation was archived
+   */
+  archivedAt?: Date | undefined;
+};
+
+export type GetArchivedConversationsPagination = {
+  /**
+   * Current page number
+   */
+  page?: number | undefined;
+  /**
+   * Items per page
+   */
+  limit?: number | undefined;
+  /**
+   * Total archived conversations matching the filter
+   */
+  totalCount?: number | undefined;
+  /**
+   * Total pages at the current limit
+   */
+  totalPages?: number | undefined;
+  /**
+   * Whether a next page exists
+   */
+  hasNextPage?: boolean | undefined;
+  /**
+   * Whether a previous page exists
+   */
+  hasPrevPage?: boolean | undefined;
+};
+
+export type GetArchivedConversationsApplied = {
+  /**
+   * Names of filters that were applied
+   */
+  filters?: Array<string> | undefined;
+  /**
+   * Map of applied filter name to its current value
+   */
+  values?: { [k: string]: any } | undefined;
+};
+
+export type GetArchivedConversationsShared = {
+  /**
+   * Allowed values for the `shared` filter
+   */
+  values?: Array<string> | undefined;
+  description?: string | undefined;
+  /**
+   * Current value supplied by the caller, or null
+   */
+  current?: string | null | undefined;
+  /**
+   * Whether this filter was applied on the request
+   */
+  applied?: boolean | undefined;
+};
+
+export type GetArchivedConversationsTags = {
+  /**
+   * Expected value type
+   */
+  type?: string | undefined;
+  description?: string | undefined;
+  current?: string | null | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetArchivedConversationsMinMessages = {
+  type?: string | undefined;
+  description?: string | undefined;
+  current?: number | null | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetArchivedConversationsSearch = {
+  type?: string | undefined;
+  description?: string | undefined;
+  current?: string | null | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetArchivedConversationsPage = {
+  type?: string | undefined;
+  current?: number | undefined;
+  min?: number | undefined;
+  max?: number | undefined;
+  default?: number | undefined;
+  description?: string | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetArchivedConversationsLimit = {
+  type?: string | undefined;
+  current?: number | undefined;
+  min?: number | undefined;
+  max?: number | undefined;
+  default?: number | undefined;
+  description?: string | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetArchivedConversationsAvailablePagination = {
+  page?: GetArchivedConversationsPage | undefined;
+  limit?: GetArchivedConversationsLimit | undefined;
+};
+
+export type GetArchivedConversationsSortingSortBy = {
+  values?: Array<string> | undefined;
+  default?: string | undefined;
+  description?: string | undefined;
+  current?: string | undefined;
+  applied?: boolean | undefined;
+};
+
+export const SortingValue = {
+  Asc: "asc",
+  Desc: "desc",
+} as const;
+export type SortingValue = OpenEnum<typeof SortingValue>;
+
+export const SortingDefault = {
+  Asc: "asc",
+  Desc: "desc",
+} as const;
+export type SortingDefault = OpenEnum<typeof SortingDefault>;
+
+export const SortingCurrent = {
+  Asc: "asc",
+  Desc: "desc",
+} as const;
+export type SortingCurrent = OpenEnum<typeof SortingCurrent>;
+
+export type GetArchivedConversationsSortingSortOrder = {
+  values?: Array<SortingValue> | undefined;
+  default?: SortingDefault | undefined;
+  description?: string | undefined;
+  current?: SortingCurrent | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetArchivedConversationsSorting = {
+  sortBy?: GetArchivedConversationsSortingSortBy | undefined;
+  sortOrder?: GetArchivedConversationsSortingSortOrder | undefined;
+};
+
+export type GetArchivedConversationsDateRangeCurrent = {
+  start?: Date | null | undefined;
+  end?: Date | null | undefined;
+};
+
+export type GetArchivedConversationsDateRange = {
+  type?: string | undefined;
+  description?: string | undefined;
+  /**
+   * Expected date format for `startDate` and `endDate` inputs
+   */
+  format?: string | undefined;
+  current?: GetArchivedConversationsDateRangeCurrent | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetArchivedConversationsDateFilters = {
+  dateRange?: GetArchivedConversationsDateRange | undefined;
+};
+
+export type GetArchivedConversationsMessageType = {
+  values?: Array<string> | undefined;
+  description?: string | undefined;
+  current?: string | null | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetArchivedConversationsMessageFilters = {
+  messageType?: GetArchivedConversationsMessageType | undefined;
+};
+
+export type GetArchivedConversationsSortingMessagesSortBy = {
+  values?: Array<string> | undefined;
+  default?: string | undefined;
+  description?: string | undefined;
+  current?: string | undefined;
+};
+
+export const SortingMessagesValue = {
+  Asc: "asc",
+  Desc: "desc",
+} as const;
+export type SortingMessagesValue = OpenEnum<typeof SortingMessagesValue>;
+
+export const SortingMessagesDefault = {
+  Asc: "asc",
+  Desc: "desc",
+} as const;
+export type SortingMessagesDefault = OpenEnum<typeof SortingMessagesDefault>;
+
+export const SortingMessagesCurrent = {
+  Asc: "asc",
+  Desc: "desc",
+} as const;
+export type SortingMessagesCurrent = OpenEnum<typeof SortingMessagesCurrent>;
+
+export type GetArchivedConversationsSortingMessagesSortOrder = {
+  values?: Array<SortingMessagesValue> | undefined;
+  default?: SortingMessagesDefault | undefined;
+  description?: string | undefined;
+  current?: SortingMessagesCurrent | undefined;
+};
+
+export type GetArchivedConversationsSortingMessages = {
+  sortBy?: GetArchivedConversationsSortingMessagesSortBy | undefined;
+  sortOrder?: GetArchivedConversationsSortingMessagesSortOrder | undefined;
+};
+
+/**
+ * Describes filters supported by this endpoint and their current values
+ */
+export type GetArchivedConversationsAvailable = {
+  shared?: GetArchivedConversationsShared | undefined;
+  tags?: GetArchivedConversationsTags | undefined;
+  minMessages?: GetArchivedConversationsMinMessages | undefined;
+  search?: GetArchivedConversationsSearch | undefined;
+  pagination?: GetArchivedConversationsAvailablePagination | undefined;
+  sorting?: GetArchivedConversationsSorting | undefined;
+  dateFilters?: GetArchivedConversationsDateFilters | undefined;
+  messageFilters?: GetArchivedConversationsMessageFilters | undefined;
+  sortingMessages?: GetArchivedConversationsSortingMessages | undefined;
+};
+
+/**
+ * Filters applied to this request and filters available for clients to use
+ */
+export type GetArchivedConversationsFilters = {
+  applied?: GetArchivedConversationsApplied | undefined;
+  /**
+   * Describes filters supported by this endpoint and their current values
+   */
+  available?: GetArchivedConversationsAvailable | undefined;
+};
+
+export type GetArchivedConversationsSummary = {
+  /**
+   * Total archived conversations matching the filter
+   */
   totalArchived?: number | undefined;
+  /**
+   * Archive timestamp of the first item in the current page
+   */
+  oldestArchive?: Date | undefined;
+  /**
+   * Archive timestamp of the last item in the current page
+   */
+  newestArchive?: Date | undefined;
 };
 
 export type GetArchivedConversationsMeta = {
+  /**
+   * Request correlation identifier
+   */
   requestId?: string | undefined;
+  /**
+   * Response generation timestamp
+   */
   timestamp?: Date | undefined;
+  /**
+   * Server processing time in milliseconds
+   */
   duration?: number | undefined;
 };
 
@@ -37,15 +555,219 @@ export type GetArchivedConversationsMeta = {
  * List of archived conversations
  */
 export type GetArchivedConversationsResponse = {
-  conversations?: Array<models.Conversation> | undefined;
+  /**
+   * Archived conversations matching the filter
+   */
+  conversations?: Array<GetArchivedConversationsConversation> | undefined;
   pagination?: GetArchivedConversationsPagination | undefined;
   /**
-   * Applied and available filters
+   * Filters applied to this request and filters available for clients to use
    */
   filters?: GetArchivedConversationsFilters | undefined;
-  summary?: Summary | undefined;
+  summary?: GetArchivedConversationsSummary | undefined;
   meta?: GetArchivedConversationsMeta | undefined;
 };
+
+/** @internal */
+export const GetArchivedConversationsSortByEnum$outboundSchema: z.ZodMiniEnum<
+  typeof GetArchivedConversationsSortByEnum
+> = z.enum(GetArchivedConversationsSortByEnum);
+
+/** @internal */
+export const GetArchivedConversationsSortOrderEnum$outboundSchema:
+  z.ZodMiniEnum<typeof GetArchivedConversationsSortOrderEnum> = z.enum(
+    GetArchivedConversationsSortOrderEnum,
+  );
+
+/** @internal */
+export type GetArchivedConversationsRequest$Outbound = {
+  page: number;
+  limit: number;
+  sortBy: string;
+  sortOrder: string;
+  search?: string | undefined;
+  shared?: boolean | undefined;
+  startDate?: string | undefined;
+  endDate?: string | undefined;
+  conversationId?: string | undefined;
+};
+
+/** @internal */
+export const GetArchivedConversationsRequest$outboundSchema: z.ZodMiniType<
+  GetArchivedConversationsRequest$Outbound,
+  GetArchivedConversationsRequest
+> = z.object({
+  page: z._default(z.int(), 1),
+  limit: z._default(z.int(), 20),
+  sortBy: z._default(
+    GetArchivedConversationsSortByEnum$outboundSchema,
+    "lastActivityAt",
+  ),
+  sortOrder: z._default(
+    GetArchivedConversationsSortOrderEnum$outboundSchema,
+    "desc",
+  ),
+  search: z.optional(z.string()),
+  shared: z.optional(z.boolean()),
+  startDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
+  endDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
+  conversationId: z.optional(z.string()),
+});
+
+export function getArchivedConversationsRequestToJSON(
+  getArchivedConversationsRequest: GetArchivedConversationsRequest,
+): string {
+  return JSON.stringify(
+    GetArchivedConversationsRequest$outboundSchema.parse(
+      getArchivedConversationsRequest,
+    ),
+  );
+}
+
+/** @internal */
+export const GetArchivedConversationsStatus$inboundSchema: z.ZodMiniType<
+  GetArchivedConversationsStatus,
+  unknown
+> = openEnums.inboundSchema(GetArchivedConversationsStatus);
+
+/** @internal */
+export const GetArchivedConversationsModelInfo$inboundSchema: z.ZodMiniType<
+  GetArchivedConversationsModelInfo,
+  unknown
+> = z.object({
+  modelKey: types.optional(types.string()),
+  modelName: types.optional(types.string()),
+  modelFriendlyName: types.optional(types.string()),
+  modelProvider: types.optional(types.string()),
+  chatMode: types.optional(types.string()),
+});
+
+export function getArchivedConversationsModelInfoFromJSON(
+  jsonString: string,
+): SafeParseResult<GetArchivedConversationsModelInfo, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetArchivedConversationsModelInfo$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetArchivedConversationsModelInfo' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetArchivedConversationsSharedWithAccessLevel$inboundSchema:
+  z.ZodMiniType<GetArchivedConversationsSharedWithAccessLevel, unknown> =
+    openEnums.inboundSchema(GetArchivedConversationsSharedWithAccessLevel);
+
+/** @internal */
+export const GetArchivedConversationsSharedWith$inboundSchema: z.ZodMiniType<
+  GetArchivedConversationsSharedWith,
+  unknown
+> = z.object({
+  userId: types.optional(types.string()),
+  accessLevel: types.optional(
+    GetArchivedConversationsSharedWithAccessLevel$inboundSchema,
+  ),
+});
+
+export function getArchivedConversationsSharedWithFromJSON(
+  jsonString: string,
+): SafeParseResult<GetArchivedConversationsSharedWith, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetArchivedConversationsSharedWith$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetArchivedConversationsSharedWith' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetArchivedConversationsConversationError$inboundSchema:
+  z.ZodMiniType<GetArchivedConversationsConversationError, unknown> = z.object({
+    message: types.string(),
+    errorType: types.optional(types.string()),
+    timestamp: types.optional(types.date()),
+    messageId: types.optional(types.string()),
+    stack: types.optional(types.string()),
+    metadata: types.optional(z.record(z.string(), z.any())),
+  });
+
+export function getArchivedConversationsConversationErrorFromJSON(
+  jsonString: string,
+): SafeParseResult<
+  GetArchivedConversationsConversationError,
+  SDKValidationError
+> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetArchivedConversationsConversationError$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'GetArchivedConversationsConversationError' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetArchivedConversationsAccessLevel$inboundSchema: z.ZodMiniType<
+  GetArchivedConversationsAccessLevel,
+  unknown
+> = openEnums.inboundSchema(GetArchivedConversationsAccessLevel);
+
+/** @internal */
+export const GetArchivedConversationsConversation$inboundSchema: z.ZodMiniType<
+  GetArchivedConversationsConversation,
+  unknown
+> = z.pipe(
+  z.object({
+    _id: types.optional(types.string()),
+    userId: types.optional(types.string()),
+    orgId: types.optional(types.string()),
+    title: types.optional(types.string()),
+    initiator: types.optional(types.string()),
+    messages: types.optional(z.array(models.Message$inboundSchema)),
+    status: types.optional(GetArchivedConversationsStatus$inboundSchema),
+    failReason: types.optional(types.string()),
+    modelInfo: types.optional(
+      z.lazy(() => GetArchivedConversationsModelInfo$inboundSchema),
+    ),
+    isShared: z._default(types.boolean(), false),
+    shareLink: types.optional(types.string()),
+    sharedWith: types.optional(
+      z.array(z.lazy(() => GetArchivedConversationsSharedWith$inboundSchema)),
+    ),
+    isArchived: z._default(types.boolean(), false),
+    archivedBy: z.optional(z.nullable(types.string())),
+    isDeleted: z._default(types.boolean(), false),
+    deletedBy: types.optional(types.string()),
+    conversationErrors: types.optional(z.array(z.lazy(() =>
+      GetArchivedConversationsConversationError$inboundSchema
+    ))),
+    metadata: types.optional(z.record(z.string(), z.any())),
+    lastActivityAt: types.optional(types.number()),
+    createdAt: types.optional(types.date()),
+    updatedAt: types.optional(types.date()),
+    isOwner: types.optional(types.boolean()),
+    accessLevel: types.optional(
+      GetArchivedConversationsAccessLevel$inboundSchema,
+    ),
+    archivedAt: types.optional(types.date()),
+  }),
+  z.transform((v) => {
+    return remap$(v, {
+      "_id": "id",
+    });
+  }),
+);
+
+export function getArchivedConversationsConversationFromJSON(
+  jsonString: string,
+): SafeParseResult<GetArchivedConversationsConversation, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetArchivedConversationsConversation$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetArchivedConversationsConversation' from JSON`,
+  );
+}
 
 /** @internal */
 export const GetArchivedConversationsPagination$inboundSchema: z.ZodMiniType<
@@ -72,10 +794,537 @@ export function getArchivedConversationsPaginationFromJSON(
 }
 
 /** @internal */
+export const GetArchivedConversationsApplied$inboundSchema: z.ZodMiniType<
+  GetArchivedConversationsApplied,
+  unknown
+> = z.object({
+  filters: types.optional(z.array(types.string())),
+  values: types.optional(z.record(z.string(), z.any())),
+});
+
+export function getArchivedConversationsAppliedFromJSON(
+  jsonString: string,
+): SafeParseResult<GetArchivedConversationsApplied, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetArchivedConversationsApplied$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetArchivedConversationsApplied' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetArchivedConversationsShared$inboundSchema: z.ZodMiniType<
+  GetArchivedConversationsShared,
+  unknown
+> = z.object({
+  values: types.optional(z.array(types.string())),
+  description: types.optional(types.string()),
+  current: z.optional(z.nullable(types.string())),
+  applied: types.optional(types.boolean()),
+});
+
+export function getArchivedConversationsSharedFromJSON(
+  jsonString: string,
+): SafeParseResult<GetArchivedConversationsShared, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetArchivedConversationsShared$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetArchivedConversationsShared' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetArchivedConversationsTags$inboundSchema: z.ZodMiniType<
+  GetArchivedConversationsTags,
+  unknown
+> = z.object({
+  type: types.optional(types.string()),
+  description: types.optional(types.string()),
+  current: z.optional(z.nullable(types.string())),
+  applied: types.optional(types.boolean()),
+});
+
+export function getArchivedConversationsTagsFromJSON(
+  jsonString: string,
+): SafeParseResult<GetArchivedConversationsTags, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetArchivedConversationsTags$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetArchivedConversationsTags' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetArchivedConversationsMinMessages$inboundSchema: z.ZodMiniType<
+  GetArchivedConversationsMinMessages,
+  unknown
+> = z.object({
+  type: types.optional(types.string()),
+  description: types.optional(types.string()),
+  current: z.optional(z.nullable(types.number())),
+  applied: types.optional(types.boolean()),
+});
+
+export function getArchivedConversationsMinMessagesFromJSON(
+  jsonString: string,
+): SafeParseResult<GetArchivedConversationsMinMessages, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetArchivedConversationsMinMessages$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetArchivedConversationsMinMessages' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetArchivedConversationsSearch$inboundSchema: z.ZodMiniType<
+  GetArchivedConversationsSearch,
+  unknown
+> = z.object({
+  type: types.optional(types.string()),
+  description: types.optional(types.string()),
+  current: z.optional(z.nullable(types.string())),
+  applied: types.optional(types.boolean()),
+});
+
+export function getArchivedConversationsSearchFromJSON(
+  jsonString: string,
+): SafeParseResult<GetArchivedConversationsSearch, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetArchivedConversationsSearch$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetArchivedConversationsSearch' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetArchivedConversationsPage$inboundSchema: z.ZodMiniType<
+  GetArchivedConversationsPage,
+  unknown
+> = z.object({
+  type: types.optional(types.string()),
+  current: types.optional(types.number()),
+  min: types.optional(types.number()),
+  max: types.optional(types.number()),
+  default: types.optional(types.number()),
+  description: types.optional(types.string()),
+  applied: types.optional(types.boolean()),
+});
+
+export function getArchivedConversationsPageFromJSON(
+  jsonString: string,
+): SafeParseResult<GetArchivedConversationsPage, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetArchivedConversationsPage$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetArchivedConversationsPage' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetArchivedConversationsLimit$inboundSchema: z.ZodMiniType<
+  GetArchivedConversationsLimit,
+  unknown
+> = z.object({
+  type: types.optional(types.string()),
+  current: types.optional(types.number()),
+  min: types.optional(types.number()),
+  max: types.optional(types.number()),
+  default: types.optional(types.number()),
+  description: types.optional(types.string()),
+  applied: types.optional(types.boolean()),
+});
+
+export function getArchivedConversationsLimitFromJSON(
+  jsonString: string,
+): SafeParseResult<GetArchivedConversationsLimit, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetArchivedConversationsLimit$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetArchivedConversationsLimit' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetArchivedConversationsAvailablePagination$inboundSchema:
+  z.ZodMiniType<GetArchivedConversationsAvailablePagination, unknown> = z
+    .object({
+      page: types.optional(
+        z.lazy(() => GetArchivedConversationsPage$inboundSchema),
+      ),
+      limit: types.optional(
+        z.lazy(() => GetArchivedConversationsLimit$inboundSchema),
+      ),
+    });
+
+export function getArchivedConversationsAvailablePaginationFromJSON(
+  jsonString: string,
+): SafeParseResult<
+  GetArchivedConversationsAvailablePagination,
+  SDKValidationError
+> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetArchivedConversationsAvailablePagination$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'GetArchivedConversationsAvailablePagination' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetArchivedConversationsSortingSortBy$inboundSchema: z.ZodMiniType<
+  GetArchivedConversationsSortingSortBy,
+  unknown
+> = z.object({
+  values: types.optional(z.array(types.string())),
+  default: types.optional(types.string()),
+  description: types.optional(types.string()),
+  current: types.optional(types.string()),
+  applied: types.optional(types.boolean()),
+});
+
+export function getArchivedConversationsSortingSortByFromJSON(
+  jsonString: string,
+): SafeParseResult<GetArchivedConversationsSortingSortBy, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetArchivedConversationsSortingSortBy$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetArchivedConversationsSortingSortBy' from JSON`,
+  );
+}
+
+/** @internal */
+export const SortingValue$inboundSchema: z.ZodMiniType<SortingValue, unknown> =
+  openEnums.inboundSchema(SortingValue);
+
+/** @internal */
+export const SortingDefault$inboundSchema: z.ZodMiniType<
+  SortingDefault,
+  unknown
+> = openEnums.inboundSchema(SortingDefault);
+
+/** @internal */
+export const SortingCurrent$inboundSchema: z.ZodMiniType<
+  SortingCurrent,
+  unknown
+> = openEnums.inboundSchema(SortingCurrent);
+
+/** @internal */
+export const GetArchivedConversationsSortingSortOrder$inboundSchema:
+  z.ZodMiniType<GetArchivedConversationsSortingSortOrder, unknown> = z.object({
+    values: types.optional(z.array(SortingValue$inboundSchema)),
+    default: types.optional(SortingDefault$inboundSchema),
+    description: types.optional(types.string()),
+    current: types.optional(SortingCurrent$inboundSchema),
+    applied: types.optional(types.boolean()),
+  });
+
+export function getArchivedConversationsSortingSortOrderFromJSON(
+  jsonString: string,
+): SafeParseResult<
+  GetArchivedConversationsSortingSortOrder,
+  SDKValidationError
+> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetArchivedConversationsSortingSortOrder$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'GetArchivedConversationsSortingSortOrder' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetArchivedConversationsSorting$inboundSchema: z.ZodMiniType<
+  GetArchivedConversationsSorting,
+  unknown
+> = z.object({
+  sortBy: types.optional(
+    z.lazy(() => GetArchivedConversationsSortingSortBy$inboundSchema),
+  ),
+  sortOrder: types.optional(
+    z.lazy(() => GetArchivedConversationsSortingSortOrder$inboundSchema),
+  ),
+});
+
+export function getArchivedConversationsSortingFromJSON(
+  jsonString: string,
+): SafeParseResult<GetArchivedConversationsSorting, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetArchivedConversationsSorting$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetArchivedConversationsSorting' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetArchivedConversationsDateRangeCurrent$inboundSchema:
+  z.ZodMiniType<GetArchivedConversationsDateRangeCurrent, unknown> = z.object({
+    start: z.optional(z.nullable(types.date())),
+    end: z.optional(z.nullable(types.date())),
+  });
+
+export function getArchivedConversationsDateRangeCurrentFromJSON(
+  jsonString: string,
+): SafeParseResult<
+  GetArchivedConversationsDateRangeCurrent,
+  SDKValidationError
+> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetArchivedConversationsDateRangeCurrent$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'GetArchivedConversationsDateRangeCurrent' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetArchivedConversationsDateRange$inboundSchema: z.ZodMiniType<
+  GetArchivedConversationsDateRange,
+  unknown
+> = z.object({
+  type: types.optional(types.string()),
+  description: types.optional(types.string()),
+  format: types.optional(types.string()),
+  current: types.optional(
+    z.lazy(() => GetArchivedConversationsDateRangeCurrent$inboundSchema),
+  ),
+  applied: types.optional(types.boolean()),
+});
+
+export function getArchivedConversationsDateRangeFromJSON(
+  jsonString: string,
+): SafeParseResult<GetArchivedConversationsDateRange, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetArchivedConversationsDateRange$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetArchivedConversationsDateRange' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetArchivedConversationsDateFilters$inboundSchema: z.ZodMiniType<
+  GetArchivedConversationsDateFilters,
+  unknown
+> = z.object({
+  dateRange: types.optional(
+    z.lazy(() => GetArchivedConversationsDateRange$inboundSchema),
+  ),
+});
+
+export function getArchivedConversationsDateFiltersFromJSON(
+  jsonString: string,
+): SafeParseResult<GetArchivedConversationsDateFilters, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetArchivedConversationsDateFilters$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetArchivedConversationsDateFilters' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetArchivedConversationsMessageType$inboundSchema: z.ZodMiniType<
+  GetArchivedConversationsMessageType,
+  unknown
+> = z.object({
+  values: types.optional(z.array(types.string())),
+  description: types.optional(types.string()),
+  current: z.optional(z.nullable(types.string())),
+  applied: types.optional(types.boolean()),
+});
+
+export function getArchivedConversationsMessageTypeFromJSON(
+  jsonString: string,
+): SafeParseResult<GetArchivedConversationsMessageType, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetArchivedConversationsMessageType$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetArchivedConversationsMessageType' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetArchivedConversationsMessageFilters$inboundSchema:
+  z.ZodMiniType<GetArchivedConversationsMessageFilters, unknown> = z.object({
+    messageType: types.optional(
+      z.lazy(() => GetArchivedConversationsMessageType$inboundSchema),
+    ),
+  });
+
+export function getArchivedConversationsMessageFiltersFromJSON(
+  jsonString: string,
+): SafeParseResult<GetArchivedConversationsMessageFilters, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetArchivedConversationsMessageFilters$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetArchivedConversationsMessageFilters' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetArchivedConversationsSortingMessagesSortBy$inboundSchema:
+  z.ZodMiniType<GetArchivedConversationsSortingMessagesSortBy, unknown> = z
+    .object({
+      values: types.optional(z.array(types.string())),
+      default: types.optional(types.string()),
+      description: types.optional(types.string()),
+      current: types.optional(types.string()),
+    });
+
+export function getArchivedConversationsSortingMessagesSortByFromJSON(
+  jsonString: string,
+): SafeParseResult<
+  GetArchivedConversationsSortingMessagesSortBy,
+  SDKValidationError
+> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetArchivedConversationsSortingMessagesSortBy$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'GetArchivedConversationsSortingMessagesSortBy' from JSON`,
+  );
+}
+
+/** @internal */
+export const SortingMessagesValue$inboundSchema: z.ZodMiniType<
+  SortingMessagesValue,
+  unknown
+> = openEnums.inboundSchema(SortingMessagesValue);
+
+/** @internal */
+export const SortingMessagesDefault$inboundSchema: z.ZodMiniType<
+  SortingMessagesDefault,
+  unknown
+> = openEnums.inboundSchema(SortingMessagesDefault);
+
+/** @internal */
+export const SortingMessagesCurrent$inboundSchema: z.ZodMiniType<
+  SortingMessagesCurrent,
+  unknown
+> = openEnums.inboundSchema(SortingMessagesCurrent);
+
+/** @internal */
+export const GetArchivedConversationsSortingMessagesSortOrder$inboundSchema:
+  z.ZodMiniType<GetArchivedConversationsSortingMessagesSortOrder, unknown> = z
+    .object({
+      values: types.optional(z.array(SortingMessagesValue$inboundSchema)),
+      default: types.optional(SortingMessagesDefault$inboundSchema),
+      description: types.optional(types.string()),
+      current: types.optional(SortingMessagesCurrent$inboundSchema),
+    });
+
+export function getArchivedConversationsSortingMessagesSortOrderFromJSON(
+  jsonString: string,
+): SafeParseResult<
+  GetArchivedConversationsSortingMessagesSortOrder,
+  SDKValidationError
+> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetArchivedConversationsSortingMessagesSortOrder$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'GetArchivedConversationsSortingMessagesSortOrder' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetArchivedConversationsSortingMessages$inboundSchema:
+  z.ZodMiniType<GetArchivedConversationsSortingMessages, unknown> = z.object({
+    sortBy: types.optional(
+      z.lazy(() => GetArchivedConversationsSortingMessagesSortBy$inboundSchema),
+    ),
+    sortOrder: types.optional(
+      z.lazy(() =>
+        GetArchivedConversationsSortingMessagesSortOrder$inboundSchema
+      ),
+    ),
+  });
+
+export function getArchivedConversationsSortingMessagesFromJSON(
+  jsonString: string,
+): SafeParseResult<
+  GetArchivedConversationsSortingMessages,
+  SDKValidationError
+> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetArchivedConversationsSortingMessages$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'GetArchivedConversationsSortingMessages' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetArchivedConversationsAvailable$inboundSchema: z.ZodMiniType<
+  GetArchivedConversationsAvailable,
+  unknown
+> = z.object({
+  shared: types.optional(
+    z.lazy(() => GetArchivedConversationsShared$inboundSchema),
+  ),
+  tags: types.optional(
+    z.lazy(() => GetArchivedConversationsTags$inboundSchema),
+  ),
+  minMessages: types.optional(
+    z.lazy(() => GetArchivedConversationsMinMessages$inboundSchema),
+  ),
+  search: types.optional(
+    z.lazy(() => GetArchivedConversationsSearch$inboundSchema),
+  ),
+  pagination: types.optional(
+    z.lazy(() => GetArchivedConversationsAvailablePagination$inboundSchema),
+  ),
+  sorting: types.optional(
+    z.lazy(() => GetArchivedConversationsSorting$inboundSchema),
+  ),
+  dateFilters: types.optional(
+    z.lazy(() => GetArchivedConversationsDateFilters$inboundSchema),
+  ),
+  messageFilters: types.optional(
+    z.lazy(() => GetArchivedConversationsMessageFilters$inboundSchema),
+  ),
+  sortingMessages: types.optional(
+    z.lazy(() => GetArchivedConversationsSortingMessages$inboundSchema),
+  ),
+});
+
+export function getArchivedConversationsAvailableFromJSON(
+  jsonString: string,
+): SafeParseResult<GetArchivedConversationsAvailable, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetArchivedConversationsAvailable$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetArchivedConversationsAvailable' from JSON`,
+  );
+}
+
+/** @internal */
 export const GetArchivedConversationsFilters$inboundSchema: z.ZodMiniType<
   GetArchivedConversationsFilters,
   unknown
-> = z.object({});
+> = z.object({
+  applied: types.optional(
+    z.lazy(() => GetArchivedConversationsApplied$inboundSchema),
+  ),
+  available: types.optional(
+    z.lazy(() => GetArchivedConversationsAvailable$inboundSchema),
+  ),
+});
 
 export function getArchivedConversationsFiltersFromJSON(
   jsonString: string,
@@ -88,17 +1337,22 @@ export function getArchivedConversationsFiltersFromJSON(
 }
 
 /** @internal */
-export const Summary$inboundSchema: z.ZodMiniType<Summary, unknown> = z.object({
+export const GetArchivedConversationsSummary$inboundSchema: z.ZodMiniType<
+  GetArchivedConversationsSummary,
+  unknown
+> = z.object({
   totalArchived: types.optional(types.number()),
+  oldestArchive: types.optional(types.date()),
+  newestArchive: types.optional(types.date()),
 });
 
-export function summaryFromJSON(
+export function getArchivedConversationsSummaryFromJSON(
   jsonString: string,
-): SafeParseResult<Summary, SDKValidationError> {
+): SafeParseResult<GetArchivedConversationsSummary, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => Summary$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Summary' from JSON`,
+    (x) => GetArchivedConversationsSummary$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetArchivedConversationsSummary' from JSON`,
   );
 }
 
@@ -127,14 +1381,18 @@ export const GetArchivedConversationsResponse$inboundSchema: z.ZodMiniType<
   GetArchivedConversationsResponse,
   unknown
 > = z.object({
-  conversations: types.optional(z.array(models.Conversation$inboundSchema)),
+  conversations: types.optional(
+    z.array(z.lazy(() => GetArchivedConversationsConversation$inboundSchema)),
+  ),
   pagination: types.optional(
     z.lazy(() => GetArchivedConversationsPagination$inboundSchema),
   ),
   filters: types.optional(
     z.lazy(() => GetArchivedConversationsFilters$inboundSchema),
   ),
-  summary: types.optional(z.lazy(() => Summary$inboundSchema)),
+  summary: types.optional(
+    z.lazy(() => GetArchivedConversationsSummary$inboundSchema),
+  ),
   meta: types.optional(
     z.lazy(() => GetArchivedConversationsMeta$inboundSchema),
   ),

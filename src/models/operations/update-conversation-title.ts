@@ -3,6 +3,14 @@
  */
 
 import * as z from "zod/v4-mini";
+import { remap as remap$ } from "../../lib/primitives.js";
+import { safeParse } from "../../lib/schemas.js";
+import * as openEnums from "../../types/enums.js";
+import { OpenEnum } from "../../types/enums.js";
+import { Result as SafeParseResult } from "../../types/fp.js";
+import * as types from "../../types/primitives.js";
+import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
 
 /**
  * Request payload
@@ -15,11 +23,330 @@ export type UpdateConversationTitleRequestBody = {
 };
 
 export type UpdateConversationTitleRequest = {
+  /**
+   * Unique conversation identifier
+   */
   conversationId: string;
   /**
    * Request payload
    */
   body: UpdateConversationTitleRequestBody;
+};
+
+export const UpdateConversationTitleMessageType = {
+  UserQuery: "user_query",
+  BotResponse: "bot_response",
+  Error: "error",
+  Feedback: "feedback",
+  System: "system",
+} as const;
+export type UpdateConversationTitleMessageType = OpenEnum<
+  typeof UpdateConversationTitleMessageType
+>;
+
+export const UpdateConversationTitleContentFormat = {
+  Markdown: "MARKDOWN",
+  Json: "JSON",
+  Html: "HTML",
+} as const;
+export type UpdateConversationTitleContentFormat = OpenEnum<
+  typeof UpdateConversationTitleContentFormat
+>;
+
+export type UpdateConversationTitleReferenceDatum = {
+  /**
+   * Display name shown to the user.
+   */
+  name?: string | undefined;
+  /**
+   * Technical identifier (numeric ID, UUID, etc.).
+   */
+  id?: string | undefined;
+  /**
+   * Item type (e.g. `project`, `issue`, `file`, `notebook`, `page`).
+   */
+  type?: string | undefined;
+  /**
+   * Source application (e.g. `jira`, `confluence`,
+   *
+   * @remarks
+   * `sharepoint`, `slack`, `drive`, `gmail`).
+   */
+  app?: string | undefined;
+  /**
+   * URL to open the item in a browser.
+   */
+  webUrl?: string | undefined;
+  /**
+   * App-specific fields keyed by name (e.g. `key` for a Jira
+   *
+   * @remarks
+   * project, `siteId` for a SharePoint document).
+   */
+  metadata?: { [k: string]: string } | undefined;
+};
+
+export type UpdateConversationTitleAppliedFilters = {
+  apps?: Array<models.AppliedFilterNode> | undefined;
+  kb?: Array<models.AppliedFilterNode> | undefined;
+};
+
+export type UpdateConversationTitleMetadata = {
+  processingTimeMs?: number | undefined;
+  modelVersion?: string | undefined;
+  aiTransactionId?: string | undefined;
+  reason?: string | undefined;
+};
+
+export type UpdateConversationTitleMessage = {
+  id: string;
+  messageType: UpdateConversationTitleMessageType;
+  content: string;
+  contentFormat: UpdateConversationTitleContentFormat;
+  /**
+   * AI confidence in the answer. Present only on
+   *
+   * @remarks
+   * `bot_response` messages, and only when the
+   * model emitted a trailing confidence block.
+   */
+  confidence?: string | undefined;
+  /**
+   * References to source documents used in the
+   *
+   * @remarks
+   * response, stored as raw citation pointers
+   * (not populated on this endpoint).
+   */
+  citations: Array<models.CitationReference>;
+  followUpQuestions: Array<models.FollowUpQuestion>;
+  feedback: Array<models.MessageFeedback>;
+  /**
+   * Reference IDs surfaced from tool responses,
+   *
+   * @remarks
+   * used for follow-up queries.
+   */
+  referenceData: Array<UpdateConversationTitleReferenceDatum>;
+  /**
+   * AI model configuration recorded against a conversation or message.
+   */
+  modelInfo?: models.ConversationModelInfo | undefined;
+  appliedFilters?: UpdateConversationTitleAppliedFilters | undefined;
+  metadata?: UpdateConversationTitleMetadata | undefined;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+/**
+ * Current status of the conversation:
+ *
+ * @remarks
+ * - `None` — no activity yet
+ * - `Inprogress` — AI is processing
+ * - `Complete` — response ready
+ * - `Failed` — error occurred
+ */
+export const UpdateConversationTitleStatus = {
+  None: "None",
+  Inprogress: "Inprogress",
+  Complete: "Complete",
+  Failed: "Failed",
+} as const;
+/**
+ * Current status of the conversation:
+ *
+ * @remarks
+ * - `None` — no activity yet
+ * - `Inprogress` — AI is processing
+ * - `Complete` — response ready
+ * - `Failed` — error occurred
+ */
+export type UpdateConversationTitleStatus = OpenEnum<
+  typeof UpdateConversationTitleStatus
+>;
+
+export const UpdateConversationTitleAccessLevel = {
+  Read: "read",
+  Write: "write",
+} as const;
+export type UpdateConversationTitleAccessLevel = OpenEnum<
+  typeof UpdateConversationTitleAccessLevel
+>;
+
+export type UpdateConversationTitleSharedWith = {
+  userId: string;
+  accessLevel: UpdateConversationTitleAccessLevel;
+};
+
+export type UpdateConversationTitleConversationError = {
+  /**
+   * Sub-document identifier auto-assigned by MongoDB.
+   */
+  id: string;
+  message: string;
+  errorType?: string | undefined;
+  /**
+   * Time the error was recorded. Server-defaulted
+   *
+   * @remarks
+   * to `Date.now` when the entry is pushed, so
+   * always present.
+   */
+  timestamp: Date;
+  messageId?: string | undefined;
+  stack?: string | undefined;
+  /**
+   * Free-form metadata attached to this error
+   *
+   * @remarks
+   * entry (Map of Mixed in the schema).
+   */
+  metadata?: { [k: string]: any } | undefined;
+};
+
+/**
+ * The full conversation document after the title update,
+ *
+ * @remarks
+ * returned as stored in MongoDB.
+ */
+export type UpdateConversationTitleConversation = {
+  /**
+   * Unique conversation identifier
+   */
+  id: string;
+  /**
+   * ID of the user who owns this conversation
+   */
+  userId: string;
+  /**
+   * Organization this conversation belongs to
+   */
+  orgId: string;
+  /**
+   * Conversation title. Present and equal to the value
+   *
+   * @remarks
+   * submitted in the request body after a successful
+   * update.
+   */
+  title?: string | undefined;
+  /**
+   * User who started the conversation
+   */
+  initiator: string;
+  /**
+   * All messages stored on this conversation.
+   */
+  messages: Array<UpdateConversationTitleMessage>;
+  /**
+   * Current status of the conversation:
+   *
+   * @remarks
+   * - `None` — no activity yet
+   * - `Inprogress` — AI is processing
+   * - `Complete` — response ready
+   * - `Failed` — error occurred
+   */
+  status?: UpdateConversationTitleStatus | undefined;
+  /**
+   * Error description, populated only when `status`
+   *
+   * @remarks
+   * is `Failed`.
+   */
+  failReason?: string | undefined;
+  /**
+   * AI model configuration recorded against a conversation or message.
+   */
+  modelInfo?: models.ConversationModelInfo | undefined;
+  /**
+   * Whether this conversation is shared with others
+   */
+  isShared: boolean;
+  /**
+   * Shareable link if the conversation is shared
+   */
+  shareLink?: string | undefined;
+  /**
+   * Users this conversation is shared with
+   */
+  sharedWith: Array<UpdateConversationTitleSharedWith>;
+  /**
+   * Whether this conversation is archived
+   */
+  isArchived: boolean;
+  /**
+   * User ID of the last user who archived this row, or `null` after
+   *
+   * @remarks
+   * unarchive cleared the archive state. Absent on rows that have
+   * never been archived.
+   */
+  archivedBy?: string | null | undefined;
+  /**
+   * Whether this conversation has been soft-deleted.
+   */
+  isDeleted: boolean;
+  /**
+   * User who soft-deleted this conversation.
+   */
+  deletedBy?: string | undefined;
+  /**
+   * Errors recorded against this conversation
+   *
+   * @remarks
+   * (e.g. failed message generations).
+   */
+  conversationErrors: Array<UpdateConversationTitleConversationError>;
+  /**
+   * Free-form metadata attached to the conversation.
+   */
+  metadata?: { [k: string]: any } | undefined;
+  /**
+   * Unix timestamp of the last activity, stored as
+   *
+   * @remarks
+   * epoch milliseconds (server-side default `Date.now`).
+   */
+  lastActivityAt: number;
+  createdAt: Date;
+  updatedAt: Date;
+  /**
+   * Mongoose document version key.
+   */
+  v: number;
+};
+
+export type UpdateConversationTitleMeta = {
+  /**
+   * Server-side request identifier. Read from the
+   *
+   * @remarks
+   * `X-Request-ID` header when supplied, otherwise
+   * auto-generated, so this field is always present.
+   */
+  requestId: string;
+  timestamp: Date;
+  /**
+   * Server-side processing time in milliseconds.
+   */
+  duration: number;
+};
+
+/**
+ * Title updated successfully
+ */
+export type UpdateConversationTitleResponse = {
+  /**
+   * The full conversation document after the title update,
+   *
+   * @remarks
+   * returned as stored in MongoDB.
+   */
+  conversation: UpdateConversationTitleConversation;
+  meta: UpdateConversationTitleMeta;
 };
 
 /** @internal */
@@ -67,5 +394,291 @@ export function updateConversationTitleRequestToJSON(
     UpdateConversationTitleRequest$outboundSchema.parse(
       updateConversationTitleRequest,
     ),
+  );
+}
+
+/** @internal */
+export const UpdateConversationTitleMessageType$inboundSchema: z.ZodMiniType<
+  UpdateConversationTitleMessageType,
+  unknown
+> = openEnums.inboundSchema(UpdateConversationTitleMessageType);
+
+/** @internal */
+export const UpdateConversationTitleContentFormat$inboundSchema: z.ZodMiniType<
+  UpdateConversationTitleContentFormat,
+  unknown
+> = openEnums.inboundSchema(UpdateConversationTitleContentFormat);
+
+/** @internal */
+export const UpdateConversationTitleReferenceDatum$inboundSchema: z.ZodMiniType<
+  UpdateConversationTitleReferenceDatum,
+  unknown
+> = z.object({
+  name: types.optional(types.string()),
+  id: types.optional(types.string()),
+  type: types.optional(types.string()),
+  app: types.optional(types.string()),
+  webUrl: types.optional(types.string()),
+  metadata: types.optional(z.record(z.string(), types.string())),
+});
+
+export function updateConversationTitleReferenceDatumFromJSON(
+  jsonString: string,
+): SafeParseResult<UpdateConversationTitleReferenceDatum, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      UpdateConversationTitleReferenceDatum$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'UpdateConversationTitleReferenceDatum' from JSON`,
+  );
+}
+
+/** @internal */
+export const UpdateConversationTitleAppliedFilters$inboundSchema: z.ZodMiniType<
+  UpdateConversationTitleAppliedFilters,
+  unknown
+> = z.object({
+  apps: types.optional(z.array(models.AppliedFilterNode$inboundSchema)),
+  kb: types.optional(z.array(models.AppliedFilterNode$inboundSchema)),
+});
+
+export function updateConversationTitleAppliedFiltersFromJSON(
+  jsonString: string,
+): SafeParseResult<UpdateConversationTitleAppliedFilters, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      UpdateConversationTitleAppliedFilters$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'UpdateConversationTitleAppliedFilters' from JSON`,
+  );
+}
+
+/** @internal */
+export const UpdateConversationTitleMetadata$inboundSchema: z.ZodMiniType<
+  UpdateConversationTitleMetadata,
+  unknown
+> = z.object({
+  processingTimeMs: types.optional(types.number()),
+  modelVersion: types.optional(types.string()),
+  aiTransactionId: types.optional(types.string()),
+  reason: types.optional(types.string()),
+});
+
+export function updateConversationTitleMetadataFromJSON(
+  jsonString: string,
+): SafeParseResult<UpdateConversationTitleMetadata, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => UpdateConversationTitleMetadata$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'UpdateConversationTitleMetadata' from JSON`,
+  );
+}
+
+/** @internal */
+export const UpdateConversationTitleMessage$inboundSchema: z.ZodMiniType<
+  UpdateConversationTitleMessage,
+  unknown
+> = z.pipe(
+  z.object({
+    _id: types.string(),
+    messageType: UpdateConversationTitleMessageType$inboundSchema,
+    content: types.string(),
+    contentFormat: z._default(
+      UpdateConversationTitleContentFormat$inboundSchema,
+      "MARKDOWN",
+    ),
+    confidence: types.optional(types.string()),
+    citations: z.array(models.CitationReference$inboundSchema),
+    followUpQuestions: z.array(models.FollowUpQuestion$inboundSchema),
+    feedback: z.array(models.MessageFeedback$inboundSchema),
+    referenceData: z.array(
+      z.lazy(() => UpdateConversationTitleReferenceDatum$inboundSchema),
+    ),
+    modelInfo: types.optional(models.ConversationModelInfo$inboundSchema),
+    appliedFilters: types.optional(
+      z.lazy(() => UpdateConversationTitleAppliedFilters$inboundSchema),
+    ),
+    metadata: types.optional(
+      z.lazy(() => UpdateConversationTitleMetadata$inboundSchema),
+    ),
+    createdAt: types.date(),
+    updatedAt: types.date(),
+  }),
+  z.transform((v) => {
+    return remap$(v, {
+      "_id": "id",
+    });
+  }),
+);
+
+export function updateConversationTitleMessageFromJSON(
+  jsonString: string,
+): SafeParseResult<UpdateConversationTitleMessage, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => UpdateConversationTitleMessage$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'UpdateConversationTitleMessage' from JSON`,
+  );
+}
+
+/** @internal */
+export const UpdateConversationTitleStatus$inboundSchema: z.ZodMiniType<
+  UpdateConversationTitleStatus,
+  unknown
+> = openEnums.inboundSchema(UpdateConversationTitleStatus);
+
+/** @internal */
+export const UpdateConversationTitleAccessLevel$inboundSchema: z.ZodMiniType<
+  UpdateConversationTitleAccessLevel,
+  unknown
+> = openEnums.inboundSchema(UpdateConversationTitleAccessLevel);
+
+/** @internal */
+export const UpdateConversationTitleSharedWith$inboundSchema: z.ZodMiniType<
+  UpdateConversationTitleSharedWith,
+  unknown
+> = z.object({
+  userId: types.string(),
+  accessLevel: z._default(
+    UpdateConversationTitleAccessLevel$inboundSchema,
+    "read",
+  ),
+});
+
+export function updateConversationTitleSharedWithFromJSON(
+  jsonString: string,
+): SafeParseResult<UpdateConversationTitleSharedWith, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => UpdateConversationTitleSharedWith$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'UpdateConversationTitleSharedWith' from JSON`,
+  );
+}
+
+/** @internal */
+export const UpdateConversationTitleConversationError$inboundSchema:
+  z.ZodMiniType<UpdateConversationTitleConversationError, unknown> = z.pipe(
+    z.object({
+      _id: types.string(),
+      message: types.string(),
+      errorType: types.optional(types.string()),
+      timestamp: types.date(),
+      messageId: types.optional(types.string()),
+      stack: types.optional(types.string()),
+      metadata: types.optional(z.record(z.string(), z.any())),
+    }),
+    z.transform((v) => {
+      return remap$(v, {
+        "_id": "id",
+      });
+    }),
+  );
+
+export function updateConversationTitleConversationErrorFromJSON(
+  jsonString: string,
+): SafeParseResult<
+  UpdateConversationTitleConversationError,
+  SDKValidationError
+> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      UpdateConversationTitleConversationError$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'UpdateConversationTitleConversationError' from JSON`,
+  );
+}
+
+/** @internal */
+export const UpdateConversationTitleConversation$inboundSchema: z.ZodMiniType<
+  UpdateConversationTitleConversation,
+  unknown
+> = z.pipe(
+  z.object({
+    _id: types.string(),
+    userId: types.string(),
+    orgId: types.string(),
+    title: types.optional(types.string()),
+    initiator: types.string(),
+    messages: z.array(
+      z.lazy(() => UpdateConversationTitleMessage$inboundSchema),
+    ),
+    status: types.optional(UpdateConversationTitleStatus$inboundSchema),
+    failReason: types.optional(types.string()),
+    modelInfo: types.optional(models.ConversationModelInfo$inboundSchema),
+    isShared: z._default(types.boolean(), false),
+    shareLink: types.optional(types.string()),
+    sharedWith: z.array(
+      z.lazy(() => UpdateConversationTitleSharedWith$inboundSchema),
+    ),
+    isArchived: z._default(types.boolean(), false),
+    archivedBy: z.optional(z.nullable(types.string())),
+    isDeleted: z._default(types.boolean(), false),
+    deletedBy: types.optional(types.string()),
+    conversationErrors: z.array(
+      z.lazy(() => UpdateConversationTitleConversationError$inboundSchema),
+    ),
+    metadata: types.optional(z.record(z.string(), z.any())),
+    lastActivityAt: types.number(),
+    createdAt: types.date(),
+    updatedAt: types.date(),
+    __v: types.number(),
+  }),
+  z.transform((v) => {
+    return remap$(v, {
+      "_id": "id",
+      "__v": "v",
+    });
+  }),
+);
+
+export function updateConversationTitleConversationFromJSON(
+  jsonString: string,
+): SafeParseResult<UpdateConversationTitleConversation, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      UpdateConversationTitleConversation$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'UpdateConversationTitleConversation' from JSON`,
+  );
+}
+
+/** @internal */
+export const UpdateConversationTitleMeta$inboundSchema: z.ZodMiniType<
+  UpdateConversationTitleMeta,
+  unknown
+> = z.object({
+  requestId: types.string(),
+  timestamp: types.date(),
+  duration: types.number(),
+});
+
+export function updateConversationTitleMetaFromJSON(
+  jsonString: string,
+): SafeParseResult<UpdateConversationTitleMeta, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => UpdateConversationTitleMeta$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'UpdateConversationTitleMeta' from JSON`,
+  );
+}
+
+/** @internal */
+export const UpdateConversationTitleResponse$inboundSchema: z.ZodMiniType<
+  UpdateConversationTitleResponse,
+  unknown
+> = z.object({
+  conversation: z.lazy(() => UpdateConversationTitleConversation$inboundSchema),
+  meta: z.lazy(() => UpdateConversationTitleMeta$inboundSchema),
+});
+
+export function updateConversationTitleResponseFromJSON(
+  jsonString: string,
+): SafeParseResult<UpdateConversationTitleResponse, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => UpdateConversationTitleResponse$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'UpdateConversationTitleResponse' from JSON`,
   );
 }

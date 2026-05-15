@@ -4,27 +4,85 @@
 
 import * as z from "zod/v4-mini";
 import { safeParse } from "../../lib/schemas.js";
+import { ClosedEnum } from "../../types/enums.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 
+/**
+ * Additional `isShared` filter (`'true'` / `'false'`). The row is
+ *
+ * @remarks
+ * only deleted if it also matches this value.
+ */
+export const DeleteSearchByIdShared = {
+  True: "true",
+  False: "false",
+} as const;
+/**
+ * Additional `isShared` filter (`'true'` / `'false'`). The row is
+ *
+ * @remarks
+ * only deleted if it also matches this value.
+ */
+export type DeleteSearchByIdShared = ClosedEnum<typeof DeleteSearchByIdShared>;
+
 export type DeleteSearchByIdRequest = {
   /**
-   * Unique search identifier
+   * ObjectId of the persisted search row to delete.
    */
   searchId: string;
+  /**
+   * Additional substring filter against `title` / `messages.content`.
+   *
+   * @remarks
+   * The row is only deleted if the `searchId` row also matches this
+   * filter; otherwise `404`. Special regex characters are escaped;
+   * values over 1000 chars or tripping the XSS guard yield `400`.
+   */
+  search?: string | undefined;
+  /**
+   * Additional `isShared` filter (`'true'` / `'false'`). The row is
+   *
+   * @remarks
+   * only deleted if it also matches this value.
+   */
+  shared?: DeleteSearchByIdShared | undefined;
+  /**
+   * ISO 8601 lower bound for `createdAt`. The row is only deleted
+   *
+   * @remarks
+   * if its `createdAt` is on or after this value.
+   */
+  startDate?: Date | undefined;
+  /**
+   * ISO 8601 upper bound for `createdAt`. The row is only deleted
+   *
+   * @remarks
+   * if its `createdAt` is on or before this value.
+   */
+  endDate?: Date | undefined;
 };
 
 /**
- * Search deleted successfully
+ * Search deleted successfully.
  */
 export type DeleteSearchByIdResponse = {
-  message?: string | undefined;
+  message: string;
 };
+
+/** @internal */
+export const DeleteSearchByIdShared$outboundSchema: z.ZodMiniEnum<
+  typeof DeleteSearchByIdShared
+> = z.enum(DeleteSearchByIdShared);
 
 /** @internal */
 export type DeleteSearchByIdRequest$Outbound = {
   searchId: string;
+  search?: string | undefined;
+  shared?: string | undefined;
+  startDate?: string | undefined;
+  endDate?: string | undefined;
 };
 
 /** @internal */
@@ -33,6 +91,10 @@ export const DeleteSearchByIdRequest$outboundSchema: z.ZodMiniType<
   DeleteSearchByIdRequest
 > = z.object({
   searchId: z.string(),
+  search: z.optional(z.string()),
+  shared: z.optional(DeleteSearchByIdShared$outboundSchema),
+  startDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
+  endDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
 });
 
 export function deleteSearchByIdRequestToJSON(
@@ -48,7 +110,7 @@ export const DeleteSearchByIdResponse$inboundSchema: z.ZodMiniType<
   DeleteSearchByIdResponse,
   unknown
 > = z.object({
-  message: types.optional(types.string()),
+  message: types.string(),
 });
 
 export function deleteSearchByIdResponseFromJSON(

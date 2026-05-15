@@ -3,14 +3,12 @@
  */
 
 import { semanticSearchArchiveSearch } from "../funcs/semantic-search-archive-search.js";
-import { semanticSearchDeleteAllSearchHistory } from "../funcs/semantic-search-delete-all-search-history.js";
 import { semanticSearchDeleteSearchById } from "../funcs/semantic-search-delete-search-by-id.js";
+import { semanticSearchDeleteSearchHistory } from "../funcs/semantic-search-delete-search-history.js";
 import { semanticSearchGetSearchById } from "../funcs/semantic-search-get-search-by-id.js";
 import { semanticSearchSearchHistory } from "../funcs/semantic-search-search-history.js";
 import { semanticSearchSearch } from "../funcs/semantic-search-search.js";
-import { semanticSearchShareSearch } from "../funcs/semantic-search-share-search.js";
 import { semanticSearchUnarchiveSearch } from "../funcs/semantic-search-unarchive-search.js";
-import { semanticSearchUnshareSearch } from "../funcs/semantic-search-unshare-search.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
 import * as models from "../models/index.js";
 import * as operations from "../models/operations/index.js";
@@ -21,38 +19,25 @@ export class SemanticSearch extends ClientSDK {
    * Perform semantic search
    *
    * @remarks
-   * Execute a semantic search across your organization's knowledge base.<br><br>
-   * <b>Overview:</b><br>
-   * Semantic search uses AI embeddings to find content based on meaning,
-   * not just keyword matching. This enables finding relevant information
-   * even when the exact words differ.<br><br>
-   * <b>How It Works:</b><br>
-   * <ol>
-   * <li>Your query is converted to a vector embedding</li>
-   * <li>The system finds documents with similar semantic meaning</li>
-   * <li>Results are ranked by relevance score</li>
-   * <li>Matching chunks are returned with metadata</li>
-   * </ol>
-   * <b>Filtering:</b><br>
-   * Use filters to narrow your search:
-   * <ul>
-   * <li><code>filters.apps</code>: Limit to specific connector apps (Google Drive, Confluence, etc.)</li>
-   * <li><code>filters.kb</code>: Limit to specific knowledge bases</li>
-   * </ul>
-   * <b>Results:</b><br>
-   * Each result includes:
-   * <ul>
-   * <li>Matching content chunk</li>
-   * <li>Relevance score (0-1, higher is better)</li>
-   * <li>Source document metadata (name, URL, type)</li>
-   * </ul>
-   * <b>Search History:</b><br>
-   * All searches are saved and can be retrieved via <code>GET /search</code>.
+   * Run a semantic search across your organization's knowledge base.
+   * Matching is meaning-based, so relevant results surface even when
+   * the wording differs from the query.
+   *
+   * Use optional `filters` to narrow the scope:
+   *
+   * - `filters.apps` — restrict to specific connector apps (for
+   *   example Google Drive or Confluence).
+   * - `filters.kb` — restrict to specific knowledge bases.
+   *
+   * The response returns a `searchId` for the persisted search along
+   * with ranked matches, each carrying a relevance score and the
+   * source document's metadata. Past searches can be retrieved via
+   * `GET /search`.
    */
   async search(
     request: models.SemanticSearchRequest,
     options?: RequestOptions,
-  ): Promise<models.SearchResult> {
+  ): Promise<models.SemanticSearchExecuteResponse> {
     return unwrapAsync(semanticSearchSearch(
       this,
       request,
@@ -64,17 +49,21 @@ export class SemanticSearch extends ClientSDK {
    * Get search history
    *
    * @remarks
-   * Retrieve your search history with pagination.<br><br>
-   * <b>Overview:</b><br>
-   * Returns a list of all searches performed by the authenticated user.
-   * Each entry includes the original query, results, and metadata.<br><br>
-   * <b>Pagination:</b><br>
-   * Use <code>page</code> and <code>limit</code> to navigate through results.
+   * Retrieve the authenticated user's persisted search history.
+   *
+   * Returns searches the user owns along with searches shared with them,
+   * scoped to the caller's organization. Archived and deleted entries are
+   * excluded. Citation references on this endpoint are returned as raw
+   * identifier strings; use `GET /search/{searchId}` to fetch a single
+   * search with its citations fully expanded.
+   *
+   * Pagination defaults to `page=1, limit=20` (maximum `limit` is 100).
+   * Results are sorted by most recent activity by default.
    */
   async searchHistory(
     request?: operations.SearchHistoryRequest | undefined,
     options?: RequestOptions,
-  ): Promise<operations.SearchHistoryResponse> {
+  ): Promise<models.SemanticSearchHistoryResponse> {
     return unwrapAsync(semanticSearchSearchHistory(
       this,
       request,
@@ -86,15 +75,22 @@ export class SemanticSearch extends ClientSDK {
    * Clear all search history
    *
    * @remarks
-   * Delete all search history for the authenticated user.<br><br>
-   * <b>Warning:</b><br>
-   * This action cannot be undone. All saved searches will be permanently removed.
+   * Permanently delete every persisted search row owned by, or shared
+   * with, the authenticated user, along with the citation rows those
+   * searches reference. The action cannot be undone.
+   *
+   * Scoped to the caller's org and limited to rows where
+   * `isDeleted: false` and `isArchived: false`. If nothing matches
+   * (including the case where every row is already archived), the
+   * endpoint returns `404` rather than a successful no-op.
    */
-  async deleteAllSearchHistory(
+  async deleteSearchHistory(
+    request?: operations.DeleteSearchHistoryRequest | undefined,
     options?: RequestOptions,
-  ): Promise<operations.DeleteAllSearchHistoryResponse> {
-    return unwrapAsync(semanticSearchDeleteAllSearchHistory(
+  ): Promise<operations.DeleteSearchHistoryResponse> {
+    return unwrapAsync(semanticSearchDeleteSearchHistory(
       this,
+      request,
       options,
     ));
   }
@@ -103,12 +99,18 @@ export class SemanticSearch extends ClientSDK {
    * Get search by ID
    *
    * @remarks
-   * Retrieve a specific search result by its ID.
+   * Retrieve a previously persisted search by its id, scoped to the
+   * caller's org.
+   *
+   * The response body is always an **array** containing zero or one
+   * persisted search document. An unknown id returns an empty array
+   * with a `200` status — callers should check array length rather
+   * than relying on a `404`.
    */
   async getSearchById(
     request: operations.GetSearchByIdRequest,
     options?: RequestOptions,
-  ): Promise<models.SearchResult> {
+  ): Promise<Array<models.PersistedSemanticSearch>> {
     return unwrapAsync(semanticSearchGetSearchById(
       this,
       request,
@@ -120,7 +122,13 @@ export class SemanticSearch extends ClientSDK {
    * Delete search by ID
    *
    * @remarks
-   * Delete a specific search result by its ID.
+   * Permanently delete a single persisted search row, plus every
+   * citation row referenced by its `citationIds`. The caller must
+   * either own the row or have it shared with them.
+   *
+   * Scoped to the caller's org and limited to rows where
+   * `isDeleted: false` and `isArchived: false`; archived or
+   * already-deleted rows surface as `404`.
    */
   async deleteSearchById(
     request: operations.DeleteSearchByIdRequest,
@@ -134,44 +142,12 @@ export class SemanticSearch extends ClientSDK {
   }
 
   /**
-   * Share a search
-   *
-   * @remarks
-   * Share a specific search result, making it accessible to other users.
-   */
-  async shareSearch(
-    request: operations.ShareSearchRequest,
-    options?: RequestOptions,
-  ): Promise<operations.ShareSearchResponse> {
-    return unwrapAsync(semanticSearchShareSearch(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
-   * Unshare a search
-   *
-   * @remarks
-   * Revoke sharing for a specific search result, making it private again.
-   */
-  async unshareSearch(
-    request: operations.UnshareSearchRequest,
-    options?: RequestOptions,
-  ): Promise<operations.UnshareSearchResponse> {
-    return unwrapAsync(semanticSearchUnshareSearch(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
    * Archive a search
    *
    * @remarks
-   * Archive a specific search result. Archived searches are hidden from the default search history view.
+   * Archive a specific search result. Archived searches are hidden
+   * from the default search history view but remain retrievable via
+   * the archive-aware listing endpoints.
    */
   async archiveSearch(
     request: operations.ArchiveSearchRequest,

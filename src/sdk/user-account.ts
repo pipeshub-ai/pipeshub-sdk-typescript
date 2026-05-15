@@ -3,11 +3,7 @@
  */
 
 import { userAccountAuthenticate } from "../funcs/user-account-authenticate.js";
-import { userAccountForgotPassword } from "../funcs/user-account-forgot-password.js";
-import { userAccountGenerateLoginOtp } from "../funcs/user-account-generate-login-otp.js";
 import { userAccountInitAuth } from "../funcs/user-account-init-auth.js";
-import { userAccountLogout } from "../funcs/user-account-logout.js";
-import { userAccountRefreshToken } from "../funcs/user-account-refresh-token.js";
 import { userAccountResetPasswordWithToken } from "../funcs/user-account-reset-password-with-token.js";
 import { userAccountResetPassword } from "../funcs/user-account-reset-password.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
@@ -20,26 +16,36 @@ export class UserAccount extends ClientSDK {
    * Initialize authentication session
    *
    * @remarks
-   * Initialize an authentication session for a user by email address.
-   * This is the first step in the multi-step authentication flow.
-   * <br><br>
-   * <b>Flow:</b><br>
-   * 1. Call this endpoint with the user's email<br>
-   * 2. Receive a session token in the <code>x-session-token</code> response header<br>
-   * 3. Use the session token in subsequent <code>/authenticate</code> calls<br>
-   * 4. The response includes <code>allowedMethods</code> for the first authentication step
-   * <br><br>
-   * <b>Session Token:</b><br>
-   * - Stored in response header <code>x-session-token</code><br>
-   * - Required for all subsequent authentication requests<br>
-   * - Expires after a configured timeout period
-   * <br><br>
-   * <b>Multi-Factor Authentication:</b><br>
-   * If the organization has MFA configured, you'll need to complete multiple
-   * authentication steps. Each step completion returns the next step's allowed methods.
+   * Start a server-side authentication session and discover which sign-in methods are
+   * configured for the organization. This is the first step in the multi-step login flow.
+   *
+   * **Request body (optional)**
+   *
+   * - You may omit the body, send an empty JSON object `{}`, or send `{ "email": "..." }`.
+   * - `email` in the body is optional and kept for legacy reasons; omitting it does not prevent
+   *   initialization. The web client typically calls this endpoint without a body and sends
+   *   `email` on `/authenticate` instead.
+   * - When provided, `email` is stored on the session for correlation with subsequent steps.
+   *
+   * **Flow:**
+   *
+   * 1. Call this endpoint (optional JSON body as above).
+   * 2. Receive a session token in the `x-session-token` response header.
+   * 3. Send that token on subsequent `/authenticate` requests (`x-session-token` header).
+   * 4. Use `allowedMethods` and `authProviders` from the response to render the login UI.
+   *
+   * **Session token**
+   *
+   * - Returned as header `x-session-token`.
+   * - Required for `/authenticate` (and related steps) until it expires.
+   *
+   * **Multi-factor authentication**
+   *
+   * If the organization has MFA, complete multiple authentication steps; each step may
+   * return the next step's allowed methods.
    */
   async initAuth(
-    request: models.InitAuthRequest,
+    request?: models.InitAuthRequest | undefined,
     options?: RequestOptions,
   ): Promise<operations.InitAuthResponse> {
     return unwrapAsync(userAccountInitAuth(
@@ -54,28 +60,32 @@ export class UserAccount extends ClientSDK {
    *
    * @remarks
    * Authenticate a user using the specified method and credentials.
-   * Requires a valid session token from <code>/initAuth</code>.
-   * <br><br>
-   * <b>Credential Formats by Method:</b><br>
-   * - <code>password</code>: <code>{ "credentials": { "password": "your-password" } }</code><br>
-   * - <code>otp</code>: <code>{ "credentials": { "otp": "123456" } }</code> (6-digit code, valid for 10 minutes)<br>
-   * - <code>google</code>: <code>{ "credentials": "google-id-token-string" }</code><br>
-   * - <code>microsoft</code>: <code>{ "credentials": { "accessToken": "...", "idToken": "..." } }</code><br>
-   * - <code>azureAd</code>: <code>{ "credentials": { "accessToken": "...", "idToken": "..." } }</code><br>
-   * - <code>oauth</code>: <code>{ "credentials": { "accessToken": "...", "idToken": "..." } }</code><br>
-   * - <code>samlSso</code>: Handled via redirect flow (use <code>/saml/signIn</code> instead)
-   * <br><br>
-   * <b>Multi-Step Response:</b><br>
-   * If organization uses MFA, successful authentication returns:<br>
-   * - <code>status: "success"</code> with <code>nextStep</code> and <code>allowedMethods</code> for next step
-   * <br><br>
-   * <b>Fully Authenticated Response:</b><br>
-   * After completing all steps:<br>
-   * - <code>message: "Fully authenticated"</code> with <code>accessToken</code> (1hr) and <code>refreshToken</code> (7d)
-   * <br><br>
-   * <b>Security:</b><br>
-   * - Account locks after 5 consecutive failed attempts<br>
-   * - CAPTCHA may be required if enabled (pass <code>cf-turnstile-response</code>)
+   * Requires a valid session token from `/initAuth`.
+   *
+   * **Credential Formats by Method:**
+   *
+   * - `password`: `{ "credentials": { "password": "your-password" } }`
+   * - `otp`: `{ "credentials": { "otp": "123456" } }` (6-digit code, valid for 10 minutes)
+   * - `google`: `{ "credentials": "google-id-token-string" }`
+   * - `microsoft`: `{ "credentials": { "accessToken": "...", "idToken": "..." } }`
+   * - `azureAd`: `{ "credentials": { "accessToken": "...", "idToken": "..." } }`
+   * - `oauth`: `{ "credentials": { "accessToken": "...", "idToken": "..." } }`
+   * - `samlSso`: Handled via redirect flow (use `/saml/signIn` instead)
+   *
+   * **Multi-Step Response:**
+   *
+   * If organization uses MFA, successful authentication returns:
+   * - `status: "success"` with `nextStep` and `allowedMethods` for next step
+   *
+   * **Fully Authenticated Response:**
+   *
+   * After completing all steps:
+   * - `message: "Fully authenticated"` with `accessToken` (1hr) and `refreshToken` (7d)
+   *
+   * **Security:**
+   *
+   * - Account locks after 5 consecutive failed attempts
+   * - CAPTCHA may be required if enabled (pass `cf-turnstile-response`)
    */
   async authenticate(
     request: operations.AuthenticateRequest,
@@ -89,77 +99,29 @@ export class UserAccount extends ClientSDK {
   }
 
   /**
-   * Generate and send OTP for login
-   *
-   * @remarks
-   * Generate and send a 6-digit one-time password (OTP) to the user's email.
-   * Use this endpoint before authenticating with the <code>otp</code> method.
-   * <br><br>
-   * <b>OTP Details:</b><br>
-   * - 6 digits numeric code<br>
-   * - Valid for <b>10 minutes</b> after generation<br>
-   * - Sent to user's registered email address
-   * <br><br>
-   * <b>Rate Limiting:</b><br>
-   * - Multiple OTP requests may be rate-limited<br>
-   * - Wait for the current OTP to expire before requesting a new one
-   * <br><br>
-   * <b>CAPTCHA:</b><br>
-   * If Cloudflare Turnstile is enabled, include <code>cf-turnstile-response</code> in the request body.
-   */
-  async generateLoginOtp(
-    request: models.OtpGenerateRequest,
-    options?: RequestOptions,
-  ): Promise<operations.GenerateLoginOtpResponse> {
-    return unwrapAsync(userAccountGenerateLoginOtp(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
-   * Request password reset email
-   *
-   * @remarks
-   * Send a password reset link to the user's email.
-   * The link contains a time-limited token that can be used to reset the password.
-   * <br><br>
-   * <b>Note:</b> This endpoint always returns 200 even if the email doesn't exist (to prevent email enumeration).
-   */
-  async forgotPassword(
-    request: models.ForgotPasswordRequest,
-    options?: RequestOptions,
-  ): Promise<operations.ForgotPasswordResponse> {
-    return unwrapAsync(userAccountForgotPassword(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
    * Reset password with email token
    *
    * @remarks
    * Reset password using a token received via email from the forgot password flow.
-   * <br><br>
-   * <b>Password Requirements:</b><br>
-   * - Minimum 8 characters<br>
-   * - At least 1 uppercase letter<br>
-   * - At least 1 lowercase letter<br>
-   * - At least 1 number<br>
+   *
+   * **Password Requirements:**
+   *
+   * - Minimum 8 characters
+   * - At least 1 uppercase letter
+   * - At least 1 lowercase letter
+   * - At least 1 number
    * - At least 1 special character (#?!@$%^&*-)
-   * <br><br>
-   * <b>Security Notes:</b><br>
-   * - Token is single-use and expires after a set time<br>
-   * - A new access token is returned upon successful reset
+   *
+   * **Security Notes:**
+   *
+   * - Token is single-use and expires after a set time
+   * - Response body contains a confirmation string in `data`
    */
   async resetPasswordWithToken(
     security: operations.ResetPasswordWithTokenSecurity,
     request: models.TokenPasswordResetRequest,
     options?: RequestOptions,
-  ): Promise<models.PasswordResetResponse> {
+  ): Promise<models.DataStringResponse> {
     return unwrapAsync(userAccountResetPasswordWithToken(
       this,
       security,
@@ -169,69 +131,19 @@ export class UserAccount extends ClientSDK {
   }
 
   /**
-   * Refresh access token
-   *
-   * @remarks
-   * Get a new access token using a valid refresh token.
-   * <br><br>
-   * <b>Usage:</b><br>
-   * - Pass the refresh token as a Bearer token in the Authorization header<br>
-   * - Returns a new access token (1 hour expiry) and basic user information
-   * <br><br>
-   * <b>Token Lifetimes:</b><br>
-   * - Access token: 1 hour<br>
-   * - Refresh token: 7 days
-   * <br><br>
-   * <b>Best Practices:</b><br>
-   * - Call this endpoint before the access token expires<br>
-   * - Store the new access token and continue using it for authenticated requests<br>
-   * - If refresh fails with 401, redirect user to login flow
-   */
-  async refreshToken(
-    security: operations.RefreshTokenSecurity,
-    options?: RequestOptions,
-  ): Promise<models.RefreshTokenResponse> {
-    return unwrapAsync(userAccountRefreshToken(
-      this,
-      security,
-      options,
-    ));
-  }
-
-  /**
-   * Logout current session
-   *
-   * @remarks
-   * Log out the current user session and invalidate tokens.
-   * <br><br>
-   * <b>Effects:</b><br>
-   * - Invalidates the current access token<br>
-   * - Clears server-side session data<br>
-   * - Client should also clear stored tokens locally
-   * <br><br>
-   * <b>Note:</b> This endpoint requires the access token, not the refresh token.
-   */
-  async logout(
-    options?: RequestOptions,
-  ): Promise<operations.LogoutResponse> {
-    return unwrapAsync(userAccountLogout(
-      this,
-      options,
-    ));
-  }
-
-  /**
    * Reset password
    *
    * @remarks
-   * Reset the password for the currently authenticated user.<br><br>
-   * <b>Overview:</b><br>
+   * Reset the password for the currently authenticated user.
+   *
+   * **Overview:**
+   *
    * Allows a logged-in user to change their password by providing the current password and a new password.
    */
   async resetPassword(
     request: operations.ResetPasswordRequest,
     options?: RequestOptions,
-  ): Promise<operations.ResetPasswordResponse> {
+  ): Promise<models.AuthenticatedPasswordResetResponse> {
     return unwrapAsync(userAccountResetPassword(
       this,
       request,

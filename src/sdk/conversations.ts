@@ -3,18 +3,15 @@
  */
 
 import { conversationsAddMessageStream } from "../funcs/conversations-add-message-stream.js";
-import { conversationsAddMessage } from "../funcs/conversations-add-message.js";
 import { conversationsArchiveConversation } from "../funcs/conversations-archive-conversation.js";
-import { conversationsCreateConversation } from "../funcs/conversations-create-conversation.js";
 import { conversationsDeleteConversationById } from "../funcs/conversations-delete-conversation-by-id.js";
 import { conversationsGetAllConversations } from "../funcs/conversations-get-all-conversations.js";
 import { conversationsGetArchivedConversations } from "../funcs/conversations-get-archived-conversations.js";
 import { conversationsGetConversationById } from "../funcs/conversations-get-conversation-by-id.js";
 import { conversationsRegenerateAnswer } from "../funcs/conversations-regenerate-answer.js";
-import { conversationsShareConversation } from "../funcs/conversations-share-conversation.js";
+import { conversationsSearchArchivedConversations } from "../funcs/conversations-search-archived-conversations.js";
 import { conversationsStreamChat } from "../funcs/conversations-stream-chat.js";
 import { conversationsUnarchiveConversation } from "../funcs/conversations-unarchive-conversation.js";
-import { conversationsUnshareConversationById } from "../funcs/conversations-unshare-conversation-by-id.js";
 import { conversationsUpdateConversationTitle } from "../funcs/conversations-update-conversation-title.js";
 import { conversationsUpdateMessageFeedback } from "../funcs/conversations-update-message-feedback.js";
 import { EventStream } from "../lib/event-streams.js";
@@ -25,75 +22,60 @@ import { unwrapAsync } from "../types/fp.js";
 
 export class Conversations extends ClientSDK {
   /**
-   * Create a new AI conversation
-   *
-   * @remarks
-   * Start a new conversation with PipesHub's AI assistant.<br><br>
-   * <b>Overview:</b><br>
-   * This endpoint creates a new conversation session and processes the initial query.
-   * The AI searches your organization's knowledge bases for relevant information and
-   * generates a response with citations to source documents.<br><br>
-   * <b>How It Works:</b><br>
-   * <ol>
-   * <li>Your query is analyzed and converted to semantic embeddings</li>
-   * <li>Relevant content is retrieved from indexed knowledge bases</li>
-   * <li>The AI generates a response using the retrieved context</li>
-   * <li>Citations link back to source documents for verification</li>
-   * <li>Follow-up questions are suggested based on the conversation</li>
-   * </ol>
-   * <b>Filtering Options:</b><br>
-   * <ul>
-   * <li><b>recordIds:</b> Limit search to specific documents</li>
-   * <li><b>filters.apps:</b> Search only specific connector apps</li>
-   * <li><b>filters.kb:</b> Search only specific knowledge bases</li>
-   * </ul>
-   * <b>Model Selection:</b><br>
-   * Use <code>modelKey</code> to select different AI models configured for your organization.
-   * Each model may have different capabilities, speed, and accuracy trade-offs.
-   */
-  async createConversation(
-    request: models.CreateConversationRequest,
-    options?: RequestOptions,
-  ): Promise<models.Conversation> {
-    return unwrapAsync(conversationsCreateConversation(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
    * Create conversation with streaming response
    *
    * @remarks
-   * Start a new conversation with real-time streaming response using Server-Sent Events (SSE).<br><br>
-   * <b>Overview:</b><br>
-   * This endpoint works like <code>/conversations/create</code> but streams the AI response
-   * in real-time as it's generated, providing a more interactive user experience.<br><br>
-   * <b>SSE Event Types:</b><br>
-   * <ul>
-   * <li><code>connected</code> - Connection established, processing started</li>
-   * <li><code>chunk</code> - Partial response text (stream these to show typing effect)</li>
-   * <li><code>citation</code> - Citation reference found during generation</li>
-   * <li><code>complete</code> - Final message with full response, citations, and follow-up questions</li>
-   * <li><code>error</code> - Error occurred during processing</li>
-   * </ul>
-   * <b>Client Implementation:</b><br>
-   * <code>
-   * const eventSource = new EventSource('/conversations/stream');<br>
-   * eventSource.onmessage = (event) => {<br>
-   * &nbsp;&nbsp;const data = JSON.parse(event.data);<br>
-   * &nbsp;&nbsp;// Handle different event types<br>
-   * };
-   * </code><br><br>
-   * <b>Error Handling:</b><br>
-   * If an error occurs mid-stream, an <code>error</code> event is sent and the stream closes.
-   * The conversation is marked as FAILED with the error reason stored.
+   * Start a new conversation and stream the AI response over Server-Sent
+   * Events (SSE). Behaves like `POST /conversations` but emits tokens,
+   * tool activity, and status updates incrementally instead of returning
+   * a single JSON response at the end.
+   *
+   * **Lifecycle**
+   *
+   * 1. The server validates `query`, persists an in-progress
+   *    conversation, then opens the SSE stream with HTTP `200`.
+   * 2. A `connected` event is emitted immediately with the new
+   *    `conversationId` so the client can link the stream (sidebar,
+   *    parallel tabs, deep links) without an extra request.
+   * 3. AI-backend events stream through (token chunks, tool calls,
+   *    status, etc.).
+   * 4. On success a single `complete` event is emitted carrying the
+   *    full persisted conversation.
+   * 5. On failure an `error` event is emitted and the conversation is
+   *    marked FAILED before the stream closes.
+   *
+   * **Event vocabulary**
+   *
+   * Three events have stable, server-defined `data` shapes:
+   *
+   * - `connected` — `{ "message": string, "conversationId": string,
+   *   "title": string }`
+   * - `complete` — `{ "conversation": Conversation,
+   *   "meta": { "requestId": string, "timestamp": string,
+   *   "duration": number } }`
+   * - `error` — `{ "error": string, "details"?: string }`
+   *
+   * The forwarded events are `status`, `answer_chunk`, `tool_calls`,
+   * `restreaming`, `metadata`, and `tool_execution_complete`. Their
+   * payloads come from the Python query service and may evolve. Note
+   * that raw `tool_call` / `tool_success` / `tool_error` / `tool_result`
+   * events emitted by the LLM tool runtime are rewrapped as `status` by
+   * the upstream wrapper before they reach this route, so clients on
+   * `/conversations/stream` never see those names directly. Clients
+   * should ignore unknown event names rather than treating them as
+   * errors.
+   *
+   * **Agent mode**
+   *
+   * When `chatMode` selects an agent mode (for example `agent:auto`),
+   * the optional `tools` list restricts which tools the agent may
+   * invoke for this turn. Outside agent modes the `tools` field is
+   * ignored.
    */
   async streamChat(
     request: models.CreateConversationRequest,
     options?: RequestOptions,
-  ): Promise<EventStream<models.SSEEvent>> {
+  ): Promise<EventStream<models.AssistantStreamSSEEvent>> {
     return unwrapAsync(conversationsStreamChat(
       this,
       request,
@@ -105,23 +87,32 @@ export class Conversations extends ClientSDK {
    * List all conversations
    *
    * @remarks
-   * Retrieve all conversations for the authenticated user.<br><br>
-   * <b>Overview:</b><br>
-   * Returns a list of all conversations owned by or shared with the current user.
-   * Conversations are returned with their messages, status, and metadata.<br><br>
-   * <b>Filtering:</b><br>
-   * <ul>
-   * <li>Only non-archived conversations are returned by default</li>
-   * <li>Use <code>/conversations/show/archives</code> for archived conversations</li>
-   * </ul>
-   * <b>Sorting:</b><br>
-   * Conversations are sorted by last activity timestamp (most recent first).
+   * Retrieve paginated conversations for the authenticated user.
+   *
+   * **Overview:**
+   *
+   * Use the optional `source` query parameter to choose which list to return:
+   * `owned` — only conversations you own (`userId` matches the current user).
+   * `shared` — conversations where you have recipient access
+   * (`isShared` and your user appears in `sharedWith`), without the owner-only branch.
+   * Defaults to `owned` when omitted. Each call returns one list; call twice if you need both.
+   *
+   * **Filtering:**
+   *
+   * - Only non-archived conversations are returned by default
+   * - Use `/conversations/show/archives` for archived conversations
+   *
+   * **Sorting:**
+   *
+   * Conversations are sorted by last activity timestamp (most recent first) by default.
    */
   async getAllConversations(
+    request?: operations.GetAllConversationsRequest | undefined,
     options?: RequestOptions,
   ): Promise<operations.GetAllConversationsResponse> {
     return unwrapAsync(conversationsGetAllConversations(
       this,
+      request,
       options,
     ));
   }
@@ -130,19 +121,71 @@ export class Conversations extends ClientSDK {
    * List archived conversations
    *
    * @remarks
-   * Retrieve all archived conversations for the authenticated user.<br><br>
-   * <b>Overview:</b><br>
+   * Retrieve all archived conversations for the authenticated user.
+   *
+   * **Overview:**
+   *
    * Archived conversations are hidden from the main list but preserved for reference.
-   * This endpoint returns only conversations where <code>isArchived: true</code>.<br><br>
-   * <b>Unarchiving:</b><br>
-   * Use <code>PATCH /conversations/{id}/unarchive</code> to restore a conversation
+   * This endpoint returns only conversations where `isArchived: true` and `archivedBy`
+   * is set. Results include conversations the caller owns and those shared with them.
+   *
+   * **Filtering and sorting:**
+   *
+   * Results can be narrowed using `search`, `shared`, `startDate`, `endDate`, and
+   * `conversationId`. Sorting is controlled by `sortBy` and `sortOrder`. Pagination
+   * is controlled by `page` and `limit`.
+   *
+   * **Unarchiving:**
+   *
+   * Use `PATCH /conversations/{conversationId}/unarchive` to restore a conversation
    * to the active list.
    */
   async getArchivedConversations(
+    request?: operations.GetArchivedConversationsRequest | undefined,
     options?: RequestOptions,
   ): Promise<operations.GetArchivedConversationsResponse> {
     return unwrapAsync(conversationsGetArchivedConversations(
       this,
+      request,
+      options,
+    ));
+  }
+
+  /**
+   * Search archived conversations
+   *
+   * @remarks
+   * Search across all archived conversations (assistant and agent) for the authenticated user.
+   *
+   * **Overview:**
+   *
+   * Performs a case-insensitive substring match against conversation titles and message content
+   * across both assistant (`Conversation`) and agent (`AgentConversation`) archived collections.
+   * Results are merged server-side and sorted by `lastActivityAt` descending.
+   *
+   * **Search parameter:**
+   *
+   * The `search` query parameter is required, must be a non-empty string, and is capped at
+   * 1000 characters. Requests that omit it or exceed the cap return `400`.
+   *
+   * **Pagination:**
+   *
+   * Results are paginated using `page` and `limit`. The response includes a `pagination`
+   * block with total counts and a `summary` block that breaks matches down by source.
+   *
+   * **Item shape:**
+   *
+   * Each item is a conversation list entry (no `messages` payload — that field is omitted
+   * for performance) tagged with `source`, plus computed `isOwner`, `accessLevel`,
+   * `archivedAt`, and `archivedBy`. `agentKey` is present only when `source` is `agent`.
+   */
+  async searchArchivedConversations(
+    request: operations.SearchArchivedConversationsRequest,
+    options?: RequestOptions,
+  ): Promise<operations.SearchArchivedConversationsResponse> {
+    return unwrapAsync(conversationsSearchArchivedConversations(
+      this,
+      request,
       options,
     ));
   }
@@ -151,19 +194,24 @@ export class Conversations extends ClientSDK {
    * Get conversation by ID
    *
    * @remarks
-   * Retrieve a specific conversation with its full message history.<br><br>
-   * <b>Overview:</b><br>
+   * Retrieve a specific conversation with its full message history.
+   *
+   * **Overview:**
+   *
    * Returns the complete conversation including all messages, citations,
-   * feedback, and metadata. Messages can be paginated for long conversations.<br><br>
-   * <b>Message Pagination:</b><br>
+   * feedback, and metadata. Messages can be paginated for long conversations.
+   *
+   * **Message Pagination:**
+   *
    * For conversations with many messages, use pagination parameters:
-   * <ul>
-   * <li><code>page</code>: Page number (default: 1)</li>
-   * <li><code>limit</code>: Messages per page (default: 10)</li>
-   * <li><code>sortBy</code>: Sort field (default: createdAt)</li>
-   * <li><code>sortOrder</code>: 'asc' or 'desc' (default: desc)</li>
-   * </ul>
-   * <b>Access Control:</b><br>
+   *
+   * - `page`: Page number (default: 1)
+   * - `limit`: Messages per page (default: 10)
+   * - `sortBy`: Sort field (default: createdAt)
+   * - `sortOrder`: 'asc' or 'desc' (default: desc)
+   *
+   * **Access Control:**
+   *
    * Users can access conversations they own or that have been shared with them.
    */
   async getConversationById(
@@ -181,13 +229,19 @@ export class Conversations extends ClientSDK {
    * Delete conversation
    *
    * @remarks
-   * Delete a conversation by its ID.<br><br>
-   * <b>Overview:</b><br>
-   * Performs a soft delete by setting <code>isDeleted: true</code>.
-   * The conversation is removed from listings but preserved in the database.<br><br>
-   * <b>Permissions:</b><br>
-   * Only the conversation owner (initiator) can delete it.
-   * Shared users cannot delete conversations.
+   * Delete a conversation by its ID.
+   *
+   * **Overview:**
+   *
+   * Performs a soft delete by setting `isDeleted: true`. The conversation is
+   * removed from listings but preserved in the database. All citations
+   * referenced by messages in the conversation are also soft-deleted.
+   *
+   * **Permissions:**
+   *
+   * The conversation initiator can always delete. Users the conversation has
+   * been shared with may delete it only when their `sharedWith.accessLevel`
+   * is `write`.
    */
   async deleteConversationById(
     request: operations.DeleteConversationByIdRequest,
@@ -201,78 +255,26 @@ export class Conversations extends ClientSDK {
   }
 
   /**
-   * Add message to conversation
+   * Add message to a conversation with streaming response
    *
    * @remarks
-   * Add a follow-up message to an existing conversation.<br><br>
-   * <b>Overview:</b><br>
-   * Continues an existing conversation by adding a new user query.
-   * The AI maintains context from previous messages when generating the response.<br><br>
-   * <b>Context Handling:</b><br>
-   * <ul>
-   * <li>Previous messages provide context for the new query</li>
-   * <li>Citations from earlier messages may be referenced</li>
-   * <li>The AI can refer back to previous topics discussed</li>
-   * </ul>
-   * <b>Model Override:</b><br>
-   * You can specify a different model for this message using <code>modelKey</code>.
-   * This allows switching models mid-conversation if needed.
-   */
-  async addMessage(
-    request: operations.AddMessageRequest,
-    options?: RequestOptions,
-  ): Promise<models.Conversation> {
-    return unwrapAsync(conversationsAddMessage(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
-   * Add message with streaming response
+   * Add a follow-up message to an existing conversation and stream the
+   * assistant's response over Server-Sent Events.
    *
-   * @remarks
-   * Add a follow-up message to an existing conversation with real-time SSE streaming.<br><br>
-   * <b>Overview:</b><br>
-   * Same as <code>POST /conversations/{id}/messages</code> but with streaming response.
-   * Provides real-time feedback as the AI generates its response.<br><br>
-   * <b>SSE Events:</b><br>
-   * See <code>/conversations/stream</code> for event type documentation.
+   * Functionally equivalent to `POST /conversations/{conversationId}/messages`
+   * but the response is delivered as an SSE stream so clients can render
+   * the answer incrementally.
+   *
+   * The wire vocabulary is described by `AssistantMessageStreamSSEEvent`.
+   * It is the same event set as `/conversations/stream`; only the
+   * `connected` and `complete` payloads differ because the conversation
+   * already exists when this route is called.
    */
   async addMessageStream(
     request: operations.AddMessageStreamRequest,
     options?: RequestOptions,
-  ): Promise<EventStream<models.SSEEvent>> {
+  ): Promise<EventStream<models.AssistantMessageStreamSSEEvent>> {
     return unwrapAsync(conversationsAddMessageStream(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
-   * Share conversation with users
-   *
-   * @remarks
-   * Share a conversation with other users in your organization.<br><br>
-   * <b>Overview:</b><br>
-   * Allows the conversation owner to grant access to other users.
-   * Shared users can view the conversation and optionally add messages.<br><br>
-   * <b>Access Levels:</b><br>
-   * <ul>
-   * <li><code>read</code> - Can view conversation and messages (default)</li>
-   * <li><code>write</code> - Can view and add new messages</li>
-   * </ul>
-   * <b>Permissions:</b><br>
-   * Only the conversation initiator (owner) can share. Users must belong
-   * to the same organization.
-   */
-  async shareConversation(
-    request: operations.ShareConversationRequest,
-    options?: RequestOptions,
-  ): Promise<models.Conversation> {
-    return unwrapAsync(conversationsShareConversation(
       this,
       request,
       options,
@@ -283,20 +285,27 @@ export class Conversations extends ClientSDK {
    * Update conversation title
    *
    * @remarks
-   * Update the title of a conversation.<br><br>
-   * <b>Overview:</b><br>
+   * Update the title of a conversation.
+   *
+   * **Overview:**
+   *
    * Conversation titles are auto-generated from the first query by default.
-   * Use this endpoint to set a custom, more descriptive title.<br><br>
-   * <b>Title Limits:</b><br>
-   * <ul>
-   * <li>Minimum: 1 character</li>
-   * <li>Maximum: 200 characters</li>
-   * </ul>
+   * Use this endpoint to set a custom, more descriptive title.
+   *
+   * **Title limits:**
+   *
+   * - Minimum: 1 character
+   * - Maximum: 200 characters
+   *
+   * **Permissions:**
+   *
+   * The conversation must exist, belong to the calling user's organization,
+   * be owned by the caller (matched on `userId`), and not be soft-deleted.
    */
   async updateConversationTitle(
     request: operations.UpdateConversationTitleRequest,
     options?: RequestOptions,
-  ): Promise<models.Conversation> {
+  ): Promise<operations.UpdateConversationTitleResponse> {
     return unwrapAsync(conversationsUpdateConversationTitle(
       this,
       request,
@@ -308,17 +317,27 @@ export class Conversations extends ClientSDK {
    * Archive conversation
    *
    * @remarks
-   * Archive a conversation to hide it from the main list.<br><br>
-   * <b>Overview:</b><br>
+   * Archive a conversation to hide it from the main list.
+   *
+   * **Overview:**
+   *
    * Archived conversations are preserved but hidden from the default conversation list.
-   * Use archiving to clean up your workspace without permanently deleting conversations.<br><br>
-   * <b>Retrieval:</b><br>
-   * View archived conversations using <code>GET /conversations/show/archives</code>.
+   * Use archiving to clean up your workspace without permanently deleting conversations.
+   *
+   * **Access:**
+   *
+   * The caller must be the conversation's initiator, or be listed in `sharedWith`
+   * with `accessLevel: write`. Already-archived conversations return `400`.
+   *
+   * **Retrieval:**
+   *
+   * View archived conversations using `GET /conversations/show/archives`.
+   * Restore one with `PATCH /conversations/{conversationId}/unarchive`.
    */
   async archiveConversation(
     request: operations.ArchiveConversationRequest,
     options?: RequestOptions,
-  ): Promise<models.Conversation> {
+  ): Promise<operations.ArchiveConversationResponse> {
     return unwrapAsync(conversationsArchiveConversation(
       this,
       request,
@@ -330,14 +349,16 @@ export class Conversations extends ClientSDK {
    * Unarchive conversation
    *
    * @remarks
-   * Restore an archived conversation to the active list.<br><br>
-   * <b>Overview:</b><br>
-   * Removes the archived flag, making the conversation visible in the main list again.
+   * Restore an archived conversation.
+   *
+   * - Path params: `conversationId`
+   * - Query params: none
+   * - Body: none
    */
   async unarchiveConversation(
     request: operations.UnarchiveConversationRequest,
     options?: RequestOptions,
-  ): Promise<models.Conversation> {
+  ): Promise<operations.UnarchiveConversationResponse> {
     return unwrapAsync(conversationsUnarchiveConversation(
       this,
       request,
@@ -349,24 +370,49 @@ export class Conversations extends ClientSDK {
    * Regenerate AI response
    *
    * @remarks
-   * Regenerate the AI response for a specific message.<br><br>
-   * <b>Overview:</b><br>
+   * Regenerate the AI response for a specific message and stream the new
+   * answer over Server-Sent Events.
+   *
+   * **Overview:**
+   *
    * If you're not satisfied with an AI response, use this endpoint to generate
-   * a new answer. The AI will re-process the original query and may produce
-   * a different response.<br><br>
-   * <b>Use Cases:</b><br>
-   * <ul>
-   * <li>Response was incomplete or unclear</li>
-   * <li>Want to try a different AI model</li>
-   * <li>New documents have been indexed since original response</li>
-   * </ul>
-   * <b>Model Override:</b><br>
-   * Specify <code>modelKey</code> to use a different model for regeneration.
+   * a new answer. The original user query is re-processed and a new bot
+   * response replaces the previous one in place.
+   *
+   * **Constraints:**
+   *
+   * - Only the *last* message of the conversation can be regenerated.
+   * - The target message must be of type `bot_response`.
+   *
+   * **Use Cases:**
+   *
+   * - Response was incomplete or unclear
+   * - Want to try a different AI model
+   * - New documents have been indexed since original response
+   *
+   * **Model Override:**
+   *
+   * Specify `modelKey` to use a different model for regeneration.
+   *
+   * **Streaming:**
+   *
+   * The response is delivered as an SSE (`text/event-stream`) stream. The
+   * exact event vocabulary depends on `chatMode`:
+   *
+   * - For non-agent modes (e.g. `internal_search`, `web_search`) the
+   *   request is dispatched to the assistant chat backend.
+   * - For agent modes (e.g. `agent:auto`) the request is dispatched to
+   *   the agent backend with a placeholder agent built from the caller's
+   *   workspace, which can additionally emit `tool_result` and
+   *   `tool_execution_complete` events.
+   *
+   * See `SSEEvent` for the full union of event names this endpoint can
+   * emit across both backends.
    */
   async regenerateAnswer(
     request: operations.RegenerateAnswerRequest,
     options?: RequestOptions,
-  ): Promise<models.Conversation> {
+  ): Promise<EventStream<models.SSEEvent>> {
     return unwrapAsync(conversationsRegenerateAnswer(
       this,
       request,
@@ -378,44 +424,35 @@ export class Conversations extends ClientSDK {
    * Submit feedback on AI response
    *
    * @remarks
-   * Provide feedback on an AI-generated response.<br><br>
-   * <b>Overview:</b><br>
-   * Feedback helps improve AI response quality over time. You can rate
-   * various aspects of the response and provide detailed comments.<br><br>
-   * <b>Feedback Options:</b><br>
-   * <ul>
-   * <li><b>isHelpful:</b> Overall thumbs up/down</li>
-   * <li><b>ratings:</b> 1-5 scale for accuracy, relevance, completeness, clarity</li>
-   * <li><b>categories:</b> Issue categories (incorrect info, too verbose, etc.)</li>
-   * <li><b>comments:</b> Free-text positive/negative feedback and suggestions</li>
-   * <li><b>citationFeedback:</b> Rate individual citations</li>
-   * </ul>
-   * <b>Restrictions:</b><br>
-   * Feedback can only be submitted on <code>bot_response</code> messages,
-   * not on user queries or system messages.
+   * Append a feedback entry to a bot-response message.
+   *
+   * **Overview**
+   *
+   * Feedback helps improve AI response quality over time. You can record an
+   * overall helpfulness signal, per-aspect ratings, issue categories, and
+   * free-text comments. Each call appends a new entry to the message;
+   * previous entries are preserved.
+   *
+   * **Feedback options**
+   *
+   * - `isHelpful` — overall thumbs up/down.
+   * - `ratings` — 1–5 scores keyed by an aspect name you choose
+   *   (e.g. `accuracy`, `relevance`, `completeness`, `clarity`).
+   * - `categories` — issue or positive categories from a fixed list.
+   * - `comments` — free-text `positive`, `negative`, and `suggestions`.
+   * - `metrics` — optional client-side telemetry
+   *   (`userInteractionTime`, `feedbackSessionId`).
+   *
+   * **Restrictions**
+   *
+   * Feedback can only be submitted on `bot_response` messages — user
+   * queries and system messages are rejected with `400`.
    */
   async updateMessageFeedback(
     request: operations.UpdateMessageFeedbackRequest,
     options?: RequestOptions,
-  ): Promise<models.Conversation> {
+  ): Promise<operations.UpdateMessageFeedbackResponse> {
     return unwrapAsync(conversationsUpdateMessageFeedback(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
-   * Unshare a conversation
-   *
-   * @remarks
-   * Revoke sharing for a conversation, making it private again.
-   */
-  async unshareConversationById(
-    request: operations.UnshareConversationByIdRequest,
-    options?: RequestOptions,
-  ): Promise<operations.UnshareConversationByIdResponse> {
-    return unwrapAsync(conversationsUnshareConversationById(
       this,
       request,
       options,

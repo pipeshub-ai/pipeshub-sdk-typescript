@@ -18,9 +18,11 @@ import {
   RequestTimeoutError,
   UnexpectedClientError,
 } from "../models/errors/http-client-errors.js";
+import * as errors from "../models/errors/index.js";
 import { PipeshubError } from "../models/errors/pipeshub-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { SDKValidationError } from "../models/errors/sdk-validation-error.js";
+import * as models from "../models/index.js";
 import * as operations from "../models/operations/index.js";
 import { APICall, APIPromise } from "../types/async.js";
 import { Result } from "../types/fp.js";
@@ -29,12 +31,16 @@ import { Result } from "../types/fp.js";
  * Get search history
  *
  * @remarks
- * Retrieve your search history with pagination.<br><br>
- * <b>Overview:</b><br>
- * Returns a list of all searches performed by the authenticated user.
- * Each entry includes the original query, results, and metadata.<br><br>
- * <b>Pagination:</b><br>
- * Use <code>page</code> and <code>limit</code> to navigate through results.
+ * Retrieve the authenticated user's persisted search history.
+ *
+ * Returns searches the user owns along with searches shared with them,
+ * scoped to the caller's organization. Archived and deleted entries are
+ * excluded. Citation references on this endpoint are returned as raw
+ * identifier strings; use `GET /search/{searchId}` to fetch a single
+ * search with its citations fully expanded.
+ *
+ * Pagination defaults to `page=1, limit=20` (maximum `limit` is 100).
+ * Results are sorted by most recent activity by default.
  */
 export function semanticSearchSearchHistory(
   client: PipeshubCore,
@@ -42,7 +48,11 @@ export function semanticSearchSearchHistory(
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    operations.SearchHistoryResponse,
+    models.SemanticSearchHistoryResponse,
+    | errors.SearchHistoryBadRequestError
+    | errors.SearchHistoryUnauthorizedError
+    | errors.SearchHistoryForbiddenError
+    | errors.SearchHistoryInternalServerError
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -67,7 +77,11 @@ async function $do(
 ): Promise<
   [
     Result<
-      operations.SearchHistoryResponse,
+      models.SemanticSearchHistoryResponse,
+      | errors.SearchHistoryBadRequestError
+      | errors.SearchHistoryUnauthorizedError
+      | errors.SearchHistoryForbiddenError
+      | errors.SearchHistoryInternalServerError
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -98,8 +112,14 @@ async function $do(
   const path = pathToFunc("/search")();
 
   const query = encodeFormQuery({
+    "endDate": payload?.endDate,
     "limit": payload?.limit,
     "page": payload?.page,
+    "search": payload?.search,
+    "shared": payload?.shared,
+    "sortBy": payload?.sortBy,
+    "sortOrder": payload?.sortOrder,
+    "startDate": payload?.startDate,
   });
 
   const headers = new Headers(compactMap({
@@ -142,7 +162,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["401", "4XX", "5XX"],
+    errorCodes: ["400", "401", "403", "4XX", "500", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -151,8 +171,16 @@ async function $do(
   }
   const response = doResult.value;
 
+  const responseFields = {
+    HttpMeta: { Response: response, Request: req },
+  };
+
   const [result] = await M.match<
-    operations.SearchHistoryResponse,
+    models.SemanticSearchHistoryResponse,
+    | errors.SearchHistoryBadRequestError
+    | errors.SearchHistoryUnauthorizedError
+    | errors.SearchHistoryForbiddenError
+    | errors.SearchHistoryInternalServerError
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -162,10 +190,14 @@ async function $do(
     | UnexpectedClientError
     | SDKValidationError
   >(
-    M.json(200, operations.SearchHistoryResponse$inboundSchema),
-    M.fail([401, "4XX"]),
+    M.json(200, models.SemanticSearchHistoryResponse$inboundSchema),
+    M.jsonErr(400, errors.SearchHistoryBadRequestError$inboundSchema),
+    M.jsonErr(401, errors.SearchHistoryUnauthorizedError$inboundSchema),
+    M.jsonErr(403, errors.SearchHistoryForbiddenError$inboundSchema),
+    M.jsonErr(500, errors.SearchHistoryInternalServerError$inboundSchema),
+    M.fail("4XX"),
     M.fail("5XX"),
-  )(response, req);
+  )(response, req, { extraFields: responseFields });
   if (!result.ok) {
     return [result, { status: "complete", request: req, response }];
   }

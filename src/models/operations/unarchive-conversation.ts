@@ -3,9 +3,68 @@
  */
 
 import * as z from "zod/v4-mini";
+import { safeParse } from "../../lib/schemas.js";
+import { ClosedEnum } from "../../types/enums.js";
+import { Result as SafeParseResult } from "../../types/fp.js";
+import * as types from "../../types/primitives.js";
+import { SDKValidationError } from "../errors/sdk-validation-error.js";
 
 export type UnarchiveConversationRequest = {
+  /**
+   * Conversation identifier
+   */
   conversationId: string;
+};
+
+/**
+ * New archive status of the conversation
+ */
+export const UnarchiveConversationStatus = {
+  Unarchived: "unarchived",
+} as const;
+/**
+ * New archive status of the conversation
+ */
+export type UnarchiveConversationStatus = ClosedEnum<
+  typeof UnarchiveConversationStatus
+>;
+
+export type UnarchiveConversationMeta = {
+  /**
+   * Request correlation identifier
+   */
+  requestId?: string | undefined;
+  /**
+   * Response generation timestamp
+   */
+  timestamp?: Date | undefined;
+  /**
+   * Server processing time in milliseconds
+   */
+  duration?: number | undefined;
+};
+
+/**
+ * Conversation unarchived successfully
+ */
+export type UnarchiveConversationResponse = {
+  /**
+   * Conversation identifier
+   */
+  id?: string | undefined;
+  /**
+   * New archive status of the conversation
+   */
+  status?: UnarchiveConversationStatus | undefined;
+  /**
+   * User who unarchived the conversation
+   */
+  unarchivedBy?: string | undefined;
+  /**
+   * Timestamp when the conversation was unarchived
+   */
+  unarchivedAt?: Date | undefined;
+  meta?: UnarchiveConversationMeta | undefined;
 };
 
 /** @internal */
@@ -28,5 +87,52 @@ export function unarchiveConversationRequestToJSON(
     UnarchiveConversationRequest$outboundSchema.parse(
       unarchiveConversationRequest,
     ),
+  );
+}
+
+/** @internal */
+export const UnarchiveConversationStatus$inboundSchema: z.ZodMiniEnum<
+  typeof UnarchiveConversationStatus
+> = z.enum(UnarchiveConversationStatus);
+
+/** @internal */
+export const UnarchiveConversationMeta$inboundSchema: z.ZodMiniType<
+  UnarchiveConversationMeta,
+  unknown
+> = z.object({
+  requestId: types.optional(types.string()),
+  timestamp: types.optional(types.date()),
+  duration: types.optional(types.number()),
+});
+
+export function unarchiveConversationMetaFromJSON(
+  jsonString: string,
+): SafeParseResult<UnarchiveConversationMeta, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => UnarchiveConversationMeta$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'UnarchiveConversationMeta' from JSON`,
+  );
+}
+
+/** @internal */
+export const UnarchiveConversationResponse$inboundSchema: z.ZodMiniType<
+  UnarchiveConversationResponse,
+  unknown
+> = z.object({
+  id: types.optional(types.string()),
+  status: types.optional(UnarchiveConversationStatus$inboundSchema),
+  unarchivedBy: types.optional(types.string()),
+  unarchivedAt: types.optional(types.date()),
+  meta: types.optional(z.lazy(() => UnarchiveConversationMeta$inboundSchema)),
+});
+
+export function unarchiveConversationResponseFromJSON(
+  jsonString: string,
+): SafeParseResult<UnarchiveConversationResponse, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => UnarchiveConversationResponse$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'UnarchiveConversationResponse' from JSON`,
   );
 }

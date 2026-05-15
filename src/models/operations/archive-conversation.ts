@@ -3,9 +3,68 @@
  */
 
 import * as z from "zod/v4-mini";
+import { safeParse } from "../../lib/schemas.js";
+import { ClosedEnum } from "../../types/enums.js";
+import { Result as SafeParseResult } from "../../types/fp.js";
+import * as types from "../../types/primitives.js";
+import { SDKValidationError } from "../errors/sdk-validation-error.js";
 
 export type ArchiveConversationRequest = {
+  /**
+   * Conversation identifier
+   */
   conversationId: string;
+};
+
+/**
+ * New archive status of the conversation
+ */
+export const ArchiveConversationStatus = {
+  Archived: "archived",
+} as const;
+/**
+ * New archive status of the conversation
+ */
+export type ArchiveConversationStatus = ClosedEnum<
+  typeof ArchiveConversationStatus
+>;
+
+export type ArchiveConversationMeta = {
+  /**
+   * Request correlation identifier
+   */
+  requestId?: string | undefined;
+  /**
+   * Response generation timestamp
+   */
+  timestamp?: Date | undefined;
+  /**
+   * Server processing time in milliseconds
+   */
+  duration?: number | undefined;
+};
+
+/**
+ * Conversation archived successfully
+ */
+export type ArchiveConversationResponse = {
+  /**
+   * Conversation identifier
+   */
+  id?: string | undefined;
+  /**
+   * New archive status of the conversation
+   */
+  status?: ArchiveConversationStatus | undefined;
+  /**
+   * User who archived the conversation
+   */
+  archivedBy?: string | undefined;
+  /**
+   * Timestamp when the conversation was archived
+   */
+  archivedAt?: Date | undefined;
+  meta?: ArchiveConversationMeta | undefined;
 };
 
 /** @internal */
@@ -26,5 +85,52 @@ export function archiveConversationRequestToJSON(
 ): string {
   return JSON.stringify(
     ArchiveConversationRequest$outboundSchema.parse(archiveConversationRequest),
+  );
+}
+
+/** @internal */
+export const ArchiveConversationStatus$inboundSchema: z.ZodMiniEnum<
+  typeof ArchiveConversationStatus
+> = z.enum(ArchiveConversationStatus);
+
+/** @internal */
+export const ArchiveConversationMeta$inboundSchema: z.ZodMiniType<
+  ArchiveConversationMeta,
+  unknown
+> = z.object({
+  requestId: types.optional(types.string()),
+  timestamp: types.optional(types.date()),
+  duration: types.optional(types.number()),
+});
+
+export function archiveConversationMetaFromJSON(
+  jsonString: string,
+): SafeParseResult<ArchiveConversationMeta, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => ArchiveConversationMeta$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ArchiveConversationMeta' from JSON`,
+  );
+}
+
+/** @internal */
+export const ArchiveConversationResponse$inboundSchema: z.ZodMiniType<
+  ArchiveConversationResponse,
+  unknown
+> = z.object({
+  id: types.optional(types.string()),
+  status: types.optional(ArchiveConversationStatus$inboundSchema),
+  archivedBy: types.optional(types.string()),
+  archivedAt: types.optional(types.date()),
+  meta: types.optional(z.lazy(() => ArchiveConversationMeta$inboundSchema)),
+});
+
+export function archiveConversationResponseFromJSON(
+  jsonString: string,
+): SafeParseResult<ArchiveConversationResponse, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => ArchiveConversationResponse$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ArchiveConversationResponse' from JSON`,
   );
 }

@@ -13,18 +13,48 @@ import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
 /**
+ * Field to sort messages by
+ */
+export const GetConversationByIdSortByEnum = {
+  CreatedAt: "createdAt",
+  MessageType: "messageType",
+  Content: "content",
+} as const;
+/**
+ * Field to sort messages by
+ */
+export type GetConversationByIdSortByEnum = ClosedEnum<
+  typeof GetConversationByIdSortByEnum
+>;
+
+/**
  * Sort direction
  */
-export const GetConversationByIdSortOrder = {
+export const GetConversationByIdSortOrderEnum = {
   Asc: "asc",
   Desc: "desc",
 } as const;
 /**
  * Sort direction
  */
-export type GetConversationByIdSortOrder = ClosedEnum<
-  typeof GetConversationByIdSortOrder
+export type GetConversationByIdSortOrderEnum = ClosedEnum<
+  typeof GetConversationByIdSortOrderEnum
 >;
+
+/**
+ * Filter messages by type
+ */
+export const QueryParamMessageType = {
+  UserQuery: "user_query",
+  BotResponse: "bot_response",
+  Error: "error",
+  Feedback: "feedback",
+  System: "system",
+} as const;
+/**
+ * Filter messages by type
+ */
+export type QueryParamMessageType = ClosedEnum<typeof QueryParamMessageType>;
 
 export type GetConversationByIdRequest = {
   /**
@@ -42,159 +72,474 @@ export type GetConversationByIdRequest = {
   /**
    * Field to sort messages by
    */
-  sortBy?: string | undefined;
+  sortBy?: GetConversationByIdSortByEnum | undefined;
   /**
    * Sort direction
    */
-  sortOrder?: GetConversationByIdSortOrder | undefined;
+  sortOrder?: GetConversationByIdSortOrderEnum | undefined;
+  /**
+   * Case-insensitive search across conversation title and message content
+   */
+  search?: string | undefined;
+  /**
+   * Filter messages created on or after this date (ISO 8601)
+   */
+  startDate?: Date | undefined;
+  /**
+   * Filter messages created on or before this date (ISO 8601)
+   */
+  endDate?: Date | undefined;
+  /**
+   * Filter by shared status of the conversation
+   */
+  shared?: boolean | undefined;
+  /**
+   * Filter messages by type
+   */
+  messageType?: QueryParamMessageType | undefined;
 };
 
-/**
- * Current status of the conversation:
- *
- * @remarks
- * <ul>
- * <li><code>INPROGRESS</code> - AI is processing</li>
- * <li><code>COMPLETED</code> - Response ready</li>
- * <li><code>FAILED</code> - Error occurred</li>
- * </ul>
- */
-export const GetConversationByIdStatus = {
-  Inprogress: "INPROGRESS",
-  Completed: "COMPLETED",
-  Failed: "FAILED",
-} as const;
-/**
- * Current status of the conversation:
- *
- * @remarks
- * <ul>
- * <li><code>INPROGRESS</code> - AI is processing</li>
- * <li><code>COMPLETED</code> - Response ready</li>
- * <li><code>FAILED</code> - Error occurred</li>
- * </ul>
- */
-export type GetConversationByIdStatus = OpenEnum<
-  typeof GetConversationByIdStatus
->;
-
-/**
- * AI model configuration used
- */
-export type ModelInfo = {
-  modelKey?: string | undefined;
-  modelName?: string | undefined;
-  modelProvider?: string | undefined;
-  chatMode?: string | undefined;
-};
-
-export const GetConversationByIdAccessLevel = {
+export const GetConversationByIdSharedWithAccessLevel = {
   Read: "read",
   Write: "write",
 } as const;
-export type GetConversationByIdAccessLevel = OpenEnum<
-  typeof GetConversationByIdAccessLevel
+export type GetConversationByIdSharedWithAccessLevel = OpenEnum<
+  typeof GetConversationByIdSharedWithAccessLevel
 >;
 
 export type GetConversationByIdSharedWith = {
   userId?: string | undefined;
-  accessLevel?: GetConversationByIdAccessLevel | undefined;
+  accessLevel?: GetConversationByIdSharedWithAccessLevel | undefined;
 };
 
-export type GetConversationByIdPagination = {
-  page?: number | undefined;
-  limit?: number | undefined;
-  totalMessages?: number | undefined;
-  totalPages?: number | undefined;
+export const GetConversationByIdStatus = {
+  None: "None",
+  Inprogress: "Inprogress",
+  Complete: "Complete",
+  Failed: "Failed",
+} as const;
+export type GetConversationByIdStatus = OpenEnum<
+  typeof GetConversationByIdStatus
+>;
+
+export const GetConversationByIdMessageMessageType = {
+  UserQuery: "user_query",
+  BotResponse: "bot_response",
+  Error: "error",
+  Feedback: "feedback",
+  System: "system",
+} as const;
+export type GetConversationByIdMessageMessageType = OpenEnum<
+  typeof GetConversationByIdMessageMessageType
+>;
+
+export const GetConversationByIdContentFormat = {
+  Markdown: "MARKDOWN",
+  Json: "JSON",
+  Html: "HTML",
+} as const;
+export type GetConversationByIdContentFormat = OpenEnum<
+  typeof GetConversationByIdContentFormat
+>;
+
+/**
+ * AI confidence in the answer. Present only on `bot_response` messages, and only when the model emitted a trailing confidence block.
+ */
+export const Confidence = {
+  VeryHigh: "Very High",
+  High: "High",
+  Medium: "Medium",
+  Low: "Low",
+  Unknown: "Unknown",
+} as const;
+/**
+ * AI confidence in the answer. Present only on `bot_response` messages, and only when the model emitted a trailing confidence block.
+ */
+export type Confidence = OpenEnum<typeof Confidence>;
+
+export type Citation = {
+  citationId?: string | undefined;
+  /**
+   * A populated citation document. Represents a single chunk of source
+   *
+   * @remarks
+   * content (e.g. a passage from a document or record) referenced by an
+   * AI response, together with its provenance metadata.
+   */
+  citationData?: models.Citation | undefined;
+};
+
+export type GetConversationByIdReferenceDatum = {
+  /**
+   * Display name shown to the user.
+   */
+  name?: string | undefined;
+  /**
+   * Technical identifier (numeric ID, UUID, etc.).
+   */
+  id?: string | undefined;
+  /**
+   * Item type (e.g. `project`, `issue`, `file`, `notebook`, `page`).
+   */
+  type?: string | undefined;
+  /**
+   * Source application (e.g. `jira`, `confluence`,
+   *
+   * @remarks
+   * `sharepoint`, `slack`, `drive`, `gmail`).
+   */
+  app?: string | undefined;
+  /**
+   * URL to open the item in a browser.
+   */
+  webUrl?: string | undefined;
+  /**
+   * App-specific fields keyed by name (e.g. `key` for a Jira
+   *
+   * @remarks
+   * project, `siteId` for a SharePoint document).
+   */
+  metadata?: { [k: string]: string } | undefined;
+};
+
+export type GetConversationByIdAppliedFilters = {
+  apps?: Array<models.AppliedFilterNode> | undefined;
+  kb?: Array<models.AppliedFilterNode> | undefined;
+};
+
+export type GetConversationByIdMetadata = {
+  processingTimeMs?: number | undefined;
+  modelVersion?: string | undefined;
+  aiTransactionId?: string | undefined;
+};
+
+export type GetConversationByIdMessage = {
+  id?: string | undefined;
+  messageType?: GetConversationByIdMessageMessageType | undefined;
+  content?: string | undefined;
+  contentFormat?: GetConversationByIdContentFormat | undefined;
+  /**
+   * AI confidence in the answer. Present only on `bot_response` messages, and only when the model emitted a trailing confidence block.
+   */
+  confidence?: Confidence | undefined;
+  /**
+   * Citations attached to this message. `citationData` is the populated citation document.
+   */
+  citations?: Array<Citation> | undefined;
+  followUpQuestions?: Array<models.FollowUpQuestion> | undefined;
+  feedback?: Array<models.MessageFeedback> | undefined;
+  /**
+   * Reference IDs surfaced from tool responses, used for follow-up queries
+   */
+  referenceData?: Array<GetConversationByIdReferenceDatum> | undefined;
+  /**
+   * AI model configuration recorded against a conversation or message.
+   */
+  modelInfo?: models.ConversationModelInfo | undefined;
+  appliedFilters?: GetConversationByIdAppliedFilters | undefined;
+  metadata?: GetConversationByIdMetadata | undefined;
+  createdAt?: Date | undefined;
+  updatedAt?: Date | undefined;
+};
+
+export type MessageRange = {
+  start?: number | undefined;
+  end?: number | undefined;
 };
 
 /**
- * A conversation represents a chat session between a user and the AI.
+ * Pagination over the conversation's messages. Messages are paginated backwards
  *
  * @remarks
- * Conversations maintain context across multiple messages and can be
- * shared, archived, and organized.
+ * (newest first), so `messageRange.start`/`messageRange.end` refer to 1-based
+ * positions within the full message list.
  */
-export type GetConversationByIdResponse = {
+export type ConversationPagination = {
+  page?: number | undefined;
+  limit?: number | undefined;
+  /**
+   * Total number of messages in the conversation
+   */
+  totalCount?: number | undefined;
+  totalPages?: number | undefined;
+  /**
+   * True if there are older messages available
+   */
+  hasNextPage?: boolean | undefined;
+  /**
+   * True if there are newer messages available
+   */
+  hasPrevPage?: boolean | undefined;
+  messageRange?: MessageRange | undefined;
+};
+
+export const AccessAccessLevel = {
+  Read: "read",
+  Write: "write",
+} as const;
+export type AccessAccessLevel = OpenEnum<typeof AccessAccessLevel>;
+
+export type Access = {
+  isOwner?: boolean | undefined;
+  accessLevel?: AccessAccessLevel | undefined;
+};
+
+export type GetConversationByIdConversation = {
   /**
    * Unique conversation identifier
    */
   id?: string | undefined;
   /**
-   * ID of the user who owns this conversation
-   */
-  userId?: string | undefined;
-  /**
-   * Organization this conversation belongs to
-   */
-  orgId?: string | undefined;
-  /**
-   * Conversation title, auto-generated from first query
-   *
-   * @remarks
-   * or manually updated
+   * Conversation title
    */
   title?: string | undefined;
   /**
    * User who started the conversation
    */
   initiator?: string | undefined;
-  /**
-   * All messages in this conversation
-   */
-  messages?: Array<models.Message> | undefined;
-  /**
-   * Current status of the conversation:
-   *
-   * @remarks
-   * <ul>
-   * <li><code>INPROGRESS</code> - AI is processing</li>
-   * <li><code>COMPLETED</code> - Response ready</li>
-   * <li><code>FAILED</code> - Error occurred</li>
-   * </ul>
-   */
+  createdAt?: Date | undefined;
+  isShared?: boolean | undefined;
+  sharedWith?: Array<GetConversationByIdSharedWith> | undefined;
   status?: GetConversationByIdStatus | undefined;
   /**
-   * Error description if status is FAILED
+   * Populated only when `status` is `Failed`
    */
   failReason?: string | undefined;
   /**
-   * AI model configuration used
+   * Page of messages, sliced by `pagination` and ordered by `sortingMessages`
    */
-  modelInfo?: ModelInfo | undefined;
+  messages?: Array<GetConversationByIdMessage> | undefined;
   /**
-   * Whether this conversation is shared with others
+   * AI model configuration recorded against a conversation or message.
    */
-  isShared: boolean;
+  modelInfo?: models.ConversationModelInfo | undefined;
   /**
-   * Shareable link if conversation is shared
+   * Pagination over the conversation's messages. Messages are paginated backwards
+   *
+   * @remarks
+   * (newest first), so `messageRange.start`/`messageRange.end` refer to 1-based
+   * positions within the full message list.
    */
-  shareLink?: string | undefined;
+  pagination?: ConversationPagination | undefined;
+  access?: Access | undefined;
+};
+
+export type GetConversationByIdApplied = {
   /**
-   * Users this conversation is shared with
+   * Names of the filters/parameters that were actually applied
    */
-  sharedWith?: Array<GetConversationByIdSharedWith> | undefined;
+  filters?: Array<string> | undefined;
   /**
-   * Whether this conversation is archived
+   * Map of applied filter name to the value that was applied
    */
-  isArchived: boolean;
+  values?: { [k: string]: any } | undefined;
+};
+
+export type GetConversationByIdShared = {
+  values?: Array<string> | undefined;
+  description?: string | undefined;
+  current?: string | null | undefined;
+  applied?: boolean | undefined;
+};
+
+/**
+ * Advertised in the `available` catalog but not currently applied as a filter by the server.
+ */
+export type GetConversationByIdTags = {
+  type?: string | undefined;
+  description?: string | undefined;
+  current?: string | null | undefined;
+  applied?: boolean | undefined;
+};
+
+/**
+ * Advertised in the `available` catalog but not currently applied as a filter by the server.
+ */
+export type GetConversationByIdMinMessages = {
+  type?: string | undefined;
+  description?: string | undefined;
+  current?: string | null | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetConversationByIdSearch = {
+  type?: string | undefined;
+  description?: string | undefined;
+  current?: string | null | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetConversationByIdPage = {
+  type?: string | undefined;
+  current?: number | undefined;
+  min?: number | undefined;
+  max?: number | undefined;
+  default?: number | undefined;
+  description?: string | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetConversationByIdLimit = {
+  type?: string | undefined;
+  current?: number | undefined;
+  min?: number | undefined;
+  max?: number | undefined;
+  default?: number | undefined;
+  description?: string | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetConversationByIdAvailablePagination = {
+  page?: GetConversationByIdPage | undefined;
+  limit?: GetConversationByIdLimit | undefined;
+};
+
+export type GetConversationByIdSortingSortBy = {
+  values?: Array<string> | undefined;
+  default?: string | undefined;
+  description?: string | undefined;
+  current?: string | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetConversationByIdSortingSortOrder = {
+  values?: Array<string> | undefined;
+  default?: string | undefined;
+  description?: string | undefined;
+  current?: string | undefined;
+  applied?: boolean | undefined;
+};
+
+/**
+ * Sort applied to the conversation list. Field set echoes back the original list-endpoint sort options even though this endpoint returns a single conversation.
+ */
+export type GetConversationByIdSorting = {
+  sortBy?: GetConversationByIdSortingSortBy | undefined;
+  sortOrder?: GetConversationByIdSortingSortOrder | undefined;
+};
+
+export type GetConversationByIdCurrent = {
+  start?: string | null | undefined;
+  end?: string | null | undefined;
+};
+
+export type GetConversationByIdDateRange = {
+  type?: string | undefined;
+  description?: string | undefined;
+  format?: string | undefined;
+  current?: GetConversationByIdCurrent | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetConversationByIdDateFilters = {
+  dateRange?: GetConversationByIdDateRange | undefined;
+};
+
+export type GetConversationByIdMessageFiltersMessageType = {
+  values?: Array<string> | undefined;
+  description?: string | undefined;
+  current?: string | null | undefined;
+  applied?: boolean | undefined;
+};
+
+export type GetConversationByIdMessageFilters = {
+  messageType?: GetConversationByIdMessageFiltersMessageType | undefined;
+};
+
+export type GetConversationByIdSortingMessagesSortBy = {
+  values?: Array<string> | undefined;
+  default?: string | undefined;
+  description?: string | undefined;
+  current?: string | undefined;
+};
+
+export type GetConversationByIdSortingMessagesSortOrder = {
+  values?: Array<string> | undefined;
+  default?: string | undefined;
+  description?: string | undefined;
+  current?: string | undefined;
+};
+
+/**
+ * Sort applied to messages within the conversation (separate from the conversation-list `sorting` block).
+ */
+export type GetConversationByIdSortingMessages = {
+  sortBy?: GetConversationByIdSortingMessagesSortBy | undefined;
+  sortOrder?: GetConversationByIdSortingMessagesSortOrder | undefined;
+};
+
+export type GetConversationByIdAvailable = {
+  shared?: GetConversationByIdShared | undefined;
   /**
-   * User who archived this conversation
+   * Advertised in the `available` catalog but not currently applied as a filter by the server.
    */
-  archivedBy?: string | undefined;
+  tags?: GetConversationByIdTags | undefined;
   /**
-   * Unix timestamp of last activity
+   * Advertised in the `available` catalog but not currently applied as a filter by the server.
    */
-  lastActivityAt?: number | undefined;
-  createdAt?: Date | undefined;
-  updatedAt?: Date | undefined;
-  pagination?: GetConversationByIdPagination | undefined;
+  minMessages?: GetConversationByIdMinMessages | undefined;
+  search?: GetConversationByIdSearch | undefined;
+  pagination?: GetConversationByIdAvailablePagination | undefined;
+  /**
+   * Sort applied to the conversation list. Field set echoes back the original list-endpoint sort options even though this endpoint returns a single conversation.
+   */
+  sorting?: GetConversationByIdSorting | undefined;
+  dateFilters?: GetConversationByIdDateFilters | undefined;
+  messageFilters?: GetConversationByIdMessageFilters | undefined;
+  /**
+   * Sort applied to messages within the conversation (separate from the conversation-list `sorting` block).
+   */
+  sortingMessages?: GetConversationByIdSortingMessages | undefined;
+};
+
+/**
+ * Summary of which filter/sort/pagination parameters were applied to this request, plus the catalog of options available on this endpoint.
+ */
+export type GetConversationByIdFilters = {
+  applied?: GetConversationByIdApplied | undefined;
+  available?: GetConversationByIdAvailable | undefined;
+};
+
+export type GetConversationByIdMeta = {
+  requestId?: string | undefined;
+  timestamp?: Date | undefined;
+  /**
+   * Server processing time in milliseconds
+   */
+  duration?: number | undefined;
+  conversationId?: string | undefined;
+  /**
+   * Total number of messages in the conversation
+   */
+  messageCount?: number | undefined;
+};
+
+/**
+ * Conversation with paginated messages, applied filter metadata, and request metadata
+ */
+export type GetConversationByIdResponse = {
+  conversation?: GetConversationByIdConversation | undefined;
+  /**
+   * Summary of which filter/sort/pagination parameters were applied to this request, plus the catalog of options available on this endpoint.
+   */
+  filters?: GetConversationByIdFilters | undefined;
+  meta?: GetConversationByIdMeta | undefined;
 };
 
 /** @internal */
-export const GetConversationByIdSortOrder$outboundSchema: z.ZodMiniEnum<
-  typeof GetConversationByIdSortOrder
-> = z.enum(GetConversationByIdSortOrder);
+export const GetConversationByIdSortByEnum$outboundSchema: z.ZodMiniEnum<
+  typeof GetConversationByIdSortByEnum
+> = z.enum(GetConversationByIdSortByEnum);
+
+/** @internal */
+export const GetConversationByIdSortOrderEnum$outboundSchema: z.ZodMiniEnum<
+  typeof GetConversationByIdSortOrderEnum
+> = z.enum(GetConversationByIdSortOrderEnum);
+
+/** @internal */
+export const QueryParamMessageType$outboundSchema: z.ZodMiniEnum<
+  typeof QueryParamMessageType
+> = z.enum(QueryParamMessageType);
 
 /** @internal */
 export type GetConversationByIdRequest$Outbound = {
@@ -203,6 +548,11 @@ export type GetConversationByIdRequest$Outbound = {
   limit: number;
   sortBy: string;
   sortOrder: string;
+  search?: string | undefined;
+  startDate?: string | undefined;
+  endDate?: string | undefined;
+  shared?: boolean | undefined;
+  messageType?: string | undefined;
 };
 
 /** @internal */
@@ -212,9 +562,17 @@ export const GetConversationByIdRequest$outboundSchema: z.ZodMiniType<
 > = z.object({
   conversationId: z.string(),
   page: z._default(z.int(), 1),
-  limit: z._default(z.int(), 10),
-  sortBy: z._default(z.string(), "createdAt"),
-  sortOrder: z._default(GetConversationByIdSortOrder$outboundSchema, "desc"),
+  limit: z._default(z.int(), 20),
+  sortBy: z._default(GetConversationByIdSortByEnum$outboundSchema, "createdAt"),
+  sortOrder: z._default(
+    GetConversationByIdSortOrderEnum$outboundSchema,
+    "desc",
+  ),
+  search: z.optional(z.string()),
+  startDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
+  endDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
+  shared: z.optional(z.boolean()),
+  messageType: z.optional(QueryParamMessageType$outboundSchema),
 });
 
 export function getConversationByIdRequestToJSON(
@@ -226,35 +584,9 @@ export function getConversationByIdRequestToJSON(
 }
 
 /** @internal */
-export const GetConversationByIdStatus$inboundSchema: z.ZodMiniType<
-  GetConversationByIdStatus,
-  unknown
-> = openEnums.inboundSchema(GetConversationByIdStatus);
-
-/** @internal */
-export const ModelInfo$inboundSchema: z.ZodMiniType<ModelInfo, unknown> = z
-  .object({
-    modelKey: types.optional(types.string()),
-    modelName: types.optional(types.string()),
-    modelProvider: types.optional(types.string()),
-    chatMode: types.optional(types.string()),
-  });
-
-export function modelInfoFromJSON(
-  jsonString: string,
-): SafeParseResult<ModelInfo, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => ModelInfo$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'ModelInfo' from JSON`,
-  );
-}
-
-/** @internal */
-export const GetConversationByIdAccessLevel$inboundSchema: z.ZodMiniType<
-  GetConversationByIdAccessLevel,
-  unknown
-> = openEnums.inboundSchema(GetConversationByIdAccessLevel);
+export const GetConversationByIdSharedWithAccessLevel$inboundSchema:
+  z.ZodMiniType<GetConversationByIdSharedWithAccessLevel, unknown> = openEnums
+    .inboundSchema(GetConversationByIdSharedWithAccessLevel);
 
 /** @internal */
 export const GetConversationByIdSharedWith$inboundSchema: z.ZodMiniType<
@@ -262,7 +594,9 @@ export const GetConversationByIdSharedWith$inboundSchema: z.ZodMiniType<
   unknown
 > = z.object({
   userId: types.optional(types.string()),
-  accessLevel: types.optional(GetConversationByIdAccessLevel$inboundSchema),
+  accessLevel: types.optional(
+    GetConversationByIdSharedWithAccessLevel$inboundSchema,
+  ),
 });
 
 export function getConversationByIdSharedWithFromJSON(
@@ -276,54 +610,138 @@ export function getConversationByIdSharedWithFromJSON(
 }
 
 /** @internal */
-export const GetConversationByIdPagination$inboundSchema: z.ZodMiniType<
-  GetConversationByIdPagination,
+export const GetConversationByIdStatus$inboundSchema: z.ZodMiniType<
+  GetConversationByIdStatus,
   unknown
-> = z.object({
-  page: types.optional(types.number()),
-  limit: types.optional(types.number()),
-  totalMessages: types.optional(types.number()),
-  totalPages: types.optional(types.number()),
-});
+> = openEnums.inboundSchema(GetConversationByIdStatus);
 
-export function getConversationByIdPaginationFromJSON(
+/** @internal */
+export const GetConversationByIdMessageMessageType$inboundSchema: z.ZodMiniType<
+  GetConversationByIdMessageMessageType,
+  unknown
+> = openEnums.inboundSchema(GetConversationByIdMessageMessageType);
+
+/** @internal */
+export const GetConversationByIdContentFormat$inboundSchema: z.ZodMiniType<
+  GetConversationByIdContentFormat,
+  unknown
+> = openEnums.inboundSchema(GetConversationByIdContentFormat);
+
+/** @internal */
+export const Confidence$inboundSchema: z.ZodMiniType<Confidence, unknown> =
+  openEnums.inboundSchema(Confidence);
+
+/** @internal */
+export const Citation$inboundSchema: z.ZodMiniType<Citation, unknown> = z
+  .object({
+    citationId: types.optional(types.string()),
+    citationData: types.optional(models.Citation$inboundSchema),
+  });
+
+export function citationFromJSON(
   jsonString: string,
-): SafeParseResult<GetConversationByIdPagination, SDKValidationError> {
+): SafeParseResult<Citation, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => GetConversationByIdPagination$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetConversationByIdPagination' from JSON`,
+    (x) => Citation$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Citation' from JSON`,
   );
 }
 
 /** @internal */
-export const GetConversationByIdResponse$inboundSchema: z.ZodMiniType<
-  GetConversationByIdResponse,
+export const GetConversationByIdReferenceDatum$inboundSchema: z.ZodMiniType<
+  GetConversationByIdReferenceDatum,
+  unknown
+> = z.object({
+  name: types.optional(types.string()),
+  id: types.optional(types.string()),
+  type: types.optional(types.string()),
+  app: types.optional(types.string()),
+  webUrl: types.optional(types.string()),
+  metadata: types.optional(z.record(z.string(), types.string())),
+});
+
+export function getConversationByIdReferenceDatumFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdReferenceDatum, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetConversationByIdReferenceDatum$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdReferenceDatum' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdAppliedFilters$inboundSchema: z.ZodMiniType<
+  GetConversationByIdAppliedFilters,
+  unknown
+> = z.object({
+  apps: types.optional(z.array(models.AppliedFilterNode$inboundSchema)),
+  kb: types.optional(z.array(models.AppliedFilterNode$inboundSchema)),
+});
+
+export function getConversationByIdAppliedFiltersFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdAppliedFilters, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetConversationByIdAppliedFilters$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdAppliedFilters' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdMetadata$inboundSchema: z.ZodMiniType<
+  GetConversationByIdMetadata,
+  unknown
+> = z.object({
+  processingTimeMs: types.optional(types.number()),
+  modelVersion: types.optional(types.string()),
+  aiTransactionId: types.optional(types.string()),
+});
+
+export function getConversationByIdMetadataFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdMetadata, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetConversationByIdMetadata$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdMetadata' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdMessage$inboundSchema: z.ZodMiniType<
+  GetConversationByIdMessage,
   unknown
 > = z.pipe(
   z.object({
     _id: types.optional(types.string()),
-    userId: types.optional(types.string()),
-    orgId: types.optional(types.string()),
-    title: types.optional(types.string()),
-    initiator: types.optional(types.string()),
-    messages: types.optional(z.array(models.Message$inboundSchema)),
-    status: types.optional(GetConversationByIdStatus$inboundSchema),
-    failReason: types.optional(types.string()),
-    modelInfo: types.optional(z.lazy(() => ModelInfo$inboundSchema)),
-    isShared: z._default(types.boolean(), false),
-    shareLink: types.optional(types.string()),
-    sharedWith: types.optional(
-      z.array(z.lazy(() => GetConversationByIdSharedWith$inboundSchema)),
+    messageType: types.optional(
+      GetConversationByIdMessageMessageType$inboundSchema,
     ),
-    isArchived: z._default(types.boolean(), false),
-    archivedBy: types.optional(types.string()),
-    lastActivityAt: types.optional(types.number()),
+    content: types.optional(types.string()),
+    contentFormat: types.optional(
+      GetConversationByIdContentFormat$inboundSchema,
+    ),
+    confidence: types.optional(Confidence$inboundSchema),
+    citations: types.optional(z.array(z.lazy(() => Citation$inboundSchema))),
+    followUpQuestions: types.optional(
+      z.array(models.FollowUpQuestion$inboundSchema),
+    ),
+    feedback: types.optional(z.array(models.MessageFeedback$inboundSchema)),
+    referenceData: types.optional(
+      z.array(z.lazy(() => GetConversationByIdReferenceDatum$inboundSchema)),
+    ),
+    modelInfo: types.optional(models.ConversationModelInfo$inboundSchema),
+    appliedFilters: types.optional(
+      z.lazy(() => GetConversationByIdAppliedFilters$inboundSchema),
+    ),
+    metadata: types.optional(
+      z.lazy(() => GetConversationByIdMetadata$inboundSchema),
+    ),
     createdAt: types.optional(types.date()),
     updatedAt: types.optional(types.date()),
-    pagination: types.optional(
-      z.lazy(() => GetConversationByIdPagination$inboundSchema),
-    ),
   }),
   z.transform((v) => {
     return remap$(v, {
@@ -331,6 +749,632 @@ export const GetConversationByIdResponse$inboundSchema: z.ZodMiniType<
     });
   }),
 );
+
+export function getConversationByIdMessageFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdMessage, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetConversationByIdMessage$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdMessage' from JSON`,
+  );
+}
+
+/** @internal */
+export const MessageRange$inboundSchema: z.ZodMiniType<MessageRange, unknown> =
+  z.object({
+    start: types.optional(types.number()),
+    end: types.optional(types.number()),
+  });
+
+export function messageRangeFromJSON(
+  jsonString: string,
+): SafeParseResult<MessageRange, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => MessageRange$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'MessageRange' from JSON`,
+  );
+}
+
+/** @internal */
+export const ConversationPagination$inboundSchema: z.ZodMiniType<
+  ConversationPagination,
+  unknown
+> = z.object({
+  page: types.optional(types.number()),
+  limit: types.optional(types.number()),
+  totalCount: types.optional(types.number()),
+  totalPages: types.optional(types.number()),
+  hasNextPage: types.optional(types.boolean()),
+  hasPrevPage: types.optional(types.boolean()),
+  messageRange: types.optional(z.lazy(() => MessageRange$inboundSchema)),
+});
+
+export function conversationPaginationFromJSON(
+  jsonString: string,
+): SafeParseResult<ConversationPagination, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => ConversationPagination$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ConversationPagination' from JSON`,
+  );
+}
+
+/** @internal */
+export const AccessAccessLevel$inboundSchema: z.ZodMiniType<
+  AccessAccessLevel,
+  unknown
+> = openEnums.inboundSchema(AccessAccessLevel);
+
+/** @internal */
+export const Access$inboundSchema: z.ZodMiniType<Access, unknown> = z.object({
+  isOwner: types.optional(types.boolean()),
+  accessLevel: types.optional(AccessAccessLevel$inboundSchema),
+});
+
+export function accessFromJSON(
+  jsonString: string,
+): SafeParseResult<Access, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Access$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Access' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdConversation$inboundSchema: z.ZodMiniType<
+  GetConversationByIdConversation,
+  unknown
+> = z.object({
+  id: types.optional(types.string()),
+  title: types.optional(types.string()),
+  initiator: types.optional(types.string()),
+  createdAt: types.optional(types.date()),
+  isShared: types.optional(types.boolean()),
+  sharedWith: types.optional(
+    z.array(z.lazy(() => GetConversationByIdSharedWith$inboundSchema)),
+  ),
+  status: types.optional(GetConversationByIdStatus$inboundSchema),
+  failReason: types.optional(types.string()),
+  messages: types.optional(
+    z.array(z.lazy(() => GetConversationByIdMessage$inboundSchema)),
+  ),
+  modelInfo: types.optional(models.ConversationModelInfo$inboundSchema),
+  pagination: types.optional(
+    z.lazy(() => ConversationPagination$inboundSchema),
+  ),
+  access: types.optional(z.lazy(() => Access$inboundSchema)),
+});
+
+export function getConversationByIdConversationFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdConversation, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetConversationByIdConversation$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdConversation' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdApplied$inboundSchema: z.ZodMiniType<
+  GetConversationByIdApplied,
+  unknown
+> = z.object({
+  filters: types.optional(z.array(types.string())),
+  values: types.optional(z.record(z.string(), z.any())),
+});
+
+export function getConversationByIdAppliedFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdApplied, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetConversationByIdApplied$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdApplied' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdShared$inboundSchema: z.ZodMiniType<
+  GetConversationByIdShared,
+  unknown
+> = z.object({
+  values: types.optional(z.array(types.string())),
+  description: types.optional(types.string()),
+  current: z.optional(z.nullable(types.string())),
+  applied: types.optional(types.boolean()),
+});
+
+export function getConversationByIdSharedFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdShared, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetConversationByIdShared$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdShared' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdTags$inboundSchema: z.ZodMiniType<
+  GetConversationByIdTags,
+  unknown
+> = z.object({
+  type: types.optional(types.string()),
+  description: types.optional(types.string()),
+  current: z.optional(z.nullable(types.string())),
+  applied: types.optional(types.boolean()),
+});
+
+export function getConversationByIdTagsFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdTags, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetConversationByIdTags$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdTags' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdMinMessages$inboundSchema: z.ZodMiniType<
+  GetConversationByIdMinMessages,
+  unknown
+> = z.object({
+  type: types.optional(types.string()),
+  description: types.optional(types.string()),
+  current: z.optional(z.nullable(types.string())),
+  applied: types.optional(types.boolean()),
+});
+
+export function getConversationByIdMinMessagesFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdMinMessages, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetConversationByIdMinMessages$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdMinMessages' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdSearch$inboundSchema: z.ZodMiniType<
+  GetConversationByIdSearch,
+  unknown
+> = z.object({
+  type: types.optional(types.string()),
+  description: types.optional(types.string()),
+  current: z.optional(z.nullable(types.string())),
+  applied: types.optional(types.boolean()),
+});
+
+export function getConversationByIdSearchFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdSearch, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetConversationByIdSearch$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdSearch' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdPage$inboundSchema: z.ZodMiniType<
+  GetConversationByIdPage,
+  unknown
+> = z.object({
+  type: types.optional(types.string()),
+  current: types.optional(types.number()),
+  min: types.optional(types.number()),
+  max: types.optional(types.number()),
+  default: types.optional(types.number()),
+  description: types.optional(types.string()),
+  applied: types.optional(types.boolean()),
+});
+
+export function getConversationByIdPageFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdPage, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetConversationByIdPage$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdPage' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdLimit$inboundSchema: z.ZodMiniType<
+  GetConversationByIdLimit,
+  unknown
+> = z.object({
+  type: types.optional(types.string()),
+  current: types.optional(types.number()),
+  min: types.optional(types.number()),
+  max: types.optional(types.number()),
+  default: types.optional(types.number()),
+  description: types.optional(types.string()),
+  applied: types.optional(types.boolean()),
+});
+
+export function getConversationByIdLimitFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdLimit, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetConversationByIdLimit$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdLimit' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdAvailablePagination$inboundSchema:
+  z.ZodMiniType<GetConversationByIdAvailablePagination, unknown> = z.object({
+    page: types.optional(z.lazy(() => GetConversationByIdPage$inboundSchema)),
+    limit: types.optional(z.lazy(() => GetConversationByIdLimit$inboundSchema)),
+  });
+
+export function getConversationByIdAvailablePaginationFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdAvailablePagination, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetConversationByIdAvailablePagination$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdAvailablePagination' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdSortingSortBy$inboundSchema: z.ZodMiniType<
+  GetConversationByIdSortingSortBy,
+  unknown
+> = z.object({
+  values: types.optional(z.array(types.string())),
+  default: types.optional(types.string()),
+  description: types.optional(types.string()),
+  current: types.optional(types.string()),
+  applied: types.optional(types.boolean()),
+});
+
+export function getConversationByIdSortingSortByFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdSortingSortBy, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetConversationByIdSortingSortBy$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdSortingSortBy' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdSortingSortOrder$inboundSchema: z.ZodMiniType<
+  GetConversationByIdSortingSortOrder,
+  unknown
+> = z.object({
+  values: types.optional(z.array(types.string())),
+  default: types.optional(types.string()),
+  description: types.optional(types.string()),
+  current: types.optional(types.string()),
+  applied: types.optional(types.boolean()),
+});
+
+export function getConversationByIdSortingSortOrderFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdSortingSortOrder, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetConversationByIdSortingSortOrder$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdSortingSortOrder' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdSorting$inboundSchema: z.ZodMiniType<
+  GetConversationByIdSorting,
+  unknown
+> = z.object({
+  sortBy: types.optional(
+    z.lazy(() => GetConversationByIdSortingSortBy$inboundSchema),
+  ),
+  sortOrder: types.optional(
+    z.lazy(() => GetConversationByIdSortingSortOrder$inboundSchema),
+  ),
+});
+
+export function getConversationByIdSortingFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdSorting, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetConversationByIdSorting$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdSorting' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdCurrent$inboundSchema: z.ZodMiniType<
+  GetConversationByIdCurrent,
+  unknown
+> = z.object({
+  start: z.optional(z.nullable(types.string())),
+  end: z.optional(z.nullable(types.string())),
+});
+
+export function getConversationByIdCurrentFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdCurrent, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetConversationByIdCurrent$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdCurrent' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdDateRange$inboundSchema: z.ZodMiniType<
+  GetConversationByIdDateRange,
+  unknown
+> = z.object({
+  type: types.optional(types.string()),
+  description: types.optional(types.string()),
+  format: types.optional(types.string()),
+  current: types.optional(
+    z.lazy(() => GetConversationByIdCurrent$inboundSchema),
+  ),
+  applied: types.optional(types.boolean()),
+});
+
+export function getConversationByIdDateRangeFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdDateRange, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetConversationByIdDateRange$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdDateRange' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdDateFilters$inboundSchema: z.ZodMiniType<
+  GetConversationByIdDateFilters,
+  unknown
+> = z.object({
+  dateRange: types.optional(
+    z.lazy(() => GetConversationByIdDateRange$inboundSchema),
+  ),
+});
+
+export function getConversationByIdDateFiltersFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdDateFilters, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetConversationByIdDateFilters$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdDateFilters' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdMessageFiltersMessageType$inboundSchema:
+  z.ZodMiniType<GetConversationByIdMessageFiltersMessageType, unknown> = z
+    .object({
+      values: types.optional(z.array(types.string())),
+      description: types.optional(types.string()),
+      current: z.optional(z.nullable(types.string())),
+      applied: types.optional(types.boolean()),
+    });
+
+export function getConversationByIdMessageFiltersMessageTypeFromJSON(
+  jsonString: string,
+): SafeParseResult<
+  GetConversationByIdMessageFiltersMessageType,
+  SDKValidationError
+> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetConversationByIdMessageFiltersMessageType$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'GetConversationByIdMessageFiltersMessageType' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdMessageFilters$inboundSchema: z.ZodMiniType<
+  GetConversationByIdMessageFilters,
+  unknown
+> = z.object({
+  messageType: types.optional(
+    z.lazy(() => GetConversationByIdMessageFiltersMessageType$inboundSchema),
+  ),
+});
+
+export function getConversationByIdMessageFiltersFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdMessageFilters, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetConversationByIdMessageFilters$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdMessageFilters' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdSortingMessagesSortBy$inboundSchema:
+  z.ZodMiniType<GetConversationByIdSortingMessagesSortBy, unknown> = z.object({
+    values: types.optional(z.array(types.string())),
+    default: types.optional(types.string()),
+    description: types.optional(types.string()),
+    current: types.optional(types.string()),
+  });
+
+export function getConversationByIdSortingMessagesSortByFromJSON(
+  jsonString: string,
+): SafeParseResult<
+  GetConversationByIdSortingMessagesSortBy,
+  SDKValidationError
+> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetConversationByIdSortingMessagesSortBy$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'GetConversationByIdSortingMessagesSortBy' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdSortingMessagesSortOrder$inboundSchema:
+  z.ZodMiniType<GetConversationByIdSortingMessagesSortOrder, unknown> = z
+    .object({
+      values: types.optional(z.array(types.string())),
+      default: types.optional(types.string()),
+      description: types.optional(types.string()),
+      current: types.optional(types.string()),
+    });
+
+export function getConversationByIdSortingMessagesSortOrderFromJSON(
+  jsonString: string,
+): SafeParseResult<
+  GetConversationByIdSortingMessagesSortOrder,
+  SDKValidationError
+> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetConversationByIdSortingMessagesSortOrder$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'GetConversationByIdSortingMessagesSortOrder' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdSortingMessages$inboundSchema: z.ZodMiniType<
+  GetConversationByIdSortingMessages,
+  unknown
+> = z.object({
+  sortBy: types.optional(
+    z.lazy(() => GetConversationByIdSortingMessagesSortBy$inboundSchema),
+  ),
+  sortOrder: types.optional(
+    z.lazy(() => GetConversationByIdSortingMessagesSortOrder$inboundSchema),
+  ),
+});
+
+export function getConversationByIdSortingMessagesFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdSortingMessages, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetConversationByIdSortingMessages$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdSortingMessages' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdAvailable$inboundSchema: z.ZodMiniType<
+  GetConversationByIdAvailable,
+  unknown
+> = z.object({
+  shared: types.optional(z.lazy(() => GetConversationByIdShared$inboundSchema)),
+  tags: types.optional(z.lazy(() => GetConversationByIdTags$inboundSchema)),
+  minMessages: types.optional(
+    z.lazy(() => GetConversationByIdMinMessages$inboundSchema),
+  ),
+  search: types.optional(z.lazy(() => GetConversationByIdSearch$inboundSchema)),
+  pagination: types.optional(
+    z.lazy(() => GetConversationByIdAvailablePagination$inboundSchema),
+  ),
+  sorting: types.optional(
+    z.lazy(() => GetConversationByIdSorting$inboundSchema),
+  ),
+  dateFilters: types.optional(
+    z.lazy(() => GetConversationByIdDateFilters$inboundSchema),
+  ),
+  messageFilters: types.optional(
+    z.lazy(() => GetConversationByIdMessageFilters$inboundSchema),
+  ),
+  sortingMessages: types.optional(
+    z.lazy(() => GetConversationByIdSortingMessages$inboundSchema),
+  ),
+});
+
+export function getConversationByIdAvailableFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdAvailable, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetConversationByIdAvailable$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdAvailable' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdFilters$inboundSchema: z.ZodMiniType<
+  GetConversationByIdFilters,
+  unknown
+> = z.object({
+  applied: types.optional(
+    z.lazy(() => GetConversationByIdApplied$inboundSchema),
+  ),
+  available: types.optional(
+    z.lazy(() => GetConversationByIdAvailable$inboundSchema),
+  ),
+});
+
+export function getConversationByIdFiltersFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdFilters, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetConversationByIdFilters$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdFilters' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdMeta$inboundSchema: z.ZodMiniType<
+  GetConversationByIdMeta,
+  unknown
+> = z.object({
+  requestId: types.optional(types.string()),
+  timestamp: types.optional(types.date()),
+  duration: types.optional(types.number()),
+  conversationId: types.optional(types.string()),
+  messageCount: types.optional(types.number()),
+});
+
+export function getConversationByIdMetaFromJSON(
+  jsonString: string,
+): SafeParseResult<GetConversationByIdMeta, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetConversationByIdMeta$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdMeta' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetConversationByIdResponse$inboundSchema: z.ZodMiniType<
+  GetConversationByIdResponse,
+  unknown
+> = z.object({
+  conversation: types.optional(
+    z.lazy(() => GetConversationByIdConversation$inboundSchema),
+  ),
+  filters: types.optional(
+    z.lazy(() => GetConversationByIdFilters$inboundSchema),
+  ),
+  meta: types.optional(z.lazy(() => GetConversationByIdMeta$inboundSchema)),
+});
 
 export function getConversationByIdResponseFromJSON(
   jsonString: string,

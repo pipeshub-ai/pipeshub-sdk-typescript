@@ -18,6 +18,7 @@ import {
   RequestTimeoutError,
   UnexpectedClientError,
 } from "../models/errors/http-client-errors.js";
+import * as errors from "../models/errors/index.js";
 import { PipeshubError } from "../models/errors/pipeshub-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { SDKValidationError } from "../models/errors/sdk-validation-error.js";
@@ -30,7 +31,13 @@ import { Result } from "../types/fp.js";
  * Get search by ID
  *
  * @remarks
- * Retrieve a specific search result by its ID.
+ * Retrieve a previously persisted search by its id, scoped to the
+ * caller's org.
+ *
+ * The response body is always an **array** containing zero or one
+ * persisted search document. An unknown id returns an empty array
+ * with a `200` status — callers should check array length rather
+ * than relying on a `404`.
  */
 export function semanticSearchGetSearchById(
   client: PipeshubCore,
@@ -38,7 +45,12 @@ export function semanticSearchGetSearchById(
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    models.SearchResult,
+    Array<models.PersistedSemanticSearch>,
+    | errors.GetSearchByIdBadRequestError
+    | errors.GetSearchByIdUnauthorizedError
+    | errors.GetSearchByIdForbiddenError
+    | errors.GetSearchByIdNotFoundError
+    | errors.GetSearchByIdInternalServerError
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -63,7 +75,12 @@ async function $do(
 ): Promise<
   [
     Result<
-      models.SearchResult,
+      Array<models.PersistedSemanticSearch>,
+      | errors.GetSearchByIdBadRequestError
+      | errors.GetSearchByIdUnauthorizedError
+      | errors.GetSearchByIdForbiddenError
+      | errors.GetSearchByIdNotFoundError
+      | errors.GetSearchByIdInternalServerError
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -135,7 +152,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["401", "404", "4XX", "5XX"],
+    errorCodes: ["400", "401", "403", "404", "4XX", "500", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -144,8 +161,17 @@ async function $do(
   }
   const response = doResult.value;
 
+  const responseFields = {
+    HttpMeta: { Response: response, Request: req },
+  };
+
   const [result] = await M.match<
-    models.SearchResult,
+    Array<models.PersistedSemanticSearch>,
+    | errors.GetSearchByIdBadRequestError
+    | errors.GetSearchByIdUnauthorizedError
+    | errors.GetSearchByIdForbiddenError
+    | errors.GetSearchByIdNotFoundError
+    | errors.GetSearchByIdInternalServerError
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -155,10 +181,15 @@ async function $do(
     | UnexpectedClientError
     | SDKValidationError
   >(
-    M.json(200, models.SearchResult$inboundSchema),
-    M.fail([401, 404, "4XX"]),
+    M.json(200, z.array(models.PersistedSemanticSearch$inboundSchema)),
+    M.jsonErr(400, errors.GetSearchByIdBadRequestError$inboundSchema),
+    M.jsonErr(401, errors.GetSearchByIdUnauthorizedError$inboundSchema),
+    M.jsonErr(403, errors.GetSearchByIdForbiddenError$inboundSchema),
+    M.jsonErr(404, errors.GetSearchByIdNotFoundError$inboundSchema),
+    M.jsonErr(500, errors.GetSearchByIdInternalServerError$inboundSchema),
+    M.fail("4XX"),
     M.fail("5XX"),
-  )(response, req);
+  )(response, req, { extraFields: responseFields });
   if (!result.ok) {
     return [result, { status: "complete", request: req, response }];
   }

@@ -5,19 +5,6 @@
 import * as z from "zod/v4-mini";
 import * as models from "../index.js";
 
-/**
- * Request payload
- */
-export type RegenerateAnswerRequestBody = {
-  filters?: models.Filters | undefined;
-  /**
-   * Override model for regeneration
-   */
-  modelKey?: string | undefined;
-  modelName?: string | undefined;
-  chatMode?: string | undefined;
-};
-
 export type RegenerateAnswerRequest = {
   conversationId: string;
   /**
@@ -27,43 +14,14 @@ export type RegenerateAnswerRequest = {
   /**
    * Request payload
    */
-  body?: RegenerateAnswerRequestBody | undefined;
+  body?: models.RegenerateRequest | undefined;
 };
-
-/** @internal */
-export type RegenerateAnswerRequestBody$Outbound = {
-  filters?: models.Filters$Outbound | undefined;
-  modelKey?: string | undefined;
-  modelName?: string | undefined;
-  chatMode?: string | undefined;
-};
-
-/** @internal */
-export const RegenerateAnswerRequestBody$outboundSchema: z.ZodMiniType<
-  RegenerateAnswerRequestBody$Outbound,
-  RegenerateAnswerRequestBody
-> = z.object({
-  filters: z.optional(models.Filters$outboundSchema),
-  modelKey: z.optional(z.string()),
-  modelName: z.optional(z.string()),
-  chatMode: z.optional(z.string()),
-});
-
-export function regenerateAnswerRequestBodyToJSON(
-  regenerateAnswerRequestBody: RegenerateAnswerRequestBody,
-): string {
-  return JSON.stringify(
-    RegenerateAnswerRequestBody$outboundSchema.parse(
-      regenerateAnswerRequestBody,
-    ),
-  );
-}
 
 /** @internal */
 export type RegenerateAnswerRequest$Outbound = {
   conversationId: string;
   messageId: string;
-  body?: RegenerateAnswerRequestBody$Outbound | undefined;
+  body?: models.RegenerateRequest$Outbound | undefined;
 };
 
 /** @internal */
@@ -73,7 +31,7 @@ export const RegenerateAnswerRequest$outboundSchema: z.ZodMiniType<
 > = z.object({
   conversationId: z.string(),
   messageId: z.string(),
-  body: z.optional(z.lazy(() => RegenerateAnswerRequestBody$outboundSchema)),
+  body: z.optional(models.RegenerateRequest$outboundSchema),
 });
 
 export function regenerateAnswerRequestToJSON(

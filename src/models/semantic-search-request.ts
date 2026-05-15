@@ -10,17 +10,19 @@ import {
 } from "./filters.js";
 
 /**
- * Request body for performing semantic search across the enterprise knowledge base.<br><br>
+ * Request body for performing semantic search across the enterprise knowledge base.
  *
  * @remarks
- * <b>How Semantic Search Works:</b><br>
- * <ol>
- * <li>Query is converted to vector embeddings</li>
- * <li>Similar content is found using vector similarity</li>
- * <li>Results are ranked by relevance score</li>
- * <li>Matching chunks with metadata are returned</li>
- * </ol>
- * <b>Filtering:</b><br>
+ *
+ * **How Semantic Search Works:**
+ *
+ * 1. Query is converted to vector embeddings
+ * 2. Similar content is found using vector similarity
+ * 3. Results are ranked by relevance score
+ * 4. Matching chunks with metadata are returned
+ *
+ * **Filtering:**
+ *
  * Use filters to narrow search scope to specific apps or knowledge bases.
  */
 export type SemanticSearchRequest = {
@@ -31,6 +33,16 @@ export type SemanticSearchRequest = {
    * semantic meaning, not just keywords.
    */
   query: string;
+  /**
+   * App connector instance ids and knowledge-base / record-group ids that narrow retrieval
+   *
+   * @remarks
+   * for a turn. For **org assistant** chat streams, send explicit `apps` / `kb` lists.
+   * For **agent** chat streams, send explicit id lists, or **omit** `filters` (and `tools`)
+   * to let the service use the agent’s stored knowledge and tool configuration. Sending
+   * `{ "apps": [], "kb": [] }` on an agent stream means **no** knowledge sources for that
+   * turn (it is not “full org default”).
+   */
   filters?: Filters | undefined;
   /**
    * Maximum number of results to return
@@ -45,6 +57,10 @@ export type SemanticSearchRequest = {
    */
   modelName?: string | undefined;
   /**
+   * Friendly display name of the model
+   */
+  modelFriendlyName?: string | undefined;
+  /**
    * Processing mode configuration
    */
   chatMode?: string | undefined;
@@ -57,6 +73,7 @@ export type SemanticSearchRequest$Outbound = {
   limit: number;
   modelKey?: string | undefined;
   modelName?: string | undefined;
+  modelFriendlyName?: string | undefined;
   chatMode?: string | undefined;
 };
 
@@ -70,6 +87,7 @@ export const SemanticSearchRequest$outboundSchema: z.ZodMiniType<
   limit: z._default(z.int(), 10),
   modelKey: z.optional(z.string()),
   modelName: z.optional(z.string()),
+  modelFriendlyName: z.optional(z.string()),
   chatMode: z.optional(z.string()),
 });
 

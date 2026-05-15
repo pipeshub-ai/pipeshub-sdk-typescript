@@ -4,6 +4,7 @@
 
 import * as z from "zod/v4-mini";
 import { safeParse } from "../../lib/schemas.js";
+import { ClosedEnum } from "../../types/enums.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
@@ -16,10 +17,52 @@ export type UnarchiveSearchRequest = {
 };
 
 /**
+ * Resulting status of the search after the operation.
+ */
+export const UnarchiveSearchStatus = {
+  Unarchived: "unarchived",
+} as const;
+/**
+ * Resulting status of the search after the operation.
+ */
+export type UnarchiveSearchStatus = ClosedEnum<typeof UnarchiveSearchStatus>;
+
+export type UnarchiveSearchMeta = {
+  /**
+   * Server-assigned request identifier for tracing. Omitted when not available.
+   */
+  requestId?: string | undefined;
+  /**
+   * Server timestamp when the response was produced.
+   */
+  timestamp: Date;
+  /**
+   * Time taken to process the request, in milliseconds.
+   */
+  duration: number;
+};
+
+/**
  * Search unarchived successfully
  */
 export type UnarchiveSearchResponse = {
-  message?: string | undefined;
+  /**
+   * Unique identifier of the unarchived search.
+   */
+  id: string;
+  /**
+   * Resulting status of the search after the operation.
+   */
+  status: UnarchiveSearchStatus;
+  /**
+   * User ID of the user who unarchived the search.
+   */
+  unarchivedBy: string;
+  /**
+   * Timestamp when the search was unarchived.
+   */
+  unarchivedAt: Date;
+  meta: UnarchiveSearchMeta;
 };
 
 /** @internal */
@@ -44,11 +87,40 @@ export function unarchiveSearchRequestToJSON(
 }
 
 /** @internal */
+export const UnarchiveSearchStatus$inboundSchema: z.ZodMiniEnum<
+  typeof UnarchiveSearchStatus
+> = z.enum(UnarchiveSearchStatus);
+
+/** @internal */
+export const UnarchiveSearchMeta$inboundSchema: z.ZodMiniType<
+  UnarchiveSearchMeta,
+  unknown
+> = z.object({
+  requestId: types.optional(types.string()),
+  timestamp: types.date(),
+  duration: types.number(),
+});
+
+export function unarchiveSearchMetaFromJSON(
+  jsonString: string,
+): SafeParseResult<UnarchiveSearchMeta, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => UnarchiveSearchMeta$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'UnarchiveSearchMeta' from JSON`,
+  );
+}
+
+/** @internal */
 export const UnarchiveSearchResponse$inboundSchema: z.ZodMiniType<
   UnarchiveSearchResponse,
   unknown
 > = z.object({
-  message: types.optional(types.string()),
+  id: types.string(),
+  status: UnarchiveSearchStatus$inboundSchema,
+  unarchivedBy: types.string(),
+  unarchivedAt: types.date(),
+  meta: z.lazy(() => UnarchiveSearchMeta$inboundSchema),
 });
 
 export function unarchiveSearchResponseFromJSON(

@@ -6,136 +6,60 @@ import * as z from "zod/v4-mini";
 import { safeParse } from "../lib/schemas.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
+import {
+  AuthProviderAzureAdPublicConfig,
+  AuthProviderAzureAdPublicConfig$inboundSchema,
+} from "./auth-provider-azure-ad-public-config.js";
+import {
+  AuthProviderGooglePublicConfig,
+  AuthProviderGooglePublicConfig$inboundSchema,
+} from "./auth-provider-google-public-config.js";
+import {
+  AuthProviderMicrosoftPublicConfig,
+  AuthProviderMicrosoftPublicConfig$inboundSchema,
+} from "./auth-provider-microsoft-public-config.js";
+import {
+  AuthProviderOAuthPublicConfig,
+  AuthProviderOAuthPublicConfig$inboundSchema,
+} from "./auth-provider-o-auth-public-config.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
-
-export type Google = {
-  /**
-   * Google OAuth client ID
-   */
-  clientId?: string | undefined;
-};
-
-export type Microsoft = {
-  /**
-   * Microsoft tenant ID
-   */
-  tenantId?: string | undefined;
-  /**
-   * Microsoft OAuth client ID
-   */
-  clientId?: string | undefined;
-};
-
-export type Azuread = {
-  /**
-   * Azure AD tenant ID
-   */
-  tenantId?: string | undefined;
-  /**
-   * Azure AD client ID
-   */
-  clientId?: string | undefined;
-};
-
-export type Oauth = {
-  /**
-   * Custom OAuth provider name
-   */
-  providerName?: string | undefined;
-  /**
-   * OAuth client ID
-   */
-  clientId?: string | undefined;
-  /**
-   * OAuth authorization URL
-   */
-  authorizationUrl?: string | undefined;
-};
 
 /**
  * Configuration for external authentication providers (returned when those methods are allowed)
  */
 export type AuthProviders = {
-  google?: Google | undefined;
-  microsoft?: Microsoft | undefined;
-  azuread?: Azuread | undefined;
-  oauth?: Oauth | undefined;
+  /**
+   * Public Google OAuth settings returned to clients
+   */
+  google?: AuthProviderGooglePublicConfig | undefined;
+  /**
+   * Public Microsoft OAuth settings returned to clients
+   */
+  microsoft?: AuthProviderMicrosoftPublicConfig | undefined;
+  /**
+   * Public Azure AD OAuth settings returned to clients
+   */
+  azuread?: AuthProviderAzureAdPublicConfig | undefined;
+  /**
+   * Public generic OAuth provider settings returned to clients
+   */
+  oauth?: AuthProviderOAuthPublicConfig | undefined;
+  /**
+   * Present when SAML SSO is an allowed method; may be an empty object
+   */
+  saml?: { [k: string]: any } | undefined;
 };
-
-/** @internal */
-export const Google$inboundSchema: z.ZodMiniType<Google, unknown> = z.object({
-  clientId: types.optional(types.string()),
-});
-
-export function googleFromJSON(
-  jsonString: string,
-): SafeParseResult<Google, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => Google$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Google' from JSON`,
-  );
-}
-
-/** @internal */
-export const Microsoft$inboundSchema: z.ZodMiniType<Microsoft, unknown> = z
-  .object({
-    tenantId: types.optional(types.string()),
-    clientId: types.optional(types.string()),
-  });
-
-export function microsoftFromJSON(
-  jsonString: string,
-): SafeParseResult<Microsoft, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => Microsoft$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Microsoft' from JSON`,
-  );
-}
-
-/** @internal */
-export const Azuread$inboundSchema: z.ZodMiniType<Azuread, unknown> = z.object({
-  tenantId: types.optional(types.string()),
-  clientId: types.optional(types.string()),
-});
-
-export function azureadFromJSON(
-  jsonString: string,
-): SafeParseResult<Azuread, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => Azuread$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Azuread' from JSON`,
-  );
-}
-
-/** @internal */
-export const Oauth$inboundSchema: z.ZodMiniType<Oauth, unknown> = z.object({
-  providerName: types.optional(types.string()),
-  clientId: types.optional(types.string()),
-  authorizationUrl: types.optional(types.string()),
-});
-
-export function oauthFromJSON(
-  jsonString: string,
-): SafeParseResult<Oauth, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => Oauth$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Oauth' from JSON`,
-  );
-}
 
 /** @internal */
 export const AuthProviders$inboundSchema: z.ZodMiniType<
   AuthProviders,
   unknown
 > = z.object({
-  google: types.optional(z.lazy(() => Google$inboundSchema)),
-  microsoft: types.optional(z.lazy(() => Microsoft$inboundSchema)),
-  azuread: types.optional(z.lazy(() => Azuread$inboundSchema)),
-  oauth: types.optional(z.lazy(() => Oauth$inboundSchema)),
+  google: types.optional(AuthProviderGooglePublicConfig$inboundSchema),
+  microsoft: types.optional(AuthProviderMicrosoftPublicConfig$inboundSchema),
+  azuread: types.optional(AuthProviderAzureAdPublicConfig$inboundSchema),
+  oauth: types.optional(AuthProviderOAuthPublicConfig$inboundSchema),
+  saml: types.optional(z.record(z.string(), z.any())),
 });
 
 export function authProvidersFromJSON(

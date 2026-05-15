@@ -5,7 +5,7 @@
 ```typescript
 import { Category } from "@pipeshub-ai/sdk/models";
 
-let value: Category = "formatting_issues";
+let value: Category = "well_explained";
 ```
 
 ## Values
@@ -13,5 +13,5 @@ let value: Category = "formatting_issues";
 This is an open enum. Unrecognized values will be captured as the `Unrecognized<string>` branded type.
 
 ```typescript
-"incorrect_information" | "missing_information" | "outdated_information" | "irrelevant_response" | "too_verbose" | "too_brief" | "formatting_issues" | "citation_issues" | Unrecognized<string>
+"incorrect_information" | "missing_information" | "irrelevant_information" | "unclear_explanation" | "poor_citations" | "excellent_answer" | "helpful_citations" | "well_explained" | "other" | Unrecognized<string>
 ```

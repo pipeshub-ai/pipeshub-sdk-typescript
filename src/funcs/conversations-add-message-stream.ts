@@ -28,15 +28,20 @@ import { APICall, APIPromise } from "../types/async.js";
 import { Result } from "../types/fp.js";
 
 /**
- * Add message with streaming response
+ * Add message to a conversation with streaming response
  *
  * @remarks
- * Add a follow-up message to an existing conversation with real-time SSE streaming.<br><br>
- * <b>Overview:</b><br>
- * Same as <code>POST /conversations/{id}/messages</code> but with streaming response.
- * Provides real-time feedback as the AI generates its response.<br><br>
- * <b>SSE Events:</b><br>
- * See <code>/conversations/stream</code> for event type documentation.
+ * Add a follow-up message to an existing conversation and stream the
+ * assistant's response over Server-Sent Events.
+ *
+ * Functionally equivalent to `POST /conversations/{conversationId}/messages`
+ * but the response is delivered as an SSE stream so clients can render
+ * the answer incrementally.
+ *
+ * The wire vocabulary is described by `AssistantMessageStreamSSEEvent`.
+ * It is the same event set as `/conversations/stream`; only the
+ * `connected` and `complete` payloads differ because the conversation
+ * already exists when this route is called.
  */
 export function conversationsAddMessageStream(
   client: PipeshubCore,
@@ -44,7 +49,7 @@ export function conversationsAddMessageStream(
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    EventStream<models.SSEEvent>,
+    EventStream<models.AssistantMessageStreamSSEEvent>,
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -69,7 +74,7 @@ async function $do(
 ): Promise<
   [
     Result<
-      EventStream<models.SSEEvent>,
+      EventStream<models.AssistantMessageStreamSSEEvent>,
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -145,7 +150,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["401", "404", "4XX", "5XX"],
+    errorCodes: ["400", "401", "403", "404", "4XX", "500", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -155,7 +160,7 @@ async function $do(
   const response = doResult.value;
 
   const [result] = await M.match<
-    EventStream<models.SSEEvent>,
+    EventStream<models.AssistantMessageStreamSSEEvent>,
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -173,14 +178,16 @@ async function $do(
           return new EventStream(stream, rawEvent => {
             return {
               done: false,
-              value: models.SSEEvent$inboundSchema.parse(rawEvent),
+              value: models.AssistantMessageStreamSSEEvent$inboundSchema.parse(
+                rawEvent,
+              ),
             };
           });
         }),
       ),
     ),
-    M.fail([401, 404, "4XX"]),
-    M.fail("5XX"),
+    M.fail([400, 401, 403, 404, "4XX"]),
+    M.fail([500, "5XX"]),
   )(response, req);
   if (!result.ok) {
     return [result, { status: "complete", request: req, response }];

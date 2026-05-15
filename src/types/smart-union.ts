@@ -5,7 +5,6 @@
 // Not needed if lax mode
 import * as z from "zod/v4-mini";
 import { startCountingDefaultToZeroValue } from "./default-to-zero-value.js";
-import { isUnknown as isDiscriminatedUnionUnknown } from "./discriminated-union.js";
 import { RFCDate } from "./rfcdate.js";
 import { startCountingUnrecognized } from "./unrecognized.js";
 
@@ -119,7 +118,7 @@ function countFieldsRecursive(parsed: unknown): number {
 
   while (index < queue.length) {
     const value = queue[index++];
-    if (value === undefined || isDiscriminatedUnionUnknown(value)) {
+    if (value === undefined) {
       continue;
     }
 

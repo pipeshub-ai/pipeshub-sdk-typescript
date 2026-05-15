@@ -3,32 +3,35 @@
  */
 
 import * as z from "zod/v4-mini";
-import { safeParse } from "../../lib/schemas.js";
-import { Result as SafeParseResult } from "../../types/fp.js";
-import * as types from "../../types/primitives.js";
-import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
 
 /**
- * Authentication methods updated successfully
+ * Request payload
  */
-export type UpdateAuthMethodResponse = {
-  message?: string | undefined;
+export type UpdateAuthMethodRequest = {
+  /**
+   * Authentication steps to set for the organization (1-3 steps)
+   */
+  authMethod: Array<models.AuthStep>;
 };
 
 /** @internal */
-export const UpdateAuthMethodResponse$inboundSchema: z.ZodMiniType<
-  UpdateAuthMethodResponse,
-  unknown
+export type UpdateAuthMethodRequest$Outbound = {
+  authMethod: Array<models.AuthStep$Outbound>;
+};
+
+/** @internal */
+export const UpdateAuthMethodRequest$outboundSchema: z.ZodMiniType<
+  UpdateAuthMethodRequest$Outbound,
+  UpdateAuthMethodRequest
 > = z.object({
-  message: types.optional(types.string()),
+  authMethod: z.array(models.AuthStep$outboundSchema),
 });
 
-export function updateAuthMethodResponseFromJSON(
-  jsonString: string,
-): SafeParseResult<UpdateAuthMethodResponse, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => UpdateAuthMethodResponse$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'UpdateAuthMethodResponse' from JSON`,
+export function updateAuthMethodRequestToJSON(
+  updateAuthMethodRequest: UpdateAuthMethodRequest,
+): string {
+  return JSON.stringify(
+    UpdateAuthMethodRequest$outboundSchema.parse(updateAuthMethodRequest),
   );
 }

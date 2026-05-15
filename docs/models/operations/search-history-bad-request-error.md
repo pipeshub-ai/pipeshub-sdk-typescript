@@ -1,0 +1,21 @@
+# SearchHistoryBadRequestError
+
+Error payload.
+
+## Example Usage
+
+```typescript
+import { SearchHistoryBadRequestError } from "@pipeshub-ai/sdk/models/operations";
+
+let value: SearchHistoryBadRequestError = {
+  code: "<value>",
+  message: "<value>",
+};
+```
+
+## Fields
+
+| Field                                                                                                                                                                                                                                          | Type                                                                                                                                                                                                                                           | Required                                                                                                                                                                                                                                       | Description                                                                                                                                                                                                                                    |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `code`                                                                                                                                                                                                                                         | *string*                                                                                                                                                                                                                                       | :heavy_check_mark:                                                                                                                                                                                                                             | Machine-readable error code. For this status the<br/>value is either `VALIDATION_ERROR` (request failed<br/>schema validation) or `HTTP_BAD_REQUEST` (semantic<br/>validation failed — malformed date, value over the<br/>allowed length, or XSS-guard trip).<br/> |
+| `message`                                                                                                                                                                                                                                      | *string*                                                                                                                                                                                                                                       | :heavy_check_mark:                                                                                                                                                                                                                             | Human-readable description of the failure.                                                                                                                                                                                                     |

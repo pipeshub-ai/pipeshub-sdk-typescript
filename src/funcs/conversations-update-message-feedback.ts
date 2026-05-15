@@ -21,7 +21,6 @@ import {
 import { PipeshubError } from "../models/errors/pipeshub-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { SDKValidationError } from "../models/errors/sdk-validation-error.js";
-import * as models from "../models/index.js";
 import * as operations from "../models/operations/index.js";
 import { APICall, APIPromise } from "../types/async.js";
 import { Result } from "../types/fp.js";
@@ -30,21 +29,29 @@ import { Result } from "../types/fp.js";
  * Submit feedback on AI response
  *
  * @remarks
- * Provide feedback on an AI-generated response.<br><br>
- * <b>Overview:</b><br>
- * Feedback helps improve AI response quality over time. You can rate
- * various aspects of the response and provide detailed comments.<br><br>
- * <b>Feedback Options:</b><br>
- * <ul>
- * <li><b>isHelpful:</b> Overall thumbs up/down</li>
- * <li><b>ratings:</b> 1-5 scale for accuracy, relevance, completeness, clarity</li>
- * <li><b>categories:</b> Issue categories (incorrect info, too verbose, etc.)</li>
- * <li><b>comments:</b> Free-text positive/negative feedback and suggestions</li>
- * <li><b>citationFeedback:</b> Rate individual citations</li>
- * </ul>
- * <b>Restrictions:</b><br>
- * Feedback can only be submitted on <code>bot_response</code> messages,
- * not on user queries or system messages.
+ * Append a feedback entry to a bot-response message.
+ *
+ * **Overview**
+ *
+ * Feedback helps improve AI response quality over time. You can record an
+ * overall helpfulness signal, per-aspect ratings, issue categories, and
+ * free-text comments. Each call appends a new entry to the message;
+ * previous entries are preserved.
+ *
+ * **Feedback options**
+ *
+ * - `isHelpful` — overall thumbs up/down.
+ * - `ratings` — 1–5 scores keyed by an aspect name you choose
+ *   (e.g. `accuracy`, `relevance`, `completeness`, `clarity`).
+ * - `categories` — issue or positive categories from a fixed list.
+ * - `comments` — free-text `positive`, `negative`, and `suggestions`.
+ * - `metrics` — optional client-side telemetry
+ *   (`userInteractionTime`, `feedbackSessionId`).
+ *
+ * **Restrictions**
+ *
+ * Feedback can only be submitted on `bot_response` messages — user
+ * queries and system messages are rejected with `400`.
  */
 export function conversationsUpdateMessageFeedback(
   client: PipeshubCore,
@@ -52,7 +59,7 @@ export function conversationsUpdateMessageFeedback(
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    models.Conversation,
+    operations.UpdateMessageFeedbackResponse,
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -77,7 +84,7 @@ async function $do(
 ): Promise<
   [
     Result<
-      models.Conversation,
+      operations.UpdateMessageFeedbackResponse,
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -157,7 +164,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["400", "401", "404", "4XX", "5XX"],
+    errorCodes: ["400", "401", "404", "4XX", "500", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -167,7 +174,7 @@ async function $do(
   const response = doResult.value;
 
   const [result] = await M.match<
-    models.Conversation,
+    operations.UpdateMessageFeedbackResponse,
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -177,9 +184,9 @@ async function $do(
     | UnexpectedClientError
     | SDKValidationError
   >(
-    M.json(200, models.Conversation$inboundSchema),
+    M.json(200, operations.UpdateMessageFeedbackResponse$inboundSchema),
     M.fail([400, 401, 404, "4XX"]),
-    M.fail("5XX"),
+    M.fail([500, "5XX"]),
   )(response, req);
   if (!result.ok) {
     return [result, { status: "complete", request: req, response }];

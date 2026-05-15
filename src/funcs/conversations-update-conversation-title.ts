@@ -21,7 +21,6 @@ import {
 import { PipeshubError } from "../models/errors/pipeshub-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { SDKValidationError } from "../models/errors/sdk-validation-error.js";
-import * as models from "../models/index.js";
 import * as operations from "../models/operations/index.js";
 import { APICall, APIPromise } from "../types/async.js";
 import { Result } from "../types/fp.js";
@@ -30,15 +29,22 @@ import { Result } from "../types/fp.js";
  * Update conversation title
  *
  * @remarks
- * Update the title of a conversation.<br><br>
- * <b>Overview:</b><br>
+ * Update the title of a conversation.
+ *
+ * **Overview:**
+ *
  * Conversation titles are auto-generated from the first query by default.
- * Use this endpoint to set a custom, more descriptive title.<br><br>
- * <b>Title Limits:</b><br>
- * <ul>
- * <li>Minimum: 1 character</li>
- * <li>Maximum: 200 characters</li>
- * </ul>
+ * Use this endpoint to set a custom, more descriptive title.
+ *
+ * **Title limits:**
+ *
+ * - Minimum: 1 character
+ * - Maximum: 200 characters
+ *
+ * **Permissions:**
+ *
+ * The conversation must exist, belong to the calling user's organization,
+ * be owned by the caller (matched on `userId`), and not be soft-deleted.
  */
 export function conversationsUpdateConversationTitle(
   client: PipeshubCore,
@@ -46,7 +52,7 @@ export function conversationsUpdateConversationTitle(
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    models.Conversation,
+    operations.UpdateConversationTitleResponse,
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -71,7 +77,7 @@ async function $do(
 ): Promise<
   [
     Result<
-      models.Conversation,
+      operations.UpdateConversationTitleResponse,
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -145,7 +151,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["400", "401", "404", "4XX", "5XX"],
+    errorCodes: ["400", "401", "403", "404", "4XX", "500", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -155,7 +161,7 @@ async function $do(
   const response = doResult.value;
 
   const [result] = await M.match<
-    models.Conversation,
+    operations.UpdateConversationTitleResponse,
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -165,9 +171,9 @@ async function $do(
     | UnexpectedClientError
     | SDKValidationError
   >(
-    M.json(200, models.Conversation$inboundSchema),
-    M.fail([400, 401, 404, "4XX"]),
-    M.fail("5XX"),
+    M.json(200, operations.UpdateConversationTitleResponse$inboundSchema),
+    M.fail([400, 401, 403, 404, "4XX"]),
+    M.fail([500, "5XX"]),
   )(response, req);
   if (!result.ok) {
     return [result, { status: "complete", request: req, response }];

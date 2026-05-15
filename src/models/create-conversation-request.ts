@@ -4,23 +4,29 @@
 
 import * as z from "zod/v4-mini";
 import {
+  AppliedFilters,
+  AppliedFilters$Outbound,
+  AppliedFilters$outboundSchema,
+} from "./applied-filters.js";
+import {
   Filters,
   Filters$Outbound,
   Filters$outboundSchema,
 } from "./filters.js";
 
 /**
- * Request body for creating a new AI conversation.<br><br>
+ * Request body for creating a new AI conversation.
  *
  * @remarks
- * <b>Query Processing:</b><br>
+ *
+ * **Query Processing:**
+ *
  * The query is processed through PipesHub's AI pipeline which:
- * <ul>
- * <li>Performs semantic search across indexed knowledge bases</li>
- * <li>Retrieves relevant context from matching documents</li>
- * <li>Generates a response with citations to source materials</li>
- * <li>Suggests follow-up questions based on the conversation</li>
- * </ul>
+ *
+ * - Performs semantic search across indexed knowledge bases
+ * - Retrieves relevant context from matching documents
+ * - Generates a response with citations to source materials
+ * - Suggests follow-up questions based on the conversation
  */
 export type CreateConversationRequest = {
   /**
@@ -41,7 +47,25 @@ export type CreateConversationRequest = {
    * Filter by department IDs to scope the search
    */
   departments?: Array<string> | undefined;
+  /**
+   * App connector instance ids and knowledge-base / record-group ids that narrow retrieval
+   *
+   * @remarks
+   * for a turn. For **org assistant** chat streams, send explicit `apps` / `kb` lists.
+   * For **agent** chat streams, send explicit id lists, or **omit** `filters` (and `tools`)
+   * to let the service use the agent’s stored knowledge and tool configuration. Sending
+   * `{ "apps": [], "kb": [] }` on an agent stream means **no** knowledge sources for that
+   * turn (it is not “full org default”).
+   */
   filters?: Filters | undefined;
+  /**
+   * Rich filter state selected by the user, used for display and persistence only.
+   *
+   * @remarks
+   * This mirrors the active selection shown in the UI and is distinct from the
+   * machine-readable `filters` field used for retrieval scoping.
+   */
+  appliedFilters?: AppliedFilters | undefined;
   /**
    * Identifier for the AI model configuration to use.
    *
@@ -54,12 +78,38 @@ export type CreateConversationRequest = {
    */
   modelName?: string | undefined;
   /**
+   * Friendly display name of the selected model
+   */
+  modelFriendlyName?: string | undefined;
+  /**
    * Chat mode affecting response behavior.
    *
    * @remarks
    * Different modes optimize for different use cases.
    */
   chatMode?: string | undefined;
+  /**
+   * IANA timezone identifier from the client (top-level field).
+   *
+   * @remarks
+   * Used to provide time-aware context to the AI.
+   */
+  timezone?: string | undefined;
+  /**
+   * ISO 8601 / RFC 3339 datetime from the client (top-level field; UTC `Z` or numeric offset).
+   *
+   * @remarks
+   */
+  currentTime?: Date | undefined;
+  /**
+   * Optional list of tool identifiers (fully-qualified action names such as
+   *
+   * @remarks
+   * "jira.create_issue") that the AI agent is permitted to invoke for this
+   * request. When omitted the agent may use any configured tool. Applicable
+   * only when chatMode is an agent mode (e.g. "agent:auto").
+   */
+  tools?: Array<string> | undefined;
 };
 
 /** @internal */
@@ -68,9 +118,14 @@ export type CreateConversationRequest$Outbound = {
   recordIds?: Array<string> | undefined;
   departments?: Array<string> | undefined;
   filters?: Filters$Outbound | undefined;
+  appliedFilters?: AppliedFilters$Outbound | undefined;
   modelKey?: string | undefined;
   modelName?: string | undefined;
+  modelFriendlyName?: string | undefined;
   chatMode?: string | undefined;
+  timezone?: string | undefined;
+  currentTime?: string | undefined;
+  tools?: Array<string> | undefined;
 };
 
 /** @internal */
@@ -82,9 +137,14 @@ export const CreateConversationRequest$outboundSchema: z.ZodMiniType<
   recordIds: z.optional(z.array(z.string())),
   departments: z.optional(z.array(z.string())),
   filters: z.optional(Filters$outboundSchema),
+  appliedFilters: z.optional(AppliedFilters$outboundSchema),
   modelKey: z.optional(z.string()),
   modelName: z.optional(z.string()),
+  modelFriendlyName: z.optional(z.string()),
   chatMode: z.optional(z.string()),
+  timezone: z.optional(z.string()),
+  currentTime: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
+  tools: z.optional(z.array(z.string())),
 });
 
 export function createConversationRequestToJSON(

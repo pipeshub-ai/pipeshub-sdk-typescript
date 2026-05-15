@@ -2,49 +2,32 @@
 
 ## Overview
 
-Enterprise semantic search across all indexed knowledge with relevance scoring
-
 ### Available Operations
 
 * [search](#search) - Perform semantic search
 * [searchHistory](#searchhistory) - Get search history
-* [deleteAllSearchHistory](#deleteallsearchhistory) - Clear all search history
+* [deleteSearchHistory](#deletesearchhistory) - Clear all search history
 * [getSearchById](#getsearchbyid) - Get search by ID
 * [deleteSearchById](#deletesearchbyid) - Delete search by ID
-* [shareSearch](#sharesearch) - Share a search
-* [unshareSearch](#unsharesearch) - Unshare a search
 * [archiveSearch](#archivesearch) - Archive a search
 * [unarchiveSearch](#unarchivesearch) - Unarchive a search
 
 ## search
 
-Execute a semantic search across your organization's knowledge base.<br><br>
-<b>Overview:</b><br>
-Semantic search uses AI embeddings to find content based on meaning,
-not just keyword matching. This enables finding relevant information
-even when the exact words differ.<br><br>
-<b>How It Works:</b><br>
-<ol>
-<li>Your query is converted to a vector embedding</li>
-<li>The system finds documents with similar semantic meaning</li>
-<li>Results are ranked by relevance score</li>
-<li>Matching chunks are returned with metadata</li>
-</ol>
-<b>Filtering:</b><br>
-Use filters to narrow your search:
-<ul>
-<li><code>filters.apps</code>: Limit to specific connector apps (Google Drive, Confluence, etc.)</li>
-<li><code>filters.kb</code>: Limit to specific knowledge bases</li>
-</ul>
-<b>Results:</b><br>
-Each result includes:
-<ul>
-<li>Matching content chunk</li>
-<li>Relevance score (0-1, higher is better)</li>
-<li>Source document metadata (name, URL, type)</li>
-</ul>
-<b>Search History:</b><br>
-All searches are saved and can be retrieved via <code>GET /search</code>.
+Run a semantic search across your organization's knowledge base.
+Matching is meaning-based, so relevant results surface even when
+the wording differs from the query.
+
+Use optional `filters` to narrow the scope:
+
+- `filters.apps` — restrict to specific connector apps (for
+  example Google Drive or Confluence).
+- `filters.kb` — restrict to specific knowledge bases.
+
+The response returns a `searchId` for the persisted search along
+with ranked matches, each carrying a relevance score and the
+source document's metadata. Past searches can be retrieved via
+`GET /search`.
 
 
 ### Example Usage: filtered
@@ -177,7 +160,7 @@ run();
 
 ### Response
 
-**Promise\<[models.SearchResult](../../models/search-result.md)\>**
+**Promise\<[models.SemanticSearchExecuteResponse](../../models/semantic-search-execute-response.md)\>**
 
 ### Errors
 
@@ -187,12 +170,16 @@ run();
 
 ## searchHistory
 
-Retrieve your search history with pagination.<br><br>
-<b>Overview:</b><br>
-Returns a list of all searches performed by the authenticated user.
-Each entry includes the original query, results, and metadata.<br><br>
-<b>Pagination:</b><br>
-Use <code>page</code> and <code>limit</code> to navigate through results.
+Retrieve the authenticated user's persisted search history.
+
+Returns searches the user owns along with searches shared with them,
+scoped to the caller's organization. Archived and deleted entries are
+excluded. Citation references on this endpoint are returned as raw
+identifier strings; use `GET /search/{searchId}` to fetch a single
+search with its citations fully expanded.
+
+Pagination defaults to `page=1, limit=20` (maximum `limit` is 100).
+Results are sorted by most recent activity by default.
 
 
 ### Example Usage
@@ -256,24 +243,33 @@ run();
 
 ### Response
 
-**Promise\<[operations.SearchHistoryResponse](../../models/operations/search-history-response.md)\>**
+**Promise\<[models.SemanticSearchHistoryResponse](../../models/semantic-search-history-response.md)\>**
 
 ### Errors
 
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+| Error Type                              | Status Code                             | Content Type                            |
+| --------------------------------------- | --------------------------------------- | --------------------------------------- |
+| errors.SearchHistoryBadRequestError     | 400                                     | application/json                        |
+| errors.SearchHistoryUnauthorizedError   | 401                                     | application/json                        |
+| errors.SearchHistoryForbiddenError      | 403                                     | application/json                        |
+| errors.SearchHistoryInternalServerError | 500                                     | application/json                        |
+| errors.PipeshubDefaultError             | 4XX, 5XX                                | \*/\*                                   |
 
-## deleteAllSearchHistory
+## deleteSearchHistory
 
-Delete all search history for the authenticated user.<br><br>
-<b>Warning:</b><br>
-This action cannot be undone. All saved searches will be permanently removed.
+Permanently delete every persisted search row owned by, or shared
+with, the authenticated user, along with the citation rows those
+searches reference. The action cannot be undone.
+
+Scoped to the caller's org and limited to rows where
+`isDeleted: false` and `isArchived: false`. If nothing matches
+(including the case where every row is already archived), the
+endpoint returns `404` rather than a successful no-op.
 
 
 ### Example Usage
 
-<!-- UsageSnippet language="typescript" operationID="deleteAllSearchHistory" method="delete" path="/search" -->
+<!-- UsageSnippet language="typescript" operationID="deleteSearchHistory" method="delete" path="/search" -->
 ```typescript
 import { Pipeshub } from "@pipeshub-ai/sdk";
 
@@ -284,7 +280,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.semanticSearch.deleteAllSearchHistory();
+  const result = await pipeshub.semanticSearch.deleteSearchHistory();
 
   console.log(result);
 }
@@ -298,7 +294,7 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
-import { semanticSearchDeleteAllSearchHistory } from "@pipeshub-ai/sdk/funcs/semantic-search-delete-all-search-history.js";
+import { semanticSearchDeleteSearchHistory } from "@pipeshub-ai/sdk/funcs/semantic-search-delete-search-history.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
@@ -309,12 +305,12 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await semanticSearchDeleteAllSearchHistory(pipeshub);
+  const res = await semanticSearchDeleteSearchHistory(pipeshub);
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("semanticSearchDeleteAllSearchHistory failed:", res.error);
+    console.log("semanticSearchDeleteSearchHistory failed:", res.error);
   }
 }
 
@@ -325,13 +321,14 @@ run();
 
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.DeleteSearchHistoryRequest](../../models/operations/delete-search-history-request.md)                                                                              | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
 
 ### Response
 
-**Promise\<[operations.DeleteAllSearchHistoryResponse](../../models/operations/delete-all-search-history-response.md)\>**
+**Promise\<[operations.DeleteSearchHistoryResponse](../../models/operations/delete-search-history-response.md)\>**
 
 ### Errors
 
@@ -341,7 +338,13 @@ run();
 
 ## getSearchById
 
-Retrieve a specific search result by its ID.
+Retrieve a previously persisted search by its id, scoped to the
+caller's org.
+
+The response body is always an **array** containing zero or one
+persisted search document. An unknown id returns an empty array
+with a `200` status — callers should check array length rather
+than relying on a `404`.
 
 
 ### Example Usage
@@ -409,17 +412,28 @@ run();
 
 ### Response
 
-**Promise\<[models.SearchResult](../../models/search-result.md)\>**
+**Promise\<[models.PersistedSemanticSearch[]](../../models/.md)\>**
 
 ### Errors
 
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+| Error Type                              | Status Code                             | Content Type                            |
+| --------------------------------------- | --------------------------------------- | --------------------------------------- |
+| errors.GetSearchByIdBadRequestError     | 400                                     | application/json                        |
+| errors.GetSearchByIdUnauthorizedError   | 401                                     | application/json                        |
+| errors.GetSearchByIdForbiddenError      | 403                                     | application/json                        |
+| errors.GetSearchByIdNotFoundError       | 404                                     | application/json                        |
+| errors.GetSearchByIdInternalServerError | 500                                     | application/json                        |
+| errors.PipeshubDefaultError             | 4XX, 5XX                                | \*/\*                                   |
 
 ## deleteSearchById
 
-Delete a specific search result by its ID.
+Permanently delete a single persisted search row, plus every
+citation row referenced by its `citationIds`. The caller must
+either own the row or have it shared with them.
+
+Scoped to the caller's org and limited to rows where
+`isDeleted: false` and `isArchived: false`; archived or
+already-deleted rows surface as `404`.
 
 
 ### Example Usage
@@ -495,169 +509,11 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## shareSearch
-
-Share a specific search result, making it accessible to other users.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="shareSearch" method="patch" path="/search/{searchId}/share" -->
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-
-const pipeshub = new Pipeshub({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const result = await pipeshub.semanticSearch.shareSearch({
-    searchId: "<value>",
-    body: {},
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
-import { semanticSearchShareSearch } from "@pipeshub-ai/sdk/funcs/semantic-search-share-search.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const res = await semanticSearchShareSearch(pipeshub, {
-    searchId: "<value>",
-    body: {},
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("semanticSearchShareSearch failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.ShareSearchRequest](../../models/operations/share-search-request.md)                                                                                               | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.ShareSearchResponse](../../models/operations/share-search-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## unshareSearch
-
-Revoke sharing for a specific search result, making it private again.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="unshareSearch" method="patch" path="/search/{searchId}/unshare" -->
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-
-const pipeshub = new Pipeshub({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const result = await pipeshub.semanticSearch.unshareSearch({
-    searchId: "<value>",
-    body: {},
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
-import { semanticSearchUnshareSearch } from "@pipeshub-ai/sdk/funcs/semantic-search-unshare-search.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const res = await semanticSearchUnshareSearch(pipeshub, {
-    searchId: "<value>",
-    body: {},
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("semanticSearchUnshareSearch failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.UnshareSearchRequest](../../models/operations/unshare-search-request.md)                                                                                           | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.UnshareSearchResponse](../../models/operations/unshare-search-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
 ## archiveSearch
 
-Archive a specific search result. Archived searches are hidden from the default search history view.
+Archive a specific search result. Archived searches are hidden
+from the default search history view but remain retrievable via
+the archive-aware listing endpoints.
 
 
 ### Example Usage

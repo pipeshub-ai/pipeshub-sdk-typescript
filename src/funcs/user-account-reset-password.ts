@@ -22,6 +22,7 @@ import * as errors from "../models/errors/index.js";
 import { PipeshubError } from "../models/errors/pipeshub-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { SDKValidationError } from "../models/errors/sdk-validation-error.js";
+import * as models from "../models/index.js";
 import * as operations from "../models/operations/index.js";
 import { APICall, APIPromise } from "../types/async.js";
 import { Result } from "../types/fp.js";
@@ -30,8 +31,10 @@ import { Result } from "../types/fp.js";
  * Reset password
  *
  * @remarks
- * Reset the password for the currently authenticated user.<br><br>
- * <b>Overview:</b><br>
+ * Reset the password for the currently authenticated user.
+ *
+ * **Overview:**
+ *
  * Allows a logged-in user to change their password by providing the current password and a new password.
  */
 export function userAccountResetPassword(
@@ -40,8 +43,8 @@ export function userAccountResetPassword(
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    operations.ResetPasswordResponse,
-    | errors.ResetPasswordBadRequestError
+    models.AuthenticatedPasswordResetResponse,
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -66,8 +69,8 @@ async function $do(
 ): Promise<
   [
     Result<
-      operations.ResetPasswordResponse,
-      | errors.ResetPasswordBadRequestError
+      models.AuthenticatedPasswordResetResponse,
+      | errors.ErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -133,7 +136,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["400", "401", "4XX", "5XX"],
+    errorCodes: ["400", "401", "404", "4XX", "500", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -147,8 +150,8 @@ async function $do(
   };
 
   const [result] = await M.match<
-    operations.ResetPasswordResponse,
-    | errors.ResetPasswordBadRequestError
+    models.AuthenticatedPasswordResetResponse,
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -158,9 +161,10 @@ async function $do(
     | UnexpectedClientError
     | SDKValidationError
   >(
-    M.json(200, operations.ResetPasswordResponse$inboundSchema),
-    M.jsonErr(400, errors.ResetPasswordBadRequestError$inboundSchema),
-    M.fail([401, "4XX"]),
+    M.json(200, models.AuthenticatedPasswordResetResponse$inboundSchema),
+    M.jsonErr([400, 401, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
+    M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });
   if (!result.ok) {

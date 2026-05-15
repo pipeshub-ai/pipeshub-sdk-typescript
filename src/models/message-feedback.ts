@@ -3,6 +3,7 @@
  */
 
 import * as z from "zod/v4-mini";
+import { remap as remap$ } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
 import * as openEnums from "../types/enums.js";
 import { OpenEnum } from "../types/enums.js";
@@ -32,12 +33,13 @@ export type Ratings = {
 export const Category = {
   IncorrectInformation: "incorrect_information",
   MissingInformation: "missing_information",
-  OutdatedInformation: "outdated_information",
-  IrrelevantResponse: "irrelevant_response",
-  TooVerbose: "too_verbose",
-  TooBrief: "too_brief",
-  FormattingIssues: "formatting_issues",
-  CitationIssues: "citation_issues",
+  IrrelevantInformation: "irrelevant_information",
+  UnclearExplanation: "unclear_explanation",
+  PoorCitations: "poor_citations",
+  ExcellentAnswer: "excellent_answer",
+  HelpfulCitations: "helpful_citations",
+  WellExplained: "well_explained",
+  Other: "other",
 } as const;
 export type Category = OpenEnum<typeof Category>;
 
@@ -57,10 +59,68 @@ export type Comments = {
 };
 
 export type CitationFeedback = {
+  /**
+   * Auto-generated sub-document identifier
+   */
+  id?: string | undefined;
   citationId?: string | undefined;
   isRelevant?: boolean | undefined;
   relevanceScore?: number | undefined;
   comment?: string | undefined;
+};
+
+/**
+ * Origin of the feedback. Always present in responses (server applies the default `user`).
+ */
+export const Source = {
+  User: "user",
+  System: "system",
+  Admin: "admin",
+  Auto: "auto",
+} as const;
+/**
+ * Origin of the feedback. Always present in responses (server applies the default `user`).
+ */
+export type Source = OpenEnum<typeof Source>;
+
+export type Revision = {
+  /**
+   * Auto-generated sub-document identifier
+   */
+  id?: string | undefined;
+  /**
+   * Names of feedback fields modified in this revision
+   */
+  updatedFields?: Array<string> | undefined;
+  /**
+   * Map of previously-set values for the fields named in `updatedFields`,
+   *
+   * @remarks
+   * keyed by field name. Stored as a Mongoose Map of Mixed values.
+   */
+  previousValues?: { [k: string]: any } | undefined;
+  updatedBy?: string | undefined;
+  /**
+   * Time the revision was recorded, as epoch milliseconds.
+   */
+  updatedAt?: number | undefined;
+};
+
+/**
+ * Optional telemetry captured alongside the feedback
+ */
+export type Metrics = {
+  /**
+   * Time from response delivery to feedback submission
+   */
+  timeToFeedback?: number | undefined;
+  /**
+   * Total time the user spent reviewing the response
+   */
+  userInteractionTime?: number | undefined;
+  feedbackSessionId?: string | undefined;
+  userAgent?: string | undefined;
+  platform?: string | undefined;
 };
 
 /**
@@ -76,7 +136,7 @@ export type MessageFeedback = {
   isHelpful?: boolean | undefined;
   ratings?: Ratings | undefined;
   /**
-   * Categories of issues identified
+   * Categories of issues or positive attributes identified
    */
   categories?: Array<Category> | undefined;
   comments?: Comments | undefined;
@@ -88,6 +148,34 @@ export type MessageFeedback = {
    * Were the suggested follow-up questions helpful
    */
   followUpQuestionsHelpful?: boolean | undefined;
+  /**
+   * Follow-up questions that were suggested but not used by the user
+   */
+  unusedFollowUpQuestions?: Array<string> | undefined;
+  /**
+   * Origin of the feedback. Always present in responses (server applies the default `user`).
+   */
+  source: Source;
+  /**
+   * User who submitted the feedback
+   */
+  feedbackProvider?: string | undefined;
+  /**
+   * Time the feedback was created, stored as a Number (epoch milliseconds)
+   *
+   * @remarks
+   * with a server-side default of `Date.now`, so always present in responses.
+   * Not an ISO 8601 datetime.
+   */
+  timestamp?: number | undefined;
+  /**
+   * Audit trail of edits to this feedback entry
+   */
+  revisions?: Array<Revision> | undefined;
+  /**
+   * Optional telemetry captured alongside the feedback
+   */
+  metrics?: Metrics | undefined;
 };
 
 /** @internal */
@@ -97,26 +185,7 @@ export const Ratings$inboundSchema: z.ZodMiniType<Ratings, unknown> = z.object({
   completeness: types.optional(types.number()),
   clarity: types.optional(types.number()),
 });
-/** @internal */
-export type Ratings$Outbound = {
-  accuracy?: number | undefined;
-  relevance?: number | undefined;
-  completeness?: number | undefined;
-  clarity?: number | undefined;
-};
 
-/** @internal */
-export const Ratings$outboundSchema: z.ZodMiniType<Ratings$Outbound, Ratings> =
-  z.object({
-    accuracy: z.optional(z.int()),
-    relevance: z.optional(z.int()),
-    completeness: z.optional(z.int()),
-    clarity: z.optional(z.int()),
-  });
-
-export function ratingsToJSON(ratings: Ratings): string {
-  return JSON.stringify(Ratings$outboundSchema.parse(ratings));
-}
 export function ratingsFromJSON(
   jsonString: string,
 ): SafeParseResult<Ratings, SDKValidationError> {
@@ -130,9 +199,6 @@ export function ratingsFromJSON(
 /** @internal */
 export const Category$inboundSchema: z.ZodMiniType<Category, unknown> =
   openEnums.inboundSchema(Category);
-/** @internal */
-export const Category$outboundSchema: z.ZodMiniType<string, Category> =
-  openEnums.outboundSchema(Category);
 
 /** @internal */
 export const Comments$inboundSchema: z.ZodMiniType<Comments, unknown> = z
@@ -141,26 +207,7 @@ export const Comments$inboundSchema: z.ZodMiniType<Comments, unknown> = z
     negative: types.optional(types.string()),
     suggestions: types.optional(types.string()),
   });
-/** @internal */
-export type Comments$Outbound = {
-  positive?: string | undefined;
-  negative?: string | undefined;
-  suggestions?: string | undefined;
-};
 
-/** @internal */
-export const Comments$outboundSchema: z.ZodMiniType<
-  Comments$Outbound,
-  Comments
-> = z.object({
-  positive: z.optional(z.string()),
-  negative: z.optional(z.string()),
-  suggestions: z.optional(z.string()),
-});
-
-export function commentsToJSON(comments: Comments): string {
-  return JSON.stringify(Comments$outboundSchema.parse(comments));
-}
 export function commentsFromJSON(
   jsonString: string,
 ): SafeParseResult<Comments, SDKValidationError> {
@@ -175,38 +222,21 @@ export function commentsFromJSON(
 export const CitationFeedback$inboundSchema: z.ZodMiniType<
   CitationFeedback,
   unknown
-> = z.object({
-  citationId: types.optional(types.string()),
-  isRelevant: types.optional(types.boolean()),
-  relevanceScore: types.optional(types.number()),
-  comment: types.optional(types.string()),
-});
-/** @internal */
-export type CitationFeedback$Outbound = {
-  citationId?: string | undefined;
-  isRelevant?: boolean | undefined;
-  relevanceScore?: number | undefined;
-  comment?: string | undefined;
-};
+> = z.pipe(
+  z.object({
+    _id: types.optional(types.string()),
+    citationId: types.optional(types.string()),
+    isRelevant: types.optional(types.boolean()),
+    relevanceScore: types.optional(types.number()),
+    comment: types.optional(types.string()),
+  }),
+  z.transform((v) => {
+    return remap$(v, {
+      "_id": "id",
+    });
+  }),
+);
 
-/** @internal */
-export const CitationFeedback$outboundSchema: z.ZodMiniType<
-  CitationFeedback$Outbound,
-  CitationFeedback
-> = z.object({
-  citationId: z.optional(z.string()),
-  isRelevant: z.optional(z.boolean()),
-  relevanceScore: z.optional(z.int()),
-  comment: z.optional(z.string()),
-});
-
-export function citationFeedbackToJSON(
-  citationFeedback: CitationFeedback,
-): string {
-  return JSON.stringify(
-    CitationFeedback$outboundSchema.parse(citationFeedback),
-  );
-}
 export function citationFeedbackFromJSON(
   jsonString: string,
 ): SafeParseResult<CitationFeedback, SDKValidationError> {
@@ -214,6 +244,55 @@ export function citationFeedbackFromJSON(
     jsonString,
     (x) => CitationFeedback$inboundSchema.parse(JSON.parse(x)),
     `Failed to parse 'CitationFeedback' from JSON`,
+  );
+}
+
+/** @internal */
+export const Source$inboundSchema: z.ZodMiniType<Source, unknown> = openEnums
+  .inboundSchema(Source);
+
+/** @internal */
+export const Revision$inboundSchema: z.ZodMiniType<Revision, unknown> = z.pipe(
+  z.object({
+    _id: types.optional(types.string()),
+    updatedFields: types.optional(z.array(types.string())),
+    previousValues: types.optional(z.record(z.string(), z.any())),
+    updatedBy: types.optional(types.string()),
+    updatedAt: types.optional(types.number()),
+  }),
+  z.transform((v) => {
+    return remap$(v, {
+      "_id": "id",
+    });
+  }),
+);
+
+export function revisionFromJSON(
+  jsonString: string,
+): SafeParseResult<Revision, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Revision$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Revision' from JSON`,
+  );
+}
+
+/** @internal */
+export const Metrics$inboundSchema: z.ZodMiniType<Metrics, unknown> = z.object({
+  timeToFeedback: types.optional(types.number()),
+  userInteractionTime: types.optional(types.number()),
+  feedbackSessionId: types.optional(types.string()),
+  userAgent: types.optional(types.string()),
+  platform: types.optional(types.string()),
+});
+
+export function metricsFromJSON(
+  jsonString: string,
+): SafeParseResult<Metrics, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Metrics$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Metrics' from JSON`,
   );
 }
 
@@ -230,37 +309,14 @@ export const MessageFeedback$inboundSchema: z.ZodMiniType<
     z.array(z.lazy(() => CitationFeedback$inboundSchema)),
   ),
   followUpQuestionsHelpful: types.optional(types.boolean()),
-});
-/** @internal */
-export type MessageFeedback$Outbound = {
-  isHelpful?: boolean | undefined;
-  ratings?: Ratings$Outbound | undefined;
-  categories?: Array<string> | undefined;
-  comments?: Comments$Outbound | undefined;
-  citationFeedback?: Array<CitationFeedback$Outbound> | undefined;
-  followUpQuestionsHelpful?: boolean | undefined;
-};
-
-/** @internal */
-export const MessageFeedback$outboundSchema: z.ZodMiniType<
-  MessageFeedback$Outbound,
-  MessageFeedback
-> = z.object({
-  isHelpful: z.optional(z.boolean()),
-  ratings: z.optional(z.lazy(() => Ratings$outboundSchema)),
-  categories: z.optional(z.array(Category$outboundSchema)),
-  comments: z.optional(z.lazy(() => Comments$outboundSchema)),
-  citationFeedback: z.optional(
-    z.array(z.lazy(() => CitationFeedback$outboundSchema)),
-  ),
-  followUpQuestionsHelpful: z.optional(z.boolean()),
+  unusedFollowUpQuestions: types.optional(z.array(types.string())),
+  source: z._default(Source$inboundSchema, "user"),
+  feedbackProvider: types.optional(types.string()),
+  timestamp: types.optional(types.number()),
+  revisions: types.optional(z.array(z.lazy(() => Revision$inboundSchema))),
+  metrics: types.optional(z.lazy(() => Metrics$inboundSchema)),
 });
 
-export function messageFeedbackToJSON(
-  messageFeedback: MessageFeedback,
-): string {
-  return JSON.stringify(MessageFeedback$outboundSchema.parse(messageFeedback));
-}
 export function messageFeedbackFromJSON(
   jsonString: string,
 ): SafeParseResult<MessageFeedback, SDKValidationError> {

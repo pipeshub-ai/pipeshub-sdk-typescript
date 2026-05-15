@@ -2,38 +2,42 @@
 
 ## Overview
 
-User authentication including multi-step MFA, password reset, OTP login, and token management
-
 ### Available Operations
 
 * [initAuth](#initauth) - Initialize authentication session
 * [authenticate](#authenticate) - Authenticate user with credentials
-* [generateLoginOtp](#generateloginotp) - Generate and send OTP for login
-* [forgotPassword](#forgotpassword) - Request password reset email
 * [resetPasswordWithToken](#resetpasswordwithtoken) - Reset password with email token
-* [refreshToken](#refreshtoken) - Refresh access token
-* [logout](#logout) - Logout current session
 * [resetPassword](#resetpassword) - Reset password
 
 ## initAuth
 
-Initialize an authentication session for a user by email address.
-This is the first step in the multi-step authentication flow.
-<br><br>
-<b>Flow:</b><br>
-1. Call this endpoint with the user's email<br>
-2. Receive a session token in the <code>x-session-token</code> response header<br>
-3. Use the session token in subsequent <code>/authenticate</code> calls<br>
-4. The response includes <code>allowedMethods</code> for the first authentication step
-<br><br>
-<b>Session Token:</b><br>
-- Stored in response header <code>x-session-token</code><br>
-- Required for all subsequent authentication requests<br>
-- Expires after a configured timeout period
-<br><br>
-<b>Multi-Factor Authentication:</b><br>
-If the organization has MFA configured, you'll need to complete multiple
-authentication steps. Each step completion returns the next step's allowed methods.
+Start a server-side authentication session and discover which sign-in methods are
+configured for the organization. This is the first step in the multi-step login flow.
+
+**Request body (optional)**
+
+- You may omit the body, send an empty JSON object `{}`, or send `{ "email": "..." }`.
+- `email` in the body is optional and kept for legacy reasons; omitting it does not prevent
+  initialization. The web client typically calls this endpoint without a body and sends
+  `email` on `/authenticate` instead.
+- When provided, `email` is stored on the session for correlation with subsequent steps.
+
+**Flow:**
+
+1. Call this endpoint (optional JSON body as above).
+2. Receive a session token in the `x-session-token` response header.
+3. Send that token on subsequent `/authenticate` requests (`x-session-token` header).
+4. Use `allowedMethods` and `authProviders` from the response to render the login UI.
+
+**Session token**
+
+- Returned as header `x-session-token`.
+- Required for `/authenticate` (and related steps) until it expires.
+
+**Multi-factor authentication**
+
+If the organization has MFA, complete multiple authentication steps; each step may
+return the next step's allowed methods.
 
 
 ### Example Usage
@@ -99,34 +103,39 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.AuthError            | 400, 403, 404               | application/json            |
+| errors.ErrorResponse        | 400                         | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## authenticate
 
 Authenticate a user using the specified method and credentials.
-Requires a valid session token from <code>/initAuth</code>.
-<br><br>
-<b>Credential Formats by Method:</b><br>
-- <code>password</code>: <code>{ "credentials": { "password": "your-password" } }</code><br>
-- <code>otp</code>: <code>{ "credentials": { "otp": "123456" } }</code> (6-digit code, valid for 10 minutes)<br>
-- <code>google</code>: <code>{ "credentials": "google-id-token-string" }</code><br>
-- <code>microsoft</code>: <code>{ "credentials": { "accessToken": "...", "idToken": "..." } }</code><br>
-- <code>azureAd</code>: <code>{ "credentials": { "accessToken": "...", "idToken": "..." } }</code><br>
-- <code>oauth</code>: <code>{ "credentials": { "accessToken": "...", "idToken": "..." } }</code><br>
-- <code>samlSso</code>: Handled via redirect flow (use <code>/saml/signIn</code> instead)
-<br><br>
-<b>Multi-Step Response:</b><br>
-If organization uses MFA, successful authentication returns:<br>
-- <code>status: "success"</code> with <code>nextStep</code> and <code>allowedMethods</code> for next step
-<br><br>
-<b>Fully Authenticated Response:</b><br>
-After completing all steps:<br>
-- <code>message: "Fully authenticated"</code> with <code>accessToken</code> (1hr) and <code>refreshToken</code> (7d)
-<br><br>
-<b>Security:</b><br>
-- Account locks after 5 consecutive failed attempts<br>
-- CAPTCHA may be required if enabled (pass <code>cf-turnstile-response</code>)
+Requires a valid session token from `/initAuth`.
+
+**Credential Formats by Method:**
+
+- `password`: `{ "credentials": { "password": "your-password" } }`
+- `otp`: `{ "credentials": { "otp": "123456" } }` (6-digit code, valid for 10 minutes)
+- `google`: `{ "credentials": "google-id-token-string" }`
+- `microsoft`: `{ "credentials": { "accessToken": "...", "idToken": "..." } }`
+- `azureAd`: `{ "credentials": { "accessToken": "...", "idToken": "..." } }`
+- `oauth`: `{ "credentials": { "accessToken": "...", "idToken": "..." } }`
+- `samlSso`: Handled via redirect flow (use `/saml/signIn` instead)
+
+**Multi-Step Response:**
+
+If organization uses MFA, successful authentication returns:
+- `status: "success"` with `nextStep` and `allowedMethods` for next step
+
+**Fully Authenticated Response:**
+
+After completing all steps:
+- `message: "Fully authenticated"` with `accessToken` (1hr) and `refreshToken` (7d)
+
+**Security:**
+
+- Account locks after 5 consecutive failed attempts
+- CAPTCHA may be required if enabled (pass `cf-turnstile-response`)
 
 
 ### Example Usage
@@ -204,180 +213,26 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.AuthError            | 400, 401, 403, 404, 410     | application/json            |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## generateLoginOtp
-
-Generate and send a 6-digit one-time password (OTP) to the user's email.
-Use this endpoint before authenticating with the <code>otp</code> method.
-<br><br>
-<b>OTP Details:</b><br>
-- 6 digits numeric code<br>
-- Valid for <b>10 minutes</b> after generation<br>
-- Sent to user's registered email address
-<br><br>
-<b>Rate Limiting:</b><br>
-- Multiple OTP requests may be rate-limited<br>
-- Wait for the current OTP to expire before requesting a new one
-<br><br>
-<b>CAPTCHA:</b><br>
-If Cloudflare Turnstile is enabled, include <code>cf-turnstile-response</code> in the request body.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="generateLoginOtp" method="post" path="/userAccount/login/otp/generate" -->
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-
-const pipeshub = new Pipeshub();
-
-async function run() {
-  const result = await pipeshub.userAccount.generateLoginOtp({
-    email: "Garland.Sipes42@hotmail.com",
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
-import { userAccountGenerateLoginOtp } from "@pipeshub-ai/sdk/funcs/user-account-generate-login-otp.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore();
-
-async function run() {
-  const res = await userAccountGenerateLoginOtp(pipeshub, {
-    email: "Garland.Sipes42@hotmail.com",
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("userAccountGenerateLoginOtp failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [models.OtpGenerateRequest](../../models/otp-generate-request.md)                                                                                                              | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.GenerateLoginOtpResponse](../../models/operations/generate-login-otp-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.AuthError            | 400, 403, 404               | application/json            |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## forgotPassword
-
-Send a password reset link to the user's email.
-The link contains a time-limited token that can be used to reset the password.
-<br><br>
-<b>Note:</b> This endpoint always returns 200 even if the email doesn't exist (to prevent email enumeration).
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="forgotPassword" method="post" path="/userAccount/password/forgot" -->
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-
-const pipeshub = new Pipeshub();
-
-async function run() {
-  const result = await pipeshub.userAccount.forgotPassword({
-    email: "Barton.Gutkowski68@yahoo.com",
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
-import { userAccountForgotPassword } from "@pipeshub-ai/sdk/funcs/user-account-forgot-password.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore();
-
-async function run() {
-  const res = await userAccountForgotPassword(pipeshub, {
-    email: "Barton.Gutkowski68@yahoo.com",
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("userAccountForgotPassword failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [models.ForgotPasswordRequest](../../models/forgot-password-request.md)                                                                                                        | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.ForgotPasswordResponse](../../models/operations/forgot-password-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 401, 404, 410          | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## resetPasswordWithToken
 
 Reset password using a token received via email from the forgot password flow.
-<br><br>
-<b>Password Requirements:</b><br>
-- Minimum 8 characters<br>
-- At least 1 uppercase letter<br>
-- At least 1 lowercase letter<br>
-- At least 1 number<br>
+
+**Password Requirements:**
+
+- Minimum 8 characters
+- At least 1 uppercase letter
+- At least 1 lowercase letter
+- At least 1 number
 - At least 1 special character (#?!@$%^&*-)
-<br><br>
-<b>Security Notes:</b><br>
-- Token is single-use and expires after a set time<br>
-- A new access token is returned upon successful reset
+
+**Security Notes:**
+
+- Token is single-use and expires after a set time
+- Response body contains a confirmation string in `data`
 
 
 ### Example Usage
@@ -442,183 +297,22 @@ run();
 
 ### Response
 
-**Promise\<[models.PasswordResetResponse](../../models/password-reset-response.md)\>**
+**Promise\<[models.DataStringResponse](../../models/data-string-response.md)\>**
 
 ### Errors
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.AuthError            | 400                         | application/json            |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## refreshToken
-
-Get a new access token using a valid refresh token.
-<br><br>
-<b>Usage:</b><br>
-- Pass the refresh token as a Bearer token in the Authorization header<br>
-- Returns a new access token (1 hour expiry) and basic user information
-<br><br>
-<b>Token Lifetimes:</b><br>
-- Access token: 1 hour<br>
-- Refresh token: 7 days
-<br><br>
-<b>Best Practices:</b><br>
-- Call this endpoint before the access token expires<br>
-- Store the new access token and continue using it for authenticated requests<br>
-- If refresh fails with 401, redirect user to login flow
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="refreshToken" method="post" path="/userAccount/refresh/token" -->
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-
-const pipeshub = new Pipeshub();
-
-async function run() {
-  const result = await pipeshub.userAccount.refreshToken({
-    scopedToken: "<YOUR_BEARER_TOKEN_HERE>",
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
-import { userAccountRefreshToken } from "@pipeshub-ai/sdk/funcs/user-account-refresh-token.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore();
-
-async function run() {
-  const res = await userAccountRefreshToken(pipeshub, {
-    scopedToken: "<YOUR_BEARER_TOKEN_HERE>",
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("userAccountRefreshToken failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `security`                                                                                                                                                                     | [operations.RefreshTokenSecurity](../../models/operations/refresh-token-security.md)                                                                                           | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[models.RefreshTokenResponse](../../models/refresh-token-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.AuthError            | 401, 404                    | application/json            |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## logout
-
-Log out the current user session and invalidate tokens.
-<br><br>
-<b>Effects:</b><br>
-- Invalidates the current access token<br>
-- Clears server-side session data<br>
-- Client should also clear stored tokens locally
-<br><br>
-<b>Note:</b> This endpoint requires the access token, not the refresh token.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="logout" method="post" path="/userAccount/logout/manual" -->
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-
-const pipeshub = new Pipeshub({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const result = await pipeshub.userAccount.logout();
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
-import { userAccountLogout } from "@pipeshub-ai/sdk/funcs/user-account-logout.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const res = await userAccountLogout(pipeshub);
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("userAccountLogout failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.LogoutResponse](../../models/operations/logout-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 401, 404               | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## resetPassword
 
-Reset the password for the currently authenticated user.<br><br>
-<b>Overview:</b><br>
+Reset the password for the currently authenticated user.
+
+**Overview:**
+
 Allows a logged-in user to change their password by providing the current password and a new password.
 
 
@@ -689,11 +383,12 @@ run();
 
 ### Response
 
-**Promise\<[operations.ResetPasswordResponse](../../models/operations/reset-password-response.md)\>**
+**Promise\<[models.AuthenticatedPasswordResetResponse](../../models/authenticated-password-reset-response.md)\>**
 
 ### Errors
 
-| Error Type                          | Status Code                         | Content Type                        |
-| ----------------------------------- | ----------------------------------- | ----------------------------------- |
-| errors.ResetPasswordBadRequestError | 400                                 | application/json                    |
-| errors.PipeshubDefaultError         | 4XX, 5XX                            | \*/\*                               |
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 401, 404               | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |

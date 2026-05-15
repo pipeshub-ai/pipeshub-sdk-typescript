@@ -21,7 +21,6 @@ import {
 import { PipeshubError } from "../models/errors/pipeshub-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { SDKValidationError } from "../models/errors/sdk-validation-error.js";
-import * as models from "../models/index.js";
 import * as operations from "../models/operations/index.js";
 import { APICall, APIPromise } from "../types/async.js";
 import { Result } from "../types/fp.js";
@@ -30,12 +29,22 @@ import { Result } from "../types/fp.js";
  * Archive conversation
  *
  * @remarks
- * Archive a conversation to hide it from the main list.<br><br>
- * <b>Overview:</b><br>
+ * Archive a conversation to hide it from the main list.
+ *
+ * **Overview:**
+ *
  * Archived conversations are preserved but hidden from the default conversation list.
- * Use archiving to clean up your workspace without permanently deleting conversations.<br><br>
- * <b>Retrieval:</b><br>
- * View archived conversations using <code>GET /conversations/show/archives</code>.
+ * Use archiving to clean up your workspace without permanently deleting conversations.
+ *
+ * **Access:**
+ *
+ * The caller must be the conversation's initiator, or be listed in `sharedWith`
+ * with `accessLevel: write`. Already-archived conversations return `400`.
+ *
+ * **Retrieval:**
+ *
+ * View archived conversations using `GET /conversations/show/archives`.
+ * Restore one with `PATCH /conversations/{conversationId}/unarchive`.
  */
 export function conversationsArchiveConversation(
   client: PipeshubCore,
@@ -43,7 +52,7 @@ export function conversationsArchiveConversation(
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    models.Conversation,
+    operations.ArchiveConversationResponse,
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -68,7 +77,7 @@ async function $do(
 ): Promise<
   [
     Result<
-      models.Conversation,
+      operations.ArchiveConversationResponse,
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -143,7 +152,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["401", "404", "4XX", "5XX"],
+    errorCodes: ["400", "401", "404", "4XX", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -153,7 +162,7 @@ async function $do(
   const response = doResult.value;
 
   const [result] = await M.match<
-    models.Conversation,
+    operations.ArchiveConversationResponse,
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -163,8 +172,8 @@ async function $do(
     | UnexpectedClientError
     | SDKValidationError
   >(
-    M.json(200, models.Conversation$inboundSchema),
-    M.fail([401, 404, "4XX"]),
+    M.json(200, operations.ArchiveConversationResponse$inboundSchema),
+    M.fail([400, 401, 404, "4XX"]),
     M.fail("5XX"),
   )(response, req);
   if (!result.ok) {

@@ -33,52 +33,54 @@ import { Result } from "../types/fp.js";
  * @remarks
  * Update the authentication methods configuration for an organization.
  * This allows admins to configure single or multi-factor authentication.
- * <br><br>
- * <b>Validation Rules:</b><br>
- * - Minimum 1 step, maximum 3 steps<br>
- * - Each step must have a unique order (1, 2, or 3)<br>
- * - No duplicate methods within the same step<br>
- * - No method can appear in multiple steps<br>
+ *
+ * **Validation Rules:**
+ * - Minimum 1 step, maximum 3 steps
+ * - Each step must have a unique order (1, 2, or 3)
+ * - No duplicate methods within the same step
+ * - No method can appear in multiple steps
  * - Each step must have at least one allowed method
- * <br><br>
- * <b>Available Methods:</b><br>
- * - <code>password</code>: Email/password authentication<br>
- * - <code>otp</code>: One-time password via email<br>
- * - <code>google</code>: Google OAuth 2.0<br>
- * - <code>microsoft</code>: Microsoft OAuth 2.0<br>
- * - <code>azureAd</code>: Azure Active Directory<br>
- * - <code>samlSso</code>: SAML 2.0 Single Sign-On<br>
- * - <code>oauth</code>: Generic OAuth 2.0 provider
- * <br><br>
- * <b>Example - Single Factor (Password or Google):</b><br>
- * <pre>
+ *
+ * **Available Methods:**
+ * - `password`: Email/password authentication
+ * - `otp`: One-time password via email
+ * - `google`: Google OAuth 2.0
+ * - `microsoft`: Microsoft OAuth 2.0
+ * - `azureAd`: Azure Active Directory
+ * - `samlSso`: SAML 2.0 Single Sign-On
+ * - `oauth`: Generic OAuth 2.0 provider
+ *
+ * **Example - Single Factor (Password or Google):**
+ *
+ * ```json
  * {
- *   "authMethods": [
+ *   "authMethod": [
  *     { "order": 1, "allowedMethods": [{ "type": "password" }, { "type": "google" }] }
  *   ]
  * }
- * </pre>
- * <br>
- * <b>Example - Two Factor (Password + OTP):</b><br>
- * <pre>
+ * ```
+ *
+ * **Example - Two Factor (Password + OTP):**
+ *
+ * ```json
  * {
- *   "authMethods": [
+ *   "authMethod": [
  *     { "order": 1, "allowedMethods": [{ "type": "password" }] },
  *     { "order": 2, "allowedMethods": [{ "type": "otp" }] }
  *   ]
  * }
- * </pre>
- * <br>
- * <b>Admin Access Required:</b> Only organization admins can update auth configuration.
+ * ```
+ *
+ * **Admin Access Required:** Only organization admins can update auth configuration.
  */
 export function organizationAuthConfigUpdateAuthMethod(
   client: PipeshubCore,
-  request: models.AuthConfig,
+  request: operations.UpdateAuthMethodRequest,
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    operations.UpdateAuthMethodResponse,
-    | errors.AuthError
+    models.UpdateAuthMethodResponse,
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -98,13 +100,13 @@ export function organizationAuthConfigUpdateAuthMethod(
 
 async function $do(
   client: PipeshubCore,
-  request: models.AuthConfig,
+  request: operations.UpdateAuthMethodRequest,
   options?: RequestOptions,
 ): Promise<
   [
     Result<
-      operations.UpdateAuthMethodResponse,
-      | errors.AuthError
+      models.UpdateAuthMethodResponse,
+      | errors.ErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -119,7 +121,8 @@ async function $do(
 > {
   const parsed = safeParse(
     request,
-    (value) => z.parse(models.AuthConfig$outboundSchema, value),
+    (value) =>
+      z.parse(operations.UpdateAuthMethodRequest$outboundSchema, value),
     "Input validation failed",
   );
   if (!parsed.ok) {
@@ -170,7 +173,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["400", "401", "403", "404", "4XX", "5XX"],
+    errorCodes: ["400", "401", "404", "4XX", "500", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -184,8 +187,8 @@ async function $do(
   };
 
   const [result] = await M.match<
-    operations.UpdateAuthMethodResponse,
-    | errors.AuthError
+    models.UpdateAuthMethodResponse,
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -195,9 +198,10 @@ async function $do(
     | UnexpectedClientError
     | SDKValidationError
   >(
-    M.json(200, operations.UpdateAuthMethodResponse$inboundSchema),
-    M.jsonErr(400, errors.AuthError$inboundSchema),
-    M.fail([401, 403, 404, "4XX"]),
+    M.json(200, models.UpdateAuthMethodResponse$inboundSchema),
+    M.jsonErr([400, 401, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
+    M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });
   if (!result.ok) {

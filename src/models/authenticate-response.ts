@@ -4,106 +4,36 @@
 
 import * as z from "zod/v4-mini";
 import { safeParse } from "../lib/schemas.js";
-import * as openEnums from "../types/enums.js";
-import { ClosedEnum, OpenEnum } from "../types/enums.js";
 import { Result as SafeParseResult } from "../types/fp.js";
-import * as types from "../types/primitives.js";
+import { smartUnion } from "../types/smart-union.js";
 import {
-  AuthProviders,
-  AuthProviders$inboundSchema,
-} from "./auth-providers.js";
+  AuthenticateFinalResponse,
+  AuthenticateFinalResponse$inboundSchema,
+} from "./authenticate-final-response.js";
+import {
+  AuthenticateMultiStepResponse,
+  AuthenticateMultiStepResponse$inboundSchema,
+} from "./authenticate-multi-step-response.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
 /**
- * Authentication step status (for multi-step auth)
- */
-export const AuthenticateResponseStatus = {
-  Success: "success",
-} as const;
-/**
- * Authentication step status (for multi-step auth)
- */
-export type AuthenticateResponseStatus = ClosedEnum<
-  typeof AuthenticateResponseStatus
->;
-
-export const AuthenticateResponseAllowedMethod = {
-  SamlSso: "samlSso",
-  Otp: "otp",
-  Password: "password",
-  Google: "google",
-  Microsoft: "microsoft",
-  AzureAd: "azureAd",
-  Oauth: "oauth",
-} as const;
-export type AuthenticateResponseAllowedMethod = OpenEnum<
-  typeof AuthenticateResponseAllowedMethod
->;
-
-/**
- * Authentication response. Two possible outcomes:
+ * Either the next step in a multi-factor flow (`status`, `nextStep`, `allowedMethods`, `authProviders`)
  *
  * @remarks
- * 1. **Multi-step in progress**: Returns `status: "success"` with `nextStep` and `allowedMethods`
- * 2. **Fully authenticated**: Returns `message: "Fully authenticated"` with `accessToken` and `refreshToken`
+ * or final tokens (`message`, `accessToken`, `refreshToken`).
  */
-export type AuthenticateResponse = {
-  /**
-   * Authentication step status (for multi-step auth)
-   */
-  status?: AuthenticateResponseStatus | undefined;
-  /**
-   * Response message (e.g., "Fully authenticated")
-   */
-  message?: string | undefined;
-  /**
-   * Next authentication step number (if multi-step auth continues)
-   */
-  nextStep?: number | undefined;
-  /**
-   * Allowed methods for next step (if multi-step auth continues)
-   */
-  allowedMethods?: Array<AuthenticateResponseAllowedMethod> | undefined;
-  /**
-   * Configuration for external authentication providers (returned when those methods are allowed)
-   */
-  authProviders?: AuthProviders | undefined;
-  /**
-   * JWT access token (1 hour expiry). Only returned when fully authenticated.
-   */
-  accessToken?: string | undefined;
-  /**
-   * JWT refresh token (7 days expiry). Only returned when fully authenticated.
-   */
-  refreshToken?: string | undefined;
-};
-
-/** @internal */
-export const AuthenticateResponseStatus$inboundSchema: z.ZodMiniEnum<
-  typeof AuthenticateResponseStatus
-> = z.enum(AuthenticateResponseStatus);
-
-/** @internal */
-export const AuthenticateResponseAllowedMethod$inboundSchema: z.ZodMiniType<
-  AuthenticateResponseAllowedMethod,
-  unknown
-> = openEnums.inboundSchema(AuthenticateResponseAllowedMethod);
+export type AuthenticateResponse =
+  | AuthenticateMultiStepResponse
+  | AuthenticateFinalResponse;
 
 /** @internal */
 export const AuthenticateResponse$inboundSchema: z.ZodMiniType<
   AuthenticateResponse,
   unknown
-> = z.object({
-  status: types.optional(AuthenticateResponseStatus$inboundSchema),
-  message: types.optional(types.string()),
-  nextStep: types.optional(types.number()),
-  allowedMethods: types.optional(
-    z.array(AuthenticateResponseAllowedMethod$inboundSchema),
-  ),
-  authProviders: types.optional(AuthProviders$inboundSchema),
-  accessToken: types.optional(types.string()),
-  refreshToken: types.optional(types.string()),
-});
+> = smartUnion([
+  AuthenticateMultiStepResponse$inboundSchema,
+  AuthenticateFinalResponse$inboundSchema,
+]);
 
 export function authenticateResponseFromJSON(
   jsonString: string,

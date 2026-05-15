@@ -9,6 +9,7 @@
  * OAuth 2.0 authentication with fine-grained scopes.
  * Supports authorization_code (with PKCE) and client_credentials flows.
  * OAuth tokens are Bearer JWTs — use the same Authorization header as regular tokens.
+ * For **client_credentials**, machine JWTs may use `userId === client_id`; the Node gateway resolves the OAuth app creator and forwards **`x-oauth-user-id`** to Python where applicable — see **OAuth Provider** tag.
  */
 export type OAuth2Scope =
   /**
@@ -147,18 +148,6 @@ export type OAuth2Scope =
    * Update system configuration
    */
   | "config:write"
-  /**
-   * Read documents
-   */
-  | "document:read"
-  /**
-   * Upload and update documents
-   */
-  | "document:write"
-  /**
-   * Delete documents
-   */
-  | "document:delete"
   /**
    * Read crawling jobs
    */

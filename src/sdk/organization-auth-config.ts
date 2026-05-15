@@ -16,23 +16,25 @@ export class OrganizationAuthConfig extends ClientSDK {
    *
    * @remarks
    * Retrieve the configured authentication methods for the organization.
-   * <br><br>
-   * <b>Response Structure:</b><br>
-   * Returns an array of authentication steps, each containing:<br>
-   * - <code>order</code>: Step number (1-3)<br>
-   * - <code>allowedMethods</code>: Array of methods allowed for that step
-   * <br><br>
-   * <b>Example Response:</b><br>
-   * <pre>
+   *
+   * **Response Structure:**
+   *
+   * Returns an array of authentication steps, each containing:
+   * - `order`: Step number (1-3)
+   * - `allowedMethods`: Array of methods allowed for that step
+   *
+   * **Example Response:**
+   *
+   * ```json
    * {
    *   "authMethods": [
    *     { "order": 1, "allowedMethods": [{ "type": "password" }, { "type": "google" }] },
    *     { "order": 2, "allowedMethods": [{ "type": "otp" }] }
    *   ]
    * }
-   * </pre>
-   * <br>
-   * <b>Admin Access Required:</b> Only organization admins can view auth configuration.
+   * ```
+   *
+   * **Admin Access Required:** Only organization admins can view auth configuration.
    */
   async getAuthMethods(
     options?: RequestOptions,
@@ -49,48 +51,50 @@ export class OrganizationAuthConfig extends ClientSDK {
    * @remarks
    * Update the authentication methods configuration for an organization.
    * This allows admins to configure single or multi-factor authentication.
-   * <br><br>
-   * <b>Validation Rules:</b><br>
-   * - Minimum 1 step, maximum 3 steps<br>
-   * - Each step must have a unique order (1, 2, or 3)<br>
-   * - No duplicate methods within the same step<br>
-   * - No method can appear in multiple steps<br>
+   *
+   * **Validation Rules:**
+   * - Minimum 1 step, maximum 3 steps
+   * - Each step must have a unique order (1, 2, or 3)
+   * - No duplicate methods within the same step
+   * - No method can appear in multiple steps
    * - Each step must have at least one allowed method
-   * <br><br>
-   * <b>Available Methods:</b><br>
-   * - <code>password</code>: Email/password authentication<br>
-   * - <code>otp</code>: One-time password via email<br>
-   * - <code>google</code>: Google OAuth 2.0<br>
-   * - <code>microsoft</code>: Microsoft OAuth 2.0<br>
-   * - <code>azureAd</code>: Azure Active Directory<br>
-   * - <code>samlSso</code>: SAML 2.0 Single Sign-On<br>
-   * - <code>oauth</code>: Generic OAuth 2.0 provider
-   * <br><br>
-   * <b>Example - Single Factor (Password or Google):</b><br>
-   * <pre>
+   *
+   * **Available Methods:**
+   * - `password`: Email/password authentication
+   * - `otp`: One-time password via email
+   * - `google`: Google OAuth 2.0
+   * - `microsoft`: Microsoft OAuth 2.0
+   * - `azureAd`: Azure Active Directory
+   * - `samlSso`: SAML 2.0 Single Sign-On
+   * - `oauth`: Generic OAuth 2.0 provider
+   *
+   * **Example - Single Factor (Password or Google):**
+   *
+   * ```json
    * {
-   *   "authMethods": [
+   *   "authMethod": [
    *     { "order": 1, "allowedMethods": [{ "type": "password" }, { "type": "google" }] }
    *   ]
    * }
-   * </pre>
-   * <br>
-   * <b>Example - Two Factor (Password + OTP):</b><br>
-   * <pre>
+   * ```
+   *
+   * **Example - Two Factor (Password + OTP):**
+   *
+   * ```json
    * {
-   *   "authMethods": [
+   *   "authMethod": [
    *     { "order": 1, "allowedMethods": [{ "type": "password" }] },
    *     { "order": 2, "allowedMethods": [{ "type": "otp" }] }
    *   ]
    * }
-   * </pre>
-   * <br>
-   * <b>Admin Access Required:</b> Only organization admins can update auth configuration.
+   * ```
+   *
+   * **Admin Access Required:** Only organization admins can update auth configuration.
    */
   async updateAuthMethod(
-    request: models.AuthConfig,
+    request: operations.UpdateAuthMethodRequest,
     options?: RequestOptions,
-  ): Promise<operations.UpdateAuthMethodResponse> {
+  ): Promise<models.UpdateAuthMethodResponse> {
     return unwrapAsync(organizationAuthConfigUpdateAuthMethod(
       this,
       request,
@@ -105,9 +109,9 @@ export class OrganizationAuthConfig extends ClientSDK {
    * Set up or initialize the organization's authentication configuration.
    */
   async setUpAuthConfig(
-    request: operations.SetUpAuthConfigRequest,
+    request: models.OrgAuthConfigCreateRequest,
     options?: RequestOptions,
-  ): Promise<operations.SetUpAuthConfigResponse> {
+  ): Promise<models.OrgAuthConfigSetupResponse> {
     return unwrapAsync(organizationAuthConfigSetUpAuthConfig(
       this,
       request,

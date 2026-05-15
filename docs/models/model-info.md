@@ -1,7 +1,5 @@
 # ModelInfo
 
-AI model configuration used
-
 ## Example Usage
 
 ```typescript
@@ -12,9 +10,10 @@ let value: ModelInfo = {};
 
 ## Fields
 
-| Field              | Type               | Required           | Description        |
-| ------------------ | ------------------ | ------------------ | ------------------ |
-| `modelKey`         | *string*           | :heavy_minus_sign: | N/A                |
-| `modelName`        | *string*           | :heavy_minus_sign: | N/A                |
-| `modelProvider`    | *string*           | :heavy_minus_sign: | N/A                |
-| `chatMode`         | *string*           | :heavy_minus_sign: | N/A                |
+| Field               | Type                | Required            | Description         |
+| ------------------- | ------------------- | ------------------- | ------------------- |
+| `modelKey`          | *string*            | :heavy_minus_sign:  | N/A                 |
+| `modelName`         | *string*            | :heavy_minus_sign:  | N/A                 |
+| `modelFriendlyName` | *string*            | :heavy_minus_sign:  | N/A                 |
+| `modelProvider`     | *string*            | :heavy_minus_sign:  | N/A                 |
+| `chatMode`          | *string*            | :heavy_minus_sign:  | N/A                 |

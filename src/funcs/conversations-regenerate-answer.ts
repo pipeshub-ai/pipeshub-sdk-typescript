@@ -5,6 +5,7 @@
 import * as z from "zod/v4-mini";
 import { PipeshubCore } from "../core.js";
 import { encodeJSON, encodeSimple } from "../lib/encodings.js";
+import { EventStream } from "../lib/event-streams.js";
 import * as M from "../lib/matchers.js";
 import { compactMap } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
@@ -30,19 +31,44 @@ import { Result } from "../types/fp.js";
  * Regenerate AI response
  *
  * @remarks
- * Regenerate the AI response for a specific message.<br><br>
- * <b>Overview:</b><br>
+ * Regenerate the AI response for a specific message and stream the new
+ * answer over Server-Sent Events.
+ *
+ * **Overview:**
+ *
  * If you're not satisfied with an AI response, use this endpoint to generate
- * a new answer. The AI will re-process the original query and may produce
- * a different response.<br><br>
- * <b>Use Cases:</b><br>
- * <ul>
- * <li>Response was incomplete or unclear</li>
- * <li>Want to try a different AI model</li>
- * <li>New documents have been indexed since original response</li>
- * </ul>
- * <b>Model Override:</b><br>
- * Specify <code>modelKey</code> to use a different model for regeneration.
+ * a new answer. The original user query is re-processed and a new bot
+ * response replaces the previous one in place.
+ *
+ * **Constraints:**
+ *
+ * - Only the *last* message of the conversation can be regenerated.
+ * - The target message must be of type `bot_response`.
+ *
+ * **Use Cases:**
+ *
+ * - Response was incomplete or unclear
+ * - Want to try a different AI model
+ * - New documents have been indexed since original response
+ *
+ * **Model Override:**
+ *
+ * Specify `modelKey` to use a different model for regeneration.
+ *
+ * **Streaming:**
+ *
+ * The response is delivered as an SSE (`text/event-stream`) stream. The
+ * exact event vocabulary depends on `chatMode`:
+ *
+ * - For non-agent modes (e.g. `internal_search`, `web_search`) the
+ *   request is dispatched to the assistant chat backend.
+ * - For agent modes (e.g. `agent:auto`) the request is dispatched to
+ *   the agent backend with a placeholder agent built from the caller's
+ *   workspace, which can additionally emit `tool_result` and
+ *   `tool_execution_complete` events.
+ *
+ * See `SSEEvent` for the full union of event names this endpoint can
+ * emit across both backends.
  */
 export function conversationsRegenerateAnswer(
   client: PipeshubCore,
@@ -50,7 +76,7 @@ export function conversationsRegenerateAnswer(
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    models.Conversation,
+    EventStream<models.SSEEvent>,
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -75,7 +101,7 @@ async function $do(
 ): Promise<
   [
     Result<
-      models.Conversation,
+      EventStream<models.SSEEvent>,
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -117,7 +143,7 @@ async function $do(
 
   const headers = new Headers(compactMap({
     "Content-Type": "application/json",
-    Accept: "application/json",
+    Accept: "text/event-stream",
   }));
 
   const securityInput = await extractSecurity(client._options.security);
@@ -165,7 +191,7 @@ async function $do(
   const response = doResult.value;
 
   const [result] = await M.match<
-    models.Conversation,
+    EventStream<models.SSEEvent>,
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -175,7 +201,20 @@ async function $do(
     | UnexpectedClientError
     | SDKValidationError
   >(
-    M.json(200, models.Conversation$inboundSchema),
+    M.sse(
+      200,
+      z.pipe(
+        z.custom<ReadableStream<Uint8Array>>(x => x instanceof ReadableStream),
+        z.transform(stream => {
+          return new EventStream(stream, rawEvent => {
+            return {
+              done: false,
+              value: models.SSEEvent$inboundSchema.parse(rawEvent),
+            };
+          });
+        }),
+      ),
+    ),
     M.fail([400, 401, 404, "4XX"]),
     M.fail("5XX"),
   )(response, req);

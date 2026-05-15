@@ -4,6 +4,8 @@
 
 import * as z from "zod/v4-mini";
 import { safeParse } from "../../lib/schemas.js";
+import * as openEnums from "../../types/enums.js";
+import { ClosedEnum, OpenEnum } from "../../types/enums.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
@@ -11,25 +13,181 @@ import * as models from "../index.js";
 
 export type GetAvailableModelsByTypeRequest = {
   /**
-   * Type of AI model
+   * Category of AI model to retrieve.
+   *
+   * @remarks
+   *
+   * Must be one of: `llm`, `embedding`, `ocr`, `slm`, `reasoning`, `multiModal`, `imageGeneration`, `tts`, `stt`.
    */
   modelType: models.ModelType;
 };
 
-export type GetAvailableModelsByTypeModel = {
-  modelKey?: string | undefined;
-  provider?: string | undefined;
-  model?: string | undefined;
-  isDefault?: boolean | undefined;
+export const GetAvailableModelsByTypeCodeHTTPInternalServerError = {
+  HttpInternalServerError: "HTTP_INTERNAL_SERVER_ERROR",
+} as const;
+export type GetAvailableModelsByTypeCodeHTTPInternalServerError = ClosedEnum<
+  typeof GetAvailableModelsByTypeCodeHTTPInternalServerError
+>;
+
+export type GetAvailableModelsByTypeErrorHTTPInternalServerError = {
+  code: GetAvailableModelsByTypeCodeHTTPInternalServerError;
+  message: string;
+};
+
+export const GetAvailableModelsByTypeForbiddenCode = {
+  HttpForbidden: "HTTP_FORBIDDEN",
+} as const;
+export type GetAvailableModelsByTypeForbiddenCode = ClosedEnum<
+  typeof GetAvailableModelsByTypeForbiddenCode
+>;
+
+export type GetAvailableModelsByTypeErrorHTTPForbidden = {
+  code: GetAvailableModelsByTypeForbiddenCode;
+  message: string;
+};
+
+export const GetAvailableModelsByTypeUnauthorizedCode = {
+  HttpUnauthorized: "HTTP_UNAUTHORIZED",
+} as const;
+export type GetAvailableModelsByTypeUnauthorizedCode = ClosedEnum<
+  typeof GetAvailableModelsByTypeUnauthorizedCode
+>;
+
+export type GetAvailableModelsByTypeErrorHTTPUnauthorized = {
+  code: GetAvailableModelsByTypeUnauthorizedCode;
+  message: string;
+};
+
+export const GetAvailableModelsByTypeCodeValidationError = {
+  ValidationError: "VALIDATION_ERROR",
+} as const;
+export type GetAvailableModelsByTypeCodeValidationError = ClosedEnum<
+  typeof GetAvailableModelsByTypeCodeValidationError
+>;
+
+/**
+ * Machine-readable error code mapped from the Zod issue code.
+ */
+export const MetadataCode = {
+  InvalidType: "INVALID_TYPE",
+  InvalidLiteral: "INVALID_LITERAL",
+  InvalidEnum: "INVALID_ENUM",
+  InvalidUnion: "INVALID_UNION",
+  InvalidDiscriminator: "INVALID_DISCRIMINATOR",
+  InvalidArguments: "INVALID_ARGUMENTS",
+  TooSmall: "TOO_SMALL",
+  TooBig: "TOO_BIG",
+} as const;
+/**
+ * Machine-readable error code mapped from the Zod issue code.
+ */
+export type MetadataCode = OpenEnum<typeof MetadataCode>;
+
+export type MetadataError = {
+  /**
+   * Dot-separated path to the failing field within the request (params, body, query).
+   */
+  field: string;
+  /**
+   * Human-readable Zod validation message.
+   */
+  message: string;
+  /**
+   * Machine-readable error code mapped from the Zod issue code.
+   */
+  code: MetadataCode;
+  /**
+   * The rejected value stringified. May be an empty string when the value is not easily serialisable.
+   */
+  value: string;
 };
 
 /**
- * Available models retrieved
+ * Per-field validation detail from Zod.
+ */
+export type GetAvailableModelsByTypeMetadata = {
+  errors: Array<MetadataError>;
+};
+
+export type GetAvailableModelsByTypeErrorValidationError = {
+  code: GetAvailableModelsByTypeCodeValidationError;
+  message: string;
+  /**
+   * Per-field validation detail from Zod.
+   */
+  metadata: GetAvailableModelsByTypeMetadata;
+};
+
+export const GetAvailableModelsByTypeStatus = {
+  Success: "success",
+} as const;
+export type GetAvailableModelsByTypeStatus = ClosedEnum<
+  typeof GetAvailableModelsByTypeStatus
+>;
+
+export type Model = {
+  /**
+   * Model category — always matches the `{modelType}` path parameter.
+   */
+  modelType: models.ModelType;
+  /**
+   * Provider identifier as stored in configuration (e.g. `openAI`, `azureOpenAI`, `anthropic`, `gemini`, `ollama`).
+   */
+  provider: string;
+  /**
+   * Specific model name/identifier forwarded to the provider API when making inference calls.
+   */
+  modelName: string;
+  /**
+   * UUID that uniquely identifies the provider configuration entry this model was expanded from. Use this key when calling update/delete endpoints.
+   */
+  modelKey: string;
+  /**
+   * `true` when this model accepts multi-modal inputs (text + images). Always present; defaults to `false` when not explicitly set.
+   */
+  isMultimodal: boolean;
+  /**
+   * `true` when this is a reasoning / chain-of-thought model. Always present; defaults to `false` when not explicitly set.
+   */
+  isReasoning: boolean;
+  /**
+   * `true` for the first model in the provider entry that was marked as default. At most one entry per `modelType` will have this set to `true`.
+   */
+  isDefault: boolean;
+  /**
+   * Optional human-readable display name. Only present when the provider configuration entry contains exactly one model name (not a comma-separated list) **and** a friendly name was added during configuration.
+   */
+  modelFriendlyName?: string | undefined;
+};
+
+/**
+ * Available models retrieved successfully.
+ *
+ * @remarks
+ *
+ * An empty `models` array (with HTTP 200) is returned when no providers of
+ * the requested type have been configured — treat this as a valid, empty
+ * state, not an error.
  */
 export type GetAvailableModelsByTypeResponse = {
-  status?: string | undefined;
-  message?: string | undefined;
-  models?: Array<GetAvailableModelsByTypeModel> | undefined;
+  status: GetAvailableModelsByTypeStatus;
+  /**
+   * Human-readable summary. Two formats are possible:
+   *
+   * @remarks
+   * - `"Found {n} {modelType} models"` — the `modelType` key
+   *   exists in the stored config (returned even when `n` is 0,
+   *   e.g. `"Found 0 ocr models"`).
+   *
+   * - `"No {modelType} models found"` — no AI config has been
+   *   stored yet, or the `modelType` key is absent from the
+   *   stored config entirely.
+   */
+  message: string;
+  /**
+   * Flat list of individual model entries. Each entry represents one model name from one provider configuration.
+   */
+  models: Array<Model>;
 };
 
 /** @internal */
@@ -56,23 +214,192 @@ export function getAvailableModelsByTypeRequestToJSON(
 }
 
 /** @internal */
-export const GetAvailableModelsByTypeModel$inboundSchema: z.ZodMiniType<
-  GetAvailableModelsByTypeModel,
-  unknown
-> = z.object({
-  modelKey: types.optional(types.string()),
-  provider: types.optional(types.string()),
-  model: types.optional(types.string()),
-  isDefault: types.optional(types.boolean()),
-});
+export const GetAvailableModelsByTypeCodeHTTPInternalServerError$inboundSchema:
+  z.ZodMiniEnum<typeof GetAvailableModelsByTypeCodeHTTPInternalServerError> = z
+    .enum(GetAvailableModelsByTypeCodeHTTPInternalServerError);
 
-export function getAvailableModelsByTypeModelFromJSON(
+/** @internal */
+export const GetAvailableModelsByTypeErrorHTTPInternalServerError$inboundSchema:
+  z.ZodMiniType<GetAvailableModelsByTypeErrorHTTPInternalServerError, unknown> =
+    z.object({
+      code: GetAvailableModelsByTypeCodeHTTPInternalServerError$inboundSchema,
+      message: types.string(),
+    });
+
+export function getAvailableModelsByTypeErrorHTTPInternalServerErrorFromJSON(
   jsonString: string,
-): SafeParseResult<GetAvailableModelsByTypeModel, SDKValidationError> {
+): SafeParseResult<
+  GetAvailableModelsByTypeErrorHTTPInternalServerError,
+  SDKValidationError
+> {
   return safeParse(
     jsonString,
-    (x) => GetAvailableModelsByTypeModel$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetAvailableModelsByTypeModel' from JSON`,
+    (x) =>
+      GetAvailableModelsByTypeErrorHTTPInternalServerError$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'GetAvailableModelsByTypeErrorHTTPInternalServerError' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAvailableModelsByTypeForbiddenCode$inboundSchema: z.ZodMiniEnum<
+  typeof GetAvailableModelsByTypeForbiddenCode
+> = z.enum(GetAvailableModelsByTypeForbiddenCode);
+
+/** @internal */
+export const GetAvailableModelsByTypeErrorHTTPForbidden$inboundSchema:
+  z.ZodMiniType<GetAvailableModelsByTypeErrorHTTPForbidden, unknown> = z.object(
+    {
+      code: GetAvailableModelsByTypeForbiddenCode$inboundSchema,
+      message: types.string(),
+    },
+  );
+
+export function getAvailableModelsByTypeErrorHTTPForbiddenFromJSON(
+  jsonString: string,
+): SafeParseResult<
+  GetAvailableModelsByTypeErrorHTTPForbidden,
+  SDKValidationError
+> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetAvailableModelsByTypeErrorHTTPForbidden$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'GetAvailableModelsByTypeErrorHTTPForbidden' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAvailableModelsByTypeUnauthorizedCode$inboundSchema:
+  z.ZodMiniEnum<typeof GetAvailableModelsByTypeUnauthorizedCode> = z.enum(
+    GetAvailableModelsByTypeUnauthorizedCode,
+  );
+
+/** @internal */
+export const GetAvailableModelsByTypeErrorHTTPUnauthorized$inboundSchema:
+  z.ZodMiniType<GetAvailableModelsByTypeErrorHTTPUnauthorized, unknown> = z
+    .object({
+      code: GetAvailableModelsByTypeUnauthorizedCode$inboundSchema,
+      message: types.string(),
+    });
+
+export function getAvailableModelsByTypeErrorHTTPUnauthorizedFromJSON(
+  jsonString: string,
+): SafeParseResult<
+  GetAvailableModelsByTypeErrorHTTPUnauthorized,
+  SDKValidationError
+> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetAvailableModelsByTypeErrorHTTPUnauthorized$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'GetAvailableModelsByTypeErrorHTTPUnauthorized' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAvailableModelsByTypeCodeValidationError$inboundSchema:
+  z.ZodMiniEnum<typeof GetAvailableModelsByTypeCodeValidationError> = z.enum(
+    GetAvailableModelsByTypeCodeValidationError,
+  );
+
+/** @internal */
+export const MetadataCode$inboundSchema: z.ZodMiniType<MetadataCode, unknown> =
+  openEnums.inboundSchema(MetadataCode);
+
+/** @internal */
+export const MetadataError$inboundSchema: z.ZodMiniType<
+  MetadataError,
+  unknown
+> = z.object({
+  field: types.string(),
+  message: types.string(),
+  code: MetadataCode$inboundSchema,
+  value: types.string(),
+});
+
+export function metadataErrorFromJSON(
+  jsonString: string,
+): SafeParseResult<MetadataError, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => MetadataError$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'MetadataError' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAvailableModelsByTypeMetadata$inboundSchema: z.ZodMiniType<
+  GetAvailableModelsByTypeMetadata,
+  unknown
+> = z.object({
+  errors: z.array(z.lazy(() => MetadataError$inboundSchema)),
+});
+
+export function getAvailableModelsByTypeMetadataFromJSON(
+  jsonString: string,
+): SafeParseResult<GetAvailableModelsByTypeMetadata, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetAvailableModelsByTypeMetadata$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetAvailableModelsByTypeMetadata' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAvailableModelsByTypeErrorValidationError$inboundSchema:
+  z.ZodMiniType<GetAvailableModelsByTypeErrorValidationError, unknown> = z
+    .object({
+      code: GetAvailableModelsByTypeCodeValidationError$inboundSchema,
+      message: types.string(),
+      metadata: z.lazy(() => GetAvailableModelsByTypeMetadata$inboundSchema),
+    });
+
+export function getAvailableModelsByTypeErrorValidationErrorFromJSON(
+  jsonString: string,
+): SafeParseResult<
+  GetAvailableModelsByTypeErrorValidationError,
+  SDKValidationError
+> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetAvailableModelsByTypeErrorValidationError$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'GetAvailableModelsByTypeErrorValidationError' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetAvailableModelsByTypeStatus$inboundSchema: z.ZodMiniEnum<
+  typeof GetAvailableModelsByTypeStatus
+> = z.enum(GetAvailableModelsByTypeStatus);
+
+/** @internal */
+export const Model$inboundSchema: z.ZodMiniType<Model, unknown> = z.object({
+  modelType: models.ModelType$inboundSchema,
+  provider: types.string(),
+  modelName: types.string(),
+  modelKey: types.string(),
+  isMultimodal: types.boolean(),
+  isReasoning: types.boolean(),
+  isDefault: types.boolean(),
+  modelFriendlyName: types.optional(types.string()),
+});
+
+export function modelFromJSON(
+  jsonString: string,
+): SafeParseResult<Model, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Model$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Model' from JSON`,
   );
 }
 
@@ -81,11 +408,9 @@ export const GetAvailableModelsByTypeResponse$inboundSchema: z.ZodMiniType<
   GetAvailableModelsByTypeResponse,
   unknown
 > = z.object({
-  status: types.optional(types.string()),
-  message: types.optional(types.string()),
-  models: types.optional(
-    z.array(z.lazy(() => GetAvailableModelsByTypeModel$inboundSchema)),
-  ),
+  status: GetAvailableModelsByTypeStatus$inboundSchema,
+  message: types.string(),
+  models: z.array(z.lazy(() => Model$inboundSchema)),
 });
 
 export function getAvailableModelsByTypeResponseFromJSON(

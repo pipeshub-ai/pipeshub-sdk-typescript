@@ -3,74 +3,18 @@
  */
 
 import { ClientSDK } from "../lib/sdks.js";
-import { AgentConversations } from "./agent-conversations.js";
-import { AgentTemplates } from "./agent-templates.js";
-import { Agents } from "./agents.js";
 import { AIModelsProviders } from "./ai-models-providers.js";
-import { AuthenticationConfiguration } from "./authentication-configuration.js";
-import { ConfigurationManager } from "./configuration-manager.js";
-import { ConnectorConfiguration } from "./connector-configuration.js";
-import { ConnectorControl } from "./connector-control.js";
-import { ConnectorFilters } from "./connector-filters.js";
-import { ConnectorInstances } from "./connector-instances.js";
-import { ConnectorOAuth } from "./connector-o-auth.js";
-import { ConnectorRegistry } from "./connector-registry.js";
-import { Connector } from "./connector.js";
 import { Conversations } from "./conversations.js";
-import { CrawlingJobs } from "./crawling-jobs.js";
-import { DocumentManagement } from "./document-management.js";
-import { Folders } from "./folders.js";
-import { KnowledgeBases } from "./knowledge-bases.js";
-import { MetricsCollection } from "./metrics-collection.js";
-import { OAuthApps } from "./o-auth-apps.js";
-import { OAuthConfiguration } from "./o-auth-configuration.js";
-import { OAuthProvider } from "./o-auth-provider.js";
-import { OAuth } from "./o-auth.js";
-import { OpenIDConnect } from "./open-id-connect.js";
+import { KnowledgeHub } from "./knowledge-hub.js";
 import { OrganizationAuthConfig } from "./organization-auth-config.js";
 import { Organizations } from "./organizations.js";
-import { Permissions } from "./permissions.js";
-import { PlatformSettings } from "./platform-settings.js";
-import { PublicURLs } from "./public-ur-ls.js";
-import { Records } from "./records.js";
-import { Saml } from "./saml.js";
 import { SemanticSearch } from "./semantic-search.js";
-import { SMTPConfiguration } from "./smtp-configuration.js";
-import { StorageConfiguration } from "./storage-configuration.js";
-import { Teams } from "./teams.js";
-import { ToolsetConfiguration } from "./toolset-configuration.js";
-import { ToolsetInstances } from "./toolset-instances.js";
-import { ToolsetOAuth } from "./toolset-o-auth.js";
-import { ToolsetRegistry } from "./toolset-registry.js";
-import { Upload } from "./upload.js";
 import { UserAccount } from "./user-account.js";
-import { UserGroups } from "./user-groups.js";
-import { Users } from "./users.js";
 
 export class Pipeshub extends ClientSDK {
   private _userAccount?: UserAccount;
   get userAccount(): UserAccount {
     return (this._userAccount ??= new UserAccount(this._options));
-  }
-
-  private _oAuth?: OAuth;
-  get oAuth(): OAuth {
-    return (this._oAuth ??= new OAuth(this._options));
-  }
-
-  private _oAuthProvider?: OAuthProvider;
-  get oAuthProvider(): OAuthProvider {
-    return (this._oAuthProvider ??= new OAuthProvider(this._options));
-  }
-
-  private _openIDConnect?: OpenIDConnect;
-  get openIDConnect(): OpenIDConnect {
-    return (this._openIDConnect ??= new OpenIDConnect(this._options));
-  }
-
-  private _oAuthApps?: OAuthApps;
-  get oAuthApps(): OAuthApps {
-    return (this._oAuthApps ??= new OAuthApps(this._options));
   }
 
   private _organizationAuthConfig?: OrganizationAuthConfig;
@@ -80,64 +24,14 @@ export class Pipeshub extends ClientSDK {
     ));
   }
 
-  private _saml?: Saml;
-  get saml(): Saml {
-    return (this._saml ??= new Saml(this._options));
-  }
-
-  private _users?: Users;
-  get users(): Users {
-    return (this._users ??= new Users(this._options));
-  }
-
-  private _teams?: Teams;
-  get teams(): Teams {
-    return (this._teams ??= new Teams(this._options));
-  }
-
   private _organizations?: Organizations;
   get organizations(): Organizations {
     return (this._organizations ??= new Organizations(this._options));
   }
 
-  private _userGroups?: UserGroups;
-  get userGroups(): UserGroups {
-    return (this._userGroups ??= new UserGroups(this._options));
-  }
-
-  private _documentManagement?: DocumentManagement;
-  get documentManagement(): DocumentManagement {
-    return (this._documentManagement ??= new DocumentManagement(this._options));
-  }
-
-  private _knowledgeBases?: KnowledgeBases;
-  get knowledgeBases(): KnowledgeBases {
-    return (this._knowledgeBases ??= new KnowledgeBases(this._options));
-  }
-
-  private _records?: Records;
-  get records(): Records {
-    return (this._records ??= new Records(this._options));
-  }
-
-  private _folders?: Folders;
-  get folders(): Folders {
-    return (this._folders ??= new Folders(this._options));
-  }
-
-  private _upload?: Upload;
-  get upload(): Upload {
-    return (this._upload ??= new Upload(this._options));
-  }
-
-  private _connector?: Connector;
-  get connector(): Connector {
-    return (this._connector ??= new Connector(this._options));
-  }
-
-  private _permissions?: Permissions;
-  get permissions(): Permissions {
-    return (this._permissions ??= new Permissions(this._options));
+  private _knowledgeHub?: KnowledgeHub;
+  get knowledgeHub(): KnowledgeHub {
+    return (this._knowledgeHub ??= new KnowledgeHub(this._options));
   }
 
   private _conversations?: Conversations;
@@ -150,127 +44,8 @@ export class Pipeshub extends ClientSDK {
     return (this._semanticSearch ??= new SemanticSearch(this._options));
   }
 
-  private _agentTemplates?: AgentTemplates;
-  get agentTemplates(): AgentTemplates {
-    return (this._agentTemplates ??= new AgentTemplates(this._options));
-  }
-
-  private _agents?: Agents;
-  get agents(): Agents {
-    return (this._agents ??= new Agents(this._options));
-  }
-
-  private _agentConversations?: AgentConversations;
-  get agentConversations(): AgentConversations {
-    return (this._agentConversations ??= new AgentConversations(this._options));
-  }
-
-  private _connectorRegistry?: ConnectorRegistry;
-  get connectorRegistry(): ConnectorRegistry {
-    return (this._connectorRegistry ??= new ConnectorRegistry(this._options));
-  }
-
-  private _connectorInstances?: ConnectorInstances;
-  get connectorInstances(): ConnectorInstances {
-    return (this._connectorInstances ??= new ConnectorInstances(this._options));
-  }
-
-  private _connectorConfiguration?: ConnectorConfiguration;
-  get connectorConfiguration(): ConnectorConfiguration {
-    return (this._connectorConfiguration ??= new ConnectorConfiguration(
-      this._options,
-    ));
-  }
-
-  private _connectorControl?: ConnectorControl;
-  get connectorControl(): ConnectorControl {
-    return (this._connectorControl ??= new ConnectorControl(this._options));
-  }
-
-  private _connectorOAuth?: ConnectorOAuth;
-  get connectorOAuth(): ConnectorOAuth {
-    return (this._connectorOAuth ??= new ConnectorOAuth(this._options));
-  }
-
-  private _connectorFilters?: ConnectorFilters;
-  get connectorFilters(): ConnectorFilters {
-    return (this._connectorFilters ??= new ConnectorFilters(this._options));
-  }
-
-  private _toolsetRegistry?: ToolsetRegistry;
-  get toolsetRegistry(): ToolsetRegistry {
-    return (this._toolsetRegistry ??= new ToolsetRegistry(this._options));
-  }
-
-  private _toolsetInstances?: ToolsetInstances;
-  get toolsetInstances(): ToolsetInstances {
-    return (this._toolsetInstances ??= new ToolsetInstances(this._options));
-  }
-
-  private _toolsetConfiguration?: ToolsetConfiguration;
-  get toolsetConfiguration(): ToolsetConfiguration {
-    return (this._toolsetConfiguration ??= new ToolsetConfiguration(
-      this._options,
-    ));
-  }
-
-  private _toolsetOAuth?: ToolsetOAuth;
-  get toolsetOAuth(): ToolsetOAuth {
-    return (this._toolsetOAuth ??= new ToolsetOAuth(this._options));
-  }
-
-  private _oAuthConfiguration?: OAuthConfiguration;
-  get oAuthConfiguration(): OAuthConfiguration {
-    return (this._oAuthConfiguration ??= new OAuthConfiguration(this._options));
-  }
-
-  private _storageConfiguration?: StorageConfiguration;
-  get storageConfiguration(): StorageConfiguration {
-    return (this._storageConfiguration ??= new StorageConfiguration(
-      this._options,
-    ));
-  }
-
-  private _smtpConfiguration?: SMTPConfiguration;
-  get smtpConfiguration(): SMTPConfiguration {
-    return (this._smtpConfiguration ??= new SMTPConfiguration(this._options));
-  }
-
-  private _authenticationConfiguration?: AuthenticationConfiguration;
-  get authenticationConfiguration(): AuthenticationConfiguration {
-    return (this._authenticationConfiguration ??=
-      new AuthenticationConfiguration(this._options));
-  }
-
   private _aiModelsProviders?: AIModelsProviders;
   get aiModelsProviders(): AIModelsProviders {
     return (this._aiModelsProviders ??= new AIModelsProviders(this._options));
-  }
-
-  private _publicURLs?: PublicURLs;
-  get publicURLs(): PublicURLs {
-    return (this._publicURLs ??= new PublicURLs(this._options));
-  }
-
-  private _platformSettings?: PlatformSettings;
-  get platformSettings(): PlatformSettings {
-    return (this._platformSettings ??= new PlatformSettings(this._options));
-  }
-
-  private _metricsCollection?: MetricsCollection;
-  get metricsCollection(): MetricsCollection {
-    return (this._metricsCollection ??= new MetricsCollection(this._options));
-  }
-
-  private _configurationManager?: ConfigurationManager;
-  get configurationManager(): ConfigurationManager {
-    return (this._configurationManager ??= new ConfigurationManager(
-      this._options,
-    ));
-  }
-
-  private _crawlingJobs?: CrawlingJobs;
-  get crawlingJobs(): CrawlingJobs {
-    return (this._crawlingJobs ??= new CrawlingJobs(this._options));
   }
 }

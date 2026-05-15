@@ -29,33 +29,20 @@ import { Result } from "../types/fp.js";
  * Perform semantic search
  *
  * @remarks
- * Execute a semantic search across your organization's knowledge base.<br><br>
- * <b>Overview:</b><br>
- * Semantic search uses AI embeddings to find content based on meaning,
- * not just keyword matching. This enables finding relevant information
- * even when the exact words differ.<br><br>
- * <b>How It Works:</b><br>
- * <ol>
- * <li>Your query is converted to a vector embedding</li>
- * <li>The system finds documents with similar semantic meaning</li>
- * <li>Results are ranked by relevance score</li>
- * <li>Matching chunks are returned with metadata</li>
- * </ol>
- * <b>Filtering:</b><br>
- * Use filters to narrow your search:
- * <ul>
- * <li><code>filters.apps</code>: Limit to specific connector apps (Google Drive, Confluence, etc.)</li>
- * <li><code>filters.kb</code>: Limit to specific knowledge bases</li>
- * </ul>
- * <b>Results:</b><br>
- * Each result includes:
- * <ul>
- * <li>Matching content chunk</li>
- * <li>Relevance score (0-1, higher is better)</li>
- * <li>Source document metadata (name, URL, type)</li>
- * </ul>
- * <b>Search History:</b><br>
- * All searches are saved and can be retrieved via <code>GET /search</code>.
+ * Run a semantic search across your organization's knowledge base.
+ * Matching is meaning-based, so relevant results surface even when
+ * the wording differs from the query.
+ *
+ * Use optional `filters` to narrow the scope:
+ *
+ * - `filters.apps` — restrict to specific connector apps (for
+ *   example Google Drive or Confluence).
+ * - `filters.kb` — restrict to specific knowledge bases.
+ *
+ * The response returns a `searchId` for the persisted search along
+ * with ranked matches, each carrying a relevance score and the
+ * source document's metadata. Past searches can be retrieved via
+ * `GET /search`.
  */
 export function semanticSearchSearch(
   client: PipeshubCore,
@@ -63,7 +50,7 @@ export function semanticSearchSearch(
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    models.SearchResult,
+    models.SemanticSearchExecuteResponse,
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -88,7 +75,7 @@ async function $do(
 ): Promise<
   [
     Result<
-      models.SearchResult,
+      models.SemanticSearchExecuteResponse,
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -154,7 +141,18 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["400", "401", "4XX", "502", "5XX"],
+    errorCodes: [
+      "400",
+      "401",
+      "403",
+      "404",
+      "4XX",
+      "500",
+      "502",
+      "503",
+      "504",
+      "5XX",
+    ],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -164,7 +162,7 @@ async function $do(
   const response = doResult.value;
 
   const [result] = await M.match<
-    models.SearchResult,
+    models.SemanticSearchExecuteResponse,
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -174,9 +172,9 @@ async function $do(
     | UnexpectedClientError
     | SDKValidationError
   >(
-    M.json(200, models.SearchResult$inboundSchema),
-    M.fail([400, 401, "4XX"]),
-    M.fail([502, "5XX"]),
+    M.json(200, models.SemanticSearchExecuteResponse$inboundSchema),
+    M.fail([400, 401, 403, 404, "4XX"]),
+    M.fail([500, 502, 503, 504, "5XX"]),
   )(response, req);
   if (!result.ok) {
     return [result, { status: "complete", request: req, response }];

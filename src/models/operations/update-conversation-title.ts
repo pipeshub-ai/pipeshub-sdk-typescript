@@ -133,6 +133,13 @@ export type UpdateConversationTitleMessage = {
    */
   modelInfo?: models.ConversationModelInfo | undefined;
   appliedFilters?: UpdateConversationTitleAppliedFilters | undefined;
+  /**
+   * Files uploaded for this message turn (see
+   *
+   * @remarks
+   * `POST /conversations/attachments/upload`).
+   */
+  attachments?: Array<models.ChatAttachmentRef> | undefined;
   metadata?: UpdateConversationTitleMetadata | undefined;
   createdAt: Date;
   updatedAt: Date;
@@ -497,6 +504,9 @@ export const UpdateConversationTitleMessage$inboundSchema: z.ZodMiniType<
     modelInfo: types.optional(models.ConversationModelInfo$inboundSchema),
     appliedFilters: types.optional(
       z.lazy(() => UpdateConversationTitleAppliedFilters$inboundSchema),
+    ),
+    attachments: types.optional(
+      z.array(models.ChatAttachmentRef$inboundSchema),
     ),
     metadata: types.optional(
       z.lazy(() => UpdateConversationTitleMetadata$inboundSchema),

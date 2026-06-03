@@ -16,6 +16,6 @@ import { ErrorResponse } from "@pipeshub-ai/sdk/models/errors";
 
 ## Fields
 
-| Field                                    | Type                                     | Required                                 | Description                              |
-| ---------------------------------------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- |
-| `error`                                  | [models.ErrorT](../../models/error-t.md) | :heavy_check_mark:                       | N/A                                      |
+| Field                                                             | Type                                                              | Required                                                          | Description                                                       |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `error`                                                           | [models.ErrorResponseError](../../models/error-response-error.md) | :heavy_check_mark:                                                | N/A                                                               |

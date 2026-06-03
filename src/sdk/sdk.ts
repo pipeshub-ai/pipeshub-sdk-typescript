@@ -3,15 +3,35 @@
  */
 
 import { ClientSDK } from "../lib/sdks.js";
+import { Agents } from "./agents.js";
 import { AIModelsProviders } from "./ai-models-providers.js";
 import { Conversations } from "./conversations.js";
 import { KnowledgeHub } from "./knowledge-hub.js";
+import { OAuthApps } from "./o-auth-apps.js";
+import { OAuthProvider } from "./o-auth-provider.js";
+import { OpenIDConnect } from "./open-id-connect.js";
 import { OrganizationAuthConfig } from "./organization-auth-config.js";
 import { Organizations } from "./organizations.js";
 import { SemanticSearch } from "./semantic-search.js";
 import { UserAccount } from "./user-account.js";
+import { WebSearch } from "./web-search.js";
 
 export class Pipeshub extends ClientSDK {
+  private _oAuthProvider?: OAuthProvider;
+  get oAuthProvider(): OAuthProvider {
+    return (this._oAuthProvider ??= new OAuthProvider(this._options));
+  }
+
+  private _openIDConnect?: OpenIDConnect;
+  get openIDConnect(): OpenIDConnect {
+    return (this._openIDConnect ??= new OpenIDConnect(this._options));
+  }
+
+  private _oAuthApps?: OAuthApps;
+  get oAuthApps(): OAuthApps {
+    return (this._oAuthApps ??= new OAuthApps(this._options));
+  }
+
   private _userAccount?: UserAccount;
   get userAccount(): UserAccount {
     return (this._userAccount ??= new UserAccount(this._options));
@@ -44,8 +64,18 @@ export class Pipeshub extends ClientSDK {
     return (this._semanticSearch ??= new SemanticSearch(this._options));
   }
 
+  private _agents?: Agents;
+  get agents(): Agents {
+    return (this._agents ??= new Agents(this._options));
+  }
+
   private _aiModelsProviders?: AIModelsProviders;
   get aiModelsProviders(): AIModelsProviders {
     return (this._aiModelsProviders ??= new AIModelsProviders(this._options));
+  }
+
+  private _webSearch?: WebSearch;
+  get webSearch(): WebSearch {
+    return (this._webSearch ??= new WebSearch(this._options));
   }
 }

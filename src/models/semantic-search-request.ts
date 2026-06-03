@@ -48,22 +48,6 @@ export type SemanticSearchRequest = {
    * Maximum number of results to return
    */
   limit?: number | undefined;
-  /**
-   * AI model to use for embeddings
-   */
-  modelKey?: string | undefined;
-  /**
-   * Display name of the model
-   */
-  modelName?: string | undefined;
-  /**
-   * Friendly display name of the model
-   */
-  modelFriendlyName?: string | undefined;
-  /**
-   * Processing mode configuration
-   */
-  chatMode?: string | undefined;
 };
 
 /** @internal */
@@ -71,10 +55,6 @@ export type SemanticSearchRequest$Outbound = {
   query: string;
   filters?: Filters$Outbound | undefined;
   limit: number;
-  modelKey?: string | undefined;
-  modelName?: string | undefined;
-  modelFriendlyName?: string | undefined;
-  chatMode?: string | undefined;
 };
 
 /** @internal */
@@ -85,10 +65,6 @@ export const SemanticSearchRequest$outboundSchema: z.ZodMiniType<
   query: z.string(),
   filters: z.optional(Filters$outboundSchema),
   limit: z._default(z.int(), 10),
-  modelKey: z.optional(z.string()),
-  modelName: z.optional(z.string()),
-  modelFriendlyName: z.optional(z.string()),
-  chatMode: z.optional(z.string()),
 });
 
 export function semanticSearchRequestToJSON(

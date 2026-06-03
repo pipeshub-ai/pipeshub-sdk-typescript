@@ -429,19 +429,15 @@ export class Conversations extends ClientSDK {
    * **Overview**
    *
    * Feedback helps improve AI response quality over time. You can record an
-   * overall helpfulness signal, per-aspect ratings, issue categories, and
-   * free-text comments. Each call appends a new entry to the message;
-   * previous entries are preserved.
+   * overall helpfulness signal, issue categories, and free-text comments.
+   * Each call appends a new entry to the message; previous entries are
+   * preserved.
    *
    * **Feedback options**
    *
    * - `isHelpful` — overall thumbs up/down.
-   * - `ratings` — 1–5 scores keyed by an aspect name you choose
-   *   (e.g. `accuracy`, `relevance`, `completeness`, `clarity`).
    * - `categories` — issue or positive categories from a fixed list.
-   * - `comments` — free-text `positive`, `negative`, and `suggestions`.
-   * - `metrics` — optional client-side telemetry
-   *   (`userInteractionTime`, `feedbackSessionId`).
+   * - `comments` — free-text `positive` and `negative`.
    *
    * **Restrictions**
    *
@@ -451,7 +447,7 @@ export class Conversations extends ClientSDK {
   async updateMessageFeedback(
     request: operations.UpdateMessageFeedbackRequest,
     options?: RequestOptions,
-  ): Promise<operations.UpdateMessageFeedbackResponse> {
+  ): Promise<models.MessageFeedbackUpdateResponse> {
     return unwrapAsync(conversationsUpdateMessageFeedback(
       this,
       request,

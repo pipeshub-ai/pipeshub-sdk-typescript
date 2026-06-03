@@ -3,16 +3,36 @@
  */
 
 import * as z from "zod/v4-mini";
+import { ClosedEnum } from "../types/enums.js";
 import {
   AppliedFilters,
   AppliedFilters$Outbound,
   AppliedFilters$outboundSchema,
 } from "./applied-filters.js";
 import {
+  ChatAttachmentRef,
+  ChatAttachmentRef$Outbound,
+  ChatAttachmentRef$outboundSchema,
+} from "./chat-attachment-ref.js";
+import {
   Filters,
   Filters$Outbound,
   Filters$outboundSchema,
 } from "./filters.js";
+
+/**
+ * Chat mode for this message
+ */
+export const AddMessageRequestChatMode = {
+  WebSearch: "web_search",
+  InternalSearch: "internal_search",
+} as const;
+/**
+ * Chat mode for this message
+ */
+export type AddMessageRequestChatMode = ClosedEnum<
+  typeof AddMessageRequestChatMode
+>;
 
 /**
  * Request body for adding a message to an existing conversation
@@ -42,6 +62,13 @@ export type AddMessageRequest = {
    */
   appliedFilters?: AppliedFilters | undefined;
   /**
+   * Uploaded chat attachments for this follow-up turn (see
+   *
+   * @remarks
+   * `POST /conversations/attachments/upload`).
+   */
+  attachments?: Array<ChatAttachmentRef> | undefined;
+  /**
    * Override the model for this specific message
    */
   modelKey?: string | undefined;
@@ -56,7 +83,7 @@ export type AddMessageRequest = {
   /**
    * Chat mode for this message
    */
-  chatMode?: string | undefined;
+  chatMode?: AddMessageRequestChatMode | undefined;
   /**
    * IANA timezone identifier from the client (top-level field).
    *
@@ -81,10 +108,16 @@ export type AddMessageRequest = {
 };
 
 /** @internal */
+export const AddMessageRequestChatMode$outboundSchema: z.ZodMiniEnum<
+  typeof AddMessageRequestChatMode
+> = z.enum(AddMessageRequestChatMode);
+
+/** @internal */
 export type AddMessageRequest$Outbound = {
   query: string;
   filters?: Filters$Outbound | undefined;
   appliedFilters?: AppliedFilters$Outbound | undefined;
+  attachments?: Array<ChatAttachmentRef$Outbound> | undefined;
   modelKey?: string | undefined;
   modelName?: string | undefined;
   modelFriendlyName?: string | undefined;
@@ -102,10 +135,11 @@ export const AddMessageRequest$outboundSchema: z.ZodMiniType<
   query: z.string(),
   filters: z.optional(Filters$outboundSchema),
   appliedFilters: z.optional(AppliedFilters$outboundSchema),
+  attachments: z.optional(z.array(ChatAttachmentRef$outboundSchema)),
   modelKey: z.optional(z.string()),
   modelName: z.optional(z.string()),
   modelFriendlyName: z.optional(z.string()),
-  chatMode: z.optional(z.string()),
+  chatMode: z.optional(AddMessageRequestChatMode$outboundSchema),
   timezone: z.optional(z.string()),
   currentTime: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
   tools: z.optional(z.array(z.string())),

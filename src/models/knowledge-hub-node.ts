@@ -11,7 +11,7 @@ import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
 /**
- * Type of the node.
+ * Type of the node (app, recordGroup, folder, or record).
  */
 export const NodeType = {
   App: "app",
@@ -20,7 +20,7 @@ export const NodeType = {
   Record: "record",
 } as const;
 /**
- * Type of the node.
+ * Type of the node (app, recordGroup, folder, or record).
  */
 export type NodeType = OpenEnum<typeof NodeType>;
 
@@ -61,7 +61,7 @@ export type KnowledgeHubNode = {
    */
   name: string;
   /**
-   * Type of the node.
+   * Type of the node (app, recordGroup, folder, or record).
    */
   nodeType: NodeType;
   /**

@@ -2,6 +2,8 @@
 
 ## Overview
 
+AI-powered conversational chat management with citations and follow-up questions
+
 ### Available Operations
 
 * [streamChat](#streamchat) - Create conversation with streaming response
@@ -89,7 +91,7 @@ async function run() {
     modelKey: "gpt-4-turbo",
     modelName: "GPT-4 Turbo",
     modelFriendlyName: "GPT-4 Turbo",
-    chatMode: "balanced",
+    chatMode: "web_search",
     timezone: "America/New_York",
     currentTime: new Date("2026-04-12T16:00:00+05:30"),
     tools: [
@@ -132,7 +134,7 @@ async function run() {
     modelKey: "gpt-4-turbo",
     modelName: "GPT-4 Turbo",
     modelFriendlyName: "GPT-4 Turbo",
-    chatMode: "balanced",
+    chatMode: "web_search",
     timezone: "America/New_York",
     currentTime: new Date("2026-04-12T16:00:00+05:30"),
     tools: [
@@ -1176,19 +1178,15 @@ Append a feedback entry to a bot-response message.
 **Overview**
 
 Feedback helps improve AI response quality over time. You can record an
-overall helpfulness signal, per-aspect ratings, issue categories, and
-free-text comments. Each call appends a new entry to the message;
-previous entries are preserved.
+overall helpfulness signal, issue categories, and free-text comments.
+Each call appends a new entry to the message; previous entries are
+preserved.
 
 **Feedback options**
 
 - `isHelpful` — overall thumbs up/down.
-- `ratings` — 1–5 scores keyed by an aspect name you choose
-  (e.g. `accuracy`, `relevance`, `completeness`, `clarity`).
 - `categories` — issue or positive categories from a fixed list.
-- `comments` — free-text `positive`, `negative`, and `suggestions`.
-- `metrics` — optional client-side telemetry
-  (`userInteractionTime`, `feedbackSessionId`).
+- `comments` — free-text `positive` and `negative`.
 
 **Restrictions**
 
@@ -1265,7 +1263,7 @@ run();
 
 ### Response
 
-**Promise\<[operations.UpdateMessageFeedbackResponse](../../models/operations/update-message-feedback-response.md)\>**
+**Promise\<[models.MessageFeedbackUpdateResponse](../../models/message-feedback-update-response.md)\>**
 
 ### Errors
 

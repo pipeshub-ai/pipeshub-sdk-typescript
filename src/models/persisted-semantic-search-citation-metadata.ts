@@ -39,6 +39,12 @@ export type PersistedSemanticSearchCitationMetadata = {
   sheetNum?: number | null | undefined;
   sheetName?: string | null | undefined;
   boundingBox?: Array<PersistedSemanticSearchBoundingBox> | null | undefined;
+  /**
+   * Block type for this citation. Common values: `text`, `image`, `table_row`, `table`,
+   *
+   * @remarks
+   * `record_summary` (whole-record semantic summary chunk).
+   */
   blockType?: string | null | undefined;
   blockText?: string | null | undefined;
   departments?: Array<string> | null | undefined;

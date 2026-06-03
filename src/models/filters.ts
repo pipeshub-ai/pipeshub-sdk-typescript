@@ -16,11 +16,21 @@ import * as z from "zod/v4-mini";
  */
 export type Filters = {
   /**
-   * Filter by application connector instance IDs
+   * Connector instance ids to scope retrieval for this turn. Each element
+   *
+   * @remarks
+   * must be a UUID (connector instance id, record-group id, etc.) or the
+   * org knowledge-base collection sentinel `knowledgeBase_<orgId>`
+   * (pattern `knowledgeBase_[a-zA-Z0-9_-]+`). Gateway validation matches
+   * Zod `appOrKbIdSchema`.
    */
   apps?: Array<string> | undefined;
   /**
-   * Filter by knowledge base IDs
+   * Knowledge-base / record-group ids to scope retrieval for this turn.
+   *
+   * @remarks
+   * Each element uses the same accepted formats as `apps`: a UUID or
+   * `knowledgeBase_<orgId>` (pattern `knowledgeBase_[a-zA-Z0-9_-]+`).
    */
   kb?: Array<string> | undefined;
 };

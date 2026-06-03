@@ -4,7 +4,7 @@
 
 import { userAccountAuthenticate } from "../funcs/user-account-authenticate.js";
 import { userAccountInitAuth } from "../funcs/user-account-init-auth.js";
-import { userAccountResetPasswordWithToken } from "../funcs/user-account-reset-password-with-token.js";
+import { userAccountRefreshToken } from "../funcs/user-account-refresh-token.js";
 import { userAccountResetPassword } from "../funcs/user-account-reset-password.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
 import * as models from "../models/index.js";
@@ -99,33 +99,34 @@ export class UserAccount extends ClientSDK {
   }
 
   /**
-   * Reset password with email token
+   * Refresh access token
    *
    * @remarks
-   * Reset password using a token received via email from the forgot password flow.
+   * Get a new access token using a valid refresh token.
    *
-   * **Password Requirements:**
+   * **Usage:**
    *
-   * - Minimum 8 characters
-   * - At least 1 uppercase letter
-   * - At least 1 lowercase letter
-   * - At least 1 number
-   * - At least 1 special character (#?!@$%^&*-)
+   * - Pass the refresh token as a Bearer token in the Authorization header
+   * - Returns a new access token and basic user information
    *
-   * **Security Notes:**
+   * **Token Lifetimes:**
    *
-   * - Token is single-use and expires after a set time
-   * - Response body contains a confirmation string in `data`
+   * - Access token: 24 hours (configurable via `ACCESS_TOKEN_EXPIRY` environment variable)
+   * - Refresh token: 30 days (configurable via `REFRESH_TOKEN_EXPIRY` environment variable)
+   *
+   * **Best Practices:**
+   *
+   * - Call this endpoint before the access token expires
+   * - Store the new access token and continue using it for authenticated requests
+   * - If refresh fails with 401, redirect user to login flow
    */
-  async resetPasswordWithToken(
-    security: operations.ResetPasswordWithTokenSecurity,
-    request: models.TokenPasswordResetRequest,
+  async refreshToken(
+    security: operations.RefreshTokenSecurity,
     options?: RequestOptions,
-  ): Promise<models.DataStringResponse> {
-    return unwrapAsync(userAccountResetPasswordWithToken(
+  ): Promise<models.RefreshTokenResponse> {
+    return unwrapAsync(userAccountRefreshToken(
       this,
       security,
-      request,
       options,
     ));
   }

@@ -15,7 +15,7 @@ import { PipeshubError } from "./pipeshub-error.js";
  * `HTTP_UNAUTHORIZED`, `HTTP_NOT_FOUND`, `VALIDATION_ERROR`, `INTERNAL_ERROR`).
  */
 export type ErrorResponseData = {
-  error: models.ErrorT;
+  error: models.ErrorResponseError;
 };
 
 /**
@@ -27,7 +27,7 @@ export type ErrorResponseData = {
  * `HTTP_UNAUTHORIZED`, `HTTP_NOT_FOUND`, `VALIDATION_ERROR`, `INTERNAL_ERROR`).
  */
 export class ErrorResponse extends PipeshubError {
-  error: models.ErrorT;
+  error: models.ErrorResponseError;
 
   /** The original data that was passed to this error instance. */
   data$: ErrorResponseData;
@@ -52,7 +52,7 @@ export const ErrorResponse$inboundSchema: z.ZodMiniType<
   unknown
 > = z.pipe(
   z.object({
-    error: z.lazy(() => models.ErrorT$inboundSchema),
+    error: z.lazy(() => models.ErrorResponseError$inboundSchema),
     request$: z.custom<Request>(x => x instanceof Request),
     response$: z.custom<Response>(x => x instanceof Response),
     body$: z.string(),

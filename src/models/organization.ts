@@ -41,15 +41,15 @@ export type Organization = {
   /**
    * Unique organization identifier
    */
-  id?: string | undefined;
+  id: string;
   /**
    * Unique slug for the organization
    */
-  slug?: string | undefined;
+  slug: string;
   /**
    * Registered name
    */
-  registeredName?: string | undefined;
+  registeredName: string;
   /**
    * Short name or display name
    */
@@ -70,7 +70,7 @@ export type Organization = {
   /**
    * Onboarding status
    */
-  onBoardingStatus?: OnBoardingStatus | undefined;
+  onBoardingStatus: OnBoardingStatus;
   /**
    * Soft delete flag
    */
@@ -78,15 +78,15 @@ export type Organization = {
   /**
    * Document version (MongoDB)
    */
-  v?: number | undefined;
+  v: number;
   /**
    * Creation timestamp (ISO 8601)
    */
-  createdAt?: Date | undefined;
+  createdAt: Date;
   /**
    * Last update timestamp (ISO 8601)
    */
-  updatedAt?: Date | undefined;
+  updatedAt: Date;
 };
 
 /** @internal */
@@ -103,19 +103,19 @@ export const OnBoardingStatus$inboundSchema: z.ZodMiniType<
 export const Organization$inboundSchema: z.ZodMiniType<Organization, unknown> =
   z.pipe(
     z.object({
-      _id: types.optional(types.string()),
-      slug: types.optional(types.string()),
-      registeredName: types.optional(types.string()),
+      _id: types.string(),
+      slug: types.string(),
+      registeredName: types.string(),
       shortName: types.optional(types.string()),
       domain: types.string(),
       contactEmail: types.string(),
       accountType: AccountType$inboundSchema,
       permanentAddress: types.optional(Address$inboundSchema),
-      onBoardingStatus: types.optional(OnBoardingStatus$inboundSchema),
+      onBoardingStatus: OnBoardingStatus$inboundSchema,
       isDeleted: z._default(types.boolean(), false),
-      __v: types.optional(types.number()),
-      createdAt: types.optional(types.date()),
-      updatedAt: types.optional(types.date()),
+      __v: types.number(),
+      createdAt: types.date(),
+      updatedAt: types.date(),
     }),
     z.transform((v) => {
       return remap$(v, {

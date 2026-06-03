@@ -15,6 +15,7 @@ import {
   RequestTimeoutError,
   UnexpectedClientError,
 } from "../models/errors/http-client-errors.js";
+import * as errors from "../models/errors/index.js";
 import { PipeshubError } from "../models/errors/pipeshub-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { SDKValidationError } from "../models/errors/sdk-validation-error.js";
@@ -26,26 +27,24 @@ import { Result } from "../types/fp.js";
  * Get current organization
  *
  * @remarks
- * Retrieve details about the authenticated user's organization.<br><br>
- * <b>Overview:</b><br>
- * This endpoint returns complete information about the current user's organization, including profile data, settings, and configuration. Use this for organization profile pages and settings.<br><br>
- * <b>Response Includes:</b><br>
- * <ul>
- * <li>Organization profile (name, email, address)</li>
- * <li>Account type and billing status</li>
- * <li>Feature flags and limits</li>
- * <li>Branding settings (logo, colors)</li>
- * <li>Creation and modification timestamps</li>
- * </ul>
- * <b>Use Cases:</b><br>
- * <ul>
- * <li>Organization profile pages</li>
- * <li>Settings and configuration screens</li>
- * <li>Billing and subscription displays</li>
- * <li>White-label branding retrieval</li>
- * </ul>
- * <b>Note:</b><br>
- * All authenticated users can access this endpoint to view their organization's details.
+ * Retrieve details about the authenticated user's organization.
+ *
+ * **Overview:**
+ *
+ * This endpoint returns the organization document for the current user's org, including profile data and configuration.
+ *
+ * **Response Includes:**
+ *
+ * - Organization profile (registeredName, shortName, contactEmail, domain)
+ * - Account type
+ * - Onboarding status
+ * - Permanent address
+ * - Creation and modification timestamps
+ *
+ * **Use Cases:**
+ *
+ * - Organization profile pages
+ * - Settings and configuration screens
  */
 export function organizationsGetCurrentOrganization(
   client: PipeshubCore,
@@ -53,6 +52,7 @@ export function organizationsGetCurrentOrganization(
 ): APIPromise<
   Result<
     models.Organization,
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -76,6 +76,7 @@ async function $do(
   [
     Result<
       models.Organization,
+      | errors.ErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -128,7 +129,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["401", "404", "4XX", "5XX"],
+    errorCodes: ["401", "404", "4XX", "500", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -137,8 +138,13 @@ async function $do(
   }
   const response = doResult.value;
 
+  const responseFields = {
+    HttpMeta: { Response: response, Request: req },
+  };
+
   const [result] = await M.match<
     models.Organization,
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -149,9 +155,11 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.Organization$inboundSchema),
-    M.fail([401, 404, "4XX"]),
+    M.jsonErr([401, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
+    M.fail("4XX"),
     M.fail("5XX"),
-  )(response, req);
+  )(response, req, { extraFields: responseFields });
   if (!result.ok) {
     return [result, { status: "complete", request: req, response }];
   }

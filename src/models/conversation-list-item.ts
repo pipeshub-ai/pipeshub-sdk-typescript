@@ -29,18 +29,20 @@ export type ModelInfo = {
   chatMode?: string | undefined;
 };
 
-export const SharedWithAccessLevel = {
+export const ConversationListItemSharedWithAccessLevel = {
   Read: "read",
   Write: "write",
 } as const;
-export type SharedWithAccessLevel = OpenEnum<typeof SharedWithAccessLevel>;
+export type ConversationListItemSharedWithAccessLevel = OpenEnum<
+  typeof ConversationListItemSharedWithAccessLevel
+>;
 
-export type SharedWith = {
+export type ConversationListItemSharedWith = {
   userId?: string | undefined;
-  accessLevel?: SharedWithAccessLevel | undefined;
+  accessLevel?: ConversationListItemSharedWithAccessLevel | undefined;
 };
 
-export type ConversationError = {
+export type ConversationListItemConversationError = {
   message?: string | undefined;
   errorType?: string | undefined;
   timestamp?: Date | undefined;
@@ -75,7 +77,7 @@ export type ConversationListItem = {
   modelInfo?: ModelInfo | undefined;
   isShared?: boolean | undefined;
   shareLink?: string | undefined;
-  sharedWith?: Array<SharedWith> | undefined;
+  sharedWith?: Array<ConversationListItemSharedWith> | undefined;
   isArchived?: boolean | undefined;
   /**
    * User ID of the last user who archived this row, or `null` after
@@ -87,7 +89,7 @@ export type ConversationListItem = {
   archivedBy?: string | null | undefined;
   isDeleted?: boolean | undefined;
   deletedBy?: string | undefined;
-  conversationErrors?: Array<ConversationError> | undefined;
+  conversationErrors?: Array<ConversationListItemConversationError> | undefined;
   metadata?: { [k: string]: any } | undefined;
   lastActivityAt?: number | undefined;
   createdAt?: Date | undefined;
@@ -123,31 +125,34 @@ export function modelInfoFromJSON(
 }
 
 /** @internal */
-export const SharedWithAccessLevel$inboundSchema: z.ZodMiniType<
-  SharedWithAccessLevel,
-  unknown
-> = openEnums.inboundSchema(SharedWithAccessLevel);
+export const ConversationListItemSharedWithAccessLevel$inboundSchema:
+  z.ZodMiniType<ConversationListItemSharedWithAccessLevel, unknown> = openEnums
+    .inboundSchema(ConversationListItemSharedWithAccessLevel);
 
 /** @internal */
-export const SharedWith$inboundSchema: z.ZodMiniType<SharedWith, unknown> = z
-  .object({
-    userId: types.optional(types.string()),
-    accessLevel: types.optional(SharedWithAccessLevel$inboundSchema),
-  });
+export const ConversationListItemSharedWith$inboundSchema: z.ZodMiniType<
+  ConversationListItemSharedWith,
+  unknown
+> = z.object({
+  userId: types.optional(types.string()),
+  accessLevel: types.optional(
+    ConversationListItemSharedWithAccessLevel$inboundSchema,
+  ),
+});
 
-export function sharedWithFromJSON(
+export function conversationListItemSharedWithFromJSON(
   jsonString: string,
-): SafeParseResult<SharedWith, SDKValidationError> {
+): SafeParseResult<ConversationListItemSharedWith, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => SharedWith$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'SharedWith' from JSON`,
+    (x) => ConversationListItemSharedWith$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ConversationListItemSharedWith' from JSON`,
   );
 }
 
 /** @internal */
-export const ConversationError$inboundSchema: z.ZodMiniType<
-  ConversationError,
+export const ConversationListItemConversationError$inboundSchema: z.ZodMiniType<
+  ConversationListItemConversationError,
   unknown
 > = z.object({
   message: types.optional(types.string()),
@@ -158,13 +163,14 @@ export const ConversationError$inboundSchema: z.ZodMiniType<
   metadata: types.optional(z.record(z.string(), z.any())),
 });
 
-export function conversationErrorFromJSON(
+export function conversationListItemConversationErrorFromJSON(
   jsonString: string,
-): SafeParseResult<ConversationError, SDKValidationError> {
+): SafeParseResult<ConversationListItemConversationError, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => ConversationError$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'ConversationError' from JSON`,
+    (x) =>
+      ConversationListItemConversationError$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ConversationListItemConversationError' from JSON`,
   );
 }
 
@@ -190,13 +196,17 @@ export const ConversationListItem$inboundSchema: z.ZodMiniType<
     modelInfo: types.optional(z.lazy(() => ModelInfo$inboundSchema)),
     isShared: types.optional(types.boolean()),
     shareLink: types.optional(types.string()),
-    sharedWith: types.optional(z.array(z.lazy(() => SharedWith$inboundSchema))),
+    sharedWith: types.optional(
+      z.array(z.lazy(() => ConversationListItemSharedWith$inboundSchema)),
+    ),
     isArchived: types.optional(types.boolean()),
     archivedBy: z.optional(z.nullable(types.string())),
     isDeleted: types.optional(types.boolean()),
     deletedBy: types.optional(types.string()),
     conversationErrors: types.optional(
-      z.array(z.lazy(() => ConversationError$inboundSchema)),
+      z.array(
+        z.lazy(() => ConversationListItemConversationError$inboundSchema),
+      ),
     ),
     metadata: types.optional(z.record(z.string(), z.any())),
     lastActivityAt: types.optional(types.number()),

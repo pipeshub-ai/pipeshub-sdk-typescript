@@ -36,6 +36,7 @@ All endpoints use the `/api/v1` prefix unless otherwise noted.
   * [Available Resources and Operations](#available-resources-and-operations)
   * [Standalone functions](#standalone-functions)
   * [Server-sent event streaming](#server-sent-event-streaming)
+  * [File uploads](#file-uploads)
   * [Retries](#retries)
   * [Error Handling](#error-handling)
   * [Server Selection](#server-selection)
@@ -94,8 +95,8 @@ import { Pipeshub } from "@pipeshub-ai/sdk";
 const pipeshub = new Pipeshub();
 
 async function run() {
-  const result = await pipeshub.userAccount.initAuth({
-    email: "user@example.com",
+  const result = await pipeshub.oAuthProvider.oauthToken({
+    grantType: "client_credentials",
   });
 
   console.log(result);
@@ -129,8 +130,8 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.userAccount.initAuth({
-    email: "user@example.com",
+  const result = await pipeshub.oAuthProvider.oauthToken({
+    grantType: "client_credentials",
   });
 
   console.log(result);
@@ -149,10 +150,8 @@ import { Pipeshub } from "@pipeshub-ai/sdk";
 const pipeshub = new Pipeshub();
 
 async function run() {
-  const result = await pipeshub.userAccount.resetPasswordWithToken({
+  const result = await pipeshub.userAccount.refreshToken({
     scopedToken: "<YOUR_BEARER_TOKEN_HERE>",
-  }, {
-    password: "H9GEHoL829GXj06",
   });
 
   console.log(result);
@@ -168,6 +167,28 @@ run();
 
 <details open>
 <summary>Available methods</summary>
+
+### [Agents](docs/sdks/agents/README.md)
+
+* [listAgents](docs/sdks/agents/README.md#listagents) - List agents
+* [createAgent](docs/sdks/agents/README.md#createagent) - Create agent
+* [getAgent](docs/sdks/agents/README.md#getagent) - Get agent
+* [updateAgent](docs/sdks/agents/README.md#updateagent) - Update agent
+* [deleteAgent](docs/sdks/agents/README.md#deleteagent) - Delete agent
+* [listAgentArchivedConversationsGrouped](docs/sdks/agents/README.md#listagentarchivedconversationsgrouped) - List archived agent conversations grouped by agent
+* [listAgentConversationArchives](docs/sdks/agents/README.md#listagentconversationarchives) - List archived conversations for an agent
+* [uploadAgentConversationChatAttachments](docs/sdks/agents/README.md#uploadagentconversationchatattachments) - Upload agent chat attachments
+* [deleteAgentConversationChatAttachment](docs/sdks/agents/README.md#deleteagentconversationchatattachment) - Delete an agent chat attachment
+* [streamAgentConversation](docs/sdks/agents/README.md#streamagentconversation) - Create agent conversation with streaming response
+* [streamAgentConversationMessage](docs/sdks/agents/README.md#streamagentconversationmessage) - Add message to agent conversation with streaming response
+* [regenerateAgentConversationMessage](docs/sdks/agents/README.md#regenerateagentconversationmessage) - Regenerate agent conversation message
+* [updateAgentConversationMessageFeedback](docs/sdks/agents/README.md#updateagentconversationmessagefeedback) - Submit feedback for an agent message
+* [archiveAgentConversation](docs/sdks/agents/README.md#archiveagentconversation) - Archive an agent conversation
+* [unarchiveAgentConversation](docs/sdks/agents/README.md#unarchiveagentconversation) - Unarchive an agent conversation
+* [updateAgentConversationTitle](docs/sdks/agents/README.md#updateagentconversationtitle) - Update agent conversation title
+* [deleteAgentConversationById](docs/sdks/agents/README.md#deleteagentconversationbyid) - Delete an agent conversation
+* [getAgentConversationById](docs/sdks/agents/README.md#getagentconversationbyid) - Get agent conversation by ID
+* [listAgentConversations](docs/sdks/agents/README.md#listagentconversations) - List agent conversations
 
 ### [AIModelsProviders](docs/sdks/aimodelsproviders/README.md)
 
@@ -193,6 +214,30 @@ run();
 * [getKnowledgeHubRootNodes](docs/sdks/knowledgehub/README.md#getknowledgehubrootnodes) - Get knowledge hub root nodes
 * [getKnowledgeHubChildNodes](docs/sdks/knowledgehub/README.md#getknowledgehubchildnodes) - Get knowledge hub child nodes
 
+### [OAuthApps](docs/sdks/oauthapps/README.md)
+
+* [listOAuthApps](docs/sdks/oauthapps/README.md#listoauthapps) - List OAuth apps
+* [createOAuthApp](docs/sdks/oauthapps/README.md#createoauthapp) - Create OAuth app
+* [listOAuthScopes](docs/sdks/oauthapps/README.md#listoauthscopes) - List available scopes
+* [getOAuthApp](docs/sdks/oauthapps/README.md#getoauthapp) - Get OAuth app details
+* [updateOAuthApp](docs/sdks/oauthapps/README.md#updateoauthapp) - Update OAuth app
+* [deleteOAuthApp](docs/sdks/oauthapps/README.md#deleteoauthapp) - Delete OAuth app
+* [regenerateOAuthAppSecret](docs/sdks/oauthapps/README.md#regenerateoauthappsecret) - Regenerate client secret
+* [suspendOAuthApp](docs/sdks/oauthapps/README.md#suspendoauthapp) - Suspend OAuth app
+* [activateOAuthApp](docs/sdks/oauthapps/README.md#activateoauthapp) - Activate suspended OAuth app
+* [listOAuthAppTokens](docs/sdks/oauthapps/README.md#listoauthapptokens) - List app tokens
+* [revokeAllOAuthAppTokens](docs/sdks/oauthapps/README.md#revokealloauthapptokens) - Revoke all app tokens
+
+### [OAuthProvider](docs/sdks/oauthprovider/README.md)
+
+* [oauthToken](docs/sdks/oauthprovider/README.md#oauthtoken) - Exchange authorization code for tokens
+* [oauthRevoke](docs/sdks/oauthprovider/README.md#oauthrevoke) - Revoke an access or refresh token
+* [oauthIntrospect](docs/sdks/oauthprovider/README.md#oauthintrospect) - Introspect a token
+
+### [OpenIDConnect](docs/sdks/openidconnect/README.md)
+
+* [oauthUserInfo](docs/sdks/openidconnect/README.md#oauthuserinfo) - Get authenticated user information
+
 ### [OrganizationAuthConfig](docs/sdks/organizationauthconfig/README.md)
 
 * [getAuthMethods](docs/sdks/organizationauthconfig/README.md#getauthmethods) - Get organization authentication methods
@@ -217,8 +262,12 @@ run();
 
 * [initAuth](docs/sdks/useraccount/README.md#initauth) - Initialize authentication session
 * [authenticate](docs/sdks/useraccount/README.md#authenticate) - Authenticate user with credentials
-* [resetPasswordWithToken](docs/sdks/useraccount/README.md#resetpasswordwithtoken) - Reset password with email token
+* [refreshToken](docs/sdks/useraccount/README.md#refreshtoken) - Refresh access token
 * [resetPassword](docs/sdks/useraccount/README.md#resetpassword) - Reset password
+
+### [WebSearch](docs/sdks/websearch/README.md)
+
+* [getWebSearchProviders](docs/sdks/websearch/README.md#getwebsearchproviders) - Get all web search providers
 
 </details>
 <!-- End Available Resources and Operations [operations] -->
@@ -238,6 +287,25 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 
 <summary>Available standalone functions</summary>
 
+- [`agentsArchiveAgentConversation`](docs/sdks/agents/README.md#archiveagentconversation) - Archive an agent conversation
+- [`agentsCreateAgent`](docs/sdks/agents/README.md#createagent) - Create agent
+- [`agentsDeleteAgent`](docs/sdks/agents/README.md#deleteagent) - Delete agent
+- [`agentsDeleteAgentConversationById`](docs/sdks/agents/README.md#deleteagentconversationbyid) - Delete an agent conversation
+- [`agentsDeleteAgentConversationChatAttachment`](docs/sdks/agents/README.md#deleteagentconversationchatattachment) - Delete an agent chat attachment
+- [`agentsGetAgent`](docs/sdks/agents/README.md#getagent) - Get agent
+- [`agentsGetAgentConversationById`](docs/sdks/agents/README.md#getagentconversationbyid) - Get agent conversation by ID
+- [`agentsListAgentArchivedConversationsGrouped`](docs/sdks/agents/README.md#listagentarchivedconversationsgrouped) - List archived agent conversations grouped by agent
+- [`agentsListAgentConversationArchives`](docs/sdks/agents/README.md#listagentconversationarchives) - List archived conversations for an agent
+- [`agentsListAgentConversations`](docs/sdks/agents/README.md#listagentconversations) - List agent conversations
+- [`agentsListAgents`](docs/sdks/agents/README.md#listagents) - List agents
+- [`agentsRegenerateAgentConversationMessage`](docs/sdks/agents/README.md#regenerateagentconversationmessage) - Regenerate agent conversation message
+- [`agentsStreamAgentConversation`](docs/sdks/agents/README.md#streamagentconversation) - Create agent conversation with streaming response
+- [`agentsStreamAgentConversationMessage`](docs/sdks/agents/README.md#streamagentconversationmessage) - Add message to agent conversation with streaming response
+- [`agentsUnarchiveAgentConversation`](docs/sdks/agents/README.md#unarchiveagentconversation) - Unarchive an agent conversation
+- [`agentsUpdateAgent`](docs/sdks/agents/README.md#updateagent) - Update agent
+- [`agentsUpdateAgentConversationMessageFeedback`](docs/sdks/agents/README.md#updateagentconversationmessagefeedback) - Submit feedback for an agent message
+- [`agentsUpdateAgentConversationTitle`](docs/sdks/agents/README.md#updateagentconversationtitle) - Update agent conversation title
+- [`agentsUploadAgentConversationChatAttachments`](docs/sdks/agents/README.md#uploadagentconversationchatattachments) - Upload agent chat attachments
 - [`aiModelsProvidersGetAvailableModelsByType`](docs/sdks/aimodelsproviders/README.md#getavailablemodelsbytype) - Get available models by type
 - [`conversationsAddMessageStream`](docs/sdks/conversations/README.md#addmessagestream) - Add message to a conversation with streaming response
 - [`conversationsArchiveConversation`](docs/sdks/conversations/README.md#archiveconversation) - Archive conversation
@@ -253,6 +321,21 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`conversationsUpdateMessageFeedback`](docs/sdks/conversations/README.md#updatemessagefeedback) - Submit feedback on AI response
 - [`knowledgeHubGetKnowledgeHubChildNodes`](docs/sdks/knowledgehub/README.md#getknowledgehubchildnodes) - Get knowledge hub child nodes
 - [`knowledgeHubGetKnowledgeHubRootNodes`](docs/sdks/knowledgehub/README.md#getknowledgehubrootnodes) - Get knowledge hub root nodes
+- [`oAuthAppsActivateOAuthApp`](docs/sdks/oauthapps/README.md#activateoauthapp) - Activate suspended OAuth app
+- [`oAuthAppsCreateOAuthApp`](docs/sdks/oauthapps/README.md#createoauthapp) - Create OAuth app
+- [`oAuthAppsDeleteOAuthApp`](docs/sdks/oauthapps/README.md#deleteoauthapp) - Delete OAuth app
+- [`oAuthAppsGetOAuthApp`](docs/sdks/oauthapps/README.md#getoauthapp) - Get OAuth app details
+- [`oAuthAppsListOAuthApps`](docs/sdks/oauthapps/README.md#listoauthapps) - List OAuth apps
+- [`oAuthAppsListOAuthAppTokens`](docs/sdks/oauthapps/README.md#listoauthapptokens) - List app tokens
+- [`oAuthAppsListOAuthScopes`](docs/sdks/oauthapps/README.md#listoauthscopes) - List available scopes
+- [`oAuthAppsRegenerateOAuthAppSecret`](docs/sdks/oauthapps/README.md#regenerateoauthappsecret) - Regenerate client secret
+- [`oAuthAppsRevokeAllOAuthAppTokens`](docs/sdks/oauthapps/README.md#revokealloauthapptokens) - Revoke all app tokens
+- [`oAuthAppsSuspendOAuthApp`](docs/sdks/oauthapps/README.md#suspendoauthapp) - Suspend OAuth app
+- [`oAuthAppsUpdateOAuthApp`](docs/sdks/oauthapps/README.md#updateoauthapp) - Update OAuth app
+- [`oAuthProviderOauthIntrospect`](docs/sdks/oauthprovider/README.md#oauthintrospect) - Introspect a token
+- [`oAuthProviderOauthRevoke`](docs/sdks/oauthprovider/README.md#oauthrevoke) - Revoke an access or refresh token
+- [`oAuthProviderOauthToken`](docs/sdks/oauthprovider/README.md#oauthtoken) - Exchange authorization code for tokens
+- [`openIDConnectOauthUserInfo`](docs/sdks/openidconnect/README.md#oauthuserinfo) - Get authenticated user information
 - [`organizationAuthConfigGetAuthMethods`](docs/sdks/organizationauthconfig/README.md#getauthmethods) - Get organization authentication methods
 - [`organizationAuthConfigSetUpAuthConfig`](docs/sdks/organizationauthconfig/README.md#setupauthconfig) - Set up auth configuration
 - [`organizationAuthConfigUpdateAuthMethod`](docs/sdks/organizationauthconfig/README.md#updateauthmethod) - Update organization authentication methods
@@ -266,8 +349,9 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`semanticSearchUnarchiveSearch`](docs/sdks/semanticsearch/README.md#unarchivesearch) - Unarchive a search
 - [`userAccountAuthenticate`](docs/sdks/useraccount/README.md#authenticate) - Authenticate user with credentials
 - [`userAccountInitAuth`](docs/sdks/useraccount/README.md#initauth) - Initialize authentication session
+- [`userAccountRefreshToken`](docs/sdks/useraccount/README.md#refreshtoken) - Refresh access token
 - [`userAccountResetPassword`](docs/sdks/useraccount/README.md#resetpassword) - Reset password
-- [`userAccountResetPasswordWithToken`](docs/sdks/useraccount/README.md#resetpasswordwithtoken) - Reset password with email token
+- [`webSearchGetWebSearchProviders`](docs/sdks/websearch/README.md#getwebsearchproviders) - Get all web search providers
 
 </details>
 <!-- End Standalone functions [standalone-funcs] -->
@@ -300,7 +384,7 @@ async function run() {
     modelKey: "gpt-4-turbo",
     modelName: "GPT-4 Turbo",
     modelFriendlyName: "GPT-4 Turbo",
-    chatMode: "balanced",
+    chatMode: "web_search",
     timezone: "America/New_York",
     currentTime: new Date("2026-04-12T16:00:00+05:30"),
     tools: [
@@ -322,6 +406,45 @@ run();
 [mdn-for-await-of]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for-await...of
 <!-- End Server-sent event streaming [eventstream] -->
 
+<!-- Start File uploads [file-upload] -->
+## File uploads
+
+Certain SDK methods accept files as part of a multi-part request. It is possible and typically recommended to upload files as a stream rather than reading the entire contents into memory. This avoids excessive memory consumption and potentially crashing with out-of-memory errors when working with very large files. The following example demonstrates how to attach a file stream to a request.
+
+> [!TIP]
+>
+> Depending on your JavaScript runtime, there are convenient utilities that return a handle to a file without reading the entire contents into memory:
+>
+> - **Node.js v20+:** Since v20, Node.js comes with a native `openAsBlob` function in [`node:fs`](https://nodejs.org/docs/latest-v20.x/api/fs.html#fsopenasblobpath-options).
+> - **Bun:** The native [`Bun.file`](https://bun.sh/docs/api/file-io#reading-files-bun-file) function produces a file handle that can be used for streaming file uploads.
+> - **Browsers:** All supported browsers return an instance to a [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) when reading the value from an `<input type="file">` element.
+> - **Node.js v18:** A file stream can be created using the `fileFrom` helper from [`fetch-blob/from.js`](https://www.npmjs.com/package/fetch-blob).
+
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.agents.uploadAgentConversationChatAttachments({
+    agentKey: "<value>",
+    body: {
+      files: [],
+    },
+  });
+
+  console.log(result);
+}
+
+run();
+
+```
+<!-- End File uploads [file-upload] -->
+
 <!-- Start Retries [retries] -->
 ## Retries
 
@@ -334,8 +457,8 @@ import { Pipeshub } from "@pipeshub-ai/sdk";
 const pipeshub = new Pipeshub();
 
 async function run() {
-  const result = await pipeshub.userAccount.initAuth({
-    email: "user@example.com",
+  const result = await pipeshub.oAuthProvider.oauthToken({
+    grantType: "client_credentials",
   }, {
     retries: {
       strategy: "backoff",
@@ -374,8 +497,8 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.userAccount.initAuth({
-    email: "user@example.com",
+  const result = await pipeshub.oAuthProvider.oauthToken({
+    grantType: "client_credentials",
   });
 
   console.log(result);
@@ -409,8 +532,8 @@ const pipeshub = new Pipeshub();
 
 async function run() {
   try {
-    const result = await pipeshub.userAccount.initAuth({
-      email: "user@example.com",
+    const result = await pipeshub.oAuthProvider.oauthToken({
+      grantType: "client_credentials",
     });
 
     console.log(result);
@@ -424,7 +547,7 @@ async function run() {
 
       // Depending on the method different errors may be thrown
       if (error instanceof errors.ErrorResponse) {
-        console.log(error.data$.error); // models.ErrorT
+        console.log(error.data$.error); // models.ErrorResponseError
       }
     }
   }
@@ -438,7 +561,7 @@ run();
 **Primary error:**
 * [`PipeshubError`](./src/models/errors/pipeshub-error.ts): The base class for HTTP error responses.
 
-<details><summary>Less common errors (29)</summary>
+<details><summary>Less common errors (33)</summary>
 
 <br />
 
@@ -451,29 +574,33 @@ run();
 
 
 **Inherit from [`PipeshubError`](./src/models/errors/pipeshub-error.ts)**:
-* [`ErrorResponse`](./src/models/errors/error-response.ts): Standard error envelope returned by all errors routed through `ErrorMiddleware`. Applies to all `BaseError` subclasses including `HttpError`, `ValidationError`, and others. The `code` field is a machine-readable string identifying the error type (e.g. `HTTP_UNAUTHORIZED`, `HTTP_NOT_FOUND`, `VALIDATION_ERROR`, `INTERNAL_ERROR`). Applicable to 7 of 30 methods.*
-* [`GetKnowledgeHubRootNodesBadRequestError`](./src/models/errors/get-knowledge-hub-root-nodes-bad-request-error.ts): Invalid request parameters. The backend's validation message is returned verbatim in `error.message`. See the examples below for the common triggers. Status code `400`. Applicable to 1 of 30 methods.*
-* [`GetKnowledgeHubChildNodesBadRequestError`](./src/models/errors/get-knowledge-hub-child-nodes-bad-request-error.ts): Invalid request parameters or path values. The backend's validation message is returned verbatim in `error.message`. See the examples below for the common triggers. Status code `400`. Applicable to 1 of 30 methods.*
-* [`SearchHistoryBadRequestError`](./src/models/errors/search-history-bad-request-error.ts): Error envelope for a failed request. Status code `400`. Applicable to 1 of 30 methods.*
-* [`GetSearchByIdBadRequestError`](./src/models/errors/get-search-by-id-bad-request-error.ts): Invalid request — `searchId` failed Zod validation (not a valid ObjectId). Status code `400`. Applicable to 1 of 30 methods.*
-* [`GetAvailableModelsByTypeBadRequestError`](./src/models/errors/get-available-models-by-type-bad-request-error.ts): Invalid `modelType` path parameter.  The `modelType` value was not one of the supported enum categories. This response is produced by the Zod validation middleware **before** the handler runs. The `error.metadata.errors` array contains per-field detail about exactly which constraint failed. Status code `400`. Applicable to 1 of 30 methods.*
-* [`GetKnowledgeHubRootNodesUnauthorizedError`](./src/models/errors/get-knowledge-hub-root-nodes-unauthorized-error.ts): Missing or invalid authentication token.  The bearer token was absent, expired, malformed, or could not be verified by the auth middleware. Status code `401`. Applicable to 1 of 30 methods.*
-* [`GetKnowledgeHubChildNodesUnauthorizedError`](./src/models/errors/get-knowledge-hub-child-nodes-unauthorized-error.ts): Missing or invalid authentication token.  The bearer token was absent, expired, malformed, or could not be verified by the auth middleware. Status code `401`. Applicable to 1 of 30 methods.*
-* [`SearchHistoryUnauthorizedError`](./src/models/errors/search-history-unauthorized-error.ts): Error envelope for a failed request. Status code `401`. Applicable to 1 of 30 methods.*
-* [`GetSearchByIdUnauthorizedError`](./src/models/errors/get-search-by-id-unauthorized-error.ts): Missing or invalid bearer token. Status code `401`. Applicable to 1 of 30 methods.*
-* [`GetAvailableModelsByTypeUnauthorizedError`](./src/models/errors/get-available-models-by-type-unauthorized-error.ts): Missing or invalid authentication token.  The bearer token was absent, expired, malformed, or could not be verified by the auth middleware. Status code `401`. Applicable to 1 of 30 methods.*
-* [`GetKnowledgeHubRootNodesForbiddenError`](./src/models/errors/get-knowledge-hub-root-nodes-forbidden-error.ts): Insufficient OAuth scope.  Only applies to OAuth tokens. The token did not carry the `kb:read` scope required by this endpoint. Regular (non-OAuth) JWT bearer tokens are not subject to scope enforcement and will not receive this error. Status code `403`. Applicable to 1 of 30 methods.*
-* [`GetKnowledgeHubChildNodesForbiddenError`](./src/models/errors/get-knowledge-hub-child-nodes-forbidden-error.ts): Insufficient OAuth scope.  Only applies to OAuth tokens. The token did not carry the `kb:read` scope required by this endpoint. Regular (non-OAuth) JWT bearer tokens are not subject to scope enforcement and will not receive this error. Status code `403`. Applicable to 1 of 30 methods.*
-* [`SearchHistoryForbiddenError`](./src/models/errors/search-history-forbidden-error.ts): Error envelope for a failed request. Status code `403`. Applicable to 1 of 30 methods.*
-* [`GetSearchByIdForbiddenError`](./src/models/errors/get-search-by-id-forbidden-error.ts): Bearer token lacks the `semantic:read` scope. Status code `403`. Applicable to 1 of 30 methods.*
-* [`GetAvailableModelsByTypeForbiddenError`](./src/models/errors/get-available-models-by-type-forbidden-error.ts): Insufficient OAuth scope.  Only applies to OAuth tokens. The token did not carry the `config:read` scope required by this endpoint. Regular (non-OAuth) JWT bearer tokens are not subject to scope enforcement and will not receive this error. Status code `403`. Applicable to 1 of 30 methods.*
-* [`GetKnowledgeHubChildNodesNotFoundError`](./src/models/errors/get-knowledge-hub-child-nodes-not-found-error.ts): Parent node not found.  The `parentId` does not correspond to an existing node of the specified `parentType`, or the node has been deleted. Status code `404`. Applicable to 1 of 30 methods.*
-* [`GetSearchByIdNotFoundError`](./src/models/errors/get-search-by-id-not-found-error.ts): Reserved for parity with sibling routes; this endpoint currently returns `200` with an empty array for an unknown id rather than emitting `404`. Status code `404`. Applicable to 1 of 30 methods.*
-* [`GetKnowledgeHubRootNodesInternalServerError`](./src/models/errors/get-knowledge-hub-root-nodes-internal-server-error.ts): An unexpected error occurred on the server. Status code `500`. Applicable to 1 of 30 methods.*
-* [`GetKnowledgeHubChildNodesInternalServerError`](./src/models/errors/get-knowledge-hub-child-nodes-internal-server-error.ts): An unexpected error occurred on the server. Status code `500`. Applicable to 1 of 30 methods.*
-* [`SearchHistoryInternalServerError`](./src/models/errors/search-history-internal-server-error.ts): Error envelope for a failed request. Status code `500`. Applicable to 1 of 30 methods.*
-* [`GetSearchByIdInternalServerError`](./src/models/errors/get-search-by-id-internal-server-error.ts): Server error. Possible causes:  - Explicit `InternalServerError`   or any other 500 `BaseError` thrown by the handler. - Non-`BaseError` exception caught by the   global error middleware. - Response serializer fallback. Status code `500`. Applicable to 1 of 30 methods.*
-* [`GetAvailableModelsByTypeInternalServerError`](./src/models/errors/get-available-models-by-type-internal-server-error.ts): An unexpected error occurred on the server. Status code `500`. Applicable to 1 of 30 methods.*
+* [`ErrorResponse`](./src/models/errors/error-response.ts): Standard error envelope returned by all errors routed through `ErrorMiddleware`. Applies to all `BaseError` subclasses including `HttpError`, `ValidationError`, and others. The `code` field is a machine-readable string identifying the error type (e.g. `HTTP_UNAUTHORIZED`, `HTTP_NOT_FOUND`, `VALIDATION_ERROR`, `INTERNAL_ERROR`). Applicable to 20 of 65 methods.*
+* [`OAuthClientManagementRateLimitError`](./src/models/errors/o-auth-client-management-rate-limit-error.ts): JSON body when OAuth client management routes exceed the per-minute rate limit (same limiter as other `/oauth-clients/*` routes). Status code `429`. Applicable to 14 of 65 methods.*
+* [`ApplicationJsonErrorResponse`](./src/models/errors/application-json-error-response.ts): Standard JSON error envelope from `ErrorMiddleware` for `BaseError` subclasses (`error.middleware.ts`). Returned for most API 4xx errors (unauthorized, forbidden, not found, validation failures, etc.). Applicable to 11 of 65 methods.*
+* [`OAuthErrorResponse`](./src/models/errors/o-auth-error-response.ts): OAuth 2.0 Error Response (RFC 6749 Section 5.2). Standard error format for OAuth endpoints. Status code `401`. Applicable to 3 of 65 methods.*
+* [`GetKnowledgeHubRootNodesBadRequestError`](./src/models/errors/get-knowledge-hub-root-nodes-bad-request-error.ts): Invalid request parameters. The backend's validation message is returned verbatim in `error.message`. See the examples below for the common triggers. Status code `400`. Applicable to 1 of 65 methods.*
+* [`GetKnowledgeHubChildNodesBadRequestError`](./src/models/errors/get-knowledge-hub-child-nodes-bad-request-error.ts): Invalid request parameters or path values. The backend's validation message is returned verbatim in `error.message`. See the examples below for the common triggers. Status code `400`. Applicable to 1 of 65 methods.*
+* [`SearchHistoryBadRequestError`](./src/models/errors/search-history-bad-request-error.ts): Error envelope for a failed request. Status code `400`. Applicable to 1 of 65 methods.*
+* [`GetSearchByIdBadRequestError`](./src/models/errors/get-search-by-id-bad-request-error.ts): Invalid request — `searchId` failed Zod validation (not a valid ObjectId). Status code `400`. Applicable to 1 of 65 methods.*
+* [`DeleteAgentConversationChatAttachmentBadRequestError`](./src/models/errors/delete-agent-conversation-chat-attachment-bad-request-error.ts): Invalid or blank path params (`agentKey` or `recordId`). Status code `400`. Applicable to 1 of 65 methods.*
+* [`GetAvailableModelsByTypeBadRequestError`](./src/models/errors/get-available-models-by-type-bad-request-error.ts): Invalid `modelType` path parameter.  The `modelType` value was not one of the supported enum categories. This response is produced by the Zod validation middleware **before** the handler runs. The `error.metadata.errors` array contains per-field detail about exactly which constraint failed. Status code `400`. Applicable to 1 of 65 methods.*
+* [`GetKnowledgeHubRootNodesUnauthorizedError`](./src/models/errors/get-knowledge-hub-root-nodes-unauthorized-error.ts): Missing or invalid authentication token.  The bearer token was absent, expired, malformed, or could not be verified by the auth middleware. Status code `401`. Applicable to 1 of 65 methods.*
+* [`GetKnowledgeHubChildNodesUnauthorizedError`](./src/models/errors/get-knowledge-hub-child-nodes-unauthorized-error.ts): Missing or invalid authentication token.  The bearer token was absent, expired, malformed, or could not be verified by the auth middleware. Status code `401`. Applicable to 1 of 65 methods.*
+* [`SearchHistoryUnauthorizedError`](./src/models/errors/search-history-unauthorized-error.ts): Error envelope for a failed request. Status code `401`. Applicable to 1 of 65 methods.*
+* [`GetSearchByIdUnauthorizedError`](./src/models/errors/get-search-by-id-unauthorized-error.ts): Missing or invalid bearer token. Status code `401`. Applicable to 1 of 65 methods.*
+* [`GetAvailableModelsByTypeUnauthorizedError`](./src/models/errors/get-available-models-by-type-unauthorized-error.ts): Missing or invalid authentication token.  The bearer token was absent, expired, malformed, or could not be verified by the auth middleware. Status code `401`. Applicable to 1 of 65 methods.*
+* [`GetKnowledgeHubRootNodesForbiddenError`](./src/models/errors/get-knowledge-hub-root-nodes-forbidden-error.ts): Insufficient OAuth scope.  Only applies to OAuth tokens. The token did not carry the `kb:read` scope required by this endpoint. Regular (non-OAuth) JWT bearer tokens are not subject to scope enforcement and will not receive this error. Status code `403`. Applicable to 1 of 65 methods.*
+* [`GetKnowledgeHubChildNodesForbiddenError`](./src/models/errors/get-knowledge-hub-child-nodes-forbidden-error.ts): Insufficient OAuth scope.  Only applies to OAuth tokens. The token did not carry the `kb:read` scope required by this endpoint. Regular (non-OAuth) JWT bearer tokens are not subject to scope enforcement and will not receive this error. Status code `403`. Applicable to 1 of 65 methods.*
+* [`SearchHistoryForbiddenError`](./src/models/errors/search-history-forbidden-error.ts): Error envelope for a failed request. Status code `403`. Applicable to 1 of 65 methods.*
+* [`GetSearchByIdForbiddenError`](./src/models/errors/get-search-by-id-forbidden-error.ts): Bearer token lacks the `semantic:read` scope. Status code `403`. Applicable to 1 of 65 methods.*
+* [`GetAvailableModelsByTypeForbiddenError`](./src/models/errors/get-available-models-by-type-forbidden-error.ts): Insufficient OAuth scope.  Only applies to OAuth tokens. The token did not carry the `config:read` scope required by this endpoint. Regular (non-OAuth) JWT bearer tokens are not subject to scope enforcement and will not receive this error. Status code `403`. Applicable to 1 of 65 methods.*
+* [`GetKnowledgeHubChildNodesNotFoundError`](./src/models/errors/get-knowledge-hub-child-nodes-not-found-error.ts): Parent node not found.  The `parentId` does not correspond to an existing node of the specified `parentType`, or the node has been deleted. Status code `404`. Applicable to 1 of 65 methods.*
+* [`GetSearchByIdNotFoundError`](./src/models/errors/get-search-by-id-not-found-error.ts): Reserved for parity with sibling routes; this endpoint currently returns `200` with an empty array for an unknown id rather than emitting `404`. Status code `404`. Applicable to 1 of 65 methods.*
+* [`GetKnowledgeHubRootNodesInternalServerError`](./src/models/errors/get-knowledge-hub-root-nodes-internal-server-error.ts): An unexpected error occurred on the server. Status code `500`. Applicable to 1 of 65 methods.*
+* [`GetKnowledgeHubChildNodesInternalServerError`](./src/models/errors/get-knowledge-hub-child-nodes-internal-server-error.ts): An unexpected error occurred on the server. Status code `500`. Applicable to 1 of 65 methods.*
+* [`SearchHistoryInternalServerError`](./src/models/errors/search-history-internal-server-error.ts): Error envelope for a failed request. Status code `500`. Applicable to 1 of 65 methods.*
+* [`GetSearchByIdInternalServerError`](./src/models/errors/get-search-by-id-internal-server-error.ts): Server error. Possible causes:  - Explicit `InternalServerError`   or any other 500 `BaseError` thrown by the handler. - Non-`BaseError` exception caught by the   global error middleware. - Response serializer fallback. Status code `500`. Applicable to 1 of 65 methods.*
+* [`GetAvailableModelsByTypeInternalServerError`](./src/models/errors/get-available-models-by-type-internal-server-error.ts): An unexpected error occurred on the server. Status code `500`. Applicable to 1 of 65 methods.*
 * [`ResponseValidationError`](./src/models/errors/response-validation-error.ts): Type mismatch between the data returned from the server and the structure expected by the SDK. See `error.rawValue` for the raw value and `error.pretty()` for a nicely formatted multi-line string.
 
 </details>
@@ -510,8 +637,8 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.userAccount.initAuth({
-    email: "user@example.com",
+  const result = await pipeshub.oAuthProvider.oauthToken({
+    grantType: "client_credentials",
   });
 
   console.log(result);
@@ -532,8 +659,8 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.userAccount.initAuth({
-    email: "user@example.com",
+  const result = await pipeshub.oAuthProvider.oauthToken({
+    grantType: "client_credentials",
   });
 
   console.log(result);

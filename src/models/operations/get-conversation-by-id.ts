@@ -44,7 +44,7 @@ export type GetConversationByIdSortOrderEnum = ClosedEnum<
 /**
  * Filter messages by type
  */
-export const QueryParamMessageType = {
+export const GetConversationByIdQueryParamMessageType = {
   UserQuery: "user_query",
   BotResponse: "bot_response",
   Error: "error",
@@ -54,7 +54,9 @@ export const QueryParamMessageType = {
 /**
  * Filter messages by type
  */
-export type QueryParamMessageType = ClosedEnum<typeof QueryParamMessageType>;
+export type GetConversationByIdQueryParamMessageType = ClosedEnum<
+  typeof GetConversationByIdQueryParamMessageType
+>;
 
 export type GetConversationByIdRequest = {
   /**
@@ -96,7 +98,7 @@ export type GetConversationByIdRequest = {
   /**
    * Filter messages by type
    */
-  messageType?: QueryParamMessageType | undefined;
+  messageType?: GetConversationByIdQueryParamMessageType | undefined;
 };
 
 export const GetConversationByIdSharedWithAccessLevel = {
@@ -221,7 +223,7 @@ export type GetConversationByIdMessage = {
   /**
    * AI confidence in the answer. Present only on `bot_response` messages, and only when the model emitted a trailing confidence block.
    */
-  confidence?: Confidence | undefined;
+  confidence?: Confidence | null | undefined;
   /**
    * Citations attached to this message. `citationData` is the populated citation document.
    */
@@ -237,6 +239,13 @@ export type GetConversationByIdMessage = {
    */
   modelInfo?: models.ConversationModelInfo | undefined;
   appliedFilters?: GetConversationByIdAppliedFilters | undefined;
+  /**
+   * Files uploaded for this message turn (see
+   *
+   * @remarks
+   * `POST /conversations/attachments/upload`).
+   */
+  attachments?: Array<models.ChatAttachmentRef> | undefined;
   metadata?: GetConversationByIdMetadata | undefined;
   createdAt?: Date | undefined;
   updatedAt?: Date | undefined;
@@ -537,9 +546,10 @@ export const GetConversationByIdSortOrderEnum$outboundSchema: z.ZodMiniEnum<
 > = z.enum(GetConversationByIdSortOrderEnum);
 
 /** @internal */
-export const QueryParamMessageType$outboundSchema: z.ZodMiniEnum<
-  typeof QueryParamMessageType
-> = z.enum(QueryParamMessageType);
+export const GetConversationByIdQueryParamMessageType$outboundSchema:
+  z.ZodMiniEnum<typeof GetConversationByIdQueryParamMessageType> = z.enum(
+    GetConversationByIdQueryParamMessageType,
+  );
 
 /** @internal */
 export type GetConversationByIdRequest$Outbound = {
@@ -572,7 +582,9 @@ export const GetConversationByIdRequest$outboundSchema: z.ZodMiniType<
   startDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
   endDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
   shared: z.optional(z.boolean()),
-  messageType: z.optional(QueryParamMessageType$outboundSchema),
+  messageType: z.optional(
+    GetConversationByIdQueryParamMessageType$outboundSchema,
+  ),
 });
 
 export function getConversationByIdRequestToJSON(
@@ -724,7 +736,7 @@ export const GetConversationByIdMessage$inboundSchema: z.ZodMiniType<
     contentFormat: types.optional(
       GetConversationByIdContentFormat$inboundSchema,
     ),
-    confidence: types.optional(Confidence$inboundSchema),
+    confidence: z.optional(z.nullable(Confidence$inboundSchema)),
     citations: types.optional(z.array(z.lazy(() => Citation$inboundSchema))),
     followUpQuestions: types.optional(
       z.array(models.FollowUpQuestion$inboundSchema),
@@ -736,6 +748,9 @@ export const GetConversationByIdMessage$inboundSchema: z.ZodMiniType<
     modelInfo: types.optional(models.ConversationModelInfo$inboundSchema),
     appliedFilters: types.optional(
       z.lazy(() => GetConversationByIdAppliedFilters$inboundSchema),
+    ),
+    attachments: types.optional(
+      z.array(models.ChatAttachmentRef$inboundSchema),
     ),
     metadata: types.optional(
       z.lazy(() => GetConversationByIdMetadata$inboundSchema),

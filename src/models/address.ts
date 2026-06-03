@@ -3,12 +3,17 @@
  */
 
 import * as z from "zod/v4-mini";
+import { remap as remap$ } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
 export type Address = {
+  /**
+   * Optional address document id
+   */
+  id?: string | undefined;
   /**
    * Address line 1
    */
@@ -32,13 +37,21 @@ export type Address = {
 };
 
 /** @internal */
-export const Address$inboundSchema: z.ZodMiniType<Address, unknown> = z.object({
-  addressLine1: types.optional(types.string()),
-  city: types.optional(types.string()),
-  state: types.optional(types.string()),
-  postCode: types.optional(types.string()),
-  country: types.optional(types.string()),
-});
+export const Address$inboundSchema: z.ZodMiniType<Address, unknown> = z.pipe(
+  z.object({
+    _id: types.optional(types.string()),
+    addressLine1: types.optional(types.string()),
+    city: types.optional(types.string()),
+    state: types.optional(types.string()),
+    postCode: types.optional(types.string()),
+    country: types.optional(types.string()),
+  }),
+  z.transform((v) => {
+    return remap$(v, {
+      "_id": "id",
+    });
+  }),
+);
 
 export function addressFromJSON(
   jsonString: string,

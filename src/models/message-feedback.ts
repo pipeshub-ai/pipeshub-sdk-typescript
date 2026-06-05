@@ -30,7 +30,7 @@ export type Ratings = {
   clarity?: number | undefined;
 };
 
-export const Category = {
+export const MessageFeedbackCategory = {
   IncorrectInformation: "incorrect_information",
   MissingInformation: "missing_information",
   IrrelevantInformation: "irrelevant_information",
@@ -41,9 +41,9 @@ export const Category = {
   WellExplained: "well_explained",
   Other: "other",
 } as const;
-export type Category = OpenEnum<typeof Category>;
+export type MessageFeedbackCategory = OpenEnum<typeof MessageFeedbackCategory>;
 
-export type Comments = {
+export type MessageFeedbackComments = {
   /**
    * What was good about the response
    */
@@ -138,8 +138,8 @@ export type MessageFeedback = {
   /**
    * Categories of issues or positive attributes identified
    */
-  categories?: Array<Category> | undefined;
-  comments?: Comments | undefined;
+  categories?: Array<MessageFeedbackCategory> | undefined;
+  comments?: MessageFeedbackComments | undefined;
   /**
    * Feedback on individual citations
    */
@@ -197,24 +197,28 @@ export function ratingsFromJSON(
 }
 
 /** @internal */
-export const Category$inboundSchema: z.ZodMiniType<Category, unknown> =
-  openEnums.inboundSchema(Category);
+export const MessageFeedbackCategory$inboundSchema: z.ZodMiniType<
+  MessageFeedbackCategory,
+  unknown
+> = openEnums.inboundSchema(MessageFeedbackCategory);
 
 /** @internal */
-export const Comments$inboundSchema: z.ZodMiniType<Comments, unknown> = z
-  .object({
-    positive: types.optional(types.string()),
-    negative: types.optional(types.string()),
-    suggestions: types.optional(types.string()),
-  });
+export const MessageFeedbackComments$inboundSchema: z.ZodMiniType<
+  MessageFeedbackComments,
+  unknown
+> = z.object({
+  positive: types.optional(types.string()),
+  negative: types.optional(types.string()),
+  suggestions: types.optional(types.string()),
+});
 
-export function commentsFromJSON(
+export function messageFeedbackCommentsFromJSON(
   jsonString: string,
-): SafeParseResult<Comments, SDKValidationError> {
+): SafeParseResult<MessageFeedbackComments, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => Comments$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Comments' from JSON`,
+    (x) => MessageFeedbackComments$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'MessageFeedbackComments' from JSON`,
   );
 }
 
@@ -303,8 +307,8 @@ export const MessageFeedback$inboundSchema: z.ZodMiniType<
 > = z.object({
   isHelpful: types.optional(types.boolean()),
   ratings: types.optional(z.lazy(() => Ratings$inboundSchema)),
-  categories: types.optional(z.array(Category$inboundSchema)),
-  comments: types.optional(z.lazy(() => Comments$inboundSchema)),
+  categories: types.optional(z.array(MessageFeedbackCategory$inboundSchema)),
+  comments: types.optional(z.lazy(() => MessageFeedbackComments$inboundSchema)),
   citationFeedback: types.optional(
     z.array(z.lazy(() => CitationFeedback$inboundSchema)),
   ),

@@ -33,6 +33,12 @@ export type SemanticSearchHit = {
   metadata?: SemanticSearchHitMetadata | undefined;
   content?: string | null | undefined;
   virtualRecordId?: string | null | undefined;
+  /**
+   * Block type for this hit. Common values: `text`, `image`, `table_row`, `table`,
+   *
+   * @remarks
+   * `record_summary` (whole-record semantic summary — `block_index` is `null` for these hits).
+   */
   blockType?: string | null | undefined;
   blockIndex?: number | null | undefined;
 };

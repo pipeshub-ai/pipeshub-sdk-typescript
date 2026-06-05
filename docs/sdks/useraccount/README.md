@@ -2,11 +2,13 @@
 
 ## Overview
 
+User authentication including multi-step MFA, password reset, OTP login, and token management
+
 ### Available Operations
 
 * [initAuth](#initauth) - Initialize authentication session
 * [authenticate](#authenticate) - Authenticate user with credentials
-* [resetPasswordWithToken](#resetpasswordwithtoken) - Reset password with email token
+* [refreshToken](#refreshtoken) - Refresh access token
 * [resetPassword](#resetpassword) - Reset password
 
 ## initAuth
@@ -217,37 +219,38 @@ run();
 | errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## resetPasswordWithToken
+## refreshToken
 
-Reset password using a token received via email from the forgot password flow.
+Get a new access token using a valid refresh token.
 
-**Password Requirements:**
+**Usage:**
 
-- Minimum 8 characters
-- At least 1 uppercase letter
-- At least 1 lowercase letter
-- At least 1 number
-- At least 1 special character (#?!@$%^&*-)
+- Pass the refresh token as a Bearer token in the Authorization header
+- Returns a new access token and basic user information
 
-**Security Notes:**
+**Token Lifetimes:**
 
-- Token is single-use and expires after a set time
-- Response body contains a confirmation string in `data`
+- Access token: 24 hours (configurable via `ACCESS_TOKEN_EXPIRY` environment variable)
+- Refresh token: 30 days (configurable via `REFRESH_TOKEN_EXPIRY` environment variable)
+
+**Best Practices:**
+
+- Call this endpoint before the access token expires
+- Store the new access token and continue using it for authenticated requests
+- If refresh fails with 401, redirect user to login flow
 
 
 ### Example Usage
 
-<!-- UsageSnippet language="typescript" operationID="resetPasswordWithToken" method="post" path="/userAccount/password/reset/token" -->
+<!-- UsageSnippet language="typescript" operationID="refreshToken" method="post" path="/userAccount/refresh/token" -->
 ```typescript
 import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub();
 
 async function run() {
-  const result = await pipeshub.userAccount.resetPasswordWithToken({
+  const result = await pipeshub.userAccount.refreshToken({
     scopedToken: "<YOUR_BEARER_TOKEN_HERE>",
-  }, {
-    password: "H9GEHoL829GXj06",
   });
 
   console.log(result);
@@ -262,23 +265,21 @@ The standalone function version of this method:
 
 ```typescript
 import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
-import { userAccountResetPasswordWithToken } from "@pipeshub-ai/sdk/funcs/user-account-reset-password-with-token.js";
+import { userAccountRefreshToken } from "@pipeshub-ai/sdk/funcs/user-account-refresh-token.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
 const pipeshub = new PipeshubCore();
 
 async function run() {
-  const res = await userAccountResetPasswordWithToken(pipeshub, {
+  const res = await userAccountRefreshToken(pipeshub, {
     scopedToken: "<YOUR_BEARER_TOKEN_HERE>",
-  }, {
-    password: "H9GEHoL829GXj06",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("userAccountResetPasswordWithToken failed:", res.error);
+    console.log("userAccountRefreshToken failed:", res.error);
   }
 }
 
@@ -289,15 +290,14 @@ run();
 
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [models.TokenPasswordResetRequest](../../models/token-password-reset-request.md)                                                                                               | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `security`                                                                                                                                                                     | [operations.ResetPasswordWithTokenSecurity](../../models/operations/reset-password-with-token-security.md)                                                                     | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
+| `security`                                                                                                                                                                     | [operations.RefreshTokenSecurity](../../models/operations/refresh-token-security.md)                                                                                           | :heavy_check_mark:                                                                                                                                                             | The security requirements to use for the request.                                                                                                                              |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
 
 ### Response
 
-**Promise\<[models.DataStringResponse](../../models/data-string-response.md)\>**
+**Promise\<[models.RefreshTokenResponse](../../models/refresh-token-response.md)\>**
 
 ### Errors
 

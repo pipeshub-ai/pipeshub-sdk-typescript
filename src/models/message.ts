@@ -14,6 +14,10 @@ import {
   AppliedFilters$inboundSchema,
 } from "./applied-filters.js";
 import {
+  ChatAttachmentRef,
+  ChatAttachmentRef$inboundSchema,
+} from "./chat-attachment-ref.js";
+import {
   CitationReference,
   CitationReference$inboundSchema,
 } from "./citation-reference.js";
@@ -43,7 +47,7 @@ import {
  * <li><code>system</code> - System notification or status</li>
  * </ul>
  */
-export const MessageType = {
+export const MessageMessageType = {
   UserQuery: "user_query",
   BotResponse: "bot_response",
   Error: "error",
@@ -62,12 +66,12 @@ export const MessageType = {
  * <li><code>system</code> - System notification or status</li>
  * </ul>
  */
-export type MessageType = OpenEnum<typeof MessageType>;
+export type MessageMessageType = OpenEnum<typeof MessageMessageType>;
 
 /**
  * Format of the content for rendering
  */
-export const ContentFormat = {
+export const MessageContentFormat = {
   Markdown: "MARKDOWN",
   Json: "JSON",
   Html: "HTML",
@@ -75,9 +79,9 @@ export const ContentFormat = {
 /**
  * Format of the content for rendering
  */
-export type ContentFormat = OpenEnum<typeof ContentFormat>;
+export type MessageContentFormat = OpenEnum<typeof MessageContentFormat>;
 
-export type Metadata = {
+export type MessageMetadata = {
   /**
    * Time taken to generate response in milliseconds
    */
@@ -96,7 +100,7 @@ export type Metadata = {
   reason?: string | undefined;
 };
 
-export type ReferenceDatum = {
+export type MessageReferenceDatum = {
   /**
    * Display name shown to the user.
    */
@@ -152,7 +156,7 @@ export type Message = {
    * <li><code>system</code> - System notification or status</li>
    * </ul>
    */
-  messageType?: MessageType | undefined;
+  messageType?: MessageMessageType | undefined;
   /**
    * The message text content
    */
@@ -160,7 +164,7 @@ export type Message = {
   /**
    * Format of the content for rendering
    */
-  contentFormat: ContentFormat;
+  contentFormat: MessageContentFormat;
   /**
    * References to source documents used in the response
    */
@@ -177,7 +181,7 @@ export type Message = {
    * User feedback on this message
    */
   feedback?: Array<MessageFeedback> | undefined;
-  metadata?: Metadata | undefined;
+  metadata?: MessageMetadata | undefined;
   /**
    * AI model configuration recorded against a conversation or message.
    */
@@ -196,47 +200,54 @@ export type Message = {
    * @remarks
    * follow-up queries (for example Jira project keys or record IDs).
    */
-  referenceData?: Array<ReferenceDatum> | undefined;
+  referenceData?: Array<MessageReferenceDatum> | undefined;
   /**
-   * Files or media attached to this message
+   * Files uploaded for this message turn (see
+   *
+   * @remarks
+   * `POST /conversations/attachments/upload`).
    */
-  attachments?: Array<{ [k: string]: any }> | undefined;
+  attachments?: Array<ChatAttachmentRef> | undefined;
   createdAt?: Date | undefined;
   updatedAt?: Date | undefined;
 };
 
 /** @internal */
-export const MessageType$inboundSchema: z.ZodMiniType<MessageType, unknown> =
-  openEnums.inboundSchema(MessageType);
-
-/** @internal */
-export const ContentFormat$inboundSchema: z.ZodMiniType<
-  ContentFormat,
+export const MessageMessageType$inboundSchema: z.ZodMiniType<
+  MessageMessageType,
   unknown
-> = openEnums.inboundSchema(ContentFormat);
+> = openEnums.inboundSchema(MessageMessageType);
 
 /** @internal */
-export const Metadata$inboundSchema: z.ZodMiniType<Metadata, unknown> = z
-  .object({
-    processingTimeMs: types.optional(types.number()),
-    modelVersion: types.optional(types.string()),
-    aiTransactionId: types.optional(types.string()),
-    reason: types.optional(types.string()),
-  });
+export const MessageContentFormat$inboundSchema: z.ZodMiniType<
+  MessageContentFormat,
+  unknown
+> = openEnums.inboundSchema(MessageContentFormat);
 
-export function metadataFromJSON(
+/** @internal */
+export const MessageMetadata$inboundSchema: z.ZodMiniType<
+  MessageMetadata,
+  unknown
+> = z.object({
+  processingTimeMs: types.optional(types.number()),
+  modelVersion: types.optional(types.string()),
+  aiTransactionId: types.optional(types.string()),
+  reason: types.optional(types.string()),
+});
+
+export function messageMetadataFromJSON(
   jsonString: string,
-): SafeParseResult<Metadata, SDKValidationError> {
+): SafeParseResult<MessageMetadata, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => Metadata$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Metadata' from JSON`,
+    (x) => MessageMetadata$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'MessageMetadata' from JSON`,
   );
 }
 
 /** @internal */
-export const ReferenceDatum$inboundSchema: z.ZodMiniType<
-  ReferenceDatum,
+export const MessageReferenceDatum$inboundSchema: z.ZodMiniType<
+  MessageReferenceDatum,
   unknown
 > = z.object({
   name: types.optional(types.string()),
@@ -247,13 +258,13 @@ export const ReferenceDatum$inboundSchema: z.ZodMiniType<
   metadata: types.optional(z.record(z.string(), types.string())),
 });
 
-export function referenceDatumFromJSON(
+export function messageReferenceDatumFromJSON(
   jsonString: string,
-): SafeParseResult<ReferenceDatum, SDKValidationError> {
+): SafeParseResult<MessageReferenceDatum, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => ReferenceDatum$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'ReferenceDatum' from JSON`,
+    (x) => MessageReferenceDatum$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'MessageReferenceDatum' from JSON`,
   );
 }
 
@@ -261,20 +272,20 @@ export function referenceDatumFromJSON(
 export const Message$inboundSchema: z.ZodMiniType<Message, unknown> = z.pipe(
   z.object({
     _id: types.optional(types.string()),
-    messageType: types.optional(MessageType$inboundSchema),
+    messageType: types.optional(MessageMessageType$inboundSchema),
     content: types.optional(types.string()),
-    contentFormat: z._default(ContentFormat$inboundSchema, "MARKDOWN"),
+    contentFormat: z._default(MessageContentFormat$inboundSchema, "MARKDOWN"),
     citations: types.optional(z.array(CitationReference$inboundSchema)),
     confidence: types.optional(types.string()),
     followUpQuestions: types.optional(z.array(FollowUpQuestion$inboundSchema)),
     feedback: types.optional(z.array(MessageFeedback$inboundSchema)),
-    metadata: types.optional(z.lazy(() => Metadata$inboundSchema)),
+    metadata: types.optional(z.lazy(() => MessageMetadata$inboundSchema)),
     modelInfo: types.optional(ConversationModelInfo$inboundSchema),
     appliedFilters: types.optional(AppliedFilters$inboundSchema),
     referenceData: types.optional(z.array(z.lazy(() =>
-      ReferenceDatum$inboundSchema
+      MessageReferenceDatum$inboundSchema
     ))),
-    attachments: types.optional(z.array(z.record(z.string(), z.any()))),
+    attachments: types.optional(z.array(ChatAttachmentRef$inboundSchema)),
     createdAt: types.optional(types.date()),
     updatedAt: types.optional(types.date()),
   }),

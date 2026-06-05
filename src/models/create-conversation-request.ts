@@ -3,16 +3,40 @@
  */
 
 import * as z from "zod/v4-mini";
+import { ClosedEnum } from "../types/enums.js";
 import {
   AppliedFilters,
   AppliedFilters$Outbound,
   AppliedFilters$outboundSchema,
 } from "./applied-filters.js";
 import {
+  ChatAttachmentRef,
+  ChatAttachmentRef$Outbound,
+  ChatAttachmentRef$outboundSchema,
+} from "./chat-attachment-ref.js";
+import {
   Filters,
   Filters$Outbound,
   Filters$outboundSchema,
 } from "./filters.js";
+
+/**
+ * Chat mode affecting response behavior.
+ *
+ * @remarks
+ */
+export const CreateConversationRequestChatMode = {
+  WebSearch: "web_search",
+  InternalSearch: "internal_search",
+} as const;
+/**
+ * Chat mode affecting response behavior.
+ *
+ * @remarks
+ */
+export type CreateConversationRequestChatMode = ClosedEnum<
+  typeof CreateConversationRequestChatMode
+>;
 
 /**
  * Request body for creating a new AI conversation.
@@ -44,10 +68,6 @@ export type CreateConversationRequest = {
    */
   recordIds?: Array<string> | undefined;
   /**
-   * Filter by department IDs to scope the search
-   */
-  departments?: Array<string> | undefined;
-  /**
    * App connector instance ids and knowledge-base / record-group ids that narrow retrieval
    *
    * @remarks
@@ -67,6 +87,13 @@ export type CreateConversationRequest = {
    */
   appliedFilters?: AppliedFilters | undefined;
   /**
+   * Uploaded chat attachments to associate with this conversation turn (see
+   *
+   * @remarks
+   * `POST /conversations/attachments/upload`).
+   */
+  attachments?: Array<ChatAttachmentRef> | undefined;
+  /**
    * Identifier for the AI model configuration to use.
    *
    * @remarks
@@ -85,9 +112,8 @@ export type CreateConversationRequest = {
    * Chat mode affecting response behavior.
    *
    * @remarks
-   * Different modes optimize for different use cases.
    */
-  chatMode?: string | undefined;
+  chatMode?: CreateConversationRequestChatMode | undefined;
   /**
    * IANA timezone identifier from the client (top-level field).
    *
@@ -113,12 +139,17 @@ export type CreateConversationRequest = {
 };
 
 /** @internal */
+export const CreateConversationRequestChatMode$outboundSchema: z.ZodMiniEnum<
+  typeof CreateConversationRequestChatMode
+> = z.enum(CreateConversationRequestChatMode);
+
+/** @internal */
 export type CreateConversationRequest$Outbound = {
   query: string;
   recordIds?: Array<string> | undefined;
-  departments?: Array<string> | undefined;
   filters?: Filters$Outbound | undefined;
   appliedFilters?: AppliedFilters$Outbound | undefined;
+  attachments?: Array<ChatAttachmentRef$Outbound> | undefined;
   modelKey?: string | undefined;
   modelName?: string | undefined;
   modelFriendlyName?: string | undefined;
@@ -135,13 +166,13 @@ export const CreateConversationRequest$outboundSchema: z.ZodMiniType<
 > = z.object({
   query: z.string(),
   recordIds: z.optional(z.array(z.string())),
-  departments: z.optional(z.array(z.string())),
   filters: z.optional(Filters$outboundSchema),
   appliedFilters: z.optional(AppliedFilters$outboundSchema),
+  attachments: z.optional(z.array(ChatAttachmentRef$outboundSchema)),
   modelKey: z.optional(z.string()),
   modelName: z.optional(z.string()),
   modelFriendlyName: z.optional(z.string()),
-  chatMode: z.optional(z.string()),
+  chatMode: z.optional(CreateConversationRequestChatMode$outboundSchema),
   timezone: z.optional(z.string()),
   currentTime: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
   tools: z.optional(z.array(z.string())),

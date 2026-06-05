@@ -21,7 +21,7 @@ export type AppliedFilterNode = {
    */
   name?: string | undefined;
   /**
-   * Type of the node (e.g. app, kb)
+   * Type of the node (e.g. app, recordGroup, folder, record)
    */
   nodeType?: string | undefined;
   /**

@@ -12,26 +12,24 @@ export class Organizations extends ClientSDK {
    * Get current organization
    *
    * @remarks
-   * Retrieve details about the authenticated user's organization.<br><br>
-   * <b>Overview:</b><br>
-   * This endpoint returns complete information about the current user's organization, including profile data, settings, and configuration. Use this for organization profile pages and settings.<br><br>
-   * <b>Response Includes:</b><br>
-   * <ul>
-   * <li>Organization profile (name, email, address)</li>
-   * <li>Account type and billing status</li>
-   * <li>Feature flags and limits</li>
-   * <li>Branding settings (logo, colors)</li>
-   * <li>Creation and modification timestamps</li>
-   * </ul>
-   * <b>Use Cases:</b><br>
-   * <ul>
-   * <li>Organization profile pages</li>
-   * <li>Settings and configuration screens</li>
-   * <li>Billing and subscription displays</li>
-   * <li>White-label branding retrieval</li>
-   * </ul>
-   * <b>Note:</b><br>
-   * All authenticated users can access this endpoint to view their organization's details.
+   * Retrieve details about the authenticated user's organization.
+   *
+   * **Overview:**
+   *
+   * This endpoint returns the organization document for the current user's org, including profile data and configuration.
+   *
+   * **Response Includes:**
+   *
+   * - Organization profile (registeredName, shortName, contactEmail, domain)
+   * - Account type
+   * - Onboarding status
+   * - Permanent address
+   * - Creation and modification timestamps
+   *
+   * **Use Cases:**
+   *
+   * - Organization profile pages
+   * - Settings and configuration screens
    */
   async getCurrentOrganization(
     options?: RequestOptions,

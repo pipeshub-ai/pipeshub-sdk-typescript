@@ -2,6 +2,8 @@
 
 ## Overview
 
+Unified browse API for root and child nodes (apps, record groups, folders, records) with filtering and search
+
 ### Available Operations
 
 * [getKnowledgeHubRootNodes](#getknowledgehubrootnodes) - Get knowledge hub root nodes

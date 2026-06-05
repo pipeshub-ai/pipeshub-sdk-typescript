@@ -21,6 +21,7 @@ import {
 import { PipeshubError } from "../models/errors/pipeshub-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { SDKValidationError } from "../models/errors/sdk-validation-error.js";
+import * as models from "../models/index.js";
 import * as operations from "../models/operations/index.js";
 import { APICall, APIPromise } from "../types/async.js";
 import { Result } from "../types/fp.js";
@@ -34,19 +35,15 @@ import { Result } from "../types/fp.js";
  * **Overview**
  *
  * Feedback helps improve AI response quality over time. You can record an
- * overall helpfulness signal, per-aspect ratings, issue categories, and
- * free-text comments. Each call appends a new entry to the message;
- * previous entries are preserved.
+ * overall helpfulness signal, issue categories, and free-text comments.
+ * Each call appends a new entry to the message; previous entries are
+ * preserved.
  *
  * **Feedback options**
  *
  * - `isHelpful` — overall thumbs up/down.
- * - `ratings` — 1–5 scores keyed by an aspect name you choose
- *   (e.g. `accuracy`, `relevance`, `completeness`, `clarity`).
  * - `categories` — issue or positive categories from a fixed list.
- * - `comments` — free-text `positive`, `negative`, and `suggestions`.
- * - `metrics` — optional client-side telemetry
- *   (`userInteractionTime`, `feedbackSessionId`).
+ * - `comments` — free-text `positive` and `negative`.
  *
  * **Restrictions**
  *
@@ -59,7 +56,7 @@ export function conversationsUpdateMessageFeedback(
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    operations.UpdateMessageFeedbackResponse,
+    models.MessageFeedbackUpdateResponse,
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -84,7 +81,7 @@ async function $do(
 ): Promise<
   [
     Result<
-      operations.UpdateMessageFeedbackResponse,
+      models.MessageFeedbackUpdateResponse,
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -174,7 +171,7 @@ async function $do(
   const response = doResult.value;
 
   const [result] = await M.match<
-    operations.UpdateMessageFeedbackResponse,
+    models.MessageFeedbackUpdateResponse,
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -184,7 +181,7 @@ async function $do(
     | UnexpectedClientError
     | SDKValidationError
   >(
-    M.json(200, operations.UpdateMessageFeedbackResponse$inboundSchema),
+    M.json(200, models.MessageFeedbackUpdateResponse$inboundSchema),
     M.fail([400, 401, 404, "4XX"]),
     M.fail([500, "5XX"]),
   )(response, req);

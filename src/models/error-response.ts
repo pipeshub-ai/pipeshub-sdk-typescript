@@ -8,7 +8,7 @@ import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
-export type ErrorT = {
+export type ErrorResponseError = {
   /**
    * Machine-readable error code. For application errors it takes the form `HTTP_<VARIANT>`
    *
@@ -27,18 +27,21 @@ export type ErrorT = {
 };
 
 /** @internal */
-export const ErrorT$inboundSchema: z.ZodMiniType<ErrorT, unknown> = z.object({
+export const ErrorResponseError$inboundSchema: z.ZodMiniType<
+  ErrorResponseError,
+  unknown
+> = z.object({
   code: types.string(),
   message: types.string(),
   metadata: types.optional(z.record(z.string(), z.any())),
 });
 
-export function errorFromJSON(
+export function errorResponseErrorFromJSON(
   jsonString: string,
-): SafeParseResult<ErrorT, SDKValidationError> {
+): SafeParseResult<ErrorResponseError, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => ErrorT$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'ErrorT' from JSON`,
+    (x) => ErrorResponseError$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ErrorResponseError' from JSON`,
   );
 }

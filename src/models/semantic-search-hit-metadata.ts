@@ -39,6 +39,12 @@ export type SemanticSearchHitMetadata = {
   connectorId?: string | null | undefined;
   connectorName?: string | null | undefined;
   blockText?: string | null | undefined;
+  /**
+   * Block type for this hit. Common values: `text`, `image`, `table_row`, `table`,
+   *
+   * @remarks
+   * `record_summary` (whole-record semantic summary chunk — no block index).
+   */
   blockType?: string | null | undefined;
   boundingBox?: Array<SemanticSearchBoundingBox> | null | undefined;
   pageNum?: Array<number | null> | null | undefined;
@@ -65,6 +71,14 @@ export type SemanticSearchHitMetadata = {
   blockId?: string | null | undefined;
   isBlock?: boolean | null | undefined;
   isBlockGroup?: boolean | null | undefined;
+  /**
+   * Set to `true` by the indexing pipeline when this vector chunk represents a
+   *
+   * @remarks
+   * whole-record semantic summary rather than an individual block. When true,
+   * `blockIndex` is absent and `block_type` on the parent hit is `record_summary`.
+   */
+  isRecordSummary?: boolean | null | undefined;
   /**
    * Knowledge base id merged from graph record during retrieval (when present).
    */
@@ -152,6 +166,7 @@ export const SemanticSearchHitMetadata$inboundSchema: z.ZodMiniType<
     blockId: z.optional(z.nullable(types.string())),
     isBlock: z.optional(z.nullable(types.boolean())),
     isBlockGroup: z.optional(z.nullable(types.boolean())),
+    isRecordSummary: z.optional(z.nullable(types.boolean())),
     kbId: z.optional(z.nullable(types.string())),
     point_id: z.optional(
       z.nullable(smartUnion([types.string(), types.number(), types.number()])),

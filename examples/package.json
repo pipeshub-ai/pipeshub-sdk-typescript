@@ -2,10 +2,21 @@
   "name": "@pipeshub-ai/sdk-examples",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "build:parent": "cd .. && npm i && npm run build && cd -",
     "build:examples": "npm i",
-    "build": "npm run build:parent && npm run build:examples"
+    "build": "npm run build:parent && npm run build:examples",
+    "agent:login": "tsx client.ts .env",
+    "agent:stream-and-message": "tsx agentConversations/create-conversation-stream-and-add-message.ts .env",
+    "agent:regenerate": "tsx agentConversations/regenerate-message-stream.ts .env",
+    "agent:feedback": "tsx agentConversations/add-message-feedback.ts .env",
+    "agent:get-by-id": "tsx agentConversations/get-conversation-by-id.ts .env",
+    "agent:get-all": "tsx agentConversations/get-all-conversations.ts .env",
+    "agent:update-title": "tsx agentConversations/update-conversation-title.ts .env",
+    "agent:archive-unarchive": "tsx agentConversations/archive-unarchive.ts .env",
+    "agent:list-archived": "tsx agentConversations/list-all-archived-conversations.ts .env",
+    "agent:list-archives-grouped": "tsx agentConversations/list-archives-grouped.ts .env"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

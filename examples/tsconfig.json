@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "types": ["node"],
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@pipeshub-ai/sdk": ["../src/index.ts"],
+      "@pipeshub-ai/sdk/models": ["../src/models/index.ts"],
+      "@pipeshub-ai/sdk/models/*": ["../src/models/*"],
+      "@pipeshub-ai/sdk/types": ["../src/types/index.ts"],
+      "@pipeshub-ai/sdk/models/operations": ["../src/models/operations/index.ts"],
+      "@pipeshub-ai/sdk/models/errors": ["../src/models/errors/index.ts"]
+    }
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules"]
+}

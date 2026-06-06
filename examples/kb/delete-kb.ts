@@ -8,7 +8,7 @@ import { Pipeshub } from "@pipeshub-ai/sdk";
 async function main(): Promise<void> {
   // create the sdk client
   const pipeshub = new Pipeshub({
-    security: { process.env.PIPESHUB_BEARER_AUTH },
+    security: { bearerAuth: process.env.PIPESHUB_BEARER_AUTH },
     serverURL: process.env.PIPESHUB_SERVER_URL,
   });
 

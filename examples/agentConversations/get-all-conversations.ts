@@ -49,13 +49,13 @@ while (true) {
   });
 
   if (page === 1) {
-    ownedTotal = res.pagination.totalCount;
+    ownedTotal = res.pagination?.totalCount ?? 0;
   }
-  owned.push(...res.conversations);
-  shared.push(...res.sharedWithMeConversations);
+  owned.push(...(res.conversations ?? []));
+  shared.push(...(res.sharedWithMeConversations ?? []));
 
   const p = res.pagination;
-  if (!p.hasNextPage || page >= p.totalPages) {
+  if (!p?.hasNextPage || page >= (p?.totalPages ?? 0)) {
     break;
   }
   page += 1;

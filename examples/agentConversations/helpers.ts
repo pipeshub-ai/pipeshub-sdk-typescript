@@ -68,7 +68,7 @@ export async function firstLlmModelKey(pipeshub: Pipeshub): Promise<string> {
     modelType: "llm",
   });
 
-  const { models } = response;
+  const models = response.models ?? [];
   if (models.length === 0) {
     throw new Error(
       "No LLM models configured. Set PIPESHUB_AGENT_MODEL_KEY or configure an LLM provider.",
@@ -86,7 +86,7 @@ export async function createAgentWithWebSearch(
   const webSearch: AgentCreateWebSearch = { provider: "duckduckgo" };
 
   const providers = await pipeshub.webSearch.getWebSearchProviders();
-  for (const provider of providers.providers) {
+  for (const provider of providers.providers ?? []) {
     if (provider.provider === "duckduckgo" && provider.providerKey) {
       webSearch.providerKey = provider.providerKey;
       break;
@@ -237,7 +237,7 @@ export async function updateTitle(
     body: { title },
   });
 
-  const updatedTitle = res.conversation.title;
+  const updatedTitle = res.conversation?.title;
   if (updatedTitle == null) {
     throw new Error("updateAgentConversationTitle returned no title");
   }
@@ -256,6 +256,10 @@ export async function printConversation(
   });
 
   const conv = res.conversation;
+  if (conv == null) {
+    throw new Error("getAgentConversationById returned no conversation");
+  }
+
   console.log(`  id: ${conv.id}`);
   if (conv.title) {
     console.log(`  title: ${JSON.stringify(conv.title)}`);
@@ -282,7 +286,7 @@ export function formatActivity(conv: AgentConversationListItem): string {
     return new Date(conv.lastActivityAt).toISOString();
   }
   if (conv.updatedAt != null) {
-    return conv.updatedAt.toISOString();
+    return new Date(conv.updatedAt).toISOString();
   }
   return "-";
 }
@@ -325,9 +329,9 @@ export async function listArchived(
       limit,
     });
 
-    conversations.push(...res.conversations);
+    conversations.push(...(res.conversations ?? []));
 
-    if (!res.pagination.hasNextPage) {
+    if (!res.pagination?.hasNextPage) {
       break;
     }
 

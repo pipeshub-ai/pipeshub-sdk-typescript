@@ -70,13 +70,15 @@ const res = await pipeshub.agents.listAgentArchivedConversationsGrouped({
   agentLimit: 20,
 });
 
-const group = res.groups.find((g) => g.agentKey === key);
+const group = res.groups?.find((g) => g.agentKey === key);
 if (!group) {
   console.log(`\n(no archived group found for agent ${key})`);
   process.exit(0);
 }
 
-const ours = group.conversations.filter((conv) => createdIds.has(conv.id));
+const ours = (group.conversations ?? []).filter((conv) =>
+  createdIds.has(conv.id),
+);
 
 printConversations(`Archived conversations for agent ${key} (created here)`, ours);
 

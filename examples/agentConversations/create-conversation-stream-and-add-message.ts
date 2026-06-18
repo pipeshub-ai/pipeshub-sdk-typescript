@@ -1,11 +1,54 @@
 import dotenv from "dotenv";
 import { Pipeshub } from "@pipeshub-ai/sdk";
-import type { AgentConversationListItem } from "@pipeshub-ai/sdk/models";
 
-import { decodeComplete, printAgentConversationStream } from "./helpers.js";
+import { printAgentConversationStream } from "./helpers.js";
 
 const FIRST_MESSAGE = "Who moved the cheese?";
 const FOLLOW_UP = "Can you give me more details on that?";
+
+type StreamConversationMessage = {
+  _id?: string;
+  messageType?: string;
+  content?: string;
+};
+
+function extractConversationDetails(completeEventData: string): {
+  answer: string;
+  conversationId: string;
+  title: string;
+  botResponseMessageId: string | null;
+} {
+  const conv =
+    (
+      JSON.parse(completeEventData) as {
+        conversation?: {
+          _id?: string;
+          title?: string;
+          messages?: StreamConversationMessage[];
+        };
+      }
+    ).conversation ?? {};
+
+  let conversationId = conv._id ?? "";
+  let title = conv.title ?? "";
+  let answer = "";
+  let botResponseMessageId: string | null = null;
+
+  const messages = conv.messages ?? [];
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const msg = messages[i]!;
+    if (!title && msg.messageType === "user_query") {
+      title = msg.content ?? "";
+    }
+    if (msg.messageType === "bot_response") {
+      answer = msg.content ?? "";
+      botResponseMessageId = msg._id ?? null;
+      break;
+    }
+  }
+
+  return { answer, conversationId, title, botResponseMessageId };
+}
 
 dotenv.config({ path: ".env" });
 
@@ -34,7 +77,7 @@ const createStream = await pipeshub.agents.streamAgentConversation({
 const createCompleteData = await printAgentConversationStream(createStream, {
   query: FIRST_MESSAGE,
 });
-const [, convId] = decodeComplete(createCompleteData);
+const { conversationId: convId } = extractConversationDetails(createCompleteData);
 
 console.log(`conversation id: ${convId}`);
 

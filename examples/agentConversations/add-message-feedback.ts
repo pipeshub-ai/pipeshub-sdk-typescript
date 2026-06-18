@@ -2,9 +2,53 @@ import dotenv from "dotenv";
 import { Pipeshub } from "@pipeshub-ai/sdk";
 import { MessageFeedbackSubmitRequestCategory } from "@pipeshub-ai/sdk/models";
 
-import { decodeComplete, printAgentConversationStream } from "./helpers.js";
+import { printAgentConversationStream } from "./helpers.js";
 
 const FIRST_MESSAGE = "Who moved the cheese?";
+
+type StreamConversationMessage = {
+  _id?: string;
+  messageType?: string;
+  content?: string;
+};
+
+function extractConversationDetails(completeEventData: string): {
+  answer: string;
+  conversationId: string;
+  title: string;
+  botResponseMessageId: string | null;
+} {
+  const conv =
+    (
+      JSON.parse(completeEventData) as {
+        conversation?: {
+          _id?: string;
+          title?: string;
+          messages?: StreamConversationMessage[];
+        };
+      }
+    ).conversation ?? {};
+
+  let conversationId = conv._id ?? "";
+  let title = conv.title ?? "";
+  let answer = "";
+  let botResponseMessageId: string | null = null;
+
+  const messages = conv.messages ?? [];
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const msg = messages[i]!;
+    if (!title && msg.messageType === "user_query") {
+      title = msg.content ?? "";
+    }
+    if (msg.messageType === "bot_response") {
+      answer = msg.content ?? "";
+      botResponseMessageId = msg._id ?? null;
+      break;
+    }
+  }
+
+  return { answer, conversationId, title, botResponseMessageId };
+}
 const POSITIVE_CATEGORIES = [
   MessageFeedbackSubmitRequestCategory.ExcellentAnswer,
   MessageFeedbackSubmitRequestCategory.HelpfulCitations,
@@ -40,7 +84,8 @@ const stream = await pipeshub.agents.streamAgentConversation({
 const completeData = await printAgentConversationStream(stream, {
   query: FIRST_MESSAGE,
 });
-const [answer, convId, , botResponseMessageId] = decodeComplete(completeData);
+const { answer, conversationId: convId, botResponseMessageId } =
+  extractConversationDetails(completeData);
 
 console.log(`conversation id: ${convId}`);
 console.log(`bot response message id: ${botResponseMessageId}`);

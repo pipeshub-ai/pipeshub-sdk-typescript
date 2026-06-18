@@ -1,42 +1,3 @@
-type ConversationMessage = {
-  _id?: string;
-  messageType?: string;
-  content?: string;
-};
-
-type CompletePayload = {
-  conversation?: {
-    _id?: string;
-    title?: string;
-    messages?: ConversationMessage[];
-  };
-};
-
-export function decodeComplete(
-  data: string,
-): [answer: string, conversationId: string, title: string, botResponseMessageId: string | null] {
-  const conv = (JSON.parse(data) as CompletePayload).conversation ?? {};
-  let conversationId = conv._id ?? "";
-  let title = conv.title ?? "";
-  let answer = "";
-  let botResponseMessageId: string | null = null;
-
-  const messages = conv.messages ?? [];
-  for (let i = messages.length - 1; i >= 0; i--) {
-    const msg = messages[i]!;
-    if (!title && msg.messageType === "user_query") {
-      title = msg.content ?? "";
-    }
-    if (msg.messageType === "bot_response") {
-      answer = msg.content ?? "";
-      botResponseMessageId = msg._id ?? null;
-      break;
-    }
-  }
-
-  return [answer, conversationId, title, botResponseMessageId];
-}
-
 type AgentStreamEvent = {
   event?: string;
   data?: string;
@@ -72,7 +33,24 @@ export async function printAgentConversationStream(
       }
       accumulated = text;
     } else if (ev.event === "complete") {
-      const [answer] = decodeComplete(ev.data);
+      const messages =
+        (
+          JSON.parse(ev.data) as {
+            conversation?: {
+              messages?: { messageType?: string; content?: string }[];
+            };
+          }
+        ).conversation?.messages ?? [];
+
+      let answer = "";
+      for (let i = messages.length - 1; i >= 0; i--) {
+        const msg = messages[i]!;
+        if (msg.messageType === "bot_response") {
+          answer = msg.content ?? "";
+          break;
+        }
+      }
+
       const finalAnswer = answer || accumulated;
       if (!silent) {
         if (!accumulated && finalAnswer) {

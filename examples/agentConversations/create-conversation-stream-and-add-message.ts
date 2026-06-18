@@ -1,27 +1,47 @@
-import { loadEnv, createClient } from "../client.js";
-import { agentKey, defaultFilters, streamAddMessage, streamCreate } from "./helpers.js";
+import dotenv from "dotenv";
+import { Pipeshub } from "@pipeshub-ai/sdk";
+import type { AgentConversationListItem } from "@pipeshub-ai/sdk/models";
+
+import { decodeComplete, printAgentConversationStream } from "./helpers.js";
 
 const FIRST_MESSAGE = "Who moved the cheese?";
 const FOLLOW_UP = "Can you give me more details on that?";
 
-const envPath = process.argv[2];
-if (!envPath) {
-  console.error(
-    "usage: npx tsx agentConversations/create-conversation-stream-and-add-message.ts .env",
-  );
-  process.exit(1);
+dotenv.config({ path: ".env" });
+
+const token = process.env.PIPESHUB_ACCESS_TOKEN;
+if (!token) {
+  throw new Error("PIPESHUB_ACCESS_TOKEN is required");
 }
 
-loadEnv(envPath);
-const pipeshub = await createClient();
+const baseUrl = (
+  process.env.PIPESHUB_BASE_URL ?? "http://localhost:3000"
+).replace(/\/$/, "");
 
-const key = agentKey();
-const filters = defaultFilters();
+const pipeshub = new Pipeshub({
+  serverURL: `${baseUrl}/api/v1`,
+  security: { bearerAuth: token },
+});
 
-console.log(`agent key: ${key}`);
+const key = "52b7e901-f3e9-4009-bcd7-c0274c58f296";
+const filters = { apps: ["270d4bac-234a-4c0d-963f-84f152cd21f0"] };
 
-const [convId] = await streamCreate(pipeshub, FIRST_MESSAGE, filters, { key });
+const createStream = await pipeshub.agents.streamAgentConversation({
+  agentKey: key,
+  body: { query: FIRST_MESSAGE, filters, chatMode: "auto" },
+});
+
+const createCompleteData = await printAgentConversationStream(createStream, {
+  query: FIRST_MESSAGE,
+});
+const [, convId] = decodeComplete(createCompleteData);
 
 console.log(`conversation id: ${convId}`);
 
-await streamAddMessage(pipeshub, convId, FOLLOW_UP, filters, { key });
+const messageStream = await pipeshub.agents.streamAgentConversationMessage({
+  agentKey: key,
+  conversationId: convId,
+  body: { query: FOLLOW_UP, filters, chatMode: "auto" },
+});
+
+await printAgentConversationStream(messageStream, { query: FOLLOW_UP });

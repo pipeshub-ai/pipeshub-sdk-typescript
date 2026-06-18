@@ -1,9 +1,18 @@
+import dotenv from "dotenv";
+import { Pipeshub } from "@pipeshub-ai/sdk";
 import type { AgentConversationListItem } from "@pipeshub-ai/sdk/models";
 
-import { loadEnv, createClient } from "../client.js";
-import { agentKey, formatActivity } from "./helpers.js";
-
 const PAGE_LIMIT = 20;
+
+function formatActivity(conv: AgentConversationListItem): string {
+  if (conv.lastActivityAt != null) {
+    return new Date(conv.lastActivityAt).toISOString();
+  }
+  if (conv.updatedAt != null) {
+    return new Date(conv.updatedAt).toISOString();
+  }
+  return "-";
+}
 
 function printSection(
   heading: string,
@@ -20,18 +29,23 @@ function printSection(
   }
 }
 
-const envPath = process.argv[2];
-if (!envPath) {
-  console.error(
-    "usage: npx tsx agentConversations/get-all-conversations.ts .env",
-  );
-  process.exit(1);
+dotenv.config({ path: ".env" });
+
+const token = process.env.PIPESHUB_ACCESS_TOKEN;
+if (!token) {
+  throw new Error("PIPESHUB_ACCESS_TOKEN is required");
 }
 
-loadEnv(envPath);
-const pipeshub = await createClient();
+const baseUrl = (
+  process.env.PIPESHUB_BASE_URL ?? "http://localhost:3000"
+).replace(/\/$/, "");
 
-const key = agentKey();
+const pipeshub = new Pipeshub({
+  serverURL: `${baseUrl}/api/v1`,
+  security: { bearerAuth: token },
+});
+
+const key = "52b7e901-f3e9-4009-bcd7-c0274c58f296";
 console.log(`Active conversations for agent ${key} (newest first):`);
 
 let page = 1;

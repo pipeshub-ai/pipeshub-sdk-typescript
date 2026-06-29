@@ -207,10 +207,7 @@ async function $do(
         z.custom<ReadableStream<Uint8Array>>(x => x instanceof ReadableStream),
         z.transform(stream => {
           return new EventStream(stream, rawEvent => {
-            return {
-              done: false,
-              value: models.SSEEvent$inboundSchema.parse(rawEvent),
-            };
+            return { value: models.SSEEvent$inboundSchema.parse(rawEvent) };
           });
         }),
       ),

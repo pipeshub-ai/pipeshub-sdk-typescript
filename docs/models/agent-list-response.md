@@ -34,6 +34,10 @@ let value: AgentListResponse = {
       ],
       updatedAtTimestamp: 439788,
       shareWithOrg: false,
+      toolsets: [],
+      knowledge: [
+        {},
+      ],
       canView: true,
       canShare: false,
       canEdit: true,

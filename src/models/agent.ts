@@ -9,13 +9,10 @@ import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import { smartUnion } from "../types/smart-union.js";
 import {
-  AgentCreateToolsetName,
-  AgentCreateToolsetName$inboundSchema,
-} from "./agent-create-toolset-name.js";
-import {
-  AgentKnowledgeFiltersParsed,
-  AgentKnowledgeFiltersParsed$inboundSchema,
-} from "./agent-knowledge-filters-parsed.js";
+  AgentKnowledge,
+  AgentKnowledge$inboundSchema,
+} from "./agent-knowledge.js";
+import { AgentToolset, AgentToolset$inboundSchema } from "./agent-toolset.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
 export type Model = {
@@ -36,100 +33,6 @@ export type Model = {
 };
 
 export type ModelUnion = string | Model;
-
-export type Tool = {
-  name?: string | undefined;
-  fullName?: string | undefined;
-  description?: string | undefined;
-  /**
-   * Server-stamped: `true` when the tool's `fullName` is no
-   *
-   * @remarks
-   * longer in the runtime tool registry (its `@tool` was
-   * removed). Read-only; ignored on create/update bodies.
-   */
-  deprecated?: boolean | undefined;
-};
-
-export type Toolset = {
-  /**
-   * Integration / toolset type key.
-   */
-  name?: AgentCreateToolsetName | undefined;
-  /**
-   * Human-readable toolset product label (for example `Jira` or `Slack`).
-   */
-  displayName?: string | undefined;
-  type?: string | undefined;
-  /**
-   * Admin-created toolset instance id
-   */
-  instanceId?: string | undefined;
-  /**
-   * Human-readable instance label (e.g. sidebar instance name)
-   */
-  instanceName?: string | undefined;
-  /**
-   * Optional branded icon URL or path
-   */
-  iconPath?: string | undefined;
-  tools?: Array<Tool> | undefined;
-};
-
-/**
- * Knowledge scope filter as stored on the graph edge. The Node `getAgent`
- *
- * @remarks
- * handler proxies this field unchanged from the AI service (only `agent.id`
- * is stripped). May be a JSON string (typical graph storage) or an object.
- * Prefer `filtersParsed` on GET for a guaranteed parsed object with the
- * same keys as the object branch below.
- */
-export type AgentFilters = AgentKnowledgeFiltersParsed | string;
-
-/**
- * Server-derived read-only object parsed from the stored
- *
- * @remarks
- * `filters` JSON by the graph provider on GET (Neo4j / Arango).
- * Empty object when `filters` is missing or invalid JSON.
- */
-export type FiltersParsed = {
-  /**
-   * Record-group ids (e.g. knowledge-base roots) in scope.
-   */
-  recordGroups?: Array<string> | undefined;
-  /**
-   * Individual record ids in scope.
-   */
-  records?: Array<string> | undefined;
-};
-
-export type Knowledge = {
-  key?: string | undefined;
-  connectorId?: string | undefined;
-  name?: string | undefined;
-  type?: string | undefined;
-  displayName?: string | undefined;
-  /**
-   * Knowledge scope filter as stored on the graph edge. The Node `getAgent`
-   *
-   * @remarks
-   * handler proxies this field unchanged from the AI service (only `agent.id`
-   * is stripped). May be a JSON string (typical graph storage) or an object.
-   * Prefer `filtersParsed` on GET for a guaranteed parsed object with the
-   * same keys as the object branch below.
-   */
-  filters?: AgentKnowledgeFiltersParsed | string | undefined;
-  /**
-   * Server-derived read-only object parsed from the stored
-   *
-   * @remarks
-   * `filters` JSON by the graph provider on GET (Neo4j / Arango).
-   * Empty object when `filters` is missing or invalid JSON.
-   */
-  filtersParsed?: FiltersParsed | undefined;
-};
 
 /**
  * Web search provider attached to this agent. Null when none is configured.
@@ -174,6 +77,9 @@ export type Agent = {
    * System instructions that define agent behavior
    */
   systemPrompt?: string | undefined;
+  /**
+   * MongoDB user ID of the agent creator
+   */
   createdBy: string;
   /**
    * Initial greeting shown when a conversation with this agent starts
@@ -196,11 +102,11 @@ export type Agent = {
    * Multiple instances of the same integration type are distinguished by `instanceId`
    * and optional `instanceName`.
    */
-  toolsets: Array<Toolset>;
+  toolsets: Array<AgentToolset>;
   /**
    * Knowledge connectors and indexed scopes linked to the agent
    */
-  knowledge: Array<Knowledge>;
+  knowledge: Array<AgentKnowledge>;
   /**
    * Whether the agent is shared with the whole organization
    */
@@ -300,109 +206,6 @@ export function modelUnionFromJSON(
 }
 
 /** @internal */
-export const Tool$inboundSchema: z.ZodMiniType<Tool, unknown> = z.object({
-  name: types.optional(types.string()),
-  fullName: types.optional(types.string()),
-  description: types.optional(types.string()),
-  deprecated: types.optional(types.boolean()),
-});
-
-export function toolFromJSON(
-  jsonString: string,
-): SafeParseResult<Tool, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => Tool$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Tool' from JSON`,
-  );
-}
-
-/** @internal */
-export const Toolset$inboundSchema: z.ZodMiniType<Toolset, unknown> = z.object({
-  name: types.optional(AgentCreateToolsetName$inboundSchema),
-  displayName: types.optional(types.string()),
-  type: types.optional(types.string()),
-  instanceId: types.optional(types.string()),
-  instanceName: types.optional(types.string()),
-  iconPath: types.optional(types.string()),
-  tools: types.optional(z.array(z.lazy(() => Tool$inboundSchema))),
-});
-
-export function toolsetFromJSON(
-  jsonString: string,
-): SafeParseResult<Toolset, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => Toolset$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Toolset' from JSON`,
-  );
-}
-
-/** @internal */
-export const AgentFilters$inboundSchema: z.ZodMiniType<AgentFilters, unknown> =
-  smartUnion([AgentKnowledgeFiltersParsed$inboundSchema, types.string()]);
-
-export function agentFiltersFromJSON(
-  jsonString: string,
-): SafeParseResult<AgentFilters, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => AgentFilters$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'AgentFilters' from JSON`,
-  );
-}
-
-/** @internal */
-export const FiltersParsed$inboundSchema: z.ZodMiniType<
-  FiltersParsed,
-  unknown
-> = z.object({
-  recordGroups: types.optional(z.array(types.string())),
-  records: types.optional(z.array(types.string())),
-});
-
-export function filtersParsedFromJSON(
-  jsonString: string,
-): SafeParseResult<FiltersParsed, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => FiltersParsed$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'FiltersParsed' from JSON`,
-  );
-}
-
-/** @internal */
-export const Knowledge$inboundSchema: z.ZodMiniType<Knowledge, unknown> = z
-  .pipe(
-    z.object({
-      _key: types.optional(types.string()),
-      connectorId: types.optional(types.string()),
-      name: types.optional(types.string()),
-      type: types.optional(types.string()),
-      displayName: types.optional(types.string()),
-      filters: types.optional(
-        smartUnion([AgentKnowledgeFiltersParsed$inboundSchema, types.string()]),
-      ),
-      filtersParsed: types.optional(z.lazy(() => FiltersParsed$inboundSchema)),
-    }),
-    z.transform((v) => {
-      return remap$(v, {
-        "_key": "key",
-      });
-    }),
-  );
-
-export function knowledgeFromJSON(
-  jsonString: string,
-): SafeParseResult<Knowledge, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => Knowledge$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Knowledge' from JSON`,
-  );
-}
-
-/** @internal */
 export const AgentWebSearch$inboundSchema: z.ZodMiniType<
   AgentWebSearch,
   unknown
@@ -438,8 +241,8 @@ export const Agent$inboundSchema: z.ZodMiniType<Agent, unknown> = z.pipe(
       types.string(),
       z.lazy(() => Model$inboundSchema),
     ])),
-    toolsets: z.array(z.lazy(() => Toolset$inboundSchema)),
-    knowledge: z.array(z.lazy(() => Knowledge$inboundSchema)),
+    toolsets: z.array(AgentToolset$inboundSchema),
+    knowledge: z.array(AgentKnowledge$inboundSchema),
     shareWithOrg: types.boolean(),
     webSearch: z.optional(
       z.nullable(z.lazy(() => AgentWebSearch$inboundSchema)),

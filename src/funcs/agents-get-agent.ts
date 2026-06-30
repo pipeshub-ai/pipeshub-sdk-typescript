@@ -33,11 +33,10 @@ import { Result } from "../types/fp.js";
  * @remarks
  * Retrieve agent details by its unique key.
  *
- * **Observed gateway behavior (localhost integration tests):**
+ * **Gateway not-found behavior:**
  * Unknown `agentKey`, lookup after soft-delete, and other AI-backend failures
- * currently return **HTTP 500** with an `ErrorResponse` body (message often
- * mentions the agent or "not found"), not 404. The Python query service may
- * return 404 when called directly; the Node proxy surfaces 500 instead.
+ * that return 404 from the Python query service are surfaced by the Node
+ * gateway as **HTTP 404** with an `ErrorResponse` body.
  */
 export function agentsGetAgent(
   client: PipeshubCore,
@@ -144,7 +143,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["400", "401", "403", "4XX", "500", "503", "5XX"],
+    errorCodes: ["400", "401", "403", "404", "4XX", "500", "503", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -170,7 +169,7 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.GetAgentResponse$inboundSchema),
-    M.jsonErr([400, 401, 403], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
     M.jsonErr([500, 503], errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

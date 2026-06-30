@@ -110,7 +110,7 @@ export type UpdateConversationTitleMessage = {
    * `bot_response` messages, and only when the
    * model emitted a trailing confidence block.
    */
-  confidence?: string | undefined;
+  confidence?: string | null | undefined;
   /**
    * References to source documents used in the
    *
@@ -494,7 +494,7 @@ export const UpdateConversationTitleMessage$inboundSchema: z.ZodMiniType<
       UpdateConversationTitleContentFormat$inboundSchema,
       "MARKDOWN",
     ),
-    confidence: types.optional(types.string()),
+    confidence: z.optional(z.nullable(types.string())),
     citations: z.array(models.CitationReference$inboundSchema),
     followUpQuestions: z.array(models.FollowUpQuestion$inboundSchema),
     feedback: z.array(models.MessageFeedback$inboundSchema),

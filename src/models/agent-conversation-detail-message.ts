@@ -55,6 +55,12 @@ export type AgentConversationDetailMessageContentFormat = OpenEnum<
   typeof AgentConversationDetailMessageContentFormat
 >;
 
+/**
+ * AI confidence in the answer. Present only on `bot_response` messages,
+ *
+ * @remarks
+ * and only when the model emitted a trailing confidence block.
+ */
 export const Confidence = {
   VeryHigh: "Very High",
   High: "High",
@@ -62,6 +68,12 @@ export const Confidence = {
   Low: "Low",
   Unknown: "Unknown",
 } as const;
+/**
+ * AI confidence in the answer. Present only on `bot_response` messages,
+ *
+ * @remarks
+ * and only when the model emitted a trailing confidence block.
+ */
 export type Confidence = OpenEnum<typeof Confidence>;
 
 export type AgentConversationDetailMessageReferenceDatum = {
@@ -116,7 +128,13 @@ export type AgentConversationDetailMessage = {
   content?: string | undefined;
   contentFormat?: AgentConversationDetailMessageContentFormat | undefined;
   citations?: Array<AgentConversationDetailMessageCitation> | undefined;
-  confidence?: Confidence | undefined;
+  /**
+   * AI confidence in the answer. Present only on `bot_response` messages,
+   *
+   * @remarks
+   * and only when the model emitted a trailing confidence block.
+   */
+  confidence?: Confidence | null | undefined;
   followUpQuestions?: Array<FollowUpQuestion> | undefined;
   feedback?: Array<MessageFeedback> | undefined;
   /**
@@ -230,7 +248,7 @@ export const AgentConversationDetailMessage$inboundSchema: z.ZodMiniType<
     citations: types.optional(
       z.array(AgentConversationDetailMessageCitation$inboundSchema),
     ),
-    confidence: types.optional(Confidence$inboundSchema),
+    confidence: z.optional(z.nullable(Confidence$inboundSchema)),
     followUpQuestions: types.optional(z.array(FollowUpQuestion$inboundSchema)),
     feedback: types.optional(z.array(MessageFeedback$inboundSchema)),
     referenceData: types.optional(z.array(z.lazy(() =>

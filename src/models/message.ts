@@ -170,9 +170,12 @@ export type Message = {
    */
   citations?: Array<CitationReference> | undefined;
   /**
-   * AI's confidence level in the response
+   * AI confidence in the answer. Present only on `bot_response` messages,
+   *
+   * @remarks
+   * and only when the model emitted a trailing confidence block.
    */
-  confidence?: string | undefined;
+  confidence?: string | null | undefined;
   /**
    * Suggested follow-up questions
    */
@@ -276,7 +279,7 @@ export const Message$inboundSchema: z.ZodMiniType<Message, unknown> = z.pipe(
     content: types.optional(types.string()),
     contentFormat: z._default(MessageContentFormat$inboundSchema, "MARKDOWN"),
     citations: types.optional(z.array(CitationReference$inboundSchema)),
-    confidence: types.optional(types.string()),
+    confidence: z.optional(z.nullable(types.string())),
     followUpQuestions: types.optional(z.array(FollowUpQuestion$inboundSchema)),
     feedback: types.optional(z.array(MessageFeedback$inboundSchema)),
     metadata: types.optional(z.lazy(() => MessageMetadata$inboundSchema)),

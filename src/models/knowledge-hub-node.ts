@@ -27,19 +27,19 @@ export type NodeType = OpenEnum<typeof NodeType>;
 /**
  * Origin type.
  */
-export const Origin = {
+export const KnowledgeHubNodeOrigin = {
   Collection: "COLLECTION",
   Connector: "CONNECTOR",
 } as const;
 /**
  * Origin type.
  */
-export type Origin = OpenEnum<typeof Origin>;
+export type KnowledgeHubNodeOrigin = OpenEnum<typeof KnowledgeHubNodeOrigin>;
 
 /**
  * Per-item permission when `include=permissions` is requested; otherwise `null`.
  */
-export type Permission = {
+export type KnowledgeHubNodePermission = {
   role: string;
   canEdit: boolean;
   canDelete: boolean;
@@ -71,7 +71,7 @@ export type KnowledgeHubNode = {
   /**
    * Origin type.
    */
-  origin: Origin;
+  origin: KnowledgeHubNodeOrigin;
   /**
    * Connector display name / key when applicable; otherwise `null`.
    */
@@ -119,7 +119,7 @@ export type KnowledgeHubNode = {
   /**
    * Per-item permission when `include=permissions` is requested; otherwise `null`.
    */
-  permission: Permission | null;
+  permission: KnowledgeHubNodePermission | null;
   /**
    * Sharing status (e.g. `private`, `shared`, `team`, `workspace`) when
    *
@@ -134,24 +134,28 @@ export const NodeType$inboundSchema: z.ZodMiniType<NodeType, unknown> =
   openEnums.inboundSchema(NodeType);
 
 /** @internal */
-export const Origin$inboundSchema: z.ZodMiniType<Origin, unknown> = openEnums
-  .inboundSchema(Origin);
+export const KnowledgeHubNodeOrigin$inboundSchema: z.ZodMiniType<
+  KnowledgeHubNodeOrigin,
+  unknown
+> = openEnums.inboundSchema(KnowledgeHubNodeOrigin);
 
 /** @internal */
-export const Permission$inboundSchema: z.ZodMiniType<Permission, unknown> = z
-  .object({
-    role: types.string(),
-    canEdit: types.boolean(),
-    canDelete: types.boolean(),
-  });
+export const KnowledgeHubNodePermission$inboundSchema: z.ZodMiniType<
+  KnowledgeHubNodePermission,
+  unknown
+> = z.object({
+  role: types.string(),
+  canEdit: types.boolean(),
+  canDelete: types.boolean(),
+});
 
-export function permissionFromJSON(
+export function knowledgeHubNodePermissionFromJSON(
   jsonString: string,
-): SafeParseResult<Permission, SDKValidationError> {
+): SafeParseResult<KnowledgeHubNodePermission, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => Permission$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Permission' from JSON`,
+    (x) => KnowledgeHubNodePermission$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'KnowledgeHubNodePermission' from JSON`,
   );
 }
 
@@ -164,7 +168,7 @@ export const KnowledgeHubNode$inboundSchema: z.ZodMiniType<
   name: types.string(),
   nodeType: NodeType$inboundSchema,
   parentId: types.nullable(types.string()),
-  origin: Origin$inboundSchema,
+  origin: KnowledgeHubNodeOrigin$inboundSchema,
   connector: types.nullable(types.string()),
   recordType: types.nullable(types.string()),
   recordGroupType: types.nullable(types.string()),
@@ -179,7 +183,9 @@ export const KnowledgeHubNode$inboundSchema: z.ZodMiniType<
   webUrl: types.nullable(types.string()),
   hasChildren: types.boolean(),
   previewRenderable: types.nullable(types.boolean()),
-  permission: types.nullable(z.lazy(() => Permission$inboundSchema)),
+  permission: types.nullable(
+    z.lazy(() => KnowledgeHubNodePermission$inboundSchema),
+  ),
   sharingStatus: types.nullable(types.string()),
 });
 

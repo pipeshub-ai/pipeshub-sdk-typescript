@@ -44,11 +44,9 @@ import { Result } from "../types/fp.js";
  * **Warning:**
  * All conversations with this agent will become inaccessible.
  *
- * **Observed gateway behavior (localhost integration tests):**
+ * **Gateway not-found behavior:**
  * Unknown `agentKey`, deleting an already-deleted agent, and `GET /agents/{agentKey}`
- * after delete currently return **HTTP 500** with an `ErrorResponse` body (message
- * often mentions the agent or "not found"), not 404. The Python backend raises 404
- * for not-found when called directly; the Node proxy may surface 500 instead.
+ * after delete return **HTTP 404** with an `ErrorResponse` body.
  */
 export function agentsDeleteAgent(
   client: PipeshubCore,
@@ -155,7 +153,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["401", "4XX", "500", "5XX"],
+    errorCodes: ["401", "404", "4XX", "500", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -181,7 +179,7 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.AgentDeleteResponse$inboundSchema),
-    M.jsonErr(401, errors.ErrorResponse$inboundSchema),
+    M.jsonErr([401, 404], errors.ErrorResponse$inboundSchema),
     M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

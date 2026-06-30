@@ -17,3 +17,5 @@ export * from "./pipeshub-error.js";
 export * from "./response-validation-error.js";
 export * from "./sdk-validation-error.js";
 export * from "./search-history.js";
+export * from "./stream-record-buffer.js";
+export * from "./stream-record-error-response.js";

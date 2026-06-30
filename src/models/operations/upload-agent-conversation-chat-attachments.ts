@@ -4,7 +4,7 @@
 
 import * as z from "zod/v4-mini";
 
-export type FileT = {
+export type UploadAgentConversationChatAttachmentsFile = {
   fileName: string;
   content: ReadableStream<Uint8Array> | Blob | ArrayBuffer | Uint8Array;
 };
@@ -24,7 +24,7 @@ export type UploadAgentConversationChatAttachmentsRequestBody = {
    *
    * @remarks
    */
-  files: Array<FileT>;
+  files: Array<UploadAgentConversationChatAttachmentsFile>;
 };
 
 export type UploadAgentConversationChatAttachmentsRequest = {
@@ -36,14 +36,17 @@ export type UploadAgentConversationChatAttachmentsRequest = {
 };
 
 /** @internal */
-export type FileT$Outbound = {
+export type UploadAgentConversationChatAttachmentsFile$Outbound = {
   fileName: string;
   content: ReadableStream<Uint8Array> | Blob | ArrayBuffer | Uint8Array;
 };
 
 /** @internal */
-export const FileT$outboundSchema: z.ZodMiniType<FileT$Outbound, FileT> = z
-  .object({
+export const UploadAgentConversationChatAttachmentsFile$outboundSchema:
+  z.ZodMiniType<
+    UploadAgentConversationChatAttachmentsFile$Outbound,
+    UploadAgentConversationChatAttachmentsFile
+  > = z.object({
     fileName: z.string(),
     content: z.union([
       z.custom<ReadableStream<Uint8Array>>(x => x instanceof ReadableStream),
@@ -53,14 +56,21 @@ export const FileT$outboundSchema: z.ZodMiniType<FileT$Outbound, FileT> = z
     ]),
   });
 
-export function fileToJSON(fileT: FileT): string {
-  return JSON.stringify(FileT$outboundSchema.parse(fileT));
+export function uploadAgentConversationChatAttachmentsFileToJSON(
+  uploadAgentConversationChatAttachmentsFile:
+    UploadAgentConversationChatAttachmentsFile,
+): string {
+  return JSON.stringify(
+    UploadAgentConversationChatAttachmentsFile$outboundSchema.parse(
+      uploadAgentConversationChatAttachmentsFile,
+    ),
+  );
 }
 
 /** @internal */
 export type UploadAgentConversationChatAttachmentsRequestBody$Outbound = {
   conversationId?: string | undefined;
-  files: Array<FileT$Outbound>;
+  files: Array<UploadAgentConversationChatAttachmentsFile$Outbound>;
 };
 
 /** @internal */
@@ -70,7 +80,9 @@ export const UploadAgentConversationChatAttachmentsRequestBody$outboundSchema:
     UploadAgentConversationChatAttachmentsRequestBody
   > = z.object({
     conversationId: z.optional(z.string()),
-    files: z.array(z.lazy(() => FileT$outboundSchema)),
+    files: z.array(
+      z.lazy(() => UploadAgentConversationChatAttachmentsFile$outboundSchema),
+    ),
   });
 
 export function uploadAgentConversationChatAttachmentsRequestBodyToJSON(

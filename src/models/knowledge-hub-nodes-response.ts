@@ -102,7 +102,7 @@ export type Size = {
 /**
  * Echo of applied filters; unused slots are JSON `null`.
  */
-export type Applied = {
+export type KnowledgeHubNodesResponseApplied = {
   q: string | null;
   nodeTypes: Array<string> | null;
   recordTypes: Array<string> | null;
@@ -125,7 +125,7 @@ export type Applied = {
 /**
  * Populated when `include=availableFilters`; otherwise `null`.
  */
-export type Available = {
+export type KnowledgeHubNodesResponseAvailable = {
   nodeTypes: Array<FilterOption>;
   recordTypes: Array<FilterOption>;
   origins: Array<FilterOption>;
@@ -139,11 +139,11 @@ export type KnowledgeHubNodesResponseFilters = {
   /**
    * Echo of applied filters; unused slots are JSON `null`.
    */
-  applied: Applied;
+  applied: KnowledgeHubNodesResponseApplied;
   /**
    * Populated when `include=availableFilters`; otherwise `null`.
    */
-  available: Available | null;
+  available: KnowledgeHubNodesResponseAvailable | null;
 };
 
 export type Breadcrumb = {
@@ -343,7 +343,10 @@ export function sizeFromJSON(
 }
 
 /** @internal */
-export const Applied$inboundSchema: z.ZodMiniType<Applied, unknown> = z.object({
+export const KnowledgeHubNodesResponseApplied$inboundSchema: z.ZodMiniType<
+  KnowledgeHubNodesResponseApplied,
+  unknown
+> = z.object({
   q: types.nullable(types.string()),
   nodeTypes: types.nullable(z.array(types.string())),
   recordTypes: types.nullable(z.array(types.string())),
@@ -357,35 +360,38 @@ export const Applied$inboundSchema: z.ZodMiniType<Applied, unknown> = z.object({
   sortOrder: types.string(),
 });
 
-export function appliedFromJSON(
+export function knowledgeHubNodesResponseAppliedFromJSON(
   jsonString: string,
-): SafeParseResult<Applied, SDKValidationError> {
+): SafeParseResult<KnowledgeHubNodesResponseApplied, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => Applied$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Applied' from JSON`,
+    (x) => KnowledgeHubNodesResponseApplied$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'KnowledgeHubNodesResponseApplied' from JSON`,
   );
 }
 
 /** @internal */
-export const Available$inboundSchema: z.ZodMiniType<Available, unknown> = z
-  .object({
-    nodeTypes: z.array(FilterOption$inboundSchema),
-    recordTypes: z.array(FilterOption$inboundSchema),
-    origins: z.array(FilterOption$inboundSchema),
-    connectors: z.array(FilterOption$inboundSchema),
-    indexingStatus: z.array(FilterOption$inboundSchema),
-    sortBy: z.array(FilterOption$inboundSchema),
-    sortOrder: z.array(FilterOption$inboundSchema),
-  });
+export const KnowledgeHubNodesResponseAvailable$inboundSchema: z.ZodMiniType<
+  KnowledgeHubNodesResponseAvailable,
+  unknown
+> = z.object({
+  nodeTypes: z.array(FilterOption$inboundSchema),
+  recordTypes: z.array(FilterOption$inboundSchema),
+  origins: z.array(FilterOption$inboundSchema),
+  connectors: z.array(FilterOption$inboundSchema),
+  indexingStatus: z.array(FilterOption$inboundSchema),
+  sortBy: z.array(FilterOption$inboundSchema),
+  sortOrder: z.array(FilterOption$inboundSchema),
+});
 
-export function availableFromJSON(
+export function knowledgeHubNodesResponseAvailableFromJSON(
   jsonString: string,
-): SafeParseResult<Available, SDKValidationError> {
+): SafeParseResult<KnowledgeHubNodesResponseAvailable, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => Available$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Available' from JSON`,
+    (x) =>
+      KnowledgeHubNodesResponseAvailable$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'KnowledgeHubNodesResponseAvailable' from JSON`,
   );
 }
 
@@ -394,8 +400,10 @@ export const KnowledgeHubNodesResponseFilters$inboundSchema: z.ZodMiniType<
   KnowledgeHubNodesResponseFilters,
   unknown
 > = z.object({
-  applied: z.lazy(() => Applied$inboundSchema),
-  available: types.nullable(z.lazy(() => Available$inboundSchema)),
+  applied: z.lazy(() => KnowledgeHubNodesResponseApplied$inboundSchema),
+  available: types.nullable(
+    z.lazy(() => KnowledgeHubNodesResponseAvailable$inboundSchema),
+  ),
 });
 
 export function knowledgeHubNodesResponseFiltersFromJSON(

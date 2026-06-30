@@ -175,7 +175,6 @@ async function $do(
         z.transform(stream => {
           return new EventStream(stream, rawEvent => {
             return {
-              done: false,
               value: models.AgentMessageStreamSSEEvent$inboundSchema.parse(
                 rawEvent,
               ),

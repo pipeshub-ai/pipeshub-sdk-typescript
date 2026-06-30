@@ -7,6 +7,11 @@ import { remap as remap$ } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
+import {
+  AgentKnowledge,
+  AgentKnowledge$inboundSchema,
+} from "./agent-knowledge.js";
+import { AgentToolset, AgentToolset$inboundSchema } from "./agent-toolset.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
 /**
@@ -52,7 +57,7 @@ export type AgentListItem = {
    */
   createdAtTimestamp: number;
   /**
-   * User id of the creator.
+   * MongoDB user ID of the agent creator
    */
   createdBy: string;
   /**
@@ -123,6 +128,22 @@ export type AgentListItem = {
    * Whether the agent is shared with the organization.
    */
   shareWithOrg: boolean;
+  /**
+   * Toolset instances linked to the agent. Same projection as
+   *
+   * @remarks
+   * `GET /agents/{agentKey}`; the backend builds it from the graph edges
+   * for each agent on the returned page.
+   */
+  toolsets: Array<AgentToolset>;
+  /**
+   * Knowledge connectors and indexed scopes linked to the agent. Same
+   *
+   * @remarks
+   * projection as `GET /agents/{agentKey}`; the backend builds it from
+   * the graph edges for each agent on the returned page.
+   */
+  knowledge: Array<AgentKnowledge>;
   /**
    * Effective permission to view the agent.
    */
@@ -196,6 +217,8 @@ export const AgentListItem$inboundSchema: z.ZodMiniType<
       z.nullable(z.lazy(() => AgentListItemWebSearch$inboundSchema)),
     ),
     shareWithOrg: types.boolean(),
+    toolsets: z.array(AgentToolset$inboundSchema),
+    knowledge: z.array(AgentKnowledge$inboundSchema),
     can_view: types.boolean(),
     can_share: types.boolean(),
     can_edit: types.boolean(),

@@ -7,6 +7,7 @@ import { Agents } from "./agents.js";
 import { AIModelsProviders } from "./ai-models-providers.js";
 import { Conversations } from "./conversations.js";
 import { KnowledgeBase } from "./knowledge-base.js";
+import { KnowledgeHub } from "./knowledge-hub.js";
 import { OAuthApps } from "./o-auth-apps.js";
 import { OAuthProvider } from "./o-auth-provider.js";
 import { OpenIDConnect } from "./open-id-connect.js";
@@ -52,6 +53,11 @@ export class Pipeshub extends ClientSDK {
   private _knowledgeBase?: KnowledgeBase;
   get knowledgeBase(): KnowledgeBase {
     return (this._knowledgeBase ??= new KnowledgeBase(this._options));
+  }
+
+  private _knowledgeHub?: KnowledgeHub;
+  get knowledgeHub(): KnowledgeHub {
+    return (this._knowledgeHub ??= new KnowledgeHub(this._options));
   }
 
   private _conversations?: Conversations;

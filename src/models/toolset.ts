@@ -13,7 +13,7 @@ import {
 } from "./agent-create-toolset-name.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
-export type Tool = {
+export type ToolsetTool = {
   /**
    * Tool node key in the backing graph store.
    */
@@ -44,7 +44,7 @@ export type Tool = {
  * same integration type are distinguished by `instanceId` and optional
  * `instanceName`.
  */
-export type AgentToolset = {
+export type Toolset = {
   /**
    * Toolset instance node key in the backing graph store.
    */
@@ -74,48 +74,19 @@ export type AgentToolset = {
    * instance exposes all of the toolset's tools.
    */
   selectedTools?: Array<string> | null | undefined;
-  tools?: Array<Tool> | undefined;
+  tools?: Array<ToolsetTool> | undefined;
 };
 
 /** @internal */
-export const Tool$inboundSchema: z.ZodMiniType<Tool, unknown> = z.pipe(
-  z.object({
-    _key: types.optional(types.string()),
-    name: types.optional(types.string()),
-    fullName: types.optional(types.string()),
-    toolsetName: types.optional(types.string()),
-    description: types.optional(types.string()),
-    deprecated: types.optional(types.boolean()),
-  }),
-  z.transform((v) => {
-    return remap$(v, {
-      "_key": "key",
-    });
-  }),
-);
-
-export function toolFromJSON(
-  jsonString: string,
-): SafeParseResult<Tool, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => Tool$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Tool' from JSON`,
-  );
-}
-
-/** @internal */
-export const AgentToolset$inboundSchema: z.ZodMiniType<AgentToolset, unknown> =
-  z.pipe(
+export const ToolsetTool$inboundSchema: z.ZodMiniType<ToolsetTool, unknown> = z
+  .pipe(
     z.object({
       _key: types.optional(types.string()),
-      name: types.optional(AgentCreateToolsetName$inboundSchema),
-      displayName: types.optional(types.string()),
-      type: types.optional(types.string()),
-      instanceId: types.optional(types.string()),
-      instanceName: types.optional(types.string()),
-      selectedTools: z.optional(z.nullable(z.array(types.string()))),
-      tools: types.optional(z.array(z.lazy(() => Tool$inboundSchema))),
+      name: types.optional(types.string()),
+      fullName: types.optional(types.string()),
+      toolsetName: types.optional(types.string()),
+      description: types.optional(types.string()),
+      deprecated: types.optional(types.boolean()),
     }),
     z.transform((v) => {
       return remap$(v, {
@@ -124,12 +95,41 @@ export const AgentToolset$inboundSchema: z.ZodMiniType<AgentToolset, unknown> =
     }),
   );
 
-export function agentToolsetFromJSON(
+export function toolsetToolFromJSON(
   jsonString: string,
-): SafeParseResult<AgentToolset, SDKValidationError> {
+): SafeParseResult<ToolsetTool, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => AgentToolset$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'AgentToolset' from JSON`,
+    (x) => ToolsetTool$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ToolsetTool' from JSON`,
+  );
+}
+
+/** @internal */
+export const Toolset$inboundSchema: z.ZodMiniType<Toolset, unknown> = z.pipe(
+  z.object({
+    _key: types.optional(types.string()),
+    name: types.optional(AgentCreateToolsetName$inboundSchema),
+    displayName: types.optional(types.string()),
+    type: types.optional(types.string()),
+    instanceId: types.optional(types.string()),
+    instanceName: types.optional(types.string()),
+    selectedTools: z.optional(z.nullable(z.array(types.string()))),
+    tools: types.optional(z.array(z.lazy(() => ToolsetTool$inboundSchema))),
+  }),
+  z.transform((v) => {
+    return remap$(v, {
+      "_key": "key",
+    });
+  }),
+);
+
+export function toolsetFromJSON(
+  jsonString: string,
+): SafeParseResult<Toolset, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Toolset$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Toolset' from JSON`,
   );
 }

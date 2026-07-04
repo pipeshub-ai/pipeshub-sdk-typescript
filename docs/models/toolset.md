@@ -1,4 +1,4 @@
-# AgentToolset
+# Toolset
 
 Toolset instance linked to an agent, as projected by the graph store on
 `GET /agents/{agentKey}` and `GET /agents`. Multiple instances of the
@@ -9,9 +9,9 @@ same integration type are distinguished by `instanceId` and optional
 ## Example Usage
 
 ```typescript
-import { AgentToolset } from "@pipeshub-ai/sdk/models";
+import { Toolset } from "@pipeshub-ai/sdk/models";
 
-let value: AgentToolset = {};
+let value: Toolset = {};
 ```
 
 ## Fields
@@ -25,4 +25,4 @@ let value: AgentToolset = {};
 | `instanceId`                                                                                                                                                                          | *string*                                                                                                                                                                              | :heavy_minus_sign:                                                                                                                                                                    | Admin-created toolset instance id                                                                                                                                                     |
 | `instanceName`                                                                                                                                                                        | *string*                                                                                                                                                                              | :heavy_minus_sign:                                                                                                                                                                    | Human-readable instance label (e.g. sidebar instance name)                                                                                                                            |
 | `selectedTools`                                                                                                                                                                       | *string*[]                                                                                                                                                                            | :heavy_minus_sign:                                                                                                                                                                    | Tool names explicitly selected for this toolset instance, when the<br/>instance was created with a subset selection. `null`/absent when the<br/>instance exposes all of the toolset's tools.<br/> |
-| `tools`                                                                                                                                                                               | [models.Tool](../models/tool.md)[]                                                                                                                                                    | :heavy_minus_sign:                                                                                                                                                                    | N/A                                                                                                                                                                                   |
+| `tools`                                                                                                                                                                               | [models.ToolsetTool](../models/toolset-tool.md)[]                                                                                                                                     | :heavy_minus_sign:                                                                                                                                                                    | N/A                                                                                                                                                                                   |

@@ -7,23 +7,8 @@ import { remap as remap$ } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
-import { smartUnion } from "../types/smart-union.js";
-import {
-  AgentKnowledgeFiltersParsed,
-  AgentKnowledgeFiltersParsed$inboundSchema,
-} from "./agent-knowledge-filters-parsed.js";
+import { AgentFilters, AgentFilters$inboundSchema } from "./agent-filters.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
-
-/**
- * Knowledge scope filter as stored on the graph edge. The Node `getAgent`
- *
- * @remarks
- * handler proxies this field unchanged from the AI service (only `agent.id`
- * is stripped). May be a JSON string (typical graph storage) or an object.
- * Prefer `filtersParsed` on GET for a guaranteed parsed object with the
- * same keys as the object branch below.
- */
-export type AgentKnowledgeFilters = AgentKnowledgeFiltersParsed | string;
 
 /**
  * Server-derived read-only object parsed from the stored
@@ -49,7 +34,7 @@ export type FiltersParsed = {
  * @remarks
  * the graph store on `GET /agents/{agentKey}` and `GET /agents`.
  */
-export type AgentKnowledge = {
+export type Knowledge = {
   key?: string | undefined;
   connectorId?: string | undefined;
   name?: string | undefined;
@@ -64,7 +49,7 @@ export type AgentKnowledge = {
    * Prefer `filtersParsed` on GET for a guaranteed parsed object with the
    * same keys as the object branch below.
    */
-  filters?: AgentKnowledgeFiltersParsed | string | undefined;
+  filters?: AgentFilters | undefined;
   /**
    * Server-derived read-only object parsed from the stored
    *
@@ -74,22 +59,6 @@ export type AgentKnowledge = {
    */
   filtersParsed?: FiltersParsed | undefined;
 };
-
-/** @internal */
-export const AgentKnowledgeFilters$inboundSchema: z.ZodMiniType<
-  AgentKnowledgeFilters,
-  unknown
-> = smartUnion([AgentKnowledgeFiltersParsed$inboundSchema, types.string()]);
-
-export function agentKnowledgeFiltersFromJSON(
-  jsonString: string,
-): SafeParseResult<AgentKnowledgeFilters, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => AgentKnowledgeFilters$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'AgentKnowledgeFilters' from JSON`,
-  );
-}
 
 /** @internal */
 export const FiltersParsed$inboundSchema: z.ZodMiniType<
@@ -111,34 +80,30 @@ export function filtersParsedFromJSON(
 }
 
 /** @internal */
-export const AgentKnowledge$inboundSchema: z.ZodMiniType<
-  AgentKnowledge,
-  unknown
-> = z.pipe(
-  z.object({
-    _key: types.optional(types.string()),
-    connectorId: types.optional(types.string()),
-    name: types.optional(types.string()),
-    type: types.optional(types.string()),
-    displayName: types.optional(types.string()),
-    filters: types.optional(
-      smartUnion([AgentKnowledgeFiltersParsed$inboundSchema, types.string()]),
-    ),
-    filtersParsed: types.optional(z.lazy(() => FiltersParsed$inboundSchema)),
-  }),
-  z.transform((v) => {
-    return remap$(v, {
-      "_key": "key",
-    });
-  }),
-);
+export const Knowledge$inboundSchema: z.ZodMiniType<Knowledge, unknown> = z
+  .pipe(
+    z.object({
+      _key: types.optional(types.string()),
+      connectorId: types.optional(types.string()),
+      name: types.optional(types.string()),
+      type: types.optional(types.string()),
+      displayName: types.optional(types.string()),
+      filters: types.optional(AgentFilters$inboundSchema),
+      filtersParsed: types.optional(z.lazy(() => FiltersParsed$inboundSchema)),
+    }),
+    z.transform((v) => {
+      return remap$(v, {
+        "_key": "key",
+      });
+    }),
+  );
 
-export function agentKnowledgeFromJSON(
+export function knowledgeFromJSON(
   jsonString: string,
-): SafeParseResult<AgentKnowledge, SDKValidationError> {
+): SafeParseResult<Knowledge, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => AgentKnowledge$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'AgentKnowledge' from JSON`,
+    (x) => Knowledge$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Knowledge' from JSON`,
   );
 }

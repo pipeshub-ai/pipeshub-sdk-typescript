@@ -1,11 +1,11 @@
-# Tool
+# ToolsetTool
 
 ## Example Usage
 
 ```typescript
-import { Tool } from "@pipeshub-ai/sdk/models";
+import { ToolsetTool } from "@pipeshub-ai/sdk/models";
 
-let value: Tool = {};
+let value: ToolsetTool = {};
 ```
 
 ## Fields

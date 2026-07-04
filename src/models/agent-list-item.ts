@@ -7,12 +7,9 @@ import { remap as remap$ } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
-import {
-  AgentKnowledge,
-  AgentKnowledge$inboundSchema,
-} from "./agent-knowledge.js";
-import { AgentToolset, AgentToolset$inboundSchema } from "./agent-toolset.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
+import { Knowledge, Knowledge$inboundSchema } from "./knowledge.js";
+import { Toolset, Toolset$inboundSchema } from "./toolset.js";
 
 /**
  * Web-search provider attachment for this agent, or `null` when none is attached.
@@ -135,7 +132,7 @@ export type AgentListItem = {
    * `GET /agents/{agentKey}`; the backend builds it from the graph edges
    * for each agent on the returned page.
    */
-  toolsets: Array<AgentToolset>;
+  toolsets: Array<Toolset>;
   /**
    * Knowledge connectors and indexed scopes linked to the agent. Same
    *
@@ -143,7 +140,7 @@ export type AgentListItem = {
    * projection as `GET /agents/{agentKey}`; the backend builds it from
    * the graph edges for each agent on the returned page.
    */
-  knowledge: Array<AgentKnowledge>;
+  knowledge: Array<Knowledge>;
   /**
    * Effective permission to view the agent.
    */
@@ -217,8 +214,8 @@ export const AgentListItem$inboundSchema: z.ZodMiniType<
       z.nullable(z.lazy(() => AgentListItemWebSearch$inboundSchema)),
     ),
     shareWithOrg: types.boolean(),
-    toolsets: z.array(AgentToolset$inboundSchema),
-    knowledge: z.array(AgentKnowledge$inboundSchema),
+    toolsets: z.array(Toolset$inboundSchema),
+    knowledge: z.array(Knowledge$inboundSchema),
     can_view: types.boolean(),
     can_share: types.boolean(),
     can_edit: types.boolean(),

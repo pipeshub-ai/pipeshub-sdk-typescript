@@ -133,6 +133,11 @@ export type MessageReferenceDatum = {
   metadata?: { [k: string]: string } | undefined;
 };
 
+export type MessageTool = {
+  toolName?: string | undefined;
+  toolResult?: any | undefined;
+};
+
 /**
  * A single message within a conversation. Messages can be user queries,
  *
@@ -211,6 +216,10 @@ export type Message = {
    * `POST /conversations/attachments/upload`).
    */
   attachments?: Array<ChatAttachmentRef> | undefined;
+  /**
+   * Tool call results invoked during this message turn.
+   */
+  tools?: Array<MessageTool> | undefined;
   createdAt?: Date | undefined;
   updatedAt?: Date | undefined;
 };
@@ -272,6 +281,23 @@ export function messageReferenceDatumFromJSON(
 }
 
 /** @internal */
+export const MessageTool$inboundSchema: z.ZodMiniType<MessageTool, unknown> = z
+  .object({
+    toolName: types.optional(types.string()),
+    toolResult: types.optional(z.any()),
+  });
+
+export function messageToolFromJSON(
+  jsonString: string,
+): SafeParseResult<MessageTool, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => MessageTool$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'MessageTool' from JSON`,
+  );
+}
+
+/** @internal */
 export const Message$inboundSchema: z.ZodMiniType<Message, unknown> = z.pipe(
   z.object({
     _id: types.optional(types.string()),
@@ -289,6 +315,7 @@ export const Message$inboundSchema: z.ZodMiniType<Message, unknown> = z.pipe(
       MessageReferenceDatum$inboundSchema
     ))),
     attachments: types.optional(z.array(ChatAttachmentRef$inboundSchema)),
+    tools: types.optional(z.array(z.lazy(() => MessageTool$inboundSchema))),
     createdAt: types.optional(types.date()),
     updatedAt: types.optional(types.date()),
   }),

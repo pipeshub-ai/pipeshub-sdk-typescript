@@ -109,6 +109,11 @@ export type AgentConversationDetailMessageReferenceDatum = {
   metadata?: { [k: string]: string } | undefined;
 };
 
+export type AgentConversationDetailMessageTool = {
+  toolName?: string | undefined;
+  toolResult?: any | undefined;
+};
+
 export type AgentConversationDetailMessageMetadata = {
   processingTimeMs?: number | undefined;
   modelVersion?: string | undefined;
@@ -153,6 +158,10 @@ export type AgentConversationDetailMessage = {
    * `POST /agents/{agentKey}/conversations/attachments/upload`).
    */
   attachments?: Array<ChatAttachmentRef> | undefined;
+  /**
+   * Tool call results invoked during this message turn.
+   */
+  tools?: Array<AgentConversationDetailMessageTool> | undefined;
   /**
    * AI model configuration recorded against a conversation or message.
    */
@@ -213,6 +222,26 @@ export function agentConversationDetailMessageReferenceDatumFromJSON(
 }
 
 /** @internal */
+export const AgentConversationDetailMessageTool$inboundSchema: z.ZodMiniType<
+  AgentConversationDetailMessageTool,
+  unknown
+> = z.object({
+  toolName: types.optional(types.string()),
+  toolResult: types.optional(z.any()),
+});
+
+export function agentConversationDetailMessageToolFromJSON(
+  jsonString: string,
+): SafeParseResult<AgentConversationDetailMessageTool, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      AgentConversationDetailMessageTool$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'AgentConversationDetailMessageTool' from JSON`,
+  );
+}
+
+/** @internal */
 export const AgentConversationDetailMessageMetadata$inboundSchema:
   z.ZodMiniType<AgentConversationDetailMessageMetadata, unknown> = z.object({
     processingTimeMs: types.optional(types.number()),
@@ -255,6 +284,9 @@ export const AgentConversationDetailMessage$inboundSchema: z.ZodMiniType<
       AgentConversationDetailMessageReferenceDatum$inboundSchema
     ))),
     attachments: types.optional(z.array(ChatAttachmentRef$inboundSchema)),
+    tools: types.optional(z.array(z.lazy(() =>
+      AgentConversationDetailMessageTool$inboundSchema
+    ))),
     modelInfo: types.optional(ConversationModelInfo$inboundSchema),
     appliedFilters: types.optional(AppliedFilters$inboundSchema),
     metadata: types.optional(z.lazy(() =>

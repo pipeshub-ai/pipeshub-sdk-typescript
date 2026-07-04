@@ -8,12 +8,9 @@ import { safeParse } from "../lib/schemas.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import { smartUnion } from "../types/smart-union.js";
-import {
-  AgentKnowledge,
-  AgentKnowledge$inboundSchema,
-} from "./agent-knowledge.js";
-import { AgentToolset, AgentToolset$inboundSchema } from "./agent-toolset.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
+import { Knowledge, Knowledge$inboundSchema } from "./knowledge.js";
+import { Toolset, Toolset$inboundSchema } from "./toolset.js";
 
 export type Model = {
   modelKey?: string | undefined;
@@ -102,11 +99,11 @@ export type Agent = {
    * Multiple instances of the same integration type are distinguished by `instanceId`
    * and optional `instanceName`.
    */
-  toolsets: Array<AgentToolset>;
+  toolsets: Array<Toolset>;
   /**
    * Knowledge connectors and indexed scopes linked to the agent
    */
-  knowledge: Array<AgentKnowledge>;
+  knowledge: Array<Knowledge>;
   /**
    * Whether the agent is shared with the whole organization
    */
@@ -241,8 +238,8 @@ export const Agent$inboundSchema: z.ZodMiniType<Agent, unknown> = z.pipe(
       types.string(),
       z.lazy(() => Model$inboundSchema),
     ])),
-    toolsets: z.array(AgentToolset$inboundSchema),
-    knowledge: z.array(AgentKnowledge$inboundSchema),
+    toolsets: z.array(Toolset$inboundSchema),
+    knowledge: z.array(Knowledge$inboundSchema),
     shareWithOrg: types.boolean(),
     webSearch: z.optional(
       z.nullable(z.lazy(() => AgentWebSearch$inboundSchema)),

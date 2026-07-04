@@ -22,6 +22,7 @@ import {
   RequestTimeoutError,
   UnexpectedClientError,
 } from "../models/errors/http-client-errors.js";
+import * as errors from "../models/errors/index.js";
 import { PipeshubError } from "../models/errors/pipeshub-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { SDKValidationError } from "../models/errors/sdk-validation-error.js";
@@ -62,6 +63,7 @@ export function knowledgeBaseUpdateRecord(
 ): APIPromise<
   Result<
     operations.UpdateRecordResponse,
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -87,6 +89,7 @@ async function $do(
   [
     Result<
       operations.UpdateRecordResponse,
+      | errors.ErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -159,7 +162,7 @@ async function $do(
     options: client._options,
     baseURL: options?.serverURL ?? client._baseURL ?? "",
     operationID: "updateRecord",
-    oAuth2Scopes: [],
+    oAuth2Scopes: ["kb:write"],
 
     resolvedSecurity: requestSecurity,
 
@@ -187,7 +190,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["400", "401", "403", "404", "4XX", "5XX"],
+    errorCodes: ["400", "401", "403", "404", "4XX", "500", "503", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -196,8 +199,13 @@ async function $do(
   }
   const response = doResult.value;
 
+  const responseFields = {
+    HttpMeta: { Response: response, Request: req },
+  };
+
   const [result] = await M.match<
     operations.UpdateRecordResponse,
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -208,9 +216,11 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, operations.UpdateRecordResponse$inboundSchema),
-    M.fail([400, 401, 403, 404, "4XX"]),
+    M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([500, 503], errors.ErrorResponse$inboundSchema),
+    M.fail("4XX"),
     M.fail("5XX"),
-  )(response, req);
+  )(response, req, { extraFields: responseFields });
   if (!result.ok) {
     return [result, { status: "complete", request: req, response }];
   }

@@ -72,6 +72,8 @@ import { Result } from "../types/fp.js";
  * Requires a valid bearer token. For OAuth tokens the `kb:read` scope
  * must be present; regular JWT bearer tokens pass through without scope
  * enforcement.
+ *
+ * @deprecated method: Use the Knowledge Base API instead. This grouping will be removed in a future release.
  */
 export function knowledgeBaseGetKnowledgeHubRootNodes(
   client: PipeshubCore,

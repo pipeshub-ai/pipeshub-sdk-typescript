@@ -17,7 +17,7 @@ PipesHub is an enterprise-grade platform providing:
 ## Authentication
 Most endpoints require JWT Bearer token authentication. Some internal endpoints use scoped tokens for service-to-service communication.
 
-**OAuth 2.0 Bearer tokens** from `POST /oauth2/token` use the same `Authorization: Bearer` header. For **`client_credentials`**, machine tokens may encode `userId === client_id` in the JWT; the **Node API gateway** resolves the OAuth **app creator**, sets the authenticated user accordingly, and forwards **`x-oauth-user-id`** to Python services on proxied calls. Do not send **`x-oauth-user-id`** yourself—the gateway removes untrusted values on ingress. See the **OAuth Provider** tag for full behavior.
+**OAuth 2.0 Bearer tokens** from `POST /oauth2/token` use the same `Authorization: Bearer` header. For **`client_credentials`**, machine tokens may encode `userId === client_id` in the JWT; the **Node API gateway** resolves the OAuth **app creator** and sets the authenticated user accordingly. See the **OAuth Provider** tag for full behavior.
 
 ## Base URLs
 All endpoints use the `/api/v1` prefix unless otherwise noted.
@@ -228,13 +228,13 @@ run();
 * [reindexRecord](docs/sdks/knowledgebase/README.md#reindexrecord) - Reindex single record
 * [reindexRecordGroup](docs/sdks/knowledgebase/README.md#reindexrecordgroup) - Reindex record group
 * [moveRecord](docs/sdks/knowledgebase/README.md#moverecord) - Move record to another location
-* [getKnowledgeHubRootNodes](docs/sdks/knowledgebase/README.md#getknowledgehubrootnodes) - Get knowledge hub root nodes
-* [getKnowledgeHubChildNodes](docs/sdks/knowledgebase/README.md#getknowledgehubchildnodes) - Get knowledge hub child nodes
+* [~~getKnowledgeHubRootNodes~~](docs/sdks/knowledgebase/README.md#getknowledgehubrootnodes) - Get knowledge hub root nodes :warning: **Deprecated**
+* [~~getKnowledgeHubChildNodes~~](docs/sdks/knowledgebase/README.md#getknowledgehubchildnodes) - Get knowledge hub child nodes :warning: **Deprecated**
 
-### [KnowledgeHub](docs/sdks/knowledgehub/README.md)
+### [~~KnowledgeHub~~](docs/sdks/knowledgehub/README.md)
 
-* [getKnowledgeHubRootNodes](docs/sdks/knowledgehub/README.md#getknowledgehubrootnodes) - Get knowledge hub root nodes
-* [getKnowledgeHubChildNodes](docs/sdks/knowledgehub/README.md#getknowledgehubchildnodes) - Get knowledge hub child nodes
+* [~~getKnowledgeHubRootNodes~~](docs/sdks/knowledgehub/README.md#getknowledgehubrootnodes) - Get knowledge hub root nodes :warning: **Deprecated**
+* [~~getKnowledgeHubChildNodes~~](docs/sdks/knowledgehub/README.md#getknowledgehubchildnodes) - Get knowledge hub child nodes :warning: **Deprecated**
 
 ### [OAuthApps](docs/sdks/oauthapps/README.md)
 
@@ -347,10 +347,6 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`knowledgeBaseDeleteKnowledgeBase`](docs/sdks/knowledgebase/README.md#deleteknowledgebase) - Delete knowledge base
 - [`knowledgeBaseDeleteRecord`](docs/sdks/knowledgebase/README.md#deleterecord) - Delete record
 - [`knowledgeBaseGetKnowledgeBase`](docs/sdks/knowledgebase/README.md#getknowledgebase) - Get knowledge base by ID
-- [`knowledgeBaseGetKnowledgeHubChildNodes`](docs/sdks/knowledgebase/README.md#getknowledgehubchildnodes) - Get knowledge hub child nodes
-- [`knowledgeBaseGetKnowledgeHubChildNodes`](docs/sdks/knowledgehub/README.md#getknowledgehubchildnodes) - Get knowledge hub child nodes
-- [`knowledgeBaseGetKnowledgeHubRootNodes`](docs/sdks/knowledgebase/README.md#getknowledgehubrootnodes) - Get knowledge hub root nodes
-- [`knowledgeBaseGetKnowledgeHubRootNodes`](docs/sdks/knowledgehub/README.md#getknowledgehubrootnodes) - Get knowledge hub root nodes
 - [`knowledgeBaseGetRecordById`](docs/sdks/knowledgebase/README.md#getrecordbyid) - Get record by ID
 - [`knowledgeBaseGetUploadLimits`](docs/sdks/knowledgebase/README.md#getuploadlimits) - Get knowledge base upload limits
 - [`knowledgeBaseListKnowledgeBases`](docs/sdks/knowledgebase/README.md#listknowledgebases) - List all knowledge bases
@@ -393,6 +389,10 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`userAccountRefreshToken`](docs/sdks/useraccount/README.md#refreshtoken) - Refresh access token
 - [`userAccountResetPassword`](docs/sdks/useraccount/README.md#resetpassword) - Reset password
 - [`webSearchGetWebSearchProviders`](docs/sdks/websearch/README.md#getwebsearchproviders) - Get all web search providers
+- ~~[`knowledgeBaseGetKnowledgeHubChildNodes`](docs/sdks/knowledgebase/README.md#getknowledgehubchildnodes)~~ - Get knowledge hub child nodes :warning: **Deprecated**
+- ~~[`knowledgeBaseGetKnowledgeHubChildNodes`](docs/sdks/knowledgehub/README.md#getknowledgehubchildnodes)~~ - Get knowledge hub child nodes :warning: **Deprecated**
+- ~~[`knowledgeBaseGetKnowledgeHubRootNodes`](docs/sdks/knowledgebase/README.md#getknowledgehubrootnodes)~~ - Get knowledge hub root nodes :warning: **Deprecated**
+- ~~[`knowledgeBaseGetKnowledgeHubRootNodes`](docs/sdks/knowledgehub/README.md#getknowledgehubrootnodes)~~ - Get knowledge hub root nodes :warning: **Deprecated**
 
 </details>
 <!-- End Standalone functions [standalone-funcs] -->

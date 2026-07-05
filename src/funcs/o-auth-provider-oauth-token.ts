@@ -38,7 +38,7 @@ import { Result } from "../types/fp.js";
  * - `client_credentials`: Get tokens for machine-to-machine auth
  * - `refresh_token`: Get new access token using refresh token
  *
- * For **`client_credentials`**, access tokens represent the **OAuth app creator** (the user who registered the client). The JWT may encode **`userId === client_id`**; the **Node API gateway** resolves the creator (**`createdBy`** claim or OAuth app lookup) and must not trust client-supplied **`x-oauth-user-id`** (stripped on ingress). Downstream Python services accept **`x-oauth-user-id`** only when set by the gateway — see **OAuth Provider** tag.
+ * For **`client_credentials`**, access tokens represent the **OAuth app creator** (the user who registered the client). The JWT may encode **`userId === client_id`**; the **Node API gateway** resolves the creator (**`createdBy`** claim or OAuth app lookup) — see **OAuth Provider** tag.
  *
  * **Client Authentication:**
  * Can be provided via:

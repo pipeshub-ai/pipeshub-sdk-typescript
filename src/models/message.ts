@@ -39,13 +39,11 @@ import {
  * Type of message:
  *
  * @remarks
- * <ul>
- * <li><code>user_query</code> - User's question or input</li>
- * <li><code>bot_response</code> - AI-generated response</li>
- * <li><code>error</code> - Error message from the system</li>
- * <li><code>feedback</code> - User feedback on a response</li>
- * <li><code>system</code> - System notification or status</li>
- * </ul>
+ * - `user_query` - User's question or input
+ * - `bot_response` - AI-generated response
+ * - `error` - Error message from the system
+ * - `feedback` - User feedback on a response
+ * - `system` - System notification or status
  */
 export const MessageMessageType = {
   UserQuery: "user_query",
@@ -58,13 +56,11 @@ export const MessageMessageType = {
  * Type of message:
  *
  * @remarks
- * <ul>
- * <li><code>user_query</code> - User's question or input</li>
- * <li><code>bot_response</code> - AI-generated response</li>
- * <li><code>error</code> - Error message from the system</li>
- * <li><code>feedback</code> - User feedback on a response</li>
- * <li><code>system</code> - System notification or status</li>
- * </ul>
+ * - `user_query` - User's question or input
+ * - `bot_response` - AI-generated response
+ * - `error` - Error message from the system
+ * - `feedback` - User feedback on a response
+ * - `system` - System notification or status
  */
 export type MessageMessageType = OpenEnum<typeof MessageMessageType>;
 
@@ -153,13 +149,11 @@ export type Message = {
    * Type of message:
    *
    * @remarks
-   * <ul>
-   * <li><code>user_query</code> - User's question or input</li>
-   * <li><code>bot_response</code> - AI-generated response</li>
-   * <li><code>error</code> - Error message from the system</li>
-   * <li><code>feedback</code> - User feedback on a response</li>
-   * <li><code>system</code> - System notification or status</li>
-   * </ul>
+   * - `user_query` - User's question or input
+   * - `bot_response` - AI-generated response
+   * - `error` - Error message from the system
+   * - `feedback` - User feedback on a response
+   * - `system` - System notification or status
    */
   messageType?: MessageMessageType | undefined;
   /**
@@ -179,6 +173,8 @@ export type Message = {
    *
    * @remarks
    * and only when the model emitted a trailing confidence block.
+   *
+   * This field is now optional and nullable; it was previously always present and non-nullable. Treat a missing or `null` value as "no confidence reported" and guard before using it. Change effective in SDK v1.3.0 (v1.2.0 and earlier always populated it).
    */
   confidence?: string | null | undefined;
   /**

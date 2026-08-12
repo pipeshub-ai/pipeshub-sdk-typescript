@@ -39,6 +39,44 @@ export const RecordOrigin = {
 export type RecordOrigin = OpenEnum<typeof RecordOrigin>;
 
 /**
+ * Parse-phase status (ahead of indexing/extraction):
+ *
+ * @remarks
+ * - NOT_STARTED: Awaiting parsing
+ * - QUEUED: In parsing queue
+ * - IN_PROGRESS: Currently being parsed
+ * - COMPLETED: Successfully parsed
+ * - FAILED: Parsing failed
+ * - FILE_TYPE_NOT_SUPPORTED: Unsupported file format
+ * - AUTO_INDEX_OFF: Auto-indexing disabled for this record
+ * - EMPTY: File has no extractable content
+ */
+export const ParsingStatus = {
+  NotStarted: "NOT_STARTED",
+  InProgress: "IN_PROGRESS",
+  Failed: "FAILED",
+  Completed: "COMPLETED",
+  FileTypeNotSupported: "FILE_TYPE_NOT_SUPPORTED",
+  AutoIndexOff: "AUTO_INDEX_OFF",
+  Empty: "EMPTY",
+  Queued: "QUEUED",
+} as const;
+/**
+ * Parse-phase status (ahead of indexing/extraction):
+ *
+ * @remarks
+ * - NOT_STARTED: Awaiting parsing
+ * - QUEUED: In parsing queue
+ * - IN_PROGRESS: Currently being parsed
+ * - COMPLETED: Successfully parsed
+ * - FAILED: Parsing failed
+ * - FILE_TYPE_NOT_SUPPORTED: Unsupported file format
+ * - AUTO_INDEX_OFF: Auto-indexing disabled for this record
+ * - EMPTY: File has no extractable content
+ */
+export type ParsingStatus = OpenEnum<typeof ParsingStatus>;
+
+/**
  * Current indexing/processing status:
  *
  * @remarks
@@ -220,6 +258,24 @@ export type RecordT = {
    */
   sourceLastModifiedTimestamp?: number | undefined;
   /**
+   * Epoch ms when parse/index processing began for the current attempt; null when idle
+   */
+  processingStartedAt?: number | null | undefined;
+  /**
+   * Parse-phase status (ahead of indexing/extraction):
+   *
+   * @remarks
+   * - NOT_STARTED: Awaiting parsing
+   * - QUEUED: In parsing queue
+   * - IN_PROGRESS: Currently being parsed
+   * - COMPLETED: Successfully parsed
+   * - FAILED: Parsing failed
+   * - FILE_TYPE_NOT_SUPPORTED: Unsupported file format
+   * - AUTO_INDEX_OFF: Auto-indexing disabled for this record
+   * - EMPTY: File has no extractable content
+   */
+  parsingStatus?: ParsingStatus | undefined;
+  /**
    * Current indexing/processing status:
    *
    * @remarks
@@ -284,6 +340,12 @@ export type RecordT = {
 /** @internal */
 export const RecordOrigin$inboundSchema: z.ZodMiniType<RecordOrigin, unknown> =
   openEnums.inboundSchema(RecordOrigin);
+
+/** @internal */
+export const ParsingStatus$inboundSchema: z.ZodMiniType<
+  ParsingStatus,
+  unknown
+> = openEnums.inboundSchema(ParsingStatus);
 
 /** @internal */
 export const IndexingStatus$inboundSchema: z.ZodMiniType<
@@ -351,6 +413,8 @@ export const RecordT$inboundSchema: z.ZodMiniType<RecordT, unknown> = z.object({
   updatedAtTimestamp: types.optional(types.number()),
   sourceCreatedAtTimestamp: types.optional(types.number()),
   sourceLastModifiedTimestamp: types.optional(types.number()),
+  processingStartedAt: z.optional(z.nullable(types.number())),
+  parsingStatus: types.optional(ParsingStatus$inboundSchema),
   indexingStatus: types.optional(IndexingStatus$inboundSchema),
   isDeleted: z._default(types.boolean(), false),
   isArchived: z._default(types.boolean(), false),

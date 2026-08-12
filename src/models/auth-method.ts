@@ -21,7 +21,7 @@ import { SDKValidationError } from "./errors/sdk-validation-error.js";
  * - `samlSso`: SAML 2.0 Single Sign-On
  * - `oauth`: Generic OAuth 2.0 provider
  */
-export const Type = {
+export const AuthMethodType = {
   SamlSso: "samlSso",
   Otp: "otp",
   Password: "password",
@@ -42,7 +42,7 @@ export const Type = {
  * - `samlSso`: SAML 2.0 Single Sign-On
  * - `oauth`: Generic OAuth 2.0 provider
  */
-export type Type = OpenEnum<typeof Type>;
+export type AuthMethodType = OpenEnum<typeof AuthMethodType>;
 
 /**
  * Authentication method configuration
@@ -60,20 +60,24 @@ export type AuthMethod = {
    * - `samlSso`: SAML 2.0 Single Sign-On
    * - `oauth`: Generic OAuth 2.0 provider
    */
-  type: Type;
+  type: AuthMethodType;
 };
 
 /** @internal */
-export const Type$inboundSchema: z.ZodMiniType<Type, unknown> = openEnums
-  .inboundSchema(Type);
+export const AuthMethodType$inboundSchema: z.ZodMiniType<
+  AuthMethodType,
+  unknown
+> = openEnums.inboundSchema(AuthMethodType);
 /** @internal */
-export const Type$outboundSchema: z.ZodMiniType<string, Type> = openEnums
-  .outboundSchema(Type);
+export const AuthMethodType$outboundSchema: z.ZodMiniType<
+  string,
+  AuthMethodType
+> = openEnums.outboundSchema(AuthMethodType);
 
 /** @internal */
 export const AuthMethod$inboundSchema: z.ZodMiniType<AuthMethod, unknown> = z
   .object({
-    type: Type$inboundSchema,
+    type: AuthMethodType$inboundSchema,
   });
 /** @internal */
 export type AuthMethod$Outbound = {
@@ -85,7 +89,7 @@ export const AuthMethod$outboundSchema: z.ZodMiniType<
   AuthMethod$Outbound,
   AuthMethod
 > = z.object({
-  type: Type$outboundSchema,
+  type: AuthMethodType$outboundSchema,
 });
 
 export function authMethodToJSON(authMethod: AuthMethod): string {

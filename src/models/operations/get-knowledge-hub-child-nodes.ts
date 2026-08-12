@@ -87,14 +87,12 @@ export type GetKnowledgeHubChildNodesRequest = {
    */
   parentType: ParentType;
   /**
-   * Identifier of the parent node. Accepts two formats:
+   * Identifier of the parent node. Must be a valid UUID
    *
    * @remarks
-   * - A standard UUID (e.g. `f3a4b5b6-5b6c-4e85-9097-3202cfe696fc`)
-   * - The Collection app sentinel `knowledgeBase_<orgId>`
-   *   (e.g. `knowledgeBase_org123`)
+   * (e.g. `f3a4b5b6-5b6c-4e85-9097-3202cfe696fc`).
    *
-   * Any value that does not match either format returns a 400 error.
+   * Any value that does not match this format returns a 400 error.
    */
   parentId: string;
   /**
@@ -215,6 +213,17 @@ export type GetKnowledgeHubChildNodesRequest = {
    */
   size?: string | undefined;
   /**
+   * Force flattened/recursive search (`true`) or direct top-level
+   *
+   * @remarks
+   * listing (`false`). When omitted, it's computed from whether any
+   * of `q`, `nodeTypes`, `recordTypes`, `origins`, `connectorIds`,
+   * `indexingStatus`, `createdAt`, `updatedAt`, or `size` are present —
+   * if any are, results are flattened automatically; otherwise only
+   * top-level nodes are returned.
+   */
+  flattened?: boolean | undefined;
+  /**
    * Comma-separated list of additional response sections to include.
    *
    * @remarks
@@ -317,6 +326,7 @@ export type GetKnowledgeHubChildNodesRequest$Outbound = {
   createdAt?: string | undefined;
   updatedAt?: string | undefined;
   size?: string | undefined;
+  flattened?: boolean | undefined;
   include?: string | undefined;
 };
 
@@ -347,6 +357,7 @@ export const GetKnowledgeHubChildNodesRequest$outboundSchema: z.ZodMiniType<
   createdAt: z.optional(z.string()),
   updatedAt: z.optional(z.string()),
   size: z.optional(z.string()),
+  flattened: z.optional(z.boolean()),
   include: z.optional(z.string()),
 });
 

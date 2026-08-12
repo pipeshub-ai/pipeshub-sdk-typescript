@@ -38,10 +38,10 @@ import { Result } from "../types/fp.js";
  * but the response is delivered as an SSE stream so clients can render
  * the answer incrementally.
  *
- * The wire vocabulary is described by `AssistantMessageStreamSSEEvent`.
- * It is the same event set as `/conversations/stream`; only the
- * `connected` and `complete` payloads differ because the conversation
- * already exists when this route is called.
+ * AG-UI is the sole wire protocol. The vocabulary is described by
+ * `ConversationMessageStreamSSEEvent`; it is the same event set as
+ * `/conversations/stream`, while the terminal result reflects an
+ * existing conversation.
  */
 export function conversationsAddMessageStream(
   client: PipeshubCore,
@@ -49,7 +49,7 @@ export function conversationsAddMessageStream(
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    EventStream<models.AssistantMessageStreamSSEEvent>,
+    EventStream<models.ConversationMessageStreamSSEEvent>,
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -74,7 +74,7 @@ async function $do(
 ): Promise<
   [
     Result<
-      EventStream<models.AssistantMessageStreamSSEEvent>,
+      EventStream<models.ConversationMessageStreamSSEEvent>,
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -160,7 +160,7 @@ async function $do(
   const response = doResult.value;
 
   const [result] = await M.match<
-    EventStream<models.AssistantMessageStreamSSEEvent>,
+    EventStream<models.ConversationMessageStreamSSEEvent>,
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -177,9 +177,8 @@ async function $do(
         z.transform(stream => {
           return new EventStream(stream, rawEvent => {
             return {
-              value: models.AssistantMessageStreamSSEEvent$inboundSchema.parse(
-                rawEvent,
-              ),
+              value: models.ConversationMessageStreamSSEEvent$inboundSchema
+                .parse(rawEvent),
             };
           });
         }),

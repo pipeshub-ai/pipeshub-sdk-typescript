@@ -5,6 +5,7 @@
 import { ClientSDK } from "../lib/sdks.js";
 import { Agents } from "./agents.js";
 import { AIModelsProviders } from "./ai-models-providers.js";
+import { Connector } from "./connector.js";
 import { Conversations } from "./conversations.js";
 import { KnowledgeBase } from "./knowledge-base.js";
 import { KnowledgeHub } from "./knowledge-hub.js";
@@ -13,6 +14,7 @@ import { OAuthProvider } from "./o-auth-provider.js";
 import { OpenIDConnect } from "./open-id-connect.js";
 import { OrganizationAuthConfig } from "./organization-auth-config.js";
 import { Organizations } from "./organizations.js";
+import { PersonalAccessTokens } from "./personal-access-tokens.js";
 import { SemanticSearch } from "./semantic-search.js";
 import { UserAccount } from "./user-account.js";
 import { WebSearch } from "./web-search.js";
@@ -31,6 +33,13 @@ export class Pipeshub extends ClientSDK {
   private _oAuthApps?: OAuthApps;
   get oAuthApps(): OAuthApps {
     return (this._oAuthApps ??= new OAuthApps(this._options));
+  }
+
+  private _personalAccessTokens?: PersonalAccessTokens;
+  get personalAccessTokens(): PersonalAccessTokens {
+    return (this._personalAccessTokens ??= new PersonalAccessTokens(
+      this._options,
+    ));
   }
 
   private _userAccount?: UserAccount;
@@ -73,6 +82,11 @@ export class Pipeshub extends ClientSDK {
   private _agents?: Agents;
   get agents(): Agents {
     return (this._agents ??= new Agents(this._options));
+  }
+
+  private _connector?: Connector;
+  get connector(): Connector {
+    return (this._connector ??= new Connector(this._options));
   }
 
   private _aiModelsProviders?: AIModelsProviders;

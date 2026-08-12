@@ -11,19 +11,27 @@ import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
 export const AgentMessageStreamSSEEventEvent = {
-  Connected: "connected",
-  Status: "status",
-  ToolCalls: "tool_calls",
-  ToolCall: "tool_call",
-  ToolSuccess: "tool_success",
-  ToolError: "tool_error",
-  ToolResult: "tool_result",
-  ToolExecutionComplete: "tool_execution_complete",
-  AnswerChunk: "answer_chunk",
-  Restreaming: "restreaming",
-  Metadata: "metadata",
-  Complete: "complete",
-  Error: "error",
+  RunStarted: "RUN_STARTED",
+  RunFinished: "RUN_FINISHED",
+  RunError: "RUN_ERROR",
+  StepStarted: "STEP_STARTED",
+  StepFinished: "STEP_FINISHED",
+  TextMessageStart: "TEXT_MESSAGE_START",
+  TextMessageContent: "TEXT_MESSAGE_CONTENT",
+  TextMessageEnd: "TEXT_MESSAGE_END",
+  ReasoningStart: "REASONING_START",
+  ReasoningMessageStart: "REASONING_MESSAGE_START",
+  ReasoningMessageContent: "REASONING_MESSAGE_CONTENT",
+  ReasoningMessageEnd: "REASONING_MESSAGE_END",
+  ReasoningEnd: "REASONING_END",
+  ToolCallStart: "TOOL_CALL_START",
+  ToolCallArgs: "TOOL_CALL_ARGS",
+  ToolCallEnd: "TOOL_CALL_END",
+  ToolCallResult: "TOOL_CALL_RESULT",
+  StateDelta: "STATE_DELTA",
+  StateSnapshot: "STATE_SNAPSHOT",
+  Custom: "CUSTOM",
+  Heartbeat: "HEARTBEAT",
 } as const;
 export type AgentMessageStreamSSEEventEvent = OpenEnum<
   typeof AgentMessageStreamSSEEventEvent
@@ -33,42 +41,37 @@ export type AgentMessageStreamSSEEventEvent = OpenEnum<
  * Server-Sent Event envelope for `POST /agents/{agentKey}/conversations/{conversationId}/messages/stream`.
  *
  * @remarks
- * `data` is a JSON-encoded string whose shape depends on `event`.
+ * AG-UI is the sole wire protocol.
  *
- * Three events have stable API-defined payloads:
+ * `event` carries the AG-UI type name and `data` is a JSON-encoded
+ * object that includes a `"type"` field matching `event`, plus
+ * type-specific fields. The public route requires `chatMode: quick`.
+ * Forwarded lifecycle events may carry `runId`, `threadId`, and
+ * `parentRunId`. Stable gateway-generated top-level outcomes:
  *
- * - `connected` — `{ "message": "SSE connection established" }`. Fired once
- *   after the SSE stream opens. No `conversationId` is included because it is already
- *   present in the request path.
- * - `complete` — `{ "conversation": AgentConversation, "recordsUsed": number,
- *   "meta": { "requestId": string, "timestamp": string, "duration": number,
- *   "recordsUsed": number } }`. Fired once after the upstream AI `complete` payload
- *   is parsed, citations are saved, and the updated conversation is persisted.
- * - `error` — `{ "error": string, "details"?: string }`. Fired for runtime failures
- *   after the stream has already started, including conversation lookup failures,
- *   upstream AI startup failures, save failures, and stream transport errors.
+ * - `CUSTOM` (`name: "conversation_created"`) — fired once after the
+ *   SSE stream opens.
+ * - `RUN_FINISHED` — fired once after the upstream AI's result is
+ *   parsed, citations are saved, and the updated conversation is
+ *   persisted. The gateway emits `{ type, result }`; `result` carries
+ *   `{ conversation, recordsUsed, meta }`.
+ * - `RUN_ERROR` — fired for runtime failures after the stream has
+ *   already started, including conversation lookup failures, upstream
+ *   AI startup failures, save failures, and stream transport errors.
  *
- * All other events are forwarded from the upstream agent backend. Common event names:
- *
- * - `status` — progress update for the current agent phase.
- * - `answer_chunk` — incremental token batch with running accumulated text.
- * - `tool_calls` / `tool_call` / `tool_success` / `tool_error` / `tool_result` /
- *   `tool_execution_complete` — tool lifecycle events emitted by the upstream agent.
- * - `restreaming` — the upstream agent restarted generation with refreshed context.
- * - `metadata` — auxiliary metadata or keep-alive payload from the upstream agent.
- *
- * Important wire behavior:
- *
- * - The upstream agent's `complete` event is consumed server-side and replaced with the
- *   API-defined `complete` event above.
- * - If the upstream `complete` payload cannot be parsed as JSON, the raw upstream
- *   `complete` frame is forwarded unchanged instead.
- * - Unknown future event names may appear and should be ignored by clients.
+ * Gateway-generated root terminal events do not contain `runId`,
+ * `threadId`, or `parentRunId`.
+ * Clients should ignore unknown event names rather than treating them
+ * as errors.
  */
 export type AgentMessageStreamSSEEvent = {
   event?: AgentMessageStreamSSEEventEvent | undefined;
   /**
-   * JSON-encoded event payload. Shape depends on `event`.
+   * JSON-encoded event payload. The decoded JSON includes a `"type"`
+   *
+   * @remarks
+   * field matching `event`, plus type-specific fields. Shape depends
+   * on `event`.
    */
   data?: string | undefined;
 };

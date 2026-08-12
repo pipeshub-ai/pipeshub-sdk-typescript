@@ -3,6 +3,7 @@
  */
 
 import * as z from "zod/v4-mini";
+import { ClosedEnum } from "../types/enums.js";
 import {
   AgentCreateKnowledge,
   AgentCreateKnowledge$Outbound,
@@ -23,6 +24,28 @@ import {
   AgentCreateWebSearchUnion$Outbound,
   AgentCreateWebSearchUnion$outboundSchema,
 } from "./agent-create-web-search-union.js";
+import {
+  AgentSkillAssignment,
+  AgentSkillAssignment$Outbound,
+  AgentSkillAssignment$outboundSchema,
+} from "./agent-skill-assignment.js";
+
+/**
+ * Agent-level reasoning effort used when a chat request omits its own.
+ */
+export const AgentUpdateRequestDefaultReasoningEffort = {
+  None: "none",
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Max: "max",
+} as const;
+/**
+ * Agent-level reasoning effort used when a chat request omits its own.
+ */
+export type AgentUpdateRequestDefaultReasoningEffort = ClosedEnum<
+  typeof AgentUpdateRequestDefaultReasoningEffort
+>;
 
 /**
  * Partial update payload for `PUT /agents/{agentKey}`.
@@ -81,6 +104,13 @@ export type AgentUpdateRequest = {
    */
   knowledge?: Array<AgentCreateKnowledge> | undefined;
   /**
+   * Complete replacement set of skills assigned to the agent. Send
+   *
+   * @remarks
+   * an empty array to clear all skill assignments.
+   */
+  skills?: Array<AgentSkillAssignment> | undefined;
+  /**
    * Accepted web-search attachment for `POST /agents/create`.
    *
    * @remarks
@@ -88,7 +118,20 @@ export type AgentUpdateRequest = {
    * a `provider` field.
    */
   webSearch?: AgentCreateWebSearchUnion | null | undefined;
+  /**
+   * Agent-level reasoning effort used when a chat request omits its own.
+   */
+  defaultReasoningEffort?:
+    | AgentUpdateRequestDefaultReasoningEffort
+    | null
+    | undefined;
 };
+
+/** @internal */
+export const AgentUpdateRequestDefaultReasoningEffort$outboundSchema:
+  z.ZodMiniEnum<typeof AgentUpdateRequestDefaultReasoningEffort> = z.enum(
+    AgentUpdateRequestDefaultReasoningEffort,
+  );
 
 /** @internal */
 export type AgentUpdateRequest$Outbound = {
@@ -103,7 +146,9 @@ export type AgentUpdateRequest$Outbound = {
   isServiceAccount: boolean;
   toolsets?: Array<AgentCreateToolset$Outbound> | undefined;
   knowledge?: Array<AgentCreateKnowledge$Outbound> | undefined;
+  skills?: Array<AgentSkillAssignment$Outbound> | undefined;
   webSearch?: AgentCreateWebSearchUnion$Outbound | null | undefined;
+  defaultReasoningEffort?: string | null | undefined;
 };
 
 /** @internal */
@@ -122,7 +167,11 @@ export const AgentUpdateRequest$outboundSchema: z.ZodMiniType<
   isServiceAccount: z._default(z.boolean(), false),
   toolsets: z.optional(z.array(AgentCreateToolset$outboundSchema)),
   knowledge: z.optional(z.array(AgentCreateKnowledge$outboundSchema)),
+  skills: z.optional(z.array(AgentSkillAssignment$outboundSchema)),
   webSearch: z.optional(z.nullable(AgentCreateWebSearchUnion$outboundSchema)),
+  defaultReasoningEffort: z.optional(
+    z.nullable(AgentUpdateRequestDefaultReasoningEffort$outboundSchema),
+  ),
 });
 
 export function agentUpdateRequestToJSON(

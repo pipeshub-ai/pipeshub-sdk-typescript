@@ -171,6 +171,17 @@ export type GetKnowledgeHubRootNodesRequest = {
    */
   size?: string | undefined;
   /**
+   * Force flattened/recursive search (`true`) or direct top-level
+   *
+   * @remarks
+   * listing (`false`). When omitted, it's computed from whether any
+   * of `q`, `nodeTypes`, `recordTypes`, `origins`, `connectorIds`,
+   * `indexingStatus`, `createdAt`, `updatedAt`, or `size` are present —
+   * if any are, results are flattened automatically; otherwise only
+   * top-level nodes are returned.
+   */
+  flattened?: boolean | undefined;
+  /**
    * Comma-separated list of additional response sections to include.
    *
    * @remarks
@@ -255,6 +266,7 @@ export type GetKnowledgeHubRootNodesRequest$Outbound = {
   createdAt?: string | undefined;
   updatedAt?: string | undefined;
   size?: string | undefined;
+  flattened?: boolean | undefined;
   include?: string | undefined;
 };
 
@@ -283,6 +295,7 @@ export const GetKnowledgeHubRootNodesRequest$outboundSchema: z.ZodMiniType<
   createdAt: z.optional(z.string()),
   updatedAt: z.optional(z.string()),
   size: z.optional(z.string()),
+  flattened: z.optional(z.boolean()),
   include: z.optional(z.string()),
 });
 

@@ -10,10 +10,7 @@ let value: GetRecordByIdResponseSchemaFileRecord = {
   orgId: "<id>",
   name: "<value>",
   extension: "gif",
-  mimeType: "<value>",
-  sizeInBytes: 781441,
   isFile: false,
-  webUrl: "https://well-lit-horst.info/",
 };
 ```
 
@@ -25,9 +22,16 @@ let value: GetRecordByIdResponseSchemaFileRecord = {
 | `orgId`               | *string*              | :heavy_check_mark:    | N/A                   |
 | `name`                | *string*              | :heavy_check_mark:    | N/A                   |
 | `extension`           | *string*              | :heavy_check_mark:    | N/A                   |
-| `mimeType`            | *string*              | :heavy_check_mark:    | N/A                   |
-| `sizeInBytes`         | *number*              | :heavy_check_mark:    | N/A                   |
+| `etag`                | *string*              | :heavy_minus_sign:    | N/A                   |
+| `ctag`                | *string*              | :heavy_minus_sign:    | N/A                   |
+| `md5Checksum`         | *string*              | :heavy_minus_sign:    | N/A                   |
+| `quickXorHash`        | *string*              | :heavy_minus_sign:    | N/A                   |
+| `crc32Hash`           | *string*              | :heavy_minus_sign:    | N/A                   |
+| `sha1Hash`            | *string*              | :heavy_minus_sign:    | N/A                   |
+| `sha256Hash`          | *string*              | :heavy_minus_sign:    | N/A                   |
+| `mimeType`            | *string*              | :heavy_minus_sign:    | N/A                   |
+| `sizeInBytes`         | *number*              | :heavy_minus_sign:    | N/A                   |
 | `isFile`              | *boolean*             | :heavy_check_mark:    | N/A                   |
-| `webUrl`              | *string*              | :heavy_check_mark:    | N/A                   |
+| `webUrl`              | *string*              | :heavy_minus_sign:    | N/A                   |
 | `path`                | *string*              | :heavy_minus_sign:    | N/A                   |
 | `localFsRelativePath` | *string*              | :heavy_minus_sign:    | N/A                   |

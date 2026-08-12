@@ -34,6 +34,15 @@ import {
   MessageFeedback,
   MessageFeedback$inboundSchema,
 } from "./message-feedback.js";
+import { MessagePart, MessagePart$inboundSchema } from "./message-part.js";
+import {
+  MessageReasoningTurn,
+  MessageReasoningTurn$inboundSchema,
+} from "./message-reasoning-turn.js";
+import {
+  MessageToolCall,
+  MessageToolCall$inboundSchema,
+} from "./message-tool-call.js";
 
 /**
  * Type of message:
@@ -44,6 +53,7 @@ import {
  * - `error` - Error message from the system
  * - `feedback` - User feedback on a response
  * - `system` - System notification or status
+ * - `tool_call` - Tool invocation turn; details are on `tools`
  */
 export const MessageMessageType = {
   UserQuery: "user_query",
@@ -51,6 +61,7 @@ export const MessageMessageType = {
   Error: "error",
   Feedback: "feedback",
   System: "system",
+  ToolCall: "tool_call",
 } as const;
 /**
  * Type of message:
@@ -61,6 +72,7 @@ export const MessageMessageType = {
  * - `error` - Error message from the system
  * - `feedback` - User feedback on a response
  * - `system` - System notification or status
+ * - `tool_call` - Tool invocation turn; details are on `tools`
  */
 export type MessageMessageType = OpenEnum<typeof MessageMessageType>;
 
@@ -129,11 +141,6 @@ export type MessageReferenceDatum = {
   metadata?: { [k: string]: string } | undefined;
 };
 
-export type MessageTool = {
-  toolName?: string | undefined;
-  toolResult?: any | undefined;
-};
-
 /**
  * A single message within a conversation. Messages can be user queries,
  *
@@ -154,6 +161,7 @@ export type Message = {
    * - `error` - Error message from the system
    * - `feedback` - User feedback on a response
    * - `system` - System notification or status
+   * - `tool_call` - Tool invocation turn; details are on `tools`
    */
   messageType?: MessageMessageType | undefined;
   /**
@@ -215,7 +223,15 @@ export type Message = {
   /**
    * Tool call results invoked during this message turn.
    */
-  tools?: Array<MessageTool> | undefined;
+  tools?: Array<MessageToolCall> | undefined;
+  /**
+   * Persisted chain-of-thought for this turn.
+   */
+  reasoning?: Array<MessageReasoningTurn> | undefined;
+  /**
+   * Ordered agent-activity transcript for this turn.
+   */
+  parts?: Array<MessagePart> | undefined;
   createdAt?: Date | undefined;
   updatedAt?: Date | undefined;
 };
@@ -277,23 +293,6 @@ export function messageReferenceDatumFromJSON(
 }
 
 /** @internal */
-export const MessageTool$inboundSchema: z.ZodMiniType<MessageTool, unknown> = z
-  .object({
-    toolName: types.optional(types.string()),
-    toolResult: types.optional(z.any()),
-  });
-
-export function messageToolFromJSON(
-  jsonString: string,
-): SafeParseResult<MessageTool, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => MessageTool$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'MessageTool' from JSON`,
-  );
-}
-
-/** @internal */
 export const Message$inboundSchema: z.ZodMiniType<Message, unknown> = z.pipe(
   z.object({
     _id: types.optional(types.string()),
@@ -311,7 +310,9 @@ export const Message$inboundSchema: z.ZodMiniType<Message, unknown> = z.pipe(
       MessageReferenceDatum$inboundSchema
     ))),
     attachments: types.optional(z.array(ChatAttachmentRef$inboundSchema)),
-    tools: types.optional(z.array(z.lazy(() => MessageTool$inboundSchema))),
+    tools: types.optional(z.array(MessageToolCall$inboundSchema)),
+    reasoning: types.optional(z.array(MessageReasoningTurn$inboundSchema)),
+    parts: types.optional(z.array(MessagePart$inboundSchema)),
     createdAt: types.optional(types.date()),
     updatedAt: types.optional(types.date()),
   }),

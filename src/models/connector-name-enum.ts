@@ -82,3 +82,8 @@ export const ConnectorNameEnum$inboundSchema: z.ZodMiniType<
   ConnectorNameEnum,
   unknown
 > = openEnums.inboundSchema(ConnectorNameEnum);
+/** @internal */
+export const ConnectorNameEnum$outboundSchema: z.ZodMiniType<
+  string,
+  ConnectorNameEnum
+> = openEnums.outboundSchema(ConnectorNameEnum);

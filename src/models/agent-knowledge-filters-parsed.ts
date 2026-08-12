@@ -9,16 +9,15 @@ import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
 /**
- * Indexed scope for a knowledge connector: record-group ids (collections /
+ * Indexed scope for a knowledge connector: record-group ids and
  *
  * @remarks
- * KB roots) and individual record ids. First-party create/update flows set
- * `recordGroups` and `records`. On GET, `filtersParsed` is this shape
- * parsed from the stored `filters` JSON string.
+ * individual record ids. On GET, `filtersParsed` is this shape parsed
+ * from the stored `filters` JSON string.
  */
 export type AgentKnowledgeFiltersParsed = {
   /**
-   * Record-group ids (e.g. knowledge-base roots) in scope.
+   * Deprecated/legacy: record-group ids for connector record-group scoping (e.g. Confluence spaces, Jira projects). No longer set for KB (Collection) entries — a KB is identified by its own `connectorId`, not by an id in this list.
    */
   recordGroups?: Array<string> | undefined;
   /**

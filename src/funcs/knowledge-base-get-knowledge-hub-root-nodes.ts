@@ -147,6 +147,7 @@ async function $do(
   const query = encodeFormQuery({
     "connectorIds": payload?.connectorIds,
     "createdAt": payload?.createdAt,
+    "flattened": payload?.flattened,
     "include": payload?.include,
     "indexingStatus": payload?.indexingStatus,
     "limit": payload?.limit,

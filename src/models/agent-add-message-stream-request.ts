@@ -5,6 +5,11 @@
 import * as z from "zod/v4-mini";
 import { ClosedEnum } from "../types/enums.js";
 import {
+  AgentCapabilities,
+  AgentCapabilities$Outbound,
+  AgentCapabilities$outboundSchema,
+} from "./agent-capabilities.js";
+import {
   AppliedFilters,
   AppliedFilters$Outbound,
   AppliedFilters$outboundSchema,
@@ -21,41 +26,55 @@ import {
 } from "./filters.js";
 
 /**
- * Chat mode hint forwarded to the agent backend. Defaults to `auto`
+ * Required execution mode. Scoped agent conversations currently
  *
  * @remarks
- * in the upstream AI payload when omitted.
- * - `auto` lets the agent pick its default strategy.
- * - `quick` favors low-latency answers over depth.
- * - `verification` runs additional grounding/verification passes.
- * - `deep` performs deeper retrieval and reasoning.
+ * support only `quick`.
  */
 export const AgentAddMessageStreamRequestChatMode = {
-  Auto: "auto",
   Quick: "quick",
-  Verification: "verification",
-  Deep: "deep",
 } as const;
 /**
- * Chat mode hint forwarded to the agent backend. Defaults to `auto`
+ * Required execution mode. Scoped agent conversations currently
  *
  * @remarks
- * in the upstream AI payload when omitted.
- * - `auto` lets the agent pick its default strategy.
- * - `quick` favors low-latency answers over depth.
- * - `verification` runs additional grounding/verification passes.
- * - `deep` performs deeper retrieval and reasoning.
+ * support only `quick`.
  */
 export type AgentAddMessageStreamRequestChatMode = ClosedEnum<
   typeof AgentAddMessageStreamRequestChatMode
 >;
 
 /**
+ * AG-UI is the only supported wire protocol. When present must be
+ *
+ * @remarks
+ * `"agui"`. Omitting the field is equivalent — the server always
+ * uses the AG-UI vocabulary (see `AgentMessageStreamSSEEvent`).
+ * Kept in the schema for backward compatibility with callers that
+ * already send it.
+ */
+export const AgentAddMessageStreamRequestProtocol = {
+  Agui: "agui",
+} as const;
+/**
+ * AG-UI is the only supported wire protocol. When present must be
+ *
+ * @remarks
+ * `"agui"`. Omitting the field is equivalent — the server always
+ * uses the AG-UI vocabulary (see `AgentMessageStreamSSEEvent`).
+ * Kept in the schema for backward compatibility with callers that
+ * already send it.
+ */
+export type AgentAddMessageStreamRequestProtocol = ClosedEnum<
+  typeof AgentAddMessageStreamRequestProtocol
+>;
+
+/**
  * Request body for `POST /agents/{agentKey}/conversations/{conversationId}/messages/stream`.
  *
  * @remarks
- * Only `query` is required; all other fields are optional overrides or
- * routing hints. Unknown fields are stripped during validation.
+ * `query` and `chatMode: quick` are required; all other fields are
+ * optional overrides. Unknown fields are stripped during validation.
  */
 export type AgentAddMessageStreamRequest = {
   /**
@@ -70,9 +89,8 @@ export type AgentAddMessageStreamRequest = {
    * Optional retrieval scope (`apps` / `kb`) for this turn. Each id must
    *
    * @remarks
-   * be a UUID or a `knowledgeBase_<orgId>` collection id. Omit to let
-   * the agent use its stored defaults; send `{ "apps": [], "kb": [] }`
-   * to force no knowledge sources for this turn.
+   * be a valid UUID. Omit to let the agent use its stored defaults;
+   * send `{ "apps": [], "kb": [] }` to force no knowledge sources for this turn.
    */
   filters?: Filters | undefined;
   /**
@@ -90,16 +108,12 @@ export type AgentAddMessageStreamRequest = {
    */
   attachments?: Array<ChatAttachmentRef> | undefined;
   /**
-   * Chat mode hint forwarded to the agent backend. Defaults to `auto`
+   * Required execution mode. Scoped agent conversations currently
    *
    * @remarks
-   * in the upstream AI payload when omitted.
-   * - `auto` lets the agent pick its default strategy.
-   * - `quick` favors low-latency answers over depth.
-   * - `verification` runs additional grounding/verification passes.
-   * - `deep` performs deeper retrieval and reasoning.
+   * support only `quick`.
    */
-  chatMode?: AgentAddMessageStreamRequestChatMode | undefined;
+  chatMode: AgentAddMessageStreamRequestChatMode;
   /**
    * AI model configuration id override for this turn. Omit to use the
    *
@@ -137,6 +151,25 @@ export type AgentAddMessageStreamRequest = {
    * tools for this turn.
    */
   tools?: Array<string> | undefined;
+  /**
+   * AG-UI is the only supported wire protocol. When present must be
+   *
+   * @remarks
+   * `"agui"`. Omitting the field is equivalent — the server always
+   * uses the AG-UI vocabulary (see `AgentMessageStreamSSEEvent`).
+   * Kept in the schema for backward compatibility with callers that
+   * already send it.
+   */
+  protocol?: AgentAddMessageStreamRequestProtocol | undefined;
+  /**
+   * Per-request agent capability toggles. Only meaningful when `chatMode`
+   *
+   * @remarks
+   * selects an agent mode; ignored otherwise. Each field falls back to its
+   * own `default` below when omitted — a missing flag is not uniformly
+   * `true`. Omitting the whole object applies every default.
+   */
+  agentCapabilities?: AgentCapabilities | undefined;
 };
 
 /** @internal */
@@ -145,18 +178,25 @@ export const AgentAddMessageStreamRequestChatMode$outboundSchema: z.ZodMiniEnum<
 > = z.enum(AgentAddMessageStreamRequestChatMode);
 
 /** @internal */
+export const AgentAddMessageStreamRequestProtocol$outboundSchema: z.ZodMiniEnum<
+  typeof AgentAddMessageStreamRequestProtocol
+> = z.enum(AgentAddMessageStreamRequestProtocol);
+
+/** @internal */
 export type AgentAddMessageStreamRequest$Outbound = {
   query: string;
   filters?: Filters$Outbound | undefined;
   appliedFilters?: AppliedFilters$Outbound | undefined;
   attachments?: Array<ChatAttachmentRef$Outbound> | undefined;
-  chatMode?: string | undefined;
+  chatMode: string;
   modelKey?: string | undefined;
   modelName?: string | undefined;
   modelFriendlyName?: string | undefined;
   timezone?: string | undefined;
   currentTime?: string | undefined;
   tools?: Array<string> | undefined;
+  protocol?: string | undefined;
+  agentCapabilities?: AgentCapabilities$Outbound | undefined;
 };
 
 /** @internal */
@@ -168,13 +208,15 @@ export const AgentAddMessageStreamRequest$outboundSchema: z.ZodMiniType<
   filters: z.optional(Filters$outboundSchema),
   appliedFilters: z.optional(AppliedFilters$outboundSchema),
   attachments: z.optional(z.array(ChatAttachmentRef$outboundSchema)),
-  chatMode: z.optional(AgentAddMessageStreamRequestChatMode$outboundSchema),
+  chatMode: AgentAddMessageStreamRequestChatMode$outboundSchema,
   modelKey: z.optional(z.string()),
   modelName: z.optional(z.string()),
   modelFriendlyName: z.optional(z.string()),
   timezone: z.optional(z.string()),
   currentTime: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
   tools: z.optional(z.array(z.string())),
+  protocol: z.optional(AgentAddMessageStreamRequestProtocol$outboundSchema),
+  agentCapabilities: z.optional(AgentCapabilities$outboundSchema),
 });
 
 export function agentAddMessageStreamRequestToJSON(

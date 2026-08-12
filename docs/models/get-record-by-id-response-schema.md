@@ -18,30 +18,24 @@ let value: GetRecordByIdResponseSchema = {
     recordType: "FILE",
     origin: "<value>",
     version: 235229,
-    isLatestVersion: true,
-    createdAtTimestamp: 59981,
-    updatedAtTimestamp: 47414,
-    sourceCreatedAtTimestamp: 297926,
-    sourceLastModifiedTimestamp: 243957,
-    lastSyncTimestamp: 359784,
+    createdAtTimestamp: 392551,
+    updatedAtTimestamp: 59981,
+    sourceCreatedAtTimestamp: 47414,
+    sourceLastModifiedTimestamp: 297926,
     indexingStatus: "<value>",
     extractionStatus: "<value>",
     isDeleted: true,
     isArchived: true,
-    isDirty: true,
     isVLMOcrProcessed: true,
     mimeType: "<value>",
-    sizeInBytes: 29403,
-    webUrl: "https://helpful-tail.biz/",
+    sizeInBytes: null,
+    webUrl: null,
     fileRecord: {
       id: "<id>",
       orgId: "<id>",
       name: "<value>",
-      extension: "wav",
-      mimeType: "<value>",
-      sizeInBytes: 793910,
-      isFile: false,
-      webUrl: "https://milky-term.net/",
+      extension: "m1v",
+      isFile: true,
     },
     mailRecord: {},
     ticketRecord: {},
@@ -57,39 +51,37 @@ let value: GetRecordByIdResponseSchema = {
   },
   metadata: {
     languages: [],
-    topics: [
+    topics: [],
+    subcategories1: [
       {
         id: "<id>",
         name: "<value>",
       },
     ],
-    subcategories1: [],
     subcategories2: [
       {
         id: "<id>",
         name: "<value>",
       },
     ],
-    subcategories3: [
-      {
-        id: "<id>",
-        name: "<value>",
-      },
-    ],
+    subcategories3: [],
     departments: [
       {
         id: "<id>",
         name: "<value>",
       },
     ],
-    categories: [
-      {
-        id: "<id>",
-        name: "<value>",
-      },
-    ],
+    categories: [],
   },
-  permissions: [],
+  permissions: [
+    {
+      id: "<id>",
+      name: "<value>",
+      type: "<value>",
+      relationship: "READER",
+      accessType: "<value>",
+    },
+  ],
 };
 ```
 

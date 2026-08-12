@@ -23,10 +23,17 @@ export type GetRecordByIdResponseSchemaFileRecord = {
   orgId: string;
   name: string;
   extension: string;
-  mimeType: string;
-  sizeInBytes: number;
+  etag?: string | null | undefined;
+  ctag?: string | null | undefined;
+  md5Checksum?: string | null | undefined;
+  quickXorHash?: string | null | undefined;
+  crc32Hash?: string | null | undefined;
+  sha1Hash?: string | null | undefined;
+  sha256Hash?: string | null | undefined;
+  mimeType?: string | null | undefined;
+  sizeInBytes?: number | null | undefined;
   isFile: boolean;
-  webUrl: string;
+  webUrl?: string | null | undefined;
   path?: string | null | undefined;
   localFsRelativePath?: string | null | undefined;
 };
@@ -42,6 +49,9 @@ export type GetRecordByIdResponseSchemaRecord = {
   externalRecordId: string;
   externalRootGroupId?: string | null | undefined;
   externalGroupId?: string | null | undefined;
+  externalParentId?: string | null | undefined;
+  externalRevisionId?: string | null | undefined;
+  recordGroupId?: string | null | undefined;
   connectorId: string;
   /**
    * Name of the source connector. Mirrors the values of the backend
@@ -92,25 +102,41 @@ export type GetRecordByIdResponseSchemaRecord = {
   recordType: RecordTypeEnum;
   origin: string;
   version: number;
-  isLatestVersion: boolean;
+  isLatestVersion?: boolean | null | undefined;
   createdAtTimestamp: number;
   updatedAtTimestamp: number;
   sourceCreatedAtTimestamp: number;
   sourceLastModifiedTimestamp: number;
-  lastSyncTimestamp: number;
+  lastSyncTimestamp?: number | null | undefined;
   lastIndexTimestamp?: number | undefined;
   lastExtractionTimestamp?: number | undefined;
+  processingStartedAt?: number | null | undefined;
+  parsingStatus?: string | null | undefined;
   indexingStatus: string;
   extractionStatus: string;
+  reason?: string | null | undefined;
   isDeleted: boolean;
   isArchived: boolean;
-  isDirty: boolean;
-  isVLMOcrProcessed: boolean;
-  mimeType: string;
-  sizeInBytes: number;
-  md5Checksum?: string | undefined;
-  virtualRecordId?: string | undefined;
-  webUrl: string;
+  deletedByUserId?: string | null | undefined;
+  isDirty?: boolean | null | undefined;
+  isVLMOcrProcessed: boolean | null;
+  mimeType: string | null;
+  sizeInBytes: number | null;
+  md5Checksum?: string | null | undefined;
+  virtualRecordId?: string | null | undefined;
+  summaryDocumentId?: string | null | undefined;
+  storageDocumentId?: string | null | undefined;
+  webUrl: string | null;
+  previewRenderable?: boolean | null | undefined;
+  isShared?: boolean | null | undefined;
+  isDependentNode?: boolean | null | undefined;
+  parentNodeId?: string | null | undefined;
+  hideWeburl?: boolean | null | undefined;
+  isInternal?: boolean | null | undefined;
+  /**
+   * True for placeholder/stub records standing in for an out-of-scope ancestor (rendered read-only, no content actions; excluded from search and indexing).
+   */
+  isPlaceholder?: boolean | null | undefined;
   fileRecord: GetRecordByIdResponseSchemaFileRecord | null;
   mailRecord: GetRecordByIdResponseSchemaMailRecord | null;
   ticketRecord: TicketRecord | null;
@@ -207,10 +233,17 @@ export const GetRecordByIdResponseSchemaFileRecord$inboundSchema: z.ZodMiniType<
   orgId: types.string(),
   name: types.string(),
   extension: types.string(),
-  mimeType: types.string(),
-  sizeInBytes: types.number(),
+  etag: z.optional(z.nullable(types.string())),
+  ctag: z.optional(z.nullable(types.string())),
+  md5Checksum: z.optional(z.nullable(types.string())),
+  quickXorHash: z.optional(z.nullable(types.string())),
+  crc32Hash: z.optional(z.nullable(types.string())),
+  sha1Hash: z.optional(z.nullable(types.string())),
+  sha256Hash: z.optional(z.nullable(types.string())),
+  mimeType: z.optional(z.nullable(types.string())),
+  sizeInBytes: z.optional(z.nullable(types.number())),
   isFile: types.boolean(),
-  webUrl: types.string(),
+  webUrl: z.optional(z.nullable(types.string())),
   path: z.optional(z.nullable(types.string())),
   localFsRelativePath: z.optional(z.nullable(types.string())),
 });
@@ -268,30 +301,46 @@ export const GetRecordByIdResponseSchemaRecord$inboundSchema: z.ZodMiniType<
   externalRecordId: types.string(),
   externalRootGroupId: z.optional(z.nullable(types.string())),
   externalGroupId: z.optional(z.nullable(types.string())),
+  externalParentId: z.optional(z.nullable(types.string())),
+  externalRevisionId: z.optional(z.nullable(types.string())),
+  recordGroupId: z.optional(z.nullable(types.string())),
   connectorId: types.string(),
   connectorName: ConnectorNameEnum$inboundSchema,
   recordType: RecordTypeEnum$inboundSchema,
   origin: types.string(),
   version: types.number(),
-  isLatestVersion: types.boolean(),
+  isLatestVersion: z.optional(z.nullable(types.boolean())),
   createdAtTimestamp: types.number(),
   updatedAtTimestamp: types.number(),
   sourceCreatedAtTimestamp: types.number(),
   sourceLastModifiedTimestamp: types.number(),
-  lastSyncTimestamp: types.number(),
+  lastSyncTimestamp: z.optional(z.nullable(types.number())),
   lastIndexTimestamp: types.optional(types.number()),
   lastExtractionTimestamp: types.optional(types.number()),
+  processingStartedAt: z.optional(z.nullable(types.number())),
+  parsingStatus: z.optional(z.nullable(types.string())),
   indexingStatus: types.string(),
   extractionStatus: types.string(),
+  reason: z.optional(z.nullable(types.string())),
   isDeleted: types.boolean(),
   isArchived: types.boolean(),
-  isDirty: types.boolean(),
-  isVLMOcrProcessed: types.boolean(),
-  mimeType: types.string(),
-  sizeInBytes: types.number(),
-  md5Checksum: types.optional(types.string()),
-  virtualRecordId: types.optional(types.string()),
-  webUrl: types.string(),
+  deletedByUserId: z.optional(z.nullable(types.string())),
+  isDirty: z.optional(z.nullable(types.boolean())),
+  isVLMOcrProcessed: types.nullable(types.boolean()),
+  mimeType: types.nullable(types.string()),
+  sizeInBytes: types.nullable(types.number()),
+  md5Checksum: z.optional(z.nullable(types.string())),
+  virtualRecordId: z.optional(z.nullable(types.string())),
+  summaryDocumentId: z.optional(z.nullable(types.string())),
+  storageDocumentId: z.optional(z.nullable(types.string())),
+  webUrl: types.nullable(types.string()),
+  previewRenderable: z.optional(z.nullable(types.boolean())),
+  isShared: z.optional(z.nullable(types.boolean())),
+  isDependentNode: z.optional(z.nullable(types.boolean())),
+  parentNodeId: z.optional(z.nullable(types.string())),
+  hideWeburl: z.optional(z.nullable(types.boolean())),
+  isInternal: z.optional(z.nullable(types.boolean())),
+  isPlaceholder: z.optional(z.nullable(types.boolean())),
   fileRecord: types.nullable(
     z.lazy(() => GetRecordByIdResponseSchemaFileRecord$inboundSchema),
   ),

@@ -5,11 +5,15 @@
 import * as z from "zod/v4-mini";
 import { remap as remap$ } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
+import * as openEnums from "../types/enums.js";
+import { OpenEnum } from "../types/enums.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import { smartUnion } from "../types/smart-union.js";
+import { AgentSkill, AgentSkill$inboundSchema } from "./agent-skill.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 import { Knowledge, Knowledge$inboundSchema } from "./knowledge.js";
+import { McpServer, McpServer$inboundSchema } from "./mcp-server.js";
 import { Toolset, Toolset$inboundSchema } from "./toolset.js";
 
 export type Model = {
@@ -42,6 +46,23 @@ export type AgentWebSearch = {
   providerKey?: string | undefined;
   providerLabel?: string | undefined;
 };
+
+/**
+ * Agent-level reasoning effort used when a chat request omits its own. Null when unset.
+ */
+export const AgentDefaultReasoningEffort = {
+  None: "none",
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Max: "max",
+} as const;
+/**
+ * Agent-level reasoning effort used when a chat request omits its own. Null when unset.
+ */
+export type AgentDefaultReasoningEffort = OpenEnum<
+  typeof AgentDefaultReasoningEffort
+>;
 
 /**
  * Detailed agent projection returned by agent detail-style endpoints such
@@ -101,9 +122,20 @@ export type Agent = {
    */
   toolsets: Array<Toolset>;
   /**
+   * MCP server instances linked to the agent (GET /agents/{agentKey} graph
+   *
+   * @remarks
+   * projection). Same shape/semantics as `toolsets`, keyed by `instanceId`.
+   */
+  mcpServers: Array<McpServer>;
+  /**
    * Knowledge connectors and indexed scopes linked to the agent
    */
   knowledge: Array<Knowledge>;
+  /**
+   * Skills linked to the agent via `agentHasSkill` edges
+   */
+  skills: Array<AgentSkill>;
   /**
    * Whether the agent is shared with the whole organization
    */
@@ -112,6 +144,10 @@ export type Agent = {
    * Web search provider attached to this agent. Null when none is configured.
    */
   webSearch?: AgentWebSearch | null | undefined;
+  /**
+   * Agent-level reasoning effort used when a chat request omits its own. Null when unset.
+   */
+  defaultReasoningEffort?: AgentDefaultReasoningEffort | null | undefined;
   /**
    * Free-form agent tags.
    */
@@ -223,6 +259,12 @@ export function agentWebSearchFromJSON(
 }
 
 /** @internal */
+export const AgentDefaultReasoningEffort$inboundSchema: z.ZodMiniType<
+  AgentDefaultReasoningEffort,
+  unknown
+> = openEnums.inboundSchema(AgentDefaultReasoningEffort);
+
+/** @internal */
 export const Agent$inboundSchema: z.ZodMiniType<Agent, unknown> = z.pipe(
   z.object({
     _id: types.string(),
@@ -239,10 +281,15 @@ export const Agent$inboundSchema: z.ZodMiniType<Agent, unknown> = z.pipe(
       z.lazy(() => Model$inboundSchema),
     ])),
     toolsets: z.array(Toolset$inboundSchema),
+    mcpServers: z.array(McpServer$inboundSchema),
     knowledge: z.array(Knowledge$inboundSchema),
+    skills: z.array(AgentSkill$inboundSchema),
     shareWithOrg: types.boolean(),
     webSearch: z.optional(
       z.nullable(z.lazy(() => AgentWebSearch$inboundSchema)),
+    ),
+    defaultReasoningEffort: z.optional(
+      z.nullable(AgentDefaultReasoningEffort$inboundSchema),
     ),
     tags: z.array(types.string()),
     createdAtTimestamp: types.number(),

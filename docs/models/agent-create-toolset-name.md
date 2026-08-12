@@ -7,7 +7,7 @@ Registered toolset name (lowercase) accepted by the create-agent gateway.
 ```typescript
 import { AgentCreateToolsetName } from "@pipeshub-ai/sdk/models";
 
-let value: AgentCreateToolsetName = "mariadb";
+let value: AgentCreateToolsetName = "lumos";
 ```
 
 ## Values
@@ -15,5 +15,5 @@ let value: AgentCreateToolsetName = "mariadb";
 This is an open enum. Unrecognized values will be captured as the `Unrecognized<string>` branded type.
 
 ```typescript
-"calendar" | "clickup" | "confluence" | "drive" | "github" | "gmail" | "jira" | "lumos" | "mariadb" | "onedrive" | "outlook" | "redshift" | "salesforce" | "sharepoint" | "slack" | "teams" | "zoom" | Unrecognized<string>
+"calendar" | "clickup" | "confluence" | "confluencedatacenter" | "drive" | "github" | "gmail" | "jira" | "jiradatacenter" | "lumos" | "mariadb" | "onedrive" | "outlook" | "redshift" | "salesforce" | "sharepoint" | "slack" | "teams" | "zoom" | Unrecognized<string>
 ```

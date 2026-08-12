@@ -277,6 +277,9 @@ export class Agents extends ClientSDK {
    * response as Server-Sent Events (SSE). The first user message is saved
    * and forwarded to the upstream agent backend; subsequent tokens, tool
    * calls, and lifecycle events are emitted on the open SSE connection.
+   *
+   * AG-UI is the sole wire protocol. The request must include
+   * `chatMode: quick`; see `AgentStreamSSEEvent` for the event vocabulary.
    */
   async streamAgentConversation(
     request: operations.StreamAgentConversationRequest,
@@ -295,6 +298,10 @@ export class Agents extends ClientSDK {
    * @remarks
    * Append a user message to an existing agent conversation and stream the
    * assistant reply over SSE.
+   *
+   * AG-UI is the sole wire protocol. The request must include
+   * `chatMode: quick`; see `AgentMessageStreamSSEEvent` for the event
+   * vocabulary.
    */
   async streamAgentConversationMessage(
     request: operations.StreamAgentConversationMessageRequest,
@@ -321,8 +328,8 @@ export class Agents extends ClientSDK {
    *
    * **Request body:**
    *
-   * All request-body fields are optional. When omitted, the server reuses
-   * the original model/context. The body supports:
+   * `chatMode: quick` is required. Other fields are optional and reuse
+   * the original model/context when omitted. The body supports:
    * - `filters`
    * - `chatMode`
    * - `modelKey`
@@ -331,18 +338,22 @@ export class Agents extends ClientSDK {
    * - `timezone`
    * - `currentTime`
    * - `tools`
+   * - `protocol`
+   * - `agentCapabilities`
    *
    * **Streaming behavior:**
    *
-   * The response is delivered as `text/event-stream`. Stable events are
-   * `connected`, `complete`, and `error`. Additional agent/tool lifecycle
-   * events may be forwarded by the backend and should be treated as
-   * informational updates.
+   * The response is delivered as an AG-UI `text/event-stream`. Stable
+   * outcomes are `RUN_FINISHED` and `RUN_ERROR`; see
+   * `AgentRegenerateSSEEvent`.
+   *
+   * Additional agent/tool lifecycle events may be forwarded by the
+   * backend and should be treated as informational updates.
    *
    * Validation failures on params/body are returned as normal HTTP `400`
    * responses before the stream starts. Valid-shape requests that fail
-   * conversation lookup or regenerate rules are reported as SSE `error`
-   * events after stream initialization.
+   * conversation lookup or regenerate rules are reported as
+   * `RUN_ERROR` events after stream initialization.
    */
   async regenerateAgentConversationMessage(
     request: operations.RegenerateAgentConversationMessageRequest,

@@ -611,8 +611,7 @@ export class KnowledgeBase extends ClientSDK {
    * **Parent identification**
    *
    * - `parentType` must be one of: `app`, `recordGroup`, `folder`, `record`
-   * - `parentId` is either a standard UUID or the Collection app sentinel
-   *   `knowledgeBase_<orgId>` (e.g. `knowledgeBase_org123`)
+   * - `parentId` must be a standard UUID
    *
    * **Filtering and searching**
    *

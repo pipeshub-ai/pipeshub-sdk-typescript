@@ -23,6 +23,7 @@ let value: UpdateRecordResponse = {
     version: 3,
     createdAtTimestamp: 1704153600000,
     updatedAtTimestamp: 1704240000000,
+    parsingStatus: "COMPLETED",
     indexingStatus: "COMPLETED",
     webUrl: "https://drive.google.com/file/d/abc123",
     mimeType: "application/pdf",

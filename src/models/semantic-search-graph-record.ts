@@ -45,6 +45,8 @@ export type SemanticSearchGraphRecord = {
   isArchived?: boolean | null | undefined;
   isVLMOcrProcessed?: boolean | null | undefined;
   deletedByUserId?: string | null | undefined;
+  processingStartedAt?: number | null | undefined;
+  parsingStatus?: string | null | undefined;
   indexingStatus?: string | null | undefined;
   extractionStatus?: string | null | undefined;
   isLatestVersion?: boolean | null | undefined;
@@ -53,6 +55,7 @@ export type SemanticSearchGraphRecord = {
   lastIndexTimestamp?: number | null | undefined;
   lastExtractionTimestamp?: number | null | undefined;
   summaryDocumentId?: string | null | undefined;
+  storageDocumentId?: string | null | undefined;
   virtualRecordId?: string | null | undefined;
   previewRenderable?: boolean | null | undefined;
   isShared?: boolean | null | undefined;
@@ -100,6 +103,8 @@ export const SemanticSearchGraphRecord$inboundSchema: z.ZodMiniType<
     isArchived: z.optional(z.nullable(types.boolean())),
     isVLMOcrProcessed: z.optional(z.nullable(types.boolean())),
     deletedByUserId: z.optional(z.nullable(types.string())),
+    processingStartedAt: z.optional(z.nullable(types.number())),
+    parsingStatus: z.optional(z.nullable(types.string())),
     indexingStatus: z.optional(z.nullable(types.string())),
     extractionStatus: z.optional(z.nullable(types.string())),
     isLatestVersion: z.optional(z.nullable(types.boolean())),
@@ -108,6 +113,7 @@ export const SemanticSearchGraphRecord$inboundSchema: z.ZodMiniType<
     lastIndexTimestamp: z.optional(z.nullable(types.number())),
     lastExtractionTimestamp: z.optional(z.nullable(types.number())),
     summaryDocumentId: z.optional(z.nullable(types.string())),
+    storageDocumentId: z.optional(z.nullable(types.string())),
     virtualRecordId: z.optional(z.nullable(types.string())),
     previewRenderable: z.optional(z.nullable(types.boolean())),
     isShared: z.optional(z.nullable(types.boolean())),

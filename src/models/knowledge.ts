@@ -19,7 +19,7 @@ import { SDKValidationError } from "./errors/sdk-validation-error.js";
  */
 export type FiltersParsed = {
   /**
-   * Record-group ids (e.g. knowledge-base roots) in scope.
+   * Deprecated/legacy: record-group ids for connector record-group scoping (e.g. Confluence spaces, Jira projects). No longer set for KB (Collection) entries — a KB is identified by its own `connectorId`, not by an id in this list.
    */
   recordGroups?: Array<string> | undefined;
   /**

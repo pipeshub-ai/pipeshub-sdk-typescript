@@ -57,18 +57,10 @@ import { Result } from "../types/fp.js";
  *
  * **Streaming:**
  *
- * The response is delivered as an SSE (`text/event-stream`) stream. The
- * exact event vocabulary depends on `chatMode`:
- *
- * - For non-agent modes (e.g. `internal_search`, `web_search`) the
- *   request is dispatched to the assistant chat backend.
- * - For agent modes (e.g. `agent:auto`) the request is dispatched to
- *   the agent backend with a placeholder agent built from the caller's
- *   workspace, which can additionally emit `tool_result` and
- *   `tool_execution_complete` events.
- *
- * See `SSEEvent` for the full union of event names this endpoint can
- * emit across both backends.
+ * The response is delivered as an AG-UI `text/event-stream` stream.
+ * Routing still depends on `chatMode`: `internal_search` and
+ * `web_search` use the assistant backend, while `agent` uses the
+ * universal agent loop. See `SSEEvent` for the event vocabulary.
  */
 export function conversationsRegenerateAnswer(
   client: PipeshubCore,

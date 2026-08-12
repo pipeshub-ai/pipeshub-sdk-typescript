@@ -19,18 +19,15 @@ export type Filters = {
    * Connector instance ids to scope retrieval for this turn. Each element
    *
    * @remarks
-   * must be a UUID (connector instance id, record-group id, etc.) or the
-   * org knowledge-base collection sentinel `knowledgeBase_<orgId>`
-   * (pattern `knowledgeBase_[a-zA-Z0-9_-]+`). Gateway validation matches
-   * Zod `appOrKbIdSchema`.
+   * must be a valid UUID (connector app id, KB app id, record-group id, etc.).
+   * Gateway validation matches Zod `appOrKbIdSchema`.
    */
   apps?: Array<string> | undefined;
   /**
-   * Knowledge-base / record-group ids to scope retrieval for this turn.
+   * Knowledge-base app ids to scope retrieval for this turn.
    *
    * @remarks
-   * Each element uses the same accepted formats as `apps`: a UUID or
-   * `knowledgeBase_<orgId>` (pattern `knowledgeBase_[a-zA-Z0-9_-]+`).
+   * Each element must be a valid UUID.
    */
   kb?: Array<string> | undefined;
 };

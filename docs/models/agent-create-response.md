@@ -35,19 +35,22 @@ let value: AgentCreateResponse = {
     isDeleted: true,
     toolsets: [
       {
-        name: "teams",
+        name: "slack",
         displayName: "Lincoln1",
         key: "<key>",
         tools: [],
       },
     ],
-    knowledge: [
+    mcpServers: [
       {
-        connectorId: "<id>",
+        name: "<value>",
+        displayName: "Malinda.Effertz23",
         key: "<key>",
-        filters: "<value>",
+        tools: [],
       },
     ],
+    knowledge: [],
+    skills: [],
   },
 };
 ```

@@ -35,6 +35,9 @@ import { Result } from "../types/fp.js";
  * response as Server-Sent Events (SSE). The first user message is saved
  * and forwarded to the upstream agent backend; subsequent tokens, tool
  * calls, and lifecycle events are emitted on the open SSE connection.
+ *
+ * AG-UI is the sole wire protocol. The request must include
+ * `chatMode: quick`; see `AgentStreamSSEEvent` for the event vocabulary.
  */
 export function agentsStreamAgentConversation(
   client: PipeshubCore,

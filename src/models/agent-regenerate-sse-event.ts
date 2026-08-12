@@ -11,19 +11,27 @@ import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
 export const AgentRegenerateSSEEventEvent = {
-  Connected: "connected",
-  Status: "status",
-  ToolCalls: "tool_calls",
-  ToolCall: "tool_call",
-  ToolSuccess: "tool_success",
-  ToolError: "tool_error",
-  ToolResult: "tool_result",
-  ToolExecutionComplete: "tool_execution_complete",
-  AnswerChunk: "answer_chunk",
-  Restreaming: "restreaming",
-  Metadata: "metadata",
-  Complete: "complete",
-  Error: "error",
+  RunStarted: "RUN_STARTED",
+  RunFinished: "RUN_FINISHED",
+  RunError: "RUN_ERROR",
+  StepStarted: "STEP_STARTED",
+  StepFinished: "STEP_FINISHED",
+  TextMessageStart: "TEXT_MESSAGE_START",
+  TextMessageContent: "TEXT_MESSAGE_CONTENT",
+  TextMessageEnd: "TEXT_MESSAGE_END",
+  ReasoningStart: "REASONING_START",
+  ReasoningMessageStart: "REASONING_MESSAGE_START",
+  ReasoningMessageContent: "REASONING_MESSAGE_CONTENT",
+  ReasoningMessageEnd: "REASONING_MESSAGE_END",
+  ReasoningEnd: "REASONING_END",
+  ToolCallStart: "TOOL_CALL_START",
+  ToolCallArgs: "TOOL_CALL_ARGS",
+  ToolCallEnd: "TOOL_CALL_END",
+  ToolCallResult: "TOOL_CALL_RESULT",
+  StateDelta: "STATE_DELTA",
+  StateSnapshot: "STATE_SNAPSHOT",
+  Custom: "CUSTOM",
+  Heartbeat: "HEARTBEAT",
 } as const;
 export type AgentRegenerateSSEEventEvent = OpenEnum<
   typeof AgentRegenerateSSEEventEvent
@@ -33,23 +41,33 @@ export type AgentRegenerateSSEEventEvent = OpenEnum<
  * SSE event envelope for `POST /agents/{agentKey}/conversations/{conversationId}/message/{messageId}/regenerate`.
  *
  * @remarks
+ * AG-UI is the sole wire protocol.
  *
- * Stable events:
+ * `event` carries the AG-UI type name and `data` is a JSON object that
+ * includes a `"type"` field matching `event`, plus type-specific
+ * fields. Stable gateway-generated top-level outcomes:
  *
- * - `connected` confirms the stream is open.
- * - `complete` returns the updated conversation plus request metadata
- *   after the regenerated bot response is persisted.
- * - `error` returns a failure message. Conversation lookup failures,
- *   unauthorized conversation access, and regenerate rule failures such
- *   as "not the last message" are reported here after the stream starts.
+ * - `RUN_FINISHED` returns `{ type, result }` where
+ *   `result` is `{ conversation, recordsUsed, meta }` — the updated
+ *   conversation plus request metadata after the regenerated response
+ *   is persisted.
+ * - `RUN_ERROR` returns `{ type, message, code? }`. Conversation
+ *   lookup failures, unauthorized conversation access, and regenerate
+ *   rule failures such as "not the last message" are reported here.
  *
  * Other events are forwarded from the agent backend and should be
- * treated as informational updates.
+ * treated as informational updates. Those forwarded lifecycle and
+ * child-run events may contain `runId`, `threadId`, and `parentRunId`;
+ * the gateway-generated root terminal event does not.
  */
 export type AgentRegenerateSSEEvent = {
   event?: AgentRegenerateSSEEventEvent | undefined;
   /**
-   * JSON-encoded event payload. Shape depends on `event`.
+   * JSON-encoded event payload. The decoded JSON includes a `"type"`
+   *
+   * @remarks
+   * field matching `event`, plus type-specific fields. Shape depends
+   * on `event`.
    */
   data?: string | undefined;
 };

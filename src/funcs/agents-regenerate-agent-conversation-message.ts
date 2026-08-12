@@ -41,8 +41,8 @@ import { Result } from "../types/fp.js";
  *
  * **Request body:**
  *
- * All request-body fields are optional. When omitted, the server reuses
- * the original model/context. The body supports:
+ * `chatMode: quick` is required. Other fields are optional and reuse
+ * the original model/context when omitted. The body supports:
  * - `filters`
  * - `chatMode`
  * - `modelKey`
@@ -51,18 +51,22 @@ import { Result } from "../types/fp.js";
  * - `timezone`
  * - `currentTime`
  * - `tools`
+ * - `protocol`
+ * - `agentCapabilities`
  *
  * **Streaming behavior:**
  *
- * The response is delivered as `text/event-stream`. Stable events are
- * `connected`, `complete`, and `error`. Additional agent/tool lifecycle
- * events may be forwarded by the backend and should be treated as
- * informational updates.
+ * The response is delivered as an AG-UI `text/event-stream`. Stable
+ * outcomes are `RUN_FINISHED` and `RUN_ERROR`; see
+ * `AgentRegenerateSSEEvent`.
+ *
+ * Additional agent/tool lifecycle events may be forwarded by the
+ * backend and should be treated as informational updates.
  *
  * Validation failures on params/body are returned as normal HTTP `400`
  * responses before the stream starts. Valid-shape requests that fail
- * conversation lookup or regenerate rules are reported as SSE `error`
- * events after stream initialization.
+ * conversation lookup or regenerate rules are reported as
+ * `RUN_ERROR` events after stream initialization.
  */
 export function agentsRegenerateAgentConversationMessage(
   client: PipeshubCore,

@@ -97,6 +97,10 @@ export type KnowledgeHubNode = {
    */
   isInternal: boolean;
   /**
+   * True for placeholder/stub nodes standing in for an out-of-scope ancestor (rendered read-only, no content actions; excluded from search and indexing).
+   */
+  isPlaceholder: boolean;
+  /**
    * Creation timestamp (epoch ms).
    */
   createdAt: number;
@@ -175,6 +179,7 @@ export const KnowledgeHubNode$inboundSchema: z.ZodMiniType<
   indexingStatus: types.nullable(types.string()),
   reason: types.nullable(types.string()),
   isInternal: types.boolean(),
+  isPlaceholder: types.boolean(),
   createdAt: types.number(),
   updatedAt: types.number(),
   sizeInBytes: types.nullable(types.number()),

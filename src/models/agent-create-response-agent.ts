@@ -5,12 +5,22 @@
 import * as z from "zod/v4-mini";
 import { remap as remap$ } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
+import * as openEnums from "../types/enums.js";
+import { OpenEnum } from "../types/enums.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import {
   AgentCreateResponseKnowledge,
   AgentCreateResponseKnowledge$inboundSchema,
 } from "./agent-create-response-knowledge.js";
+import {
+  AgentCreateResponseMcpServer,
+  AgentCreateResponseMcpServer$inboundSchema,
+} from "./agent-create-response-mcp-server.js";
+import {
+  AgentCreateResponseSkill,
+  AgentCreateResponseSkill$inboundSchema,
+} from "./agent-create-response-skill.js";
 import {
   AgentCreateResponseToolset,
   AgentCreateResponseToolset$inboundSchema,
@@ -23,6 +33,23 @@ export type AgentCreateResponseAgentWebSearch = {
   providerLabel?: string | undefined;
 };
 
+/**
+ * Agent-level reasoning effort used when a chat request omits its own. Null when unset.
+ */
+export const AgentCreateResponseAgentDefaultReasoningEffort = {
+  None: "none",
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Max: "max",
+} as const;
+/**
+ * Agent-level reasoning effort used when a chat request omits its own. Null when unset.
+ */
+export type AgentCreateResponseAgentDefaultReasoningEffort = OpenEnum<
+  typeof AgentCreateResponseAgentDefaultReasoningEffort
+>;
+
 export type AgentCreateResponseAgent = {
   key: string;
   name: string;
@@ -33,6 +60,13 @@ export type AgentCreateResponseAgent = {
   models: Array<string>;
   tags: Array<string>;
   webSearch: AgentCreateResponseAgentWebSearch | null;
+  /**
+   * Agent-level reasoning effort used when a chat request omits its own. Null when unset.
+   */
+  defaultReasoningEffort?:
+    | AgentCreateResponseAgentDefaultReasoningEffort
+    | null
+    | undefined;
   isActive: boolean;
   isServiceAccount: boolean;
   createdBy: string;
@@ -41,7 +75,9 @@ export type AgentCreateResponseAgent = {
   updatedAtTimestamp: number;
   isDeleted: boolean;
   toolsets: Array<AgentCreateResponseToolset>;
+  mcpServers: Array<AgentCreateResponseMcpServer>;
   knowledge: Array<AgentCreateResponseKnowledge>;
+  skills: Array<AgentCreateResponseSkill>;
 };
 
 /** @internal */
@@ -65,6 +101,11 @@ export function agentCreateResponseAgentWebSearchFromJSON(
 }
 
 /** @internal */
+export const AgentCreateResponseAgentDefaultReasoningEffort$inboundSchema:
+  z.ZodMiniType<AgentCreateResponseAgentDefaultReasoningEffort, unknown> =
+    openEnums.inboundSchema(AgentCreateResponseAgentDefaultReasoningEffort);
+
+/** @internal */
 export const AgentCreateResponseAgent$inboundSchema: z.ZodMiniType<
   AgentCreateResponseAgent,
   unknown
@@ -81,6 +122,9 @@ export const AgentCreateResponseAgent$inboundSchema: z.ZodMiniType<
     webSearch: types.nullable(
       z.lazy(() => AgentCreateResponseAgentWebSearch$inboundSchema),
     ),
+    defaultReasoningEffort: z.optional(
+      z.nullable(AgentCreateResponseAgentDefaultReasoningEffort$inboundSchema),
+    ),
     isActive: types.boolean(),
     isServiceAccount: types.boolean(),
     createdBy: types.string(),
@@ -89,7 +133,9 @@ export const AgentCreateResponseAgent$inboundSchema: z.ZodMiniType<
     updatedAtTimestamp: types.number(),
     isDeleted: types.boolean(),
     toolsets: z.array(AgentCreateResponseToolset$inboundSchema),
+    mcpServers: z.array(AgentCreateResponseMcpServer$inboundSchema),
     knowledge: z.array(AgentCreateResponseKnowledge$inboundSchema),
+    skills: z.array(AgentCreateResponseSkill$inboundSchema),
   }),
   z.transform((v) => {
     return remap$(v, {

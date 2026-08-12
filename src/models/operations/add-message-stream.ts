@@ -16,13 +16,13 @@ export type AddMessageStreamRequest = {
   /**
    * Request payload
    */
-  body: models.AddMessageRequest;
+  body: models.ConversationMessageStreamRequest;
 };
 
 /** @internal */
 export type AddMessageStreamRequest$Outbound = {
   conversationId: string;
-  body: models.AddMessageRequest$Outbound;
+  body: models.ConversationMessageStreamRequest$Outbound;
 };
 
 /** @internal */
@@ -31,7 +31,7 @@ export const AddMessageStreamRequest$outboundSchema: z.ZodMiniType<
   AddMessageStreamRequest
 > = z.object({
   conversationId: z.string(),
-  body: models.AddMessageRequest$outboundSchema,
+  body: models.ConversationMessageStreamRequest$outboundSchema,
 });
 
 export function addMessageStreamRequestToJSON(

@@ -130,6 +130,7 @@ export const GetConversationByIdMessageMessageType = {
   Error: "error",
   Feedback: "feedback",
   System: "system",
+  ToolCall: "tool_call",
 } as const;
 export type GetConversationByIdMessageMessageType = OpenEnum<
   typeof GetConversationByIdMessageMessageType
@@ -258,6 +259,18 @@ export type GetConversationByIdMessage = {
    * `POST /conversations/attachments/upload`).
    */
   attachments?: Array<models.ChatAttachmentRef> | undefined;
+  /**
+   * Tool call results invoked during this message turn.
+   */
+  tools?: Array<models.MessageToolCall> | undefined;
+  /**
+   * Persisted chain-of-thought for this turn.
+   */
+  reasoning?: Array<models.MessageReasoningTurn> | undefined;
+  /**
+   * Ordered agent-activity transcript for this turn.
+   */
+  parts?: Array<models.MessagePart> | undefined;
   metadata?: GetConversationByIdMetadata | undefined;
   createdAt?: Date | undefined;
   updatedAt?: Date | undefined;
@@ -764,6 +777,11 @@ export const GetConversationByIdMessage$inboundSchema: z.ZodMiniType<
     attachments: types.optional(
       z.array(models.ChatAttachmentRef$inboundSchema),
     ),
+    tools: types.optional(z.array(models.MessageToolCall$inboundSchema)),
+    reasoning: types.optional(
+      z.array(models.MessageReasoningTurn$inboundSchema),
+    ),
+    parts: types.optional(z.array(models.MessagePart$inboundSchema)),
     metadata: types.optional(
       z.lazy(() => GetConversationByIdMetadata$inboundSchema),
     ),

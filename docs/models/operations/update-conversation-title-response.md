@@ -16,7 +16,7 @@ let value: UpdateConversationTitleResponse = {
     messages: [
       {
         id: "<value>",
-        messageType: "bot_response",
+        messageType: "error",
         content: "<value>",
         citations: [],
         followUpQuestions: [],

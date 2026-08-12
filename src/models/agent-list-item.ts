@@ -5,10 +5,13 @@
 import * as z from "zod/v4-mini";
 import { remap as remap$ } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
+import * as openEnums from "../types/enums.js";
+import { OpenEnum } from "../types/enums.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 import { Knowledge, Knowledge$inboundSchema } from "./knowledge.js";
+import { McpServer, McpServer$inboundSchema } from "./mcp-server.js";
 import { Toolset, Toolset$inboundSchema } from "./toolset.js";
 
 /**
@@ -26,6 +29,23 @@ export type AgentListItemWebSearch = {
   providerKey?: string | undefined;
   providerLabel?: string | undefined;
 };
+
+/**
+ * Agent-level reasoning effort used when a chat request omits its own. Null when unset.
+ */
+export const AgentListItemDefaultReasoningEffort = {
+  None: "none",
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Max: "max",
+} as const;
+/**
+ * Agent-level reasoning effort used when a chat request omits its own. Null when unset.
+ */
+export type AgentListItemDefaultReasoningEffort = OpenEnum<
+  typeof AgentListItemDefaultReasoningEffort
+>;
 
 /**
  * Agent projection returned by `GET /agents`.
@@ -122,6 +142,13 @@ export type AgentListItem = {
    */
   webSearch?: AgentListItemWebSearch | null | undefined;
   /**
+   * Agent-level reasoning effort used when a chat request omits its own. Null when unset.
+   */
+  defaultReasoningEffort?:
+    | AgentListItemDefaultReasoningEffort
+    | null
+    | undefined;
+  /**
    * Whether the agent is shared with the organization.
    */
   shareWithOrg: boolean;
@@ -133,6 +160,14 @@ export type AgentListItem = {
    * for each agent on the returned page.
    */
   toolsets: Array<Toolset>;
+  /**
+   * MCP server instances linked to the agent. Same projection as
+   *
+   * @remarks
+   * `GET /agents/{agentKey}`; the backend builds it from the graph
+   * edges for each agent on the returned page.
+   */
+  mcpServers: Array<McpServer>;
   /**
    * Knowledge connectors and indexed scopes linked to the agent. Same
    *
@@ -188,6 +223,12 @@ export function agentListItemWebSearchFromJSON(
 }
 
 /** @internal */
+export const AgentListItemDefaultReasoningEffort$inboundSchema: z.ZodMiniType<
+  AgentListItemDefaultReasoningEffort,
+  unknown
+> = openEnums.inboundSchema(AgentListItemDefaultReasoningEffort);
+
+/** @internal */
 export const AgentListItem$inboundSchema: z.ZodMiniType<
   AgentListItem,
   unknown
@@ -213,8 +254,12 @@ export const AgentListItem$inboundSchema: z.ZodMiniType<
     webSearch: z.optional(
       z.nullable(z.lazy(() => AgentListItemWebSearch$inboundSchema)),
     ),
+    defaultReasoningEffort: z.optional(
+      z.nullable(AgentListItemDefaultReasoningEffort$inboundSchema),
+    ),
     shareWithOrg: types.boolean(),
     toolsets: z.array(Toolset$inboundSchema),
+    mcpServers: z.array(McpServer$inboundSchema),
     knowledge: z.array(Knowledge$inboundSchema),
     can_view: types.boolean(),
     can_share: types.boolean(),

@@ -33,6 +33,10 @@ import { Result } from "../types/fp.js";
  * @remarks
  * Append a user message to an existing agent conversation and stream the
  * assistant reply over SSE.
+ *
+ * AG-UI is the sole wire protocol. The request must include
+ * `chatMode: quick`; see `AgentMessageStreamSSEEvent` for the event
+ * vocabulary.
  */
 export function agentsStreamAgentConversationMessage(
   client: PipeshubCore,

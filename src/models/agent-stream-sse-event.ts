@@ -10,33 +10,29 @@ import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
-/**
- * SSE event name.
- *
- * @remarks
- * See the enum for possible values.
- */
 export const AgentStreamSSEEventEvent = {
-  Connected: "connected",
-  Status: "status",
-  ToolCalls: "tool_calls",
-  ToolCall: "tool_call",
-  ToolSuccess: "tool_success",
-  ToolError: "tool_error",
-  ToolResult: "tool_result",
-  ToolExecutionComplete: "tool_execution_complete",
-  AnswerChunk: "answer_chunk",
-  Restreaming: "restreaming",
-  Metadata: "metadata",
-  Complete: "complete",
-  Error: "error",
+  RunStarted: "RUN_STARTED",
+  RunFinished: "RUN_FINISHED",
+  RunError: "RUN_ERROR",
+  StepStarted: "STEP_STARTED",
+  StepFinished: "STEP_FINISHED",
+  TextMessageStart: "TEXT_MESSAGE_START",
+  TextMessageContent: "TEXT_MESSAGE_CONTENT",
+  TextMessageEnd: "TEXT_MESSAGE_END",
+  ReasoningStart: "REASONING_START",
+  ReasoningMessageStart: "REASONING_MESSAGE_START",
+  ReasoningMessageContent: "REASONING_MESSAGE_CONTENT",
+  ReasoningMessageEnd: "REASONING_MESSAGE_END",
+  ReasoningEnd: "REASONING_END",
+  ToolCallStart: "TOOL_CALL_START",
+  ToolCallArgs: "TOOL_CALL_ARGS",
+  ToolCallEnd: "TOOL_CALL_END",
+  ToolCallResult: "TOOL_CALL_RESULT",
+  StateDelta: "STATE_DELTA",
+  StateSnapshot: "STATE_SNAPSHOT",
+  Custom: "CUSTOM",
+  Heartbeat: "HEARTBEAT",
 } as const;
-/**
- * SSE event name.
- *
- * @remarks
- * See the enum for possible values.
- */
 export type AgentStreamSSEEventEvent = OpenEnum<
   typeof AgentStreamSSEEventEvent
 >;
@@ -45,21 +41,27 @@ export type AgentStreamSSEEventEvent = OpenEnum<
  * SSE event envelope for `POST /agents/{agentKey}/conversations/stream`.
  *
  * @remarks
- * Event names are listed in `event`; payload JSON is carried in `data`.
+ * AG-UI is the sole wire protocol.
+ *
+ * `event` carries the AG-UI type name and `data` is a JSON-encoded
+ * object that includes a `"type"` field matching `event`, plus
+ * type-specific fields. The public route requires `chatMode: quick`.
+ * Forwarded lifecycle events may carry `runId`, `threadId`, and
+ * `parentRunId`; gateway-generated root terminal events do not.
+ *
+ * Stable gateway-generated top-level outcomes are `RUN_FINISHED` as
+ * `{ type, result }` and `RUN_ERROR` as `{ type, message, code? }`.
+ * Clients should ignore unknown event names rather than treating them
+ * as errors.
  */
 export type AgentStreamSSEEvent = {
-  /**
-   * SSE event name.
-   *
-   * @remarks
-   * See the enum for possible values.
-   */
   event?: AgentStreamSSEEventEvent | undefined;
   /**
-   * JSON-encoded event payload.
+   * JSON-encoded event payload. The decoded JSON includes a `"type"`
    *
    * @remarks
-   * Shape depends on `event`.
+   * field matching `event`, plus type-specific fields. Shape depends
+   * on `event`.
    */
   data?: string | undefined;
 };

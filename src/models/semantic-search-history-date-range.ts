@@ -8,7 +8,7 @@ import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
-export type Current = {
+export type SemanticSearchHistoryDateRangeCurrent = {
   start: string | null;
   end: string | null;
 };
@@ -17,23 +17,27 @@ export type SemanticSearchHistoryDateRange = {
   type: string;
   description: string;
   format: string;
-  current: Current;
+  current: SemanticSearchHistoryDateRangeCurrent;
   applied: boolean;
 };
 
 /** @internal */
-export const Current$inboundSchema: z.ZodMiniType<Current, unknown> = z.object({
+export const SemanticSearchHistoryDateRangeCurrent$inboundSchema: z.ZodMiniType<
+  SemanticSearchHistoryDateRangeCurrent,
+  unknown
+> = z.object({
   start: types.nullable(types.string()),
   end: types.nullable(types.string()),
 });
 
-export function currentFromJSON(
+export function semanticSearchHistoryDateRangeCurrentFromJSON(
   jsonString: string,
-): SafeParseResult<Current, SDKValidationError> {
+): SafeParseResult<SemanticSearchHistoryDateRangeCurrent, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => Current$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Current' from JSON`,
+    (x) =>
+      SemanticSearchHistoryDateRangeCurrent$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'SemanticSearchHistoryDateRangeCurrent' from JSON`,
   );
 }
 
@@ -45,7 +49,7 @@ export const SemanticSearchHistoryDateRange$inboundSchema: z.ZodMiniType<
   type: types.string(),
   description: types.string(),
   format: types.string(),
-  current: z.lazy(() => Current$inboundSchema),
+  current: z.lazy(() => SemanticSearchHistoryDateRangeCurrent$inboundSchema),
   applied: types.boolean(),
 });
 

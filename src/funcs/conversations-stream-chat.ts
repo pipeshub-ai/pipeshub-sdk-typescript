@@ -39,51 +39,39 @@ import { Result } from "../types/fp.js";
  *
  * 1. The server validates `query`, persists an in-progress
  *    conversation, then opens the SSE stream with HTTP `200`.
- * 2. A `connected` event is emitted immediately with the new
- *    `conversationId` so the client can link the stream (sidebar,
- *    parallel tabs, deep links) without an extra request.
+ * 2. A `CUSTOM` event named `conversation_created` is emitted
+ *    immediately with the new `conversationId` so the client can link
+ *    the stream (sidebar, parallel tabs, deep links) without an extra
+ *    request.
  * 3. AI-backend events stream through (token chunks, tool calls,
  *    status, etc.).
- * 4. On success a single `complete` event is emitted carrying the
- *    full persisted conversation.
- * 5. On failure an `error` event is emitted and the conversation is
- *    marked FAILED before the stream closes.
+ * 4. On success a single root `RUN_FINISHED` event is emitted carrying
+ *    the full persisted conversation in `result`.
+ * 5. On failure a root `RUN_ERROR` event is emitted and the
+ *    conversation is marked FAILED before the stream closes.
  *
  * **Event vocabulary**
  *
- * Three events have stable, server-defined `data` shapes:
+ * AG-UI is the sole wire protocol. See `ConversationStreamSSEEvent`
+ * for the full event enum and payload guidance.
  *
- * - `connected` — `{ "message": string, "conversationId": string,
- *   "title": string }`
- * - `complete` — `{ "conversation": Conversation,
- *   "meta": { "requestId": string, "timestamp": string,
- *   "duration": number } }`
- * - `error` — `{ "error": string, "details"?: string }`
- *
- * The forwarded events are `status`, `answer_chunk`, `tool_calls`,
- * `restreaming`, `metadata`, and `tool_execution_complete`. Their
- * payloads come from the Python query service and may evolve. Note
- * that raw `tool_call` / `tool_success` / `tool_error` / `tool_result`
- * events emitted by the LLM tool runtime are rewrapped as `status` by
- * the upstream wrapper before they reach this route, so clients on
- * `/conversations/stream` never see those names directly. Clients
- * should ignore unknown event names rather than treating them as
- * errors.
+ * Clients should ignore unknown event names rather than treating them
+ * as errors.
  *
  * **Agent mode**
  *
- * When `chatMode` selects an agent mode (for example `agent:auto`),
+ * When `chatMode` is `agent`,
  * the optional `tools` list restricts which tools the agent may
  * invoke for this turn. Outside agent modes the `tools` field is
  * ignored.
  */
 export function conversationsStreamChat(
   client: PipeshubCore,
-  request: models.CreateConversationRequest,
+  request: models.ConversationStreamRequest,
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    EventStream<models.AssistantStreamSSEEvent>,
+    EventStream<models.ConversationStreamSSEEvent>,
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -103,12 +91,12 @@ export function conversationsStreamChat(
 
 async function $do(
   client: PipeshubCore,
-  request: models.CreateConversationRequest,
+  request: models.ConversationStreamRequest,
   options?: RequestOptions,
 ): Promise<
   [
     Result<
-      EventStream<models.AssistantStreamSSEEvent>,
+      EventStream<models.ConversationStreamSSEEvent>,
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -123,7 +111,7 @@ async function $do(
 > {
   const parsed = safeParse(
     request,
-    (value) => z.parse(models.CreateConversationRequest$outboundSchema, value),
+    (value) => z.parse(models.ConversationStreamRequest$outboundSchema, value),
     "Input validation failed",
   );
   if (!parsed.ok) {
@@ -184,7 +172,7 @@ async function $do(
   const response = doResult.value;
 
   const [result] = await M.match<
-    EventStream<models.AssistantStreamSSEEvent>,
+    EventStream<models.ConversationStreamSSEEvent>,
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -201,7 +189,7 @@ async function $do(
         z.transform(stream => {
           return new EventStream(stream, rawEvent => {
             return {
-              value: models.AssistantStreamSSEEvent$inboundSchema.parse(
+              value: models.ConversationStreamSSEEvent$inboundSchema.parse(
                 rawEvent,
               ),
             };

@@ -11,51 +11,58 @@ import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
 export const SSEEventEvent = {
-  Connected: "connected",
-  Status: "status",
-  AnswerChunk: "answer_chunk",
-  ToolCall: "tool_call",
-  ToolCalls: "tool_calls",
-  ToolResult: "tool_result",
-  ToolSuccess: "tool_success",
-  ToolError: "tool_error",
-  ToolExecutionComplete: "tool_execution_complete",
-  Restreaming: "restreaming",
-  Metadata: "metadata",
-  Complete: "complete",
-  Error: "error",
+  RunStarted: "RUN_STARTED",
+  RunFinished: "RUN_FINISHED",
+  RunError: "RUN_ERROR",
+  StepStarted: "STEP_STARTED",
+  StepFinished: "STEP_FINISHED",
+  TextMessageStart: "TEXT_MESSAGE_START",
+  TextMessageContent: "TEXT_MESSAGE_CONTENT",
+  TextMessageEnd: "TEXT_MESSAGE_END",
+  ReasoningStart: "REASONING_START",
+  ReasoningMessageStart: "REASONING_MESSAGE_START",
+  ReasoningMessageContent: "REASONING_MESSAGE_CONTENT",
+  ReasoningMessageEnd: "REASONING_MESSAGE_END",
+  ReasoningEnd: "REASONING_END",
+  ToolCallStart: "TOOL_CALL_START",
+  ToolCallArgs: "TOOL_CALL_ARGS",
+  ToolCallEnd: "TOOL_CALL_END",
+  ToolCallResult: "TOOL_CALL_RESULT",
+  StateDelta: "STATE_DELTA",
+  StateSnapshot: "STATE_SNAPSHOT",
+  Custom: "CUSTOM",
+  Heartbeat: "HEARTBEAT",
 } as const;
 export type SSEEventEvent = OpenEnum<typeof SSEEventEvent>;
 
 /**
- * Server-Sent Event envelope for streaming chat responses.
+ * Server-Sent Event envelope for streaming chat responses. AG-UI is
  *
  * @remarks
+ * the sole wire protocol.
  *
- * `data` is a JSON-encoded string whose shape depends on `event`.
- * Three events are emitted by the API layer and have stable shapes
- * documented on the streaming routes:
+ * `event` carries the AG-UI type name and `data` is a JSON-encoded
+ * object that includes a `"type"` field matching `event`, plus
+ * type-specific fields. Stable gateway-generated top-level outcomes:
  *
- * - `connected` — fired once on connection. Carries the newly created
- *   `conversationId` and `title` so the client can link the stream to
- *   a row before any tokens arrive.
- * - `complete` — fired once after the AI backend finishes. Carries the
- *   full persisted `conversation` and a `meta` block with `requestId`,
+ * - `RUN_FINISHED` — `{ type, result }`; `result` carries the full
+ *   persisted `conversation` and a `meta` block with `requestId`,
  *   `timestamp` and `duration`.
- * - `error` — fired when the stream fails. Carries an `error` message
- *   and optional `details`. The conversation row is marked FAILED
- *   before the stream closes.
+ * - `RUN_ERROR` — `{ type, message, code? }`. The conversation row is
+ *   marked FAILED before the stream closes.
  *
- * All other events are forwarded verbatim from the AI backend; their
- * payloads are AI-backend defined and may evolve. Currently observed
- * names include `status`, `answer_chunk`, `tool_call`, `tool_calls`,
- * `tool_result`, `tool_success`, `tool_error`,
- * `tool_execution_complete`, `restreaming`, and `metadata`.
+ * Forwarded upstream lifecycle or child-run events may contain `runId`,
+ * `threadId`, and `parentRunId`. Gateway-generated root terminal events
+ * do not. Clients should ignore unknown event names.
  */
 export type SSEEvent = {
   event?: SSEEventEvent | undefined;
   /**
-   * JSON-encoded event payload. Shape depends on `event`.
+   * JSON-encoded event payload. The decoded JSON includes a `"type"`
+   *
+   * @remarks
+   * field matching `event`, plus type-specific fields. Shape depends
+   * on `event`.
    */
   data?: string | undefined;
 };

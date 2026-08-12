@@ -19,12 +19,11 @@ export type RegenerateAgentConversationMessageRequest = {
    */
   messageId: string;
   /**
-   * Optional regeneration payload. All fields are optional and are
+   * Regeneration payload requiring `chatMode: quick`.
    *
    * @remarks
-   * validated against `RegenerateRequest`.
    */
-  body?: models.RegenerateRequest | undefined;
+  body: models.AgentRegenerateRequest;
 };
 
 /** @internal */
@@ -32,7 +31,7 @@ export type RegenerateAgentConversationMessageRequest$Outbound = {
   agentKey: string;
   conversationId: string;
   messageId: string;
-  body?: models.RegenerateRequest$Outbound | undefined;
+  body: models.AgentRegenerateRequest$Outbound;
 };
 
 /** @internal */
@@ -44,7 +43,7 @@ export const RegenerateAgentConversationMessageRequest$outboundSchema:
     agentKey: z.string(),
     conversationId: z.string(),
     messageId: z.string(),
-    body: z.optional(models.RegenerateRequest$outboundSchema),
+    body: models.AgentRegenerateRequest$outboundSchema,
   });
 
 export function regenerateAgentConversationMessageRequestToJSON(

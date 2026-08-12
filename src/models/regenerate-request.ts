@@ -3,11 +3,40 @@
  */
 
 import * as z from "zod/v4-mini";
+import { ClosedEnum } from "../types/enums.js";
+import {
+  AgentCapabilities,
+  AgentCapabilities$Outbound,
+  AgentCapabilities$outboundSchema,
+} from "./agent-capabilities.js";
 import {
   Filters,
   Filters$Outbound,
   Filters$outboundSchema,
 } from "./filters.js";
+
+/**
+ * AG-UI is the only supported wire protocol. When present must be
+ *
+ * @remarks
+ * `"agui"`. Omitting the field is equivalent — the server always
+ * uses the AG-UI vocabulary. Kept in the schema for backward
+ * compatibility with callers that already send it.
+ */
+export const RegenerateRequestProtocol = {
+  Agui: "agui",
+} as const;
+/**
+ * AG-UI is the only supported wire protocol. When present must be
+ *
+ * @remarks
+ * `"agui"`. Omitting the field is equivalent — the server always
+ * uses the AG-UI vocabulary. Kept in the schema for backward
+ * compatibility with callers that already send it.
+ */
+export type RegenerateRequestProtocol = ClosedEnum<
+  typeof RegenerateRequestProtocol
+>;
 
 /**
  * Request body for regenerating an AI response. All fields are optional;
@@ -25,6 +54,9 @@ import {
  * - `currentTime` — optional ISO 8601 / RFC 3339 datetime string with
  *   UTC `Z` or a numeric offset
  * - `tools` — optional array of non-empty tool identifiers
+ * - `protocol` — optional inert compatibility field; when present it must
+ *   be `agui`, which is also the protocol used when the field is omitted
+ * - `agentCapabilities` — optional per-request agent capability toggles
  */
 export type RegenerateRequest = {
   /**
@@ -58,7 +90,7 @@ export type RegenerateRequest = {
    * Chat mode used for regeneration (for example `internal_search`,
    *
    * @remarks
-   * `web_search`, or an agent mode such as `agent:auto`).
+   * `web_search`, or the universal `agent` mode).
    */
   chatMode?: string | undefined;
   /**
@@ -83,7 +115,30 @@ export type RegenerateRequest = {
    * regenerating. Applicable only in agent chat modes.
    */
   tools?: Array<string> | undefined;
+  /**
+   * AG-UI is the only supported wire protocol. When present must be
+   *
+   * @remarks
+   * `"agui"`. Omitting the field is equivalent — the server always
+   * uses the AG-UI vocabulary. Kept in the schema for backward
+   * compatibility with callers that already send it.
+   */
+  protocol?: RegenerateRequestProtocol | undefined;
+  /**
+   * Per-request agent capability toggles. Only meaningful when `chatMode`
+   *
+   * @remarks
+   * selects an agent mode; ignored otherwise. Each field falls back to its
+   * own `default` below when omitted — a missing flag is not uniformly
+   * `true`. Omitting the whole object applies every default.
+   */
+  agentCapabilities?: AgentCapabilities | undefined;
 };
+
+/** @internal */
+export const RegenerateRequestProtocol$outboundSchema: z.ZodMiniEnum<
+  typeof RegenerateRequestProtocol
+> = z.enum(RegenerateRequestProtocol);
 
 /** @internal */
 export type RegenerateRequest$Outbound = {
@@ -95,6 +150,8 @@ export type RegenerateRequest$Outbound = {
   timezone?: string | undefined;
   currentTime?: string | undefined;
   tools?: Array<string> | undefined;
+  protocol?: string | undefined;
+  agentCapabilities?: AgentCapabilities$Outbound | undefined;
 };
 
 /** @internal */
@@ -110,6 +167,8 @@ export const RegenerateRequest$outboundSchema: z.ZodMiniType<
   timezone: z.optional(z.string()),
   currentTime: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
   tools: z.optional(z.array(z.string())),
+  protocol: z.optional(RegenerateRequestProtocol$outboundSchema),
+  agentCapabilities: z.optional(AgentCapabilities$outboundSchema),
 });
 
 export function regenerateRequestToJSON(

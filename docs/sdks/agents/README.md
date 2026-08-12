@@ -837,6 +837,9 @@ response as Server-Sent Events (SSE). The first user message is saved
 and forwarded to the upstream agent backend; subsequent tokens, tool
 calls, and lifecycle events are emitted on the open SSE connection.
 
+AG-UI is the sole wire protocol. The request must include
+`chatMode: quick`; see `AgentStreamSSEEvent` for the event vocabulary.
+
 
 ### Example Usage
 
@@ -895,7 +898,7 @@ async function run() {
           },
         ],
       },
-      chatMode: "auto",
+      chatMode: "quick",
       modelKey: "5c1832f4-fa19-4167-b913-307fad3a6551",
       modelName: "gpt-5.4-mini",
       modelFriendlyName: "GPT 5.4 mini",
@@ -974,7 +977,7 @@ async function run() {
           },
         ],
       },
-      chatMode: "auto",
+      chatMode: "quick",
       modelKey: "5c1832f4-fa19-4167-b913-307fad3a6551",
       modelName: "gpt-5.4-mini",
       modelFriendlyName: "GPT 5.4 mini",
@@ -1019,6 +1022,10 @@ run();
 
 Append a user message to an existing agent conversation and stream the
 assistant reply over SSE.
+
+AG-UI is the sole wire protocol. The request must include
+`chatMode: quick`; see `AgentMessageStreamSSEEvent` for the event
+vocabulary.
 
 
 ### Example Usage
@@ -1072,7 +1079,7 @@ async function run() {
           },
         ],
       },
-      chatMode: "verification",
+      chatMode: "quick",
       modelKey: "5c1832f4-fa19-4167-b913-307fad3a6551",
       modelName: "gpt-5.4-mini",
       modelFriendlyName: "GPT 5.4 mini",
@@ -1145,7 +1152,7 @@ async function run() {
           },
         ],
       },
-      chatMode: "verification",
+      chatMode: "quick",
       modelKey: "5c1832f4-fa19-4167-b913-307fad3a6551",
       modelName: "gpt-5.4-mini",
       modelFriendlyName: "GPT 5.4 mini",
@@ -1198,8 +1205,8 @@ conversation and stream the new answer over Server-Sent Events.
 
 **Request body:**
 
-All request-body fields are optional. When omitted, the server reuses
-the original model/context. The body supports:
+`chatMode: quick` is required. Other fields are optional and reuse
+the original model/context when omitted. The body supports:
 - `filters`
 - `chatMode`
 - `modelKey`
@@ -1208,18 +1215,22 @@ the original model/context. The body supports:
 - `timezone`
 - `currentTime`
 - `tools`
+- `protocol`
+- `agentCapabilities`
 
 **Streaming behavior:**
 
-The response is delivered as `text/event-stream`. Stable events are
-`connected`, `complete`, and `error`. Additional agent/tool lifecycle
-events may be forwarded by the backend and should be treated as
-informational updates.
+The response is delivered as an AG-UI `text/event-stream`. Stable
+outcomes are `RUN_FINISHED` and `RUN_ERROR`; see
+`AgentRegenerateSSEEvent`.
+
+Additional agent/tool lifecycle events may be forwarded by the
+backend and should be treated as informational updates.
 
 Validation failures on params/body are returned as normal HTTP `400`
 responses before the stream starts. Valid-shape requests that fail
-conversation lookup or regenerate rules are reported as SSE `error`
-events after stream initialization.
+conversation lookup or regenerate rules are reported as
+`RUN_ERROR` events after stream initialization.
 
 
 ### Example Usage
@@ -1243,7 +1254,7 @@ async function run() {
       modelKey: "05438a37-68f2-4641-a8dc-6c47e63278ca",
       modelName: "gpt-5.4-mini",
       modelFriendlyName: "mini",
-      chatMode: "internal_search",
+      chatMode: "quick",
       timezone: "Asia/Calcutta",
       currentTime: new Date("2026-05-11T15:43:21+05:30"),
       tools: [
@@ -1286,7 +1297,7 @@ async function run() {
       modelKey: "05438a37-68f2-4641-a8dc-6c47e63278ca",
       modelName: "gpt-5.4-mini",
       modelFriendlyName: "mini",
-      chatMode: "internal_search",
+      chatMode: "quick",
       timezone: "Asia/Calcutta",
       currentTime: new Date("2026-05-11T15:43:21+05:30"),
       tools: [

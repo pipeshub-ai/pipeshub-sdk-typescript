@@ -34,8 +34,16 @@ let value: GetAgentResponse = {
       },
     ],
     toolsets: [],
+    mcpServers: [
+      {},
+    ],
     knowledge: [
       {},
+    ],
+    skills: [
+      {
+        name: "<value>",
+      },
     ],
     shareWithOrg: false,
     webSearch: {
@@ -44,19 +52,18 @@ let value: GetAgentResponse = {
     tags: [
       "<value 1>",
       "<value 2>",
-      "<value 3>",
     ],
-    createdAtTimestamp: 573995,
-    updatedAtTimestamp: 586565,
+    createdAtTimestamp: 490802,
+    updatedAtTimestamp: 493429,
     isActive: true,
-    isDeleted: true,
-    isServiceAccount: true,
+    isDeleted: false,
+    isServiceAccount: false,
     accessType: "INDIVIDUAL",
     userRole: "OWNER",
     canView: false,
     canShare: false,
-    canEdit: false,
-    canDelete: false,
+    canEdit: true,
+    canDelete: true,
   },
 };
 ```

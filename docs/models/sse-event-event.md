@@ -5,7 +5,7 @@
 ```typescript
 import { SSEEventEvent } from "@pipeshub-ai/sdk/models";
 
-let value: SSEEventEvent = "answer_chunk";
+let value: SSEEventEvent = "STEP_STARTED";
 ```
 
 ## Values
@@ -13,5 +13,5 @@ let value: SSEEventEvent = "answer_chunk";
 This is an open enum. Unrecognized values will be captured as the `Unrecognized<string>` branded type.
 
 ```typescript
-"connected" | "status" | "answer_chunk" | "tool_call" | "tool_calls" | "tool_result" | "tool_success" | "tool_error" | "tool_execution_complete" | "restreaming" | "metadata" | "complete" | "error" | Unrecognized<string>
+"RUN_STARTED" | "RUN_FINISHED" | "RUN_ERROR" | "STEP_STARTED" | "STEP_FINISHED" | "TEXT_MESSAGE_START" | "TEXT_MESSAGE_CONTENT" | "TEXT_MESSAGE_END" | "REASONING_START" | "REASONING_MESSAGE_START" | "REASONING_MESSAGE_CONTENT" | "REASONING_MESSAGE_END" | "REASONING_END" | "TOOL_CALL_START" | "TOOL_CALL_ARGS" | "TOOL_CALL_END" | "TOOL_CALL_RESULT" | "STATE_DELTA" | "STATE_SNAPSHOT" | "CUSTOM" | "HEARTBEAT" | Unrecognized<string>
 ```

@@ -36,7 +36,13 @@ export type ChatAttachmentUploadRef = {
    */
   virtualRecordId: string;
   /**
-   * Optional backend-reported processing mode for the attachment.
+   * Backend-reported parsing mode used for the attachment (e.g. `pdfplumber`, `docling`, `csv_lightweight`).
+   */
+  parseMode?: string | undefined;
+  /**
+   * Deprecated alias for `parseMode`, kept for backward compatibility. Use `parseMode` instead.
+   *
+   * @deprecated field: This will be removed in a future release, please migrate away from it as soon as possible.
    */
   ocrMode?: string | undefined;
 };
@@ -51,6 +57,7 @@ export const ChatAttachmentUploadRef$inboundSchema: z.ZodMiniType<
   mimeType: types.string(),
   extension: types.string(),
   virtualRecordId: types.string(),
+  parseMode: types.optional(types.string()),
   ocrMode: types.optional(types.string()),
 });
 

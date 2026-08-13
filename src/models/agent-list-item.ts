@@ -131,6 +131,15 @@ export type AgentListItem = {
    */
   updatedBy?: string | null | undefined;
   /**
+   * True when this agent has no models configured and will use the
+   *
+   * @remarks
+   * organization's default LLM (marked `isDefault: true` in the AI
+   * models configuration) at chat time. Derived from `models` being
+   * empty — not persisted separately.
+   */
+  usesOrgDefault?: boolean | undefined;
+  /**
    * Web-search provider attachment for this agent, or `null` when none is attached.
    *
    * @remarks
@@ -251,6 +260,7 @@ export const AgentListItem$inboundSchema: z.ZodMiniType<
     tags: z.array(types.string()),
     updatedAtTimestamp: types.number(),
     updatedBy: z.optional(z.nullable(types.string())),
+    usesOrgDefault: types.optional(types.boolean()),
     webSearch: z.optional(
       z.nullable(z.lazy(() => AgentListItemWebSearch$inboundSchema)),
     ),

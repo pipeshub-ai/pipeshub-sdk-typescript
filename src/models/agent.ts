@@ -114,6 +114,15 @@ export type Agent = {
    */
   models: Array<string | Model>;
   /**
+   * True when this agent has no models configured and will use the
+   *
+   * @remarks
+   * organization's default LLM (marked `isDefault: true` in the AI
+   * models configuration) at chat time. Derived from `models` being
+   * empty — not persisted separately.
+   */
+  usesOrgDefault?: boolean | undefined;
+  /**
    * Toolset instances linked to the agent (GET /agents/{agentKey} graph projection).
    *
    * @remarks
@@ -280,6 +289,7 @@ export const Agent$inboundSchema: z.ZodMiniType<Agent, unknown> = z.pipe(
       types.string(),
       z.lazy(() => Model$inboundSchema),
     ])),
+    usesOrgDefault: types.optional(types.boolean()),
     toolsets: z.array(Toolset$inboundSchema),
     mcpServers: z.array(McpServer$inboundSchema),
     knowledge: z.array(Knowledge$inboundSchema),

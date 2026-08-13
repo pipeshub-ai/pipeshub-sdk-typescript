@@ -101,11 +101,10 @@ export type AgentCreateRequest = {
    */
   skills?: Array<AgentSkillAssignment> | undefined;
   /**
-   * Accepted web-search attachment for `POST /agents/create`.
+   * Web-search attachment for an agent. Accepts either a provider string
    *
    * @remarks
-   * The gateway accepts either a provider string or an object with at least
-   * a `provider` field.
+   * or an object with at least a `provider` field.
    */
   webSearch?: AgentCreateWebSearchUnion | null | undefined;
   /**

@@ -69,13 +69,16 @@ export type AgentCreateRequest = {
    */
   instructions?: string | undefined;
   /**
-   * Agent model configuration entries. The gateway requires at least one
+   * Agent model configuration entries. Optional — an agent created without
    *
    * @remarks
-   * object entry with `isReasoning: true`. String-only arrays are schema-valid
-   * but rejected at runtime with HTTP 400.
+   * any models (an empty array or an omitted field) uses the organization's
+   * default LLM at chat time. When at least one model entry IS provided, the
+   * gateway requires at least one object entry with `isReasoning: true`.
+   * String-only arrays are schema-valid but rejected at runtime with HTTP 400
+   * unless the array is empty.
    */
-  models: Array<AgentCreateModelEntryUnion>;
+  models?: Array<AgentCreateModelEntryUnion> | undefined;
   tags?: Array<string> | undefined;
   /**
    * Share agent with the organization
@@ -127,7 +130,7 @@ export type AgentCreateRequest$Outbound = {
   startMessage?: string | undefined;
   systemPrompt?: string | undefined;
   instructions?: string | undefined;
-  models: Array<AgentCreateModelEntryUnion$Outbound>;
+  models?: Array<AgentCreateModelEntryUnion$Outbound> | undefined;
   tags?: Array<string> | undefined;
   shareWithOrg: boolean;
   isServiceAccount: boolean;
@@ -148,7 +151,7 @@ export const AgentCreateRequest$outboundSchema: z.ZodMiniType<
   startMessage: z.optional(z.string()),
   systemPrompt: z.optional(z.string()),
   instructions: z.optional(z.string()),
-  models: z.array(AgentCreateModelEntryUnion$outboundSchema),
+  models: z.optional(z.array(AgentCreateModelEntryUnion$outboundSchema)),
   tags: z.optional(z.array(z.string())),
   shareWithOrg: z._default(z.boolean(), false),
   isServiceAccount: z._default(z.boolean(), false),

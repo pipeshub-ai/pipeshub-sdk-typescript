@@ -152,7 +152,6 @@ const pipeshub = new Pipeshub({
 async function run() {
   const result = await pipeshub.agents.createAgent({
     name: "Product Support Agent",
-    models: [],
   });
 
   console.log(result);
@@ -180,7 +179,6 @@ const pipeshub = new PipeshubCore({
 async function run() {
   const res = await agentsCreateAgent(pipeshub, {
     name: "Product Support Agent",
-    models: [],
   });
   if (res.ok) {
     const { value: result } = res;

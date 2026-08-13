@@ -1,7 +1,8 @@
 {
-  "name": "@pipeshub-ai/sdk-examples",
+  "name": "pipeshub-examples",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "build:parent": "cd .. && npm i && npm run build && cd -",
     "build:examples": "npm i",
@@ -13,6 +14,6 @@
     "tsx": "^4.19.2"
   },
   "dependencies": {
-    "@pipeshub-ai/sdk": "file:.."
+    "pipeshub": "file:.."
   }
 }

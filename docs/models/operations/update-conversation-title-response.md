@@ -13,45 +13,28 @@ let value: UpdateConversationTitleResponse = {
     userId: "<value>",
     orgId: "<value>",
     initiator: "<value>",
-    messages: [
+    sharedWith: [
       {
-        id: "<value>",
-        messageType: "error",
-        content: "<value>",
-        citations: [],
-        followUpQuestions: [],
-        feedback: [],
-        referenceData: [
-          {},
-        ],
-        createdAt: new Date("2024-08-12T16:14:38.259Z"),
-        updatedAt: new Date("2024-05-25T05:14:26.248Z"),
+        userId: "<value>",
       },
     ],
-    sharedWith: [],
-    conversationErrors: [
-      {
-        id: "<value>",
-        message: "<value>",
-        timestamp: new Date("2025-05-07T09:22:52.013Z"),
-      },
-    ],
-    lastActivityAt: 879495,
-    createdAt: new Date("2026-05-20T13:07:36.389Z"),
-    updatedAt: new Date("2025-08-24T16:56:32.828Z"),
-    v: 54157,
+    conversationErrors: [],
+    lastActivityAt: 856140,
+    createdAt: new Date("2026-08-21T22:13:40.117Z"),
+    updatedAt: new Date("2026-05-20T13:07:36.389Z"),
+    v: 549002,
   },
   meta: {
     requestId: "<id>",
-    timestamp: new Date("2026-12-05T05:20:19.434Z"),
-    duration: 275294,
+    timestamp: new Date("2024-02-29T08:33:06.823Z"),
+    duration: 975568,
   },
 };
 ```
 
 ## Fields
 
-| Field                                                                                                               | Type                                                                                                                | Required                                                                                                            | Description                                                                                                         |
-| ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `conversation`                                                                                                      | [operations.UpdateConversationTitleConversation](../../models/operations/update-conversation-title-conversation.md) | :heavy_check_mark:                                                                                                  | The full conversation document after the title update,<br/>returned as stored in MongoDB.<br/>                      |
-| `meta`                                                                                                              | [operations.UpdateConversationTitleMeta](../../models/operations/update-conversation-title-meta.md)                 | :heavy_check_mark:                                                                                                  | N/A                                                                                                                 |
+| Field                                                                                                                                                                                                                                                                                   | Type                                                                                                                                                                                                                                                                                    | Required                                                                                                                                                                                                                                                                                | Description                                                                                                                                                                                                                                                                             |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `conversation`                                                                                                                                                                                                                                                                          | [operations.UpdateConversationTitleConversation](../../models/operations/update-conversation-title-conversation.md)                                                                                                                                                                     | :heavy_check_mark:                                                                                                                                                                                                                                                                      | The conversation document after the title update, as<br/>stored in the `chatSessions` collection.<br/><br/>Carries no `messages`: they live in `chatSessionMessages`<br/>(see `chat.session.schema.ts`) and this route neither<br/>reads nor joins them. Fetch the conversation by id to<br/>get its messages.<br/> |
+| `meta`                                                                                                                                                                                                                                                                                  | [operations.UpdateConversationTitleMeta](../../models/operations/update-conversation-title-meta.md)                                                                                                                                                                                     | :heavy_check_mark:                                                                                                                                                                                                                                                                      | N/A                                                                                                                                                                                                                                                                                     |

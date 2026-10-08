@@ -26,6 +26,32 @@ import {
 } from "./filters.js";
 
 /**
+ * Only meaningful together with `projectId`. Overrides the
+ *
+ * @remarks
+ * project's default sharing behavior for this one conversation:
+ * `private` keeps it visible to the owner only; `project` exposes
+ * it to every project member. Defaults from the project's
+ * `chatSharing` setting when omitted.
+ */
+export const ConversationStreamRequestProjectVisibility = {
+  Private: "private",
+  Project: "project",
+} as const;
+/**
+ * Only meaningful together with `projectId`. Overrides the
+ *
+ * @remarks
+ * project's default sharing behavior for this one conversation:
+ * `private` keeps it visible to the owner only; `project` exposes
+ * it to every project member. Defaults from the project's
+ * `chatSharing` setting when omitted.
+ */
+export type ConversationStreamRequestProjectVisibility = ClosedEnum<
+  typeof ConversationStreamRequestProjectVisibility
+>;
+
+/**
  * Optional execution mode for non-stream consumers of this shared
  *
  * @remarks
@@ -123,6 +149,27 @@ export type ConversationStreamRequest = {
    */
   attachments?: Array<ChatAttachmentRef> | undefined;
   /**
+   * Link the new conversation to a project the caller has at least
+   *
+   * @remarks
+   * viewer access to. When the project's instructions, knowledge
+   * scope, or files are set and this request didn't supply its own
+   * `filters`/`attachments`, they are merged in as a fallback (the
+   * request always wins). Ignored on follow-up turns — only
+   * meaningful when creating a conversation.
+   */
+  projectId?: string | undefined;
+  /**
+   * Only meaningful together with `projectId`. Overrides the
+   *
+   * @remarks
+   * project's default sharing behavior for this one conversation:
+   * `private` keeps it visible to the owner only; `project` exposes
+   * it to every project member. Defaults from the project's
+   * `chatSharing` setting when omitted.
+   */
+  projectVisibility?: ConversationStreamRequestProjectVisibility | undefined;
+  /**
    * Identifier for the AI model configuration to use.
    *
    * @remarks
@@ -187,7 +234,22 @@ export type ConversationStreamRequest = {
    * `true`. Omitting the whole object applies every default.
    */
   agentCapabilities?: AgentCapabilities | undefined;
+  /**
+   * Client-generated identifier for this run. Send it here to enable
+   *
+   * @remarks
+   * `POST /conversations/{conversationId}/cancel {runId}` while the
+   * stream is still generating. Optional — a caller that never sends
+   * one just can't cooperatively cancel the run.
+   */
+  runId?: string | undefined;
 };
+
+/** @internal */
+export const ConversationStreamRequestProjectVisibility$outboundSchema:
+  z.ZodMiniEnum<typeof ConversationStreamRequestProjectVisibility> = z.enum(
+    ConversationStreamRequestProjectVisibility,
+  );
 
 /** @internal */
 export const ConversationStreamRequestChatMode$outboundSchema: z.ZodMiniEnum<
@@ -206,6 +268,8 @@ export type ConversationStreamRequest$Outbound = {
   filters?: Filters$Outbound | undefined;
   appliedFilters?: AppliedFilters$Outbound | undefined;
   attachments?: Array<ChatAttachmentRef$Outbound> | undefined;
+  projectId?: string | undefined;
+  projectVisibility?: string | undefined;
   modelKey?: string | undefined;
   modelName?: string | undefined;
   modelFriendlyName?: string | undefined;
@@ -215,6 +279,7 @@ export type ConversationStreamRequest$Outbound = {
   tools?: Array<string> | undefined;
   protocol?: string | undefined;
   agentCapabilities?: AgentCapabilities$Outbound | undefined;
+  runId?: string | undefined;
 };
 
 /** @internal */
@@ -227,6 +292,10 @@ export const ConversationStreamRequest$outboundSchema: z.ZodMiniType<
   filters: z.optional(Filters$outboundSchema),
   appliedFilters: z.optional(AppliedFilters$outboundSchema),
   attachments: z.optional(z.array(ChatAttachmentRef$outboundSchema)),
+  projectId: z.optional(z.string()),
+  projectVisibility: z.optional(
+    ConversationStreamRequestProjectVisibility$outboundSchema,
+  ),
   modelKey: z.optional(z.string()),
   modelName: z.optional(z.string()),
   modelFriendlyName: z.optional(z.string()),
@@ -236,6 +305,7 @@ export const ConversationStreamRequest$outboundSchema: z.ZodMiniType<
   tools: z.optional(z.array(z.string())),
   protocol: z.optional(ConversationStreamRequestProtocol$outboundSchema),
   agentCapabilities: z.optional(AgentCapabilities$outboundSchema),
+  runId: z.optional(z.string()),
 });
 
 export function conversationStreamRequestToJSON(

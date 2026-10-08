@@ -158,6 +158,14 @@ export type Agent = {
    */
   defaultReasoningEffort?: AgentDefaultReasoningEffort | null | undefined;
   /**
+   * When true (default), the agent's system prompt includes the current
+   *
+   * @remarks
+   * user's name, email, and organization. When false, the agent relies
+   * on tools, actions, and knowledge sources without that profile data.
+   */
+  sendUserContext?: boolean | undefined;
+  /**
    * Free-form agent tags.
    */
   tags: Array<string>;
@@ -301,6 +309,7 @@ export const Agent$inboundSchema: z.ZodMiniType<Agent, unknown> = z.pipe(
     defaultReasoningEffort: z.optional(
       z.nullable(AgentDefaultReasoningEffort$inboundSchema),
     ),
+    sendUserContext: types.optional(types.boolean()),
     tags: z.array(types.string()),
     createdAtTimestamp: types.number(),
     updatedAtTimestamp: types.number(),

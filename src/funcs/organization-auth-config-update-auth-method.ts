@@ -40,6 +40,7 @@ import { Result } from "../types/fp.js";
  * - No duplicate methods within the same step
  * - No method can appear in multiple steps
  * - Each step must have at least one allowed method
+ * - `samlSso` is only allowed in a single-step policy; it can't be combined with other steps
  *
  * **Available Methods:**
  * - `password`: Email/password authentication

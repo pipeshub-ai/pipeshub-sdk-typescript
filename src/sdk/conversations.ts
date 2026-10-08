@@ -3,13 +3,19 @@
  */
 
 import { conversationsAddMessageStream } from "../funcs/conversations-add-message-stream.js";
+import { conversationsAddMessage } from "../funcs/conversations-add-message.js";
 import { conversationsArchiveConversation } from "../funcs/conversations-archive-conversation.js";
+import { conversationsCancelConversationStream } from "../funcs/conversations-cancel-conversation-stream.js";
+import { conversationsCreateConversation } from "../funcs/conversations-create-conversation.js";
 import { conversationsDeleteConversationById } from "../funcs/conversations-delete-conversation-by-id.js";
 import { conversationsGetAllConversations } from "../funcs/conversations-get-all-conversations.js";
 import { conversationsGetArchivedConversations } from "../funcs/conversations-get-archived-conversations.js";
 import { conversationsGetConversationById } from "../funcs/conversations-get-conversation-by-id.js";
+import { conversationsGetProjectConversations } from "../funcs/conversations-get-project-conversations.js";
 import { conversationsRegenerateAnswer } from "../funcs/conversations-regenerate-answer.js";
 import { conversationsSearchArchivedConversations } from "../funcs/conversations-search-archived-conversations.js";
+import { conversationsSetConversationProjectVisibility } from "../funcs/conversations-set-conversation-project-visibility.js";
+import { conversationsSetConversationProject } from "../funcs/conversations-set-conversation-project.js";
 import { conversationsStreamChat } from "../funcs/conversations-stream-chat.js";
 import { conversationsUnarchiveConversation } from "../funcs/conversations-unarchive-conversation.js";
 import { conversationsUpdateConversationTitle } from "../funcs/conversations-update-conversation-title.js";
@@ -21,6 +27,54 @@ import * as operations from "../models/operations/index.js";
 import { unwrapAsync } from "../types/fp.js";
 
 export class Conversations extends ClientSDK {
+  /**
+   * Create conversation (non-streaming)
+   *
+   * @remarks
+   * Start a new assistant conversation and wait for the complete answer.
+   * The JSON counterpart of `POST /conversations/stream`, for API, SDK
+   * and automation callers that do not consume SSE.
+   *
+   * **How a turn runs**
+   *
+   * 1. The user's message is saved (in its own short transaction on a
+   *    replica set).
+   * 2. The AI backend runs the same agent-loop pipeline as the `/stream`
+   *    route and returns only its final result. No transaction is held
+   *    during this call, and the call is never retried.
+   * 3. The answer, citations and status are saved exactly as the
+   *    streaming route saves them, and the updated conversation is
+   *    returned.
+   *
+   * Every failure after step 1 is persisted: the conversation ends with
+   * status `Failed`, a `failReason`, and an `error` message, and the
+   * response carries `X-Conversation-Id` so the caller can fetch it.
+   * A 4xx from the AI backend (for example no model configured) keeps
+   * its status and user-facing message; other failures return 500 with
+   * a generic message.
+   *
+   * The response arrives only when the whole answer is ready, which can
+   * take minutes for agent runs. Allow a generous client and proxy
+   * timeout, or use the `/stream` variant for interactive clients.
+   *
+   * **Modes**
+   *
+   * `chatMode: agent` (or `agent:<mode>`) runs the universal agent and
+   * honours `tools` / `agentCapabilities`; `internal_search` and
+   * `web_search` run the search assistant and ignore `tools`. Omitted,
+   * it defaults to internal search.
+   */
+  async createConversation(
+    request: models.CreateConversationRequest,
+    options?: RequestOptions,
+  ): Promise<operations.CreateConversationResponse> {
+    return unwrapAsync(conversationsCreateConversation(
+      this,
+      request,
+      options,
+    ));
+  }
+
   /**
    * Create conversation with streaming response
    *
@@ -243,6 +297,49 @@ export class Conversations extends ClientSDK {
   }
 
   /**
+   * Add message (non-streaming)
+   *
+   * @remarks
+   * Ask a follow-up in an existing assistant conversation and wait for
+   * the complete answer. The JSON counterpart of
+   * `POST /conversations/{conversationId}/messages/stream`. Earlier turns
+   * are sent to the model as history; project context comes from the
+   * conversation, never from the request.
+   *
+   * **How a turn runs**
+   *
+   * 1. The user's message is saved (in its own short transaction on a
+   *    replica set).
+   * 2. The AI backend runs the same agent-loop pipeline as the `/stream`
+   *    route and returns only its final result. No transaction is held
+   *    during this call, and the call is never retried.
+   * 3. The answer, citations and status are saved exactly as the
+   *    streaming route saves them, and the updated conversation is
+   *    returned.
+   *
+   * Every failure after step 1 is persisted: the conversation ends with
+   * status `Failed`, a `failReason`, and an `error` message, and the
+   * response carries `X-Conversation-Id` so the caller can fetch it.
+   * A 4xx from the AI backend (for example no model configured) keeps
+   * its status and user-facing message; other failures return 500 with
+   * a generic message.
+   *
+   * The response arrives only when the whole answer is ready, which can
+   * take minutes for agent runs. Allow a generous client and proxy
+   * timeout, or use the `/stream` variant for interactive clients.
+   */
+  async addMessage(
+    request: operations.AddMessageRequest,
+    options?: RequestOptions,
+  ): Promise<operations.AddMessageResponse> {
+    return unwrapAsync(conversationsAddMessage(
+      this,
+      request,
+      options,
+    ));
+  }
+
+  /**
    * Add message to a conversation with streaming response
    *
    * @remarks
@@ -401,6 +498,39 @@ export class Conversations extends ClientSDK {
   }
 
   /**
+   * Cancel an in-flight chat stream
+   *
+   * @remarks
+   * Cooperatively stop a `POST /conversations/stream` or
+   * `POST /conversations/{conversationId}/messages/stream` run that is
+   * still generating, using the `runId` sent when that stream started.
+   *
+   * This is a synchronous JSON ack, not another SSE stream. The
+   * cancelled run's own stream (if still connected) receives a terminal
+   * frame with a `stopped` status and whatever partial answer had
+   * already generated; nothing further is delivered here.
+   *
+   * `{ cancelled: false }` — not an error — covers a `runId` that
+   * already finished or was never registered; the caller only needs to
+   * know the stream is not running anymore, not why.
+   *
+   * `runId` must belong to a run started on THIS `conversationId` — a
+   * `runId` that exists but was registered under a different
+   * conversation (even one owned by the same caller) is rejected with
+   * `403`, same as a `runId` owned by a different user/org.
+   */
+  async cancelConversationStream(
+    request: operations.CancelConversationStreamRequest,
+    options?: RequestOptions,
+  ): Promise<operations.CancelConversationStreamResponse> {
+    return unwrapAsync(conversationsCancelConversationStream(
+      this,
+      request,
+      options,
+    ));
+  }
+
+  /**
    * Submit feedback on AI response
    *
    * @remarks
@@ -429,6 +559,84 @@ export class Conversations extends ClientSDK {
     options?: RequestOptions,
   ): Promise<models.MessageFeedbackUpdateResponse> {
     return unwrapAsync(conversationsUpdateMessageFeedback(
+      this,
+      request,
+      options,
+    ));
+  }
+
+  /**
+   * Link or unlink a conversation to a project
+   *
+   * @remarks
+   * Set (`projectId: <id>`) or clear (`projectId: null`) the project this
+   * conversation belongs to. Initiator-only.
+   *
+   * **Access:**
+   *
+   * The caller must be the conversation's initiator. Linking to a
+   * non-null `projectId` also requires at least viewer access to that
+   * project (`404` if not visible to the caller — never `403`, to avoid
+   * leaking project existence across an org boundary).
+   *
+   * **Visibility on link:**
+   *
+   * When linking, `projectVisibility` defaults from the project's
+   * `chatSharing` setting (`members` → `project`, otherwise `private`)
+   * unless the conversation was already `project`-visible, in which case
+   * that is preserved. Use
+   * `PATCH /conversations/{conversationId}/project-visibility` to
+   * override it explicitly. Unlinking (`projectId: null`) always clears
+   * both `projectId` and `projectVisibility`.
+   */
+  async setConversationProject(
+    request: operations.SetConversationProjectRequest,
+    options?: RequestOptions,
+  ): Promise<operations.SetConversationProjectResponse> {
+    return unwrapAsync(conversationsSetConversationProject(
+      this,
+      request,
+      options,
+    ));
+  }
+
+  /**
+   * Override a conversation's project visibility
+   *
+   * @remarks
+   * Explicitly set whether a project-linked conversation is visible to
+   * other members of that project (`project`) or only to its owner
+   * (`private`). Initiator-only. Requires the conversation to already be
+   * linked to a project via
+   * `PUT /conversations/{conversationId}/project`.
+   */
+  async setConversationProjectVisibility(
+    request: operations.SetConversationProjectVisibilityRequest,
+    options?: RequestOptions,
+  ): Promise<operations.SetConversationProjectVisibilityResponse> {
+    return unwrapAsync(conversationsSetConversationProjectVisibility(
+      this,
+      request,
+      options,
+    ));
+  }
+
+  /**
+   * List a project's conversations
+   *
+   * @remarks
+   * Requires viewer access to the project. Returns both chat and agent
+   * sessions (`chatSessions`, discriminated by `sessionType`/`agentKey`)
+   * that the caller may see: rows they own, plus rows with
+   * `projectVisibility: project`. Access to the project is asserted
+   * first, so a private conversation belonging to a *different* project
+   * member never leaks through this endpoint.
+   */
+  async getProjectConversations(
+    request: operations.GetProjectConversationsRequest,
+    options?: RequestOptions,
+  ): Promise<operations.GetProjectConversationsResponse> {
+    return unwrapAsync(conversationsGetProjectConversations(
       this,
       request,
       options,

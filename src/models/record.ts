@@ -262,6 +262,10 @@ export type RecordT = {
    */
   processingStartedAt?: number | null | undefined;
   /**
+   * Epoch ms the platform last queued this record for indexing; absent until first queued. Platform-owned, unlike updatedAtTimestamp
+   */
+  queuedAtTimestamp?: number | null | undefined;
+  /**
    * Parse-phase status (ahead of indexing/extraction):
    *
    * @remarks
@@ -414,6 +418,7 @@ export const RecordT$inboundSchema: z.ZodMiniType<RecordT, unknown> = z.object({
   sourceCreatedAtTimestamp: types.optional(types.number()),
   sourceLastModifiedTimestamp: types.optional(types.number()),
   processingStartedAt: z.optional(z.nullable(types.number())),
+  queuedAtTimestamp: z.optional(z.nullable(types.number())),
   parsingStatus: types.optional(ParsingStatus$inboundSchema),
   indexingStatus: types.optional(IndexingStatus$inboundSchema),
   isDeleted: z._default(types.boolean(), false),

@@ -20,6 +20,7 @@ export const AgentConversationListItemStatus = {
   Inprogress: "Inprogress",
   Complete: "Complete",
   Failed: "Failed",
+  Stopped: "Stopped",
 } as const;
 export type AgentConversationListItemStatus = OpenEnum<
   typeof AgentConversationListItemStatus
@@ -72,6 +73,26 @@ export const AgentConversationListItemAccessLevel = {
  */
 export type AgentConversationListItemAccessLevel = OpenEnum<
   typeof AgentConversationListItemAccessLevel
+>;
+
+/**
+ * Only meaningful when `projectId` is set. `project` exposes the
+ *
+ * @remarks
+ * conversation to every member of the linked project.
+ */
+export const AgentConversationListItemProjectVisibility = {
+  Private: "private",
+  Project: "project",
+} as const;
+/**
+ * Only meaningful when `projectId` is set. `project` exposes the
+ *
+ * @remarks
+ * conversation to every member of the linked project.
+ */
+export type AgentConversationListItemProjectVisibility = OpenEnum<
+  typeof AgentConversationListItemProjectVisibility
 >;
 
 /**
@@ -136,6 +157,20 @@ export type AgentConversationListItem = {
    * explicit share grant is attached to the serialized row.
    */
   accessLevel?: AgentConversationListItemAccessLevel | undefined;
+  /**
+   * The project this agent conversation is linked to, if any.
+   */
+  projectId?: string | null | undefined;
+  /**
+   * Only meaningful when `projectId` is set. `project` exposes the
+   *
+   * @remarks
+   * conversation to every member of the linked project.
+   */
+  projectVisibility?:
+    | AgentConversationListItemProjectVisibility
+    | null
+    | undefined;
 };
 
 /** @internal */
@@ -213,6 +248,11 @@ export const AgentConversationListItemAccessLevel$inboundSchema: z.ZodMiniType<
 > = openEnums.inboundSchema(AgentConversationListItemAccessLevel);
 
 /** @internal */
+export const AgentConversationListItemProjectVisibility$inboundSchema:
+  z.ZodMiniType<AgentConversationListItemProjectVisibility, unknown> = openEnums
+    .inboundSchema(AgentConversationListItemProjectVisibility);
+
+/** @internal */
 export const AgentConversationListItem$inboundSchema: z.ZodMiniType<
   AgentConversationListItem,
   unknown
@@ -249,6 +289,10 @@ export const AgentConversationListItem$inboundSchema: z.ZodMiniType<
     isOwner: types.optional(types.boolean()),
     accessLevel: types.optional(
       AgentConversationListItemAccessLevel$inboundSchema,
+    ),
+    projectId: z.optional(z.nullable(types.string())),
+    projectVisibility: z.optional(
+      z.nullable(AgentConversationListItemProjectVisibility$inboundSchema),
     ),
   }),
   z.transform((v) => {

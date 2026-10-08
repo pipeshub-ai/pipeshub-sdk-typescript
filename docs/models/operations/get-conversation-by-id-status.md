@@ -5,7 +5,7 @@
 ```typescript
 import { GetConversationByIdStatus } from "@pipeshub-ai/sdk/models/operations";
 
-let value: GetConversationByIdStatus = "Failed";
+let value: GetConversationByIdStatus = "Stopped";
 ```
 
 ## Values
@@ -13,5 +13,5 @@ let value: GetConversationByIdStatus = "Failed";
 This is an open enum. Unrecognized values will be captured as the `Unrecognized<string>` branded type.
 
 ```typescript
-"None" | "Inprogress" | "Complete" | "Failed" | Unrecognized<string>
+"None" | "Inprogress" | "Complete" | "Failed" | "Stopped" | Unrecognized<string>
 ```

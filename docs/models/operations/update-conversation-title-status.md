@@ -5,6 +5,7 @@ Current status of the conversation:
 - `Inprogress` — AI is processing
 - `Complete` — response ready
 - `Failed` — error occurred
+- `Stopped` — cancelled, or the client disconnected mid-answer
 
 
 ## Example Usage
@@ -20,5 +21,5 @@ let value: UpdateConversationTitleStatus = "Inprogress";
 This is an open enum. Unrecognized values will be captured as the `Unrecognized<string>` branded type.
 
 ```typescript
-"None" | "Inprogress" | "Complete" | "Failed" | Unrecognized<string>
+"None" | "Inprogress" | "Complete" | "Failed" | "Stopped" | Unrecognized<string>
 ```

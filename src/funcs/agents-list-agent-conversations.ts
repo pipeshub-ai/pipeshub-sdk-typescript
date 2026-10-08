@@ -106,6 +106,7 @@ async function $do(
     "isArchived": payload.isArchived,
     "limit": payload.limit,
     "page": payload.page,
+    "projectId": payload.projectId,
     "search": payload.search,
     "sortBy": payload.sortBy,
     "sortOrder": payload.sortOrder,

@@ -52,6 +52,11 @@ export class PersonalAccessTokens extends ClientSDK {
    * env var, not the full role-aware OAuth-app scope catalog — a
    * non-admin can request any scope in that set.
    *
+   * **Session only.** The bearer token must be the user's interactive
+   * session JWT. OAuth access tokens and personal access tokens
+   * (`phpat_...`) are rejected with `403`, so a token that is already
+   * issued cannot mint another with wider scopes or a longer life.
+   *
    * The response's `accessToken` is shown **once**; only its SHA-256
    * hash is stored. It's prefixed `phpat_` (see the `bearerAuth`
    * security scheme).

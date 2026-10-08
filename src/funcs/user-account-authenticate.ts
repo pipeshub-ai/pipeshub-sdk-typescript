@@ -41,7 +41,8 @@ import { Result } from "../types/fp.js";
  * - `microsoft`: `{ "credentials": { "accessToken": "...", "idToken": "..." } }`
  * - `azureAd`: `{ "credentials": { "accessToken": "...", "idToken": "..." } }`
  * - `oauth`: `{ "credentials": { "accessToken": "...", "idToken": "..." } }`
- * - `samlSso`: Handled via redirect flow (use `/saml/signIn` instead)
+ * - `samlSso`: not accepted here; this endpoint answers `400`. SAML sign-in runs as a browser
+ *   redirect: send the browser to `/saml/signIn` instead
  *
  * **Multi-Step Response:**
  *
@@ -55,8 +56,12 @@ import { Result } from "../types/fp.js";
  *
  * **Security:**
  *
- * - Account locks after 5 consecutive failed attempts
+ * - Account locks for 24 hours after 5 consecutive failed attempts, and the owner is
+ *   sent an email saying so. While it is locked, sign-in is refused with the same answer
+ *   as a wrong password or code, even when the password or code is right
  * - CAPTCHA may be required if enabled (pass `cf-turnstile-response`)
+ * - An email with no account gets the same status and message as a real account given
+ *   a wrong password (`400`) or a wrong, missing or expired sign-in code (`401`)
  */
 export function userAccountAuthenticate(
   client: PipeshubCore,
@@ -158,7 +163,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["400", "401", "404", "410", "4XX", "500", "5XX"],
+    errorCodes: ["400", "401", "404", "4XX", "500", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -184,7 +189,7 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.AuthenticateResponse$inboundSchema),
-    M.jsonErr([400, 401, 404, 410], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([400, 401, 404], errors.ErrorResponse$inboundSchema),
     M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

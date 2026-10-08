@@ -254,8 +254,9 @@ async function $do(
       [400, 401, 403, 404, 413, 429],
       errors.ErrorResponse$inboundSchema,
     ),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
-    M.fail([500, "5XX"]),
+    M.fail("5XX"),
   )(response, req, { extraFields: responseFields });
   if (!result.ok) {
     return [result, { status: "complete", request: req, response }];

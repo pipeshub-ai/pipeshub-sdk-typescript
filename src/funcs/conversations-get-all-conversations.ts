@@ -114,6 +114,7 @@ async function $do(
     "endDate": payload?.endDate,
     "limit": payload?.limit,
     "page": payload?.page,
+    "projectId": payload?.projectId,
     "search": payload?.search,
     "shared": payload?.shared,
     "sortBy": payload?.sortBy,

@@ -5,7 +5,7 @@
 ```typescript
 import { AgentConversationListItemStatus } from "@pipeshub-ai/sdk/models";
 
-let value: AgentConversationListItemStatus = "Failed";
+let value: AgentConversationListItemStatus = "Stopped";
 ```
 
 ## Values
@@ -13,5 +13,5 @@ let value: AgentConversationListItemStatus = "Failed";
 This is an open enum. Unrecognized values will be captured as the `Unrecognized<string>` branded type.
 
 ```typescript
-"None" | "Inprogress" | "Complete" | "Failed" | Unrecognized<string>
+"None" | "Inprogress" | "Complete" | "Failed" | "Stopped" | Unrecognized<string>
 ```

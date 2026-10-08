@@ -43,6 +43,11 @@ import { Result } from "../types/fp.js";
  * env var, not the full role-aware OAuth-app scope catalog — a
  * non-admin can request any scope in that set.
  *
+ * **Session only.** The bearer token must be the user's interactive
+ * session JWT. OAuth access tokens and personal access tokens
+ * (`phpat_...`) are rejected with `403`, so a token that is already
+ * issued cannot mint another with wider scopes or a longer life.
+ *
  * The response's `accessToken` is shown **once**; only its SHA-256
  * hash is stored. It's prefixed `phpat_` (see the `bearerAuth`
  * security scheme).
@@ -148,7 +153,7 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["400", "401", "429", "4XX", "5XX"],
+    errorCodes: ["400", "401", "403", "429", "4XX", "5XX"],
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -175,7 +180,10 @@ async function $do(
     | SDKValidationError
   >(
     M.json(201, models.CreatePatResponse$inboundSchema),
-    M.jsonErr([400, 401], errors.ApplicationJsonErrorResponse$inboundSchema),
+    M.jsonErr(
+      [400, 401, 403],
+      errors.ApplicationJsonErrorResponse$inboundSchema,
+    ),
     M.jsonErr(429, errors.OAuthClientManagementRateLimitError$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

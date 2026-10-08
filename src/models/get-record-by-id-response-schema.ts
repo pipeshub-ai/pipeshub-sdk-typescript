@@ -52,6 +52,15 @@ export type GetRecordByIdResponseSchemaRecord = {
   externalParentId?: string | null | undefined;
   externalRevisionId?: string | null | undefined;
   recordGroupId?: string | null | undefined;
+  /**
+   * Internal identifier of the top-most record group in this record's
+   *
+   * @remarks
+   * chain. A group with no parent is its own root, so this is null
+   * only for records written before the field existed, or by
+   * connectors that do not set it.
+   */
+  rootRecordGroupId?: string | null | undefined;
   connectorId: string;
   /**
    * Name of the source connector. Mirrors the values of the backend
@@ -111,6 +120,7 @@ export type GetRecordByIdResponseSchemaRecord = {
   lastIndexTimestamp?: number | undefined;
   lastExtractionTimestamp?: number | undefined;
   processingStartedAt?: number | null | undefined;
+  queuedAtTimestamp?: number | null | undefined;
   parsingStatus?: string | null | undefined;
   indexingStatus: string;
   extractionStatus: string;
@@ -304,6 +314,7 @@ export const GetRecordByIdResponseSchemaRecord$inboundSchema: z.ZodMiniType<
   externalParentId: z.optional(z.nullable(types.string())),
   externalRevisionId: z.optional(z.nullable(types.string())),
   recordGroupId: z.optional(z.nullable(types.string())),
+  rootRecordGroupId: z.optional(z.nullable(types.string())),
   connectorId: types.string(),
   connectorName: ConnectorNameEnum$inboundSchema,
   recordType: RecordTypeEnum$inboundSchema,
@@ -318,6 +329,7 @@ export const GetRecordByIdResponseSchemaRecord$inboundSchema: z.ZodMiniType<
   lastIndexTimestamp: types.optional(types.number()),
   lastExtractionTimestamp: types.optional(types.number()),
   processingStartedAt: z.optional(z.nullable(types.number())),
+  queuedAtTimestamp: z.optional(z.nullable(types.number())),
   parsingStatus: z.optional(z.nullable(types.string())),
   indexingStatus: types.string(),
   extractionStatus: types.string(),

@@ -12,11 +12,11 @@ This field is now optional and nullable; it was previously always present and no
 import { Confidence } from "@pipeshub-ai/sdk/models";
 
 let value: Confidence = "Low";
+
+// Open enum: unrecognized values are captured as Unrecognized<string>
 ```
 
 ## Values
-
-This is an open enum. Unrecognized values will be captured as the `Unrecognized<string>` branded type.
 
 ```typescript
 "Very High" | "High" | "Medium" | "Low" | "Unknown" | Unrecognized<string>

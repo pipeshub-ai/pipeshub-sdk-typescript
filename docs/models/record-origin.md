@@ -11,11 +11,11 @@ Source of the record:
 import { RecordOrigin } from "@pipeshub-ai/sdk/models";
 
 let value: RecordOrigin = "UPLOAD";
+
+// Open enum: unrecognized values are captured as Unrecognized<string>
 ```
 
 ## Values
-
-This is an open enum. Unrecognized values will be captured as the `Unrecognized<string>` branded type.
 
 ```typescript
 "UPLOAD" | "CONNECTOR" | Unrecognized<string>

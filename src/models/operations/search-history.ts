@@ -116,6 +116,13 @@ export type SearchHistoryRequest = {
  */
 export type SearchHistoryInternalServerErrorError = {
   /**
+   * Identifier for this request, echoed so a bug report can quote it.
+   *
+   * @remarks
+   * Absent when the request never reached the middleware that assigns one.
+   */
+  requestId?: string | undefined;
+  /**
    * Machine-readable error code. For this status the
    *
    * @remarks
@@ -136,6 +143,13 @@ export type SearchHistoryInternalServerErrorError = {
  */
 export type SearchHistoryForbiddenError = {
   /**
+   * Identifier for this request, echoed so a bug report can quote it.
+   *
+   * @remarks
+   * Absent when the request never reached the middleware that assigns one.
+   */
+  requestId?: string | undefined;
+  /**
    * Machine-readable error code. For this status the
    *
    * @remarks
@@ -153,6 +167,13 @@ export type SearchHistoryForbiddenError = {
  * Error payload.
  */
 export type SearchHistoryUnauthorizedError = {
+  /**
+   * Identifier for this request, echoed so a bug report can quote it.
+   *
+   * @remarks
+   * Absent when the request never reached the middleware that assigns one.
+   */
+  requestId?: string | undefined;
   /**
    * Machine-readable error code. For this status the
    *
@@ -172,6 +193,13 @@ export type SearchHistoryUnauthorizedError = {
  * Error payload.
  */
 export type SearchHistoryBadRequestError = {
+  /**
+   * Identifier for this request, echoed so a bug report can quote it.
+   *
+   * @remarks
+   * Absent when the request never reached the middleware that assigns one.
+   */
+  requestId?: string | undefined;
   /**
    * Machine-readable error code. For this status the
    *
@@ -243,6 +271,7 @@ export const SearchHistoryInternalServerErrorError$inboundSchema: z.ZodMiniType<
   SearchHistoryInternalServerErrorError,
   unknown
 > = z.object({
+  requestId: types.optional(types.string()),
   code: types.string(),
   message: types.string(),
 });
@@ -263,6 +292,7 @@ export const SearchHistoryForbiddenError$inboundSchema: z.ZodMiniType<
   SearchHistoryForbiddenError,
   unknown
 > = z.object({
+  requestId: types.optional(types.string()),
   code: types.string(),
   message: types.string(),
 });
@@ -282,6 +312,7 @@ export const SearchHistoryUnauthorizedError$inboundSchema: z.ZodMiniType<
   SearchHistoryUnauthorizedError,
   unknown
 > = z.object({
+  requestId: types.optional(types.string()),
   code: types.string(),
   message: types.string(),
 });
@@ -301,6 +332,7 @@ export const SearchHistoryBadRequestError$inboundSchema: z.ZodMiniType<
   SearchHistoryBadRequestError,
   unknown
 > = z.object({
+  requestId: types.optional(types.string()),
   code: types.string(),
   message: types.string(),
 });

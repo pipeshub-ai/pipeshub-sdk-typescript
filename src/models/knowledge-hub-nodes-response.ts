@@ -193,7 +193,7 @@ export type KnowledgeHubNodesResponse = {
   /**
    * Always `true` on HTTP 200. Failures use 4xx/5xx error envelopes, not this body shape.
    */
-  success: boolean;
+  success: true;
   /**
    * Always `null` on HTTP 200.
    */
@@ -493,7 +493,7 @@ export const KnowledgeHubNodesResponse$inboundSchema: z.ZodMiniType<
   KnowledgeHubNodesResponse,
   unknown
 > = z.object({
-  success: types.boolean(),
+  success: types.literal(true),
   error: types.nullable(types.string()),
   id: types.nullable(types.string()),
   currentNode: types.nullable(z.lazy(() => CurrentNode$inboundSchema)),

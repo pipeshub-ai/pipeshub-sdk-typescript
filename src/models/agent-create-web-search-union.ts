@@ -13,10 +13,10 @@ export type AgentCreateWebSearch = {
 };
 
 /**
- * Web-search attachment for an agent. Accepts either a provider string
+ * Web-search attachment for an agent. Accepts a provider string, an object
  *
  * @remarks
- * or an object with at least a `provider` field.
+ * with at least a `provider` field, or `null`.
  */
 export type AgentCreateWebSearchUnion = AgentCreateWebSearch | string;
 

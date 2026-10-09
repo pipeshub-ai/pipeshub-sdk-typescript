@@ -70,7 +70,8 @@ export class UserAccount extends ClientSDK {
    * - `microsoft`: `{ "credentials": { "accessToken": "...", "idToken": "..." } }`
    * - `azureAd`: `{ "credentials": { "accessToken": "...", "idToken": "..." } }`
    * - `oauth`: `{ "credentials": { "accessToken": "...", "idToken": "..." } }`
-   * - `samlSso`: Handled via redirect flow (use `/saml/signIn` instead)
+   * - `samlSso`: not accepted here; this endpoint answers `400`. SAML sign-in runs as a browser
+   *   redirect: send the browser to `/saml/signIn` instead
    *
    * **Multi-Step Response:**
    *
@@ -84,8 +85,12 @@ export class UserAccount extends ClientSDK {
    *
    * **Security:**
    *
-   * - Account locks after 5 consecutive failed attempts
+   * - Account locks for 24 hours after 5 consecutive failed attempts, and the owner is
+   *   sent an email saying so. While it is locked, sign-in is refused with the same answer
+   *   as a wrong password or code, even when the password or code is right
    * - CAPTCHA may be required if enabled (pass `cf-turnstile-response`)
+   * - An email with no account gets the same status and message as a real account given
+   *   a wrong password (`400`) or a wrong, missing or expired sign-in code (`401`)
    */
   async authenticate(
     request: operations.AuthenticateRequest,

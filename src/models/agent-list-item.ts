@@ -158,6 +158,10 @@ export type AgentListItem = {
     | null
     | undefined;
   /**
+   * When false, this agent omits user name/email/org from its system prompt.
+   */
+  sendUserContext?: boolean | undefined;
+  /**
    * Whether the agent is shared with the organization.
    */
   shareWithOrg: boolean;
@@ -267,6 +271,7 @@ export const AgentListItem$inboundSchema: z.ZodMiniType<
     defaultReasoningEffort: z.optional(
       z.nullable(AgentListItemDefaultReasoningEffort$inboundSchema),
     ),
+    sendUserContext: types.optional(types.boolean()),
     shareWithOrg: types.boolean(),
     toolsets: z.array(Toolset$inboundSchema),
     mcpServers: z.array(McpServer$inboundSchema),

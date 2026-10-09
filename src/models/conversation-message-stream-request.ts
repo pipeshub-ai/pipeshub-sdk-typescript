@@ -168,6 +168,14 @@ export type ConversationMessageStreamRequest = {
    * `true`. Omitting the whole object applies every default.
    */
   agentCapabilities?: AgentCapabilities | undefined;
+  /**
+   * Client-generated identifier for this run. Send it here to enable
+   *
+   * @remarks
+   * `POST /conversations/{conversationId}/cancel {runId}` while the
+   * stream is still generating.
+   */
+  runId?: string | undefined;
 };
 
 /** @internal */
@@ -197,6 +205,7 @@ export type ConversationMessageStreamRequest$Outbound = {
   tools?: Array<string> | undefined;
   protocol?: string | undefined;
   agentCapabilities?: AgentCapabilities$Outbound | undefined;
+  runId?: string | undefined;
 };
 
 /** @internal */
@@ -217,6 +226,7 @@ export const ConversationMessageStreamRequest$outboundSchema: z.ZodMiniType<
   tools: z.optional(z.array(z.string())),
   protocol: z.optional(ConversationMessageStreamRequestProtocol$outboundSchema),
   agentCapabilities: z.optional(AgentCapabilities$outboundSchema),
+  runId: z.optional(z.string()),
 });
 
 export function conversationMessageStreamRequestToJSON(

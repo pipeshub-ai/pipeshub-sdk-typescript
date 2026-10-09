@@ -15,11 +15,11 @@ Type of message:
 import { MessageMessageType } from "@pipeshub-ai/sdk/models";
 
 let value: MessageMessageType = "system";
+
+// Open enum: unrecognized values are captured as Unrecognized<string>
 ```
 
 ## Values
-
-This is an open enum. Unrecognized values will be captured as the `Unrecognized<string>` branded type.
 
 ```typescript
 "user_query" | "bot_response" | "error" | "feedback" | "system" | "tool_call" | Unrecognized<string>

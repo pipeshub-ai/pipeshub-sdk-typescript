@@ -57,6 +57,7 @@ export type SemanticSearchHitMetadata = {
   webUrl?: string | null | undefined;
   previewRenderable?: boolean | null | undefined;
   hideWeburl?: boolean | null | undefined;
+  updatedAt?: Date | null | undefined;
   categories?: Array<string> | null | undefined;
   departments?: Array<string> | null | undefined;
   topics?: Array<string> | null | undefined;
@@ -152,6 +153,7 @@ export const SemanticSearchHitMetadata$inboundSchema: z.ZodMiniType<
     webUrl: z.optional(z.nullable(types.string())),
     previewRenderable: z.optional(z.nullable(types.boolean())),
     hideWeburl: z.optional(z.nullable(types.boolean())),
+    updatedAt: z.optional(z.nullable(types.date())),
     categories: z.optional(z.nullable(z.array(types.string()))),
     departments: z.optional(z.nullable(z.array(types.string()))),
     topics: z.optional(z.nullable(z.array(types.string()))),

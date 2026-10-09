@@ -26,19 +26,21 @@ import {
 } from "./filters.js";
 
 /**
- * Required execution mode. Scoped agent conversations currently
+ * Execution mode. Scoped agent conversations support only `quick`.
  *
  * @remarks
- * support only `quick`.
+ * Required on the `/stream` route; optional on the non-streaming
+ * route.
  */
 export const AgentAddMessageStreamRequestChatMode = {
   Quick: "quick",
 } as const;
 /**
- * Required execution mode. Scoped agent conversations currently
+ * Execution mode. Scoped agent conversations support only `quick`.
  *
  * @remarks
- * support only `quick`.
+ * Required on the `/stream` route; optional on the non-streaming
+ * route.
  */
 export type AgentAddMessageStreamRequestChatMode = ClosedEnum<
   typeof AgentAddMessageStreamRequestChatMode
@@ -108,10 +110,11 @@ export type AgentAddMessageStreamRequest = {
    */
   attachments?: Array<ChatAttachmentRef> | undefined;
   /**
-   * Required execution mode. Scoped agent conversations currently
+   * Execution mode. Scoped agent conversations support only `quick`.
    *
    * @remarks
-   * support only `quick`.
+   * Required on the `/stream` route; optional on the non-streaming
+   * route.
    */
   chatMode: AgentAddMessageStreamRequestChatMode;
   /**
@@ -170,6 +173,14 @@ export type AgentAddMessageStreamRequest = {
    * `true`. Omitting the whole object applies every default.
    */
   agentCapabilities?: AgentCapabilities | undefined;
+  /**
+   * Client-generated identifier for this run. Send it here to enable
+   *
+   * @remarks
+   * `POST /agents/{agentKey}/conversations/{conversationId}/cancel
+   * {runId}` while the stream is still generating.
+   */
+  runId?: string | undefined;
 };
 
 /** @internal */
@@ -197,6 +208,7 @@ export type AgentAddMessageStreamRequest$Outbound = {
   tools?: Array<string> | undefined;
   protocol?: string | undefined;
   agentCapabilities?: AgentCapabilities$Outbound | undefined;
+  runId?: string | undefined;
 };
 
 /** @internal */
@@ -217,6 +229,7 @@ export const AgentAddMessageStreamRequest$outboundSchema: z.ZodMiniType<
   tools: z.optional(z.array(z.string())),
   protocol: z.optional(AgentAddMessageStreamRequestProtocol$outboundSchema),
   agentCapabilities: z.optional(AgentCapabilities$outboundSchema),
+  runId: z.optional(z.string()),
 });
 
 export function agentAddMessageStreamRequestToJSON(

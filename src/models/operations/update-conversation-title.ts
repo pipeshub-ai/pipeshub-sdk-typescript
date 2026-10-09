@@ -33,133 +33,6 @@ export type UpdateConversationTitleRequest = {
   body: UpdateConversationTitleRequestBody;
 };
 
-export const UpdateConversationTitleMessageType = {
-  UserQuery: "user_query",
-  BotResponse: "bot_response",
-  Error: "error",
-  Feedback: "feedback",
-  System: "system",
-  ToolCall: "tool_call",
-} as const;
-export type UpdateConversationTitleMessageType = OpenEnum<
-  typeof UpdateConversationTitleMessageType
->;
-
-export const UpdateConversationTitleContentFormat = {
-  Markdown: "MARKDOWN",
-  Json: "JSON",
-  Html: "HTML",
-} as const;
-export type UpdateConversationTitleContentFormat = OpenEnum<
-  typeof UpdateConversationTitleContentFormat
->;
-
-export type UpdateConversationTitleReferenceDatum = {
-  /**
-   * Display name shown to the user.
-   */
-  name?: string | undefined;
-  /**
-   * Technical identifier (numeric ID, UUID, etc.).
-   */
-  id?: string | undefined;
-  /**
-   * Item type (e.g. `project`, `issue`, `file`, `notebook`, `page`).
-   */
-  type?: string | undefined;
-  /**
-   * Source application (e.g. `jira`, `confluence`,
-   *
-   * @remarks
-   * `sharepoint`, `slack`, `drive`, `gmail`).
-   */
-  app?: string | undefined;
-  /**
-   * URL to open the item in a browser.
-   */
-  webUrl?: string | undefined;
-  /**
-   * App-specific fields keyed by name (e.g. `key` for a Jira
-   *
-   * @remarks
-   * project, `siteId` for a SharePoint document).
-   */
-  metadata?: { [k: string]: string } | undefined;
-};
-
-export type UpdateConversationTitleAppliedFilters = {
-  apps?: Array<models.AppliedFilterNode> | undefined;
-  kb?: Array<models.AppliedFilterNode> | undefined;
-};
-
-export type UpdateConversationTitleMetadata = {
-  processingTimeMs?: number | undefined;
-  modelVersion?: string | undefined;
-  aiTransactionId?: string | undefined;
-  reason?: string | undefined;
-};
-
-export type UpdateConversationTitleMessage = {
-  id: string;
-  messageType: UpdateConversationTitleMessageType;
-  content: string;
-  contentFormat: UpdateConversationTitleContentFormat;
-  /**
-   * AI confidence in the answer. Present only on
-   *
-   * @remarks
-   * `bot_response` messages, and only when the
-   * model emitted a trailing confidence block.
-   *
-   * This field is now optional and nullable; it was previously always present and non-nullable. Treat a missing or `null` value as "no confidence reported" and guard before using it. Change effective in SDK v1.3.0 (v1.2.0 and earlier always populated it).
-   */
-  confidence?: string | null | undefined;
-  /**
-   * References to source documents used in the
-   *
-   * @remarks
-   * response, stored as raw citation pointers
-   * (not populated on this endpoint).
-   */
-  citations: Array<models.CitationReference>;
-  followUpQuestions: Array<models.FollowUpQuestion>;
-  feedback: Array<models.MessageFeedback>;
-  /**
-   * Reference IDs surfaced from tool responses,
-   *
-   * @remarks
-   * used for follow-up queries.
-   */
-  referenceData: Array<UpdateConversationTitleReferenceDatum>;
-  /**
-   * AI model configuration recorded against a conversation or message.
-   */
-  modelInfo?: models.ConversationModelInfo | undefined;
-  appliedFilters?: UpdateConversationTitleAppliedFilters | undefined;
-  /**
-   * Files uploaded for this message turn (see
-   *
-   * @remarks
-   * `POST /conversations/attachments/upload`).
-   */
-  attachments?: Array<models.ChatAttachmentRef> | undefined;
-  /**
-   * Tool call results invoked during this message turn.
-   */
-  tools?: Array<models.MessageToolCall> | undefined;
-  /**
-   * Persisted chain-of-thought for this turn.
-   */
-  reasoning?: Array<models.MessageReasoningTurn> | undefined;
-  /**
-   * Ordered agent-activity transcript for this turn.
-   */
-  parts?: Array<models.MessagePart> | undefined;
-  metadata?: UpdateConversationTitleMetadata | undefined;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
 /**
  * Current status of the conversation:
  *
@@ -168,12 +41,14 @@ export type UpdateConversationTitleMessage = {
  * - `Inprogress` — AI is processing
  * - `Complete` — response ready
  * - `Failed` — error occurred
+ * - `Stopped` — cancelled, or the client disconnected mid-answer
  */
 export const UpdateConversationTitleStatus = {
   None: "None",
   Inprogress: "Inprogress",
   Complete: "Complete",
   Failed: "Failed",
+  Stopped: "Stopped",
 } as const;
 /**
  * Current status of the conversation:
@@ -183,6 +58,7 @@ export const UpdateConversationTitleStatus = {
  * - `Inprogress` — AI is processing
  * - `Complete` — response ready
  * - `Failed` — error occurred
+ * - `Stopped` — cancelled, or the client disconnected mid-answer
  */
 export type UpdateConversationTitleStatus = OpenEnum<
   typeof UpdateConversationTitleStatus
@@ -228,10 +104,15 @@ export type UpdateConversationTitleConversationError = {
 };
 
 /**
- * The full conversation document after the title update,
+ * The conversation document after the title update, as
  *
  * @remarks
- * returned as stored in MongoDB.
+ * stored in the `chatSessions` collection.
+ *
+ * Carries no `messages`: they live in `chatSessionMessages`
+ * (see `chat.session.schema.ts`) and this route neither
+ * reads nor joins them. Fetch the conversation by id to
+ * get its messages.
  */
 export type UpdateConversationTitleConversation = {
   /**
@@ -259,10 +140,6 @@ export type UpdateConversationTitleConversation = {
    */
   initiator: string;
   /**
-   * All messages stored on this conversation.
-   */
-  messages: Array<UpdateConversationTitleMessage>;
-  /**
    * Current status of the conversation:
    *
    * @remarks
@@ -270,6 +147,7 @@ export type UpdateConversationTitleConversation = {
    * - `Inprogress` — AI is processing
    * - `Complete` — response ready
    * - `Failed` — error occurred
+   * - `Stopped` — cancelled, or the client disconnected mid-answer
    */
   status?: UpdateConversationTitleStatus | undefined;
   /**
@@ -362,10 +240,15 @@ export type UpdateConversationTitleMeta = {
  */
 export type UpdateConversationTitleResponse = {
   /**
-   * The full conversation document after the title update,
+   * The conversation document after the title update, as
    *
    * @remarks
-   * returned as stored in MongoDB.
+   * stored in the `chatSessions` collection.
+   *
+   * Carries no `messages`: they live in `chatSessionMessages`
+   * (see `chat.session.schema.ts`) and this route neither
+   * reads nor joins them. Fetch the conversation by id to
+   * get its messages.
    */
   conversation: UpdateConversationTitleConversation;
   meta: UpdateConversationTitleMeta;
@@ -416,138 +299,6 @@ export function updateConversationTitleRequestToJSON(
     UpdateConversationTitleRequest$outboundSchema.parse(
       updateConversationTitleRequest,
     ),
-  );
-}
-
-/** @internal */
-export const UpdateConversationTitleMessageType$inboundSchema: z.ZodMiniType<
-  UpdateConversationTitleMessageType,
-  unknown
-> = openEnums.inboundSchema(UpdateConversationTitleMessageType);
-
-/** @internal */
-export const UpdateConversationTitleContentFormat$inboundSchema: z.ZodMiniType<
-  UpdateConversationTitleContentFormat,
-  unknown
-> = openEnums.inboundSchema(UpdateConversationTitleContentFormat);
-
-/** @internal */
-export const UpdateConversationTitleReferenceDatum$inboundSchema: z.ZodMiniType<
-  UpdateConversationTitleReferenceDatum,
-  unknown
-> = z.object({
-  name: types.optional(types.string()),
-  id: types.optional(types.string()),
-  type: types.optional(types.string()),
-  app: types.optional(types.string()),
-  webUrl: types.optional(types.string()),
-  metadata: types.optional(z.record(z.string(), types.string())),
-});
-
-export function updateConversationTitleReferenceDatumFromJSON(
-  jsonString: string,
-): SafeParseResult<UpdateConversationTitleReferenceDatum, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) =>
-      UpdateConversationTitleReferenceDatum$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'UpdateConversationTitleReferenceDatum' from JSON`,
-  );
-}
-
-/** @internal */
-export const UpdateConversationTitleAppliedFilters$inboundSchema: z.ZodMiniType<
-  UpdateConversationTitleAppliedFilters,
-  unknown
-> = z.object({
-  apps: types.optional(z.array(models.AppliedFilterNode$inboundSchema)),
-  kb: types.optional(z.array(models.AppliedFilterNode$inboundSchema)),
-});
-
-export function updateConversationTitleAppliedFiltersFromJSON(
-  jsonString: string,
-): SafeParseResult<UpdateConversationTitleAppliedFilters, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) =>
-      UpdateConversationTitleAppliedFilters$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'UpdateConversationTitleAppliedFilters' from JSON`,
-  );
-}
-
-/** @internal */
-export const UpdateConversationTitleMetadata$inboundSchema: z.ZodMiniType<
-  UpdateConversationTitleMetadata,
-  unknown
-> = z.object({
-  processingTimeMs: types.optional(types.number()),
-  modelVersion: types.optional(types.string()),
-  aiTransactionId: types.optional(types.string()),
-  reason: types.optional(types.string()),
-});
-
-export function updateConversationTitleMetadataFromJSON(
-  jsonString: string,
-): SafeParseResult<UpdateConversationTitleMetadata, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => UpdateConversationTitleMetadata$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'UpdateConversationTitleMetadata' from JSON`,
-  );
-}
-
-/** @internal */
-export const UpdateConversationTitleMessage$inboundSchema: z.ZodMiniType<
-  UpdateConversationTitleMessage,
-  unknown
-> = z.pipe(
-  z.object({
-    _id: types.string(),
-    messageType: UpdateConversationTitleMessageType$inboundSchema,
-    content: types.string(),
-    contentFormat: z._default(
-      UpdateConversationTitleContentFormat$inboundSchema,
-      "MARKDOWN",
-    ),
-    confidence: z.optional(z.nullable(types.string())),
-    citations: z.array(models.CitationReference$inboundSchema),
-    followUpQuestions: z.array(models.FollowUpQuestion$inboundSchema),
-    feedback: z.array(models.MessageFeedback$inboundSchema),
-    referenceData: z.array(
-      z.lazy(() => UpdateConversationTitleReferenceDatum$inboundSchema),
-    ),
-    modelInfo: types.optional(models.ConversationModelInfo$inboundSchema),
-    appliedFilters: types.optional(
-      z.lazy(() => UpdateConversationTitleAppliedFilters$inboundSchema),
-    ),
-    attachments: types.optional(
-      z.array(models.ChatAttachmentRef$inboundSchema),
-    ),
-    tools: types.optional(z.array(models.MessageToolCall$inboundSchema)),
-    reasoning: types.optional(
-      z.array(models.MessageReasoningTurn$inboundSchema),
-    ),
-    parts: types.optional(z.array(models.MessagePart$inboundSchema)),
-    metadata: types.optional(
-      z.lazy(() => UpdateConversationTitleMetadata$inboundSchema),
-    ),
-    createdAt: types.date(),
-    updatedAt: types.date(),
-  }),
-  z.transform((v) => {
-    return remap$(v, {
-      "_id": "id",
-    });
-  }),
-);
-
-export function updateConversationTitleMessageFromJSON(
-  jsonString: string,
-): SafeParseResult<UpdateConversationTitleMessage, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => UpdateConversationTitleMessage$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'UpdateConversationTitleMessage' from JSON`,
   );
 }
 
@@ -631,9 +382,6 @@ export const UpdateConversationTitleConversation$inboundSchema: z.ZodMiniType<
     orgId: types.string(),
     title: types.optional(types.string()),
     initiator: types.string(),
-    messages: z.array(
-      z.lazy(() => UpdateConversationTitleMessage$inboundSchema),
-    ),
     status: types.optional(UpdateConversationTitleStatus$inboundSchema),
     failReason: types.optional(types.string()),
     modelInfo: types.optional(models.ConversationModelInfo$inboundSchema),

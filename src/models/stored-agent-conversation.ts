@@ -21,6 +21,7 @@ export const StoredAgentConversationStatus = {
   Inprogress: "Inprogress",
   Complete: "Complete",
   Failed: "Failed",
+  Stopped: "Stopped",
 } as const;
 export type StoredAgentConversationStatus = OpenEnum<
   typeof StoredAgentConversationStatus

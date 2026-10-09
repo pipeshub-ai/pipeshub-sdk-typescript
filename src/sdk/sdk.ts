@@ -15,6 +15,7 @@ import { OpenIDConnect } from "./open-id-connect.js";
 import { OrganizationAuthConfig } from "./organization-auth-config.js";
 import { Organizations } from "./organizations.js";
 import { PersonalAccessTokens } from "./personal-access-tokens.js";
+import { Projects } from "./projects.js";
 import { SemanticSearch } from "./semantic-search.js";
 import { UserAccount } from "./user-account.js";
 import { WebSearch } from "./web-search.js";
@@ -72,6 +73,11 @@ export class Pipeshub extends ClientSDK {
   private _conversations?: Conversations;
   get conversations(): Conversations {
     return (this._conversations ??= new Conversations(this._options));
+  }
+
+  private _projects?: Projects;
+  get projects(): Projects {
+    return (this._projects ??= new Projects(this._options));
   }
 
   private _semanticSearch?: SemanticSearch;

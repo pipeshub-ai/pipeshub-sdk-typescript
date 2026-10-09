@@ -41,11 +41,11 @@ may use any of the connector-specific types below.
 import { RecordTypeEnum } from "@pipeshub-ai/sdk/models";
 
 let value: RecordTypeEnum = "FILE";
+
+// Open enum: unrecognized values are captured as Unrecognized<string>
 ```
 
 ## Values
-
-This is an open enum. Unrecognized values will be captured as the `Unrecognized<string>` branded type.
 
 ```typescript
 "FILE" | "DRIVE" | "WEBPAGE" | "DATABASE" | "DATASOURCE" | "MESSAGE" | "MAIL" | "GROUP_MAIL" | "TICKET" | "COMMENT" | "INLINE_COMMENT" | "CONFLUENCE_PAGE" | "CONFLUENCE_BLOGPOST" | "SHAREPOINT_PAGE" | "SHAREPOINT_LIST" | "SHAREPOINT_LIST_ITEM" | "SHAREPOINT_DOCUMENT_LIBRARY" | "LINK" | "PROJECT" | "PULL_REQUEST" | "MEETING" | "PRODUCT" | "DEAL" | "CASE" | "TASK" | "ARTIFACT" | "CODE_FILE" | "SQL_TABLE" | "SQL_VIEW" | "OTHERS" | Unrecognized<string>

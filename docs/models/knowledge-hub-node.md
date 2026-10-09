@@ -16,24 +16,25 @@ let value: KnowledgeHubNode = {
   parentId: "<id>",
   origin: "CONNECTOR",
   connector: "<value>",
+  connectorId: "<id>",
   recordType: "<value>",
-  recordGroupType: "<value>",
-  indexingStatus: null,
+  recordGroupType: null,
+  indexingStatus: "<value>",
   reason: "<value>",
   isInternal: false,
   isPlaceholder: false,
-  createdAt: 940085,
-  updatedAt: 607791,
-  sizeInBytes: 861721,
-  mimeType: "<value>",
-  extension: null,
-  webUrl: "https://crowded-markup.net/",
-  hasChildren: false,
-  previewRenderable: null,
+  createdAt: 607791,
+  updatedAt: 109382,
+  sizeInBytes: 599267,
+  mimeType: null,
+  extension: "jpeg",
+  webUrl: "https://suburban-availability.net",
+  hasChildren: true,
+  previewRenderable: true,
   permission: {
     role: "<value>",
     canEdit: true,
-    canDelete: false,
+    canDelete: true,
   },
   sharingStatus: "<value>",
 };
@@ -49,6 +50,7 @@ let value: KnowledgeHubNode = {
 | `parentId`                                                                                                                                            | *string*                                                                                                                                              | :heavy_check_mark:                                                                                                                                    | Parent node ID, or `null` at the root browse level.                                                                                                   |
 | `origin`                                                                                                                                              | [models.KnowledgeHubNodeOrigin](../models/knowledge-hub-node-origin.md)                                                                               | :heavy_check_mark:                                                                                                                                    | Origin type.                                                                                                                                          |
 | `connector`                                                                                                                                           | *string*                                                                                                                                              | :heavy_check_mark:                                                                                                                                    | Connector display name / key when applicable; otherwise `null`.                                                                                       |
+| `connectorId`                                                                                                                                         | *string*                                                                                                                                              | :heavy_check_mark:                                                                                                                                    | Connector instance id for records and groups that come from a connector; otherwise `null` (Collections, and app nodes).                               |
 | `recordType`                                                                                                                                          | *string*                                                                                                                                              | :heavy_check_mark:                                                                                                                                    | Record type when `nodeType` is `record`; otherwise `null`.                                                                                            |
 | `recordGroupType`                                                                                                                                     | *string*                                                                                                                                              | :heavy_check_mark:                                                                                                                                    | Record group type when `nodeType` is `recordGroup`; otherwise `null`.                                                                                 |
 | `indexingStatus`                                                                                                                                      | *string*                                                                                                                                              | :heavy_check_mark:                                                                                                                                    | Indexing status when `nodeType` is `record`; otherwise `null`.                                                                                        |

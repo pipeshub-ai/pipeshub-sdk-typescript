@@ -6,11 +6,11 @@
 import { SortingCurrent } from "@pipeshub-ai/sdk/models/operations";
 
 let value: SortingCurrent = "desc";
+
+// Open enum: unrecognized values are captured as Unrecognized<string>
 ```
 
 ## Values
-
-This is an open enum. Unrecognized values will be captured as the `Unrecognized<string>` branded type.
 
 ```typescript
 "asc" | "desc" | Unrecognized<string>

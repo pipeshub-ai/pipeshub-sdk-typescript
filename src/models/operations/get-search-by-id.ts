@@ -54,6 +54,13 @@ export type InternalServerErrorErrorCode = OpenEnum<
 
 export type GetSearchByIdInternalServerErrorError = {
   /**
+   * Identifier for this request, echoed so a bug report can quote it.
+   *
+   * @remarks
+   * Absent when the request never reached the middleware that assigns one.
+   */
+  requestId?: string | undefined;
+  /**
    * Machine-readable error code.
    *
    * @remarks
@@ -96,6 +103,13 @@ export type GetSearchByIdNotFoundCode = ClosedEnum<
 
 export type GetSearchByIdNotFoundError = {
   /**
+   * Identifier for this request, echoed so a bug report can quote it.
+   *
+   * @remarks
+   * Absent when the request never reached the middleware that assigns one.
+   */
+  requestId?: string | undefined;
+  /**
    * Machine-readable error code. `HTTP_NOT_FOUND`
    *
    * @remarks
@@ -131,6 +145,13 @@ export type GetSearchByIdForbiddenCode = ClosedEnum<
 >;
 
 export type GetSearchByIdErrorHTTPForbidden = {
+  /**
+   * Identifier for this request, echoed so a bug report can quote it.
+   *
+   * @remarks
+   * Absent when the request never reached the middleware that assigns one.
+   */
+  requestId?: string | undefined;
   /**
    * Machine-readable error code. `HTTP_FORBIDDEN`
    *
@@ -168,6 +189,13 @@ export type GetSearchByIdUnauthorizedCode = ClosedEnum<
 
 export type GetSearchByIdErrorHTTPUnauthorized = {
   /**
+   * Identifier for this request, echoed so a bug report can quote it.
+   *
+   * @remarks
+   * Absent when the request never reached the middleware that assigns one.
+   */
+  requestId?: string | undefined;
+  /**
    * Machine-readable error code. `HTTP_UNAUTHORIZED`
    *
    * @remarks
@@ -203,6 +231,13 @@ export type GetSearchByIdCodeValidationError = ClosedEnum<
 >;
 
 export type GetSearchByIdErrorValidationError = {
+  /**
+   * Identifier for this request, echoed so a bug report can quote it.
+   *
+   * @remarks
+   * Absent when the request never reached the middleware that assigns one.
+   */
+  requestId?: string | undefined;
   /**
    * Machine-readable error code. `VALIDATION_ERROR`
    *
@@ -249,6 +284,7 @@ export const GetSearchByIdInternalServerErrorError$inboundSchema: z.ZodMiniType<
   GetSearchByIdInternalServerErrorError,
   unknown
 > = z.object({
+  requestId: types.optional(types.string()),
   code: InternalServerErrorErrorCode$inboundSchema,
   message: types.string(),
 });
@@ -274,6 +310,7 @@ export const GetSearchByIdNotFoundError$inboundSchema: z.ZodMiniType<
   GetSearchByIdNotFoundError,
   unknown
 > = z.object({
+  requestId: types.optional(types.string()),
   code: GetSearchByIdNotFoundCode$inboundSchema,
   message: types.string(),
 });
@@ -298,6 +335,7 @@ export const GetSearchByIdErrorHTTPForbidden$inboundSchema: z.ZodMiniType<
   GetSearchByIdErrorHTTPForbidden,
   unknown
 > = z.object({
+  requestId: types.optional(types.string()),
   code: GetSearchByIdForbiddenCode$inboundSchema,
   message: types.string(),
 });
@@ -322,6 +360,7 @@ export const GetSearchByIdErrorHTTPUnauthorized$inboundSchema: z.ZodMiniType<
   GetSearchByIdErrorHTTPUnauthorized,
   unknown
 > = z.object({
+  requestId: types.optional(types.string()),
   code: GetSearchByIdUnauthorizedCode$inboundSchema,
   message: types.string(),
 });
@@ -347,6 +386,7 @@ export const GetSearchByIdErrorValidationError$inboundSchema: z.ZodMiniType<
   GetSearchByIdErrorValidationError,
   unknown
 > = z.object({
+  requestId: types.optional(types.string()),
   code: GetSearchByIdCodeValidationError$inboundSchema,
   message: types.string(),
 });

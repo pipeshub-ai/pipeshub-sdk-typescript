@@ -6,6 +6,8 @@ import * as z from "zod/v4-mini";
 import { safeParse } from "../lib/schemas.js";
 import { ClosedEnum } from "../types/enums.js";
 import { Result as SafeParseResult } from "../types/fp.js";
+import * as types from "../types/primitives.js";
+import { smartUnion } from "../types/smart-union.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 import {
   StoredAgentConversation,
@@ -17,6 +19,12 @@ export const MessageEnum = {
 } as const;
 export type MessageEnum = ClosedEnum<typeof MessageEnum>;
 
+export type AgentConversationDeleteResponseConversation = {};
+
+export type ConversationUnion =
+  | StoredAgentConversation
+  | AgentConversationDeleteResponseConversation;
+
 /**
  * Envelope returned by `DELETE /agents/{agentKey}/conversations/{conversationId}`.
  *
@@ -27,12 +35,10 @@ export type MessageEnum = ClosedEnum<typeof MessageEnum>;
  */
 export type AgentConversationDeleteResponse = {
   message: MessageEnum;
-  /**
-   * Stored agent conversation document returned by non-list endpoints.
-   *
-   * @remarks
-   */
-  conversation: StoredAgentConversation;
+  conversation:
+    | StoredAgentConversation
+    | AgentConversationDeleteResponseConversation
+    | null;
 };
 
 /** @internal */
@@ -40,12 +46,57 @@ export const MessageEnum$inboundSchema: z.ZodMiniEnum<typeof MessageEnum> = z
   .enum(MessageEnum);
 
 /** @internal */
+export const AgentConversationDeleteResponseConversation$inboundSchema:
+  z.ZodMiniType<AgentConversationDeleteResponseConversation, unknown> = z
+    .object({});
+
+export function agentConversationDeleteResponseConversationFromJSON(
+  jsonString: string,
+): SafeParseResult<
+  AgentConversationDeleteResponseConversation,
+  SDKValidationError
+> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      AgentConversationDeleteResponseConversation$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'AgentConversationDeleteResponseConversation' from JSON`,
+  );
+}
+
+/** @internal */
+export const ConversationUnion$inboundSchema: z.ZodMiniType<
+  ConversationUnion,
+  unknown
+> = smartUnion([
+  StoredAgentConversation$inboundSchema,
+  z.lazy(() => AgentConversationDeleteResponseConversation$inboundSchema),
+]);
+
+export function conversationUnionFromJSON(
+  jsonString: string,
+): SafeParseResult<ConversationUnion, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => ConversationUnion$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ConversationUnion' from JSON`,
+  );
+}
+
+/** @internal */
 export const AgentConversationDeleteResponse$inboundSchema: z.ZodMiniType<
   AgentConversationDeleteResponse,
   unknown
 > = z.object({
   message: MessageEnum$inboundSchema,
-  conversation: StoredAgentConversation$inboundSchema,
+  conversation: types.nullable(
+    smartUnion([
+      StoredAgentConversation$inboundSchema,
+      z.lazy(() => AgentConversationDeleteResponseConversation$inboundSchema),
+    ]),
+  ),
 });
 
 export function agentConversationDeleteResponseFromJSON(

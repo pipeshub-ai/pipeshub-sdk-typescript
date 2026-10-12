@@ -8,11 +8,11 @@ Registered toolset name (lowercase) accepted by the create-agent gateway.
 import { AgentCreateToolsetName } from "@pipeshub-ai/sdk/models";
 
 let value: AgentCreateToolsetName = "lumos";
+
+// Open enum: unrecognized values are captured as Unrecognized<string>
 ```
 
 ## Values
-
-This is an open enum. Unrecognized values will be captured as the `Unrecognized<string>` branded type.
 
 ```typescript
 "calendar" | "clickup" | "confluence" | "confluencedatacenter" | "drive" | "github" | "gmail" | "jira" | "jiradatacenter" | "lumos" | "mariadb" | "onedrive" | "outlook" | "redshift" | "salesforce" | "sharepoint" | "slack" | "teams" | "zoom" | Unrecognized<string>

@@ -101,10 +101,10 @@ export type AgentCreateRequest = {
    */
   skills?: Array<AgentSkillAssignment> | undefined;
   /**
-   * Web-search attachment for an agent. Accepts either a provider string
+   * Web-search attachment for an agent. Accepts a provider string, an object
    *
    * @remarks
-   * or an object with at least a `provider` field.
+   * with at least a `provider` field, or `null`.
    */
   webSearch?: AgentCreateWebSearchUnion | null | undefined;
   /**
@@ -114,6 +114,14 @@ export type AgentCreateRequest = {
     | AgentCreateRequestDefaultReasoningEffort
     | null
     | undefined;
+  /**
+   * When true (default), include the current user's name, email, and
+   *
+   * @remarks
+   * organization in this agent's system prompt. When false, omit that
+   * profile data.
+   */
+  sendUserContext?: boolean | undefined;
 };
 
 /** @internal */
@@ -138,6 +146,7 @@ export type AgentCreateRequest$Outbound = {
   skills?: Array<AgentSkillAssignment$Outbound> | undefined;
   webSearch?: AgentCreateWebSearchUnion$Outbound | null | undefined;
   defaultReasoningEffort?: string | null | undefined;
+  sendUserContext: boolean;
 };
 
 /** @internal */
@@ -161,6 +170,7 @@ export const AgentCreateRequest$outboundSchema: z.ZodMiniType<
   defaultReasoningEffort: z.optional(
     z.nullable(AgentCreateRequestDefaultReasoningEffort$outboundSchema),
   ),
+  sendUserContext: z._default(z.boolean(), true),
 });
 
 export function agentCreateRequestToJSON(

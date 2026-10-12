@@ -11,7 +11,7 @@ let value: RegenerateAgentConversationMessageRequest = {
   messageId: "<value>",
   body: {
     modelKey: "05438a37-68f2-4641-a8dc-6c47e63278ca",
-    modelName: "gpt-5.4-mini",
+    modelName: "gpt-5.6-luna",
     modelFriendlyName: "mini",
     chatMode: "quick",
     timezone: "Asia/Calcutta",

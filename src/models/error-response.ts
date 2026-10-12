@@ -10,6 +10,13 @@ import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
 export type ErrorResponseError = {
   /**
+   * Identifier for this request, echoed so a bug report can quote it.
+   *
+   * @remarks
+   * Absent when the request never reached the middleware that assigns one.
+   */
+  requestId?: string | undefined;
+  /**
    * Machine-readable error code. For application errors it takes the form `HTTP_<VARIANT>`
    *
    * @remarks
@@ -31,6 +38,7 @@ export const ErrorResponseError$inboundSchema: z.ZodMiniType<
   ErrorResponseError,
   unknown
 > = z.object({
+  requestId: types.optional(types.string()),
   code: types.string(),
   message: types.string(),
   metadata: types.optional(z.record(z.string(), z.any())),

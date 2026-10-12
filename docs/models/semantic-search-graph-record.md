@@ -46,6 +46,7 @@ let value: SemanticSearchGraphRecord = {};
 | `isVLMOcrProcessed`           | *boolean*                     | :heavy_minus_sign:            | N/A                           |
 | `deletedByUserId`             | *string*                      | :heavy_minus_sign:            | N/A                           |
 | `processingStartedAt`         | *number*                      | :heavy_minus_sign:            | N/A                           |
+| `queuedAtTimestamp`           | *number*                      | :heavy_minus_sign:            | N/A                           |
 | `parsingStatus`               | *string*                      | :heavy_minus_sign:            | N/A                           |
 | `indexingStatus`              | *string*                      | :heavy_minus_sign:            | N/A                           |
 | `extractionStatus`            | *string*                      | :heavy_minus_sign:            | N/A                           |

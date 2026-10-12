@@ -19,7 +19,7 @@ let value: GetAvailableModelsByTypeResponse = {
     {
       modelType: "reasoning",
       provider: "azureOpenAI",
-      modelName: "gpt-5.4-mini",
+      modelName: "gpt-5.6-luna",
       modelKey: "f3a4b5b6-5b6c-4e85-9097-3202cfe696fc",
       isMultimodal: true,
       isReasoning: true,

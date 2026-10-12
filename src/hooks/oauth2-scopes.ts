@@ -113,6 +113,18 @@ export type OAuth2Scope =
    */
   | "conversation:chat"
   /**
+   * Read projects and their conversations
+   */
+  | "project:read"
+  /**
+   * Create and manage projects
+   */
+  | "project:write"
+  /**
+   * Delete projects
+   */
+  | "project:delete"
+  /**
    * Read AI agents
    */
   | "agent:read"

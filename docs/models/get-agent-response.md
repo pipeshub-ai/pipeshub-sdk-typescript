@@ -24,7 +24,7 @@ let value: GetAgentResponse = {
     models: [
       {
         modelKey: "f3a4b5b6-5b6c-4e85-9097-3202cfe696fc",
-        modelName: "gpt-5.4-mini",
+        modelName: "gpt-5.6-luna",
         provider: "azureOpenAI",
         isReasoning: true,
         isMultimodal: true,

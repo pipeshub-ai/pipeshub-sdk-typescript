@@ -108,6 +108,16 @@ export type GetAllConversationsRequest = {
    * `true`/`false`, or `1`/`0`.
    */
   shared?: string | undefined;
+  /**
+   * Restrict results to a single project. Pass a project's `id` to
+   *
+   * @remarks
+   * list conversations linked to that project (visible to the
+   * caller — owner, member, or org-visible project with
+   * `projectVisibility: project`), or the literal string
+   * `unassigned` to list conversations with no `projectId`.
+   */
+  projectId?: string | undefined;
 };
 
 /**
@@ -379,6 +389,7 @@ export type GetAllConversationsRequest$Outbound = {
   startDate?: string | undefined;
   endDate?: string | undefined;
   shared?: string | undefined;
+  projectId?: string | undefined;
 };
 
 /** @internal */
@@ -396,6 +407,7 @@ export const GetAllConversationsRequest$outboundSchema: z.ZodMiniType<
   startDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
   endDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
   shared: z.optional(z.string()),
+  projectId: z.optional(z.string()),
 });
 
 export function getAllConversationsRequestToJSON(

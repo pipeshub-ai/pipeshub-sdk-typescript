@@ -121,6 +121,14 @@ export type AgentRegenerateRequest = {
    * `true`. Omitting the whole object applies every default.
    */
   agentCapabilities?: AgentCapabilities | undefined;
+  /**
+   * Client-generated identifier for this regeneration run. Send it
+   *
+   * @remarks
+   * here to enable `POST .../cancel {runId}` while it is still
+   * generating.
+   */
+  runId?: string | undefined;
 };
 
 /** @internal */
@@ -145,6 +153,7 @@ export type AgentRegenerateRequest$Outbound = {
   tools?: Array<string> | undefined;
   protocol?: string | undefined;
   agentCapabilities?: AgentCapabilities$Outbound | undefined;
+  runId?: string | undefined;
 };
 
 /** @internal */
@@ -162,6 +171,7 @@ export const AgentRegenerateRequest$outboundSchema: z.ZodMiniType<
   tools: z.optional(z.array(z.string())),
   protocol: z.optional(AgentRegenerateRequestProtocol$outboundSchema),
   agentCapabilities: z.optional(AgentCapabilities$outboundSchema),
+  runId: z.optional(z.string()),
 });
 
 export function agentRegenerateRequestToJSON(

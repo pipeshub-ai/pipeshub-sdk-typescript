@@ -26,19 +26,41 @@ import {
 } from "./filters.js";
 
 /**
- * Required execution mode. Scoped agent conversations currently
+ * Only meaningful together with `projectId`. Overrides the
  *
  * @remarks
- * support only `quick`.
+ * project's default sharing behavior for this one conversation.
+ */
+export const AgentStreamCreateConversationRequestProjectVisibility = {
+  Private: "private",
+  Project: "project",
+} as const;
+/**
+ * Only meaningful together with `projectId`. Overrides the
+ *
+ * @remarks
+ * project's default sharing behavior for this one conversation.
+ */
+export type AgentStreamCreateConversationRequestProjectVisibility = ClosedEnum<
+  typeof AgentStreamCreateConversationRequestProjectVisibility
+>;
+
+/**
+ * Execution mode. Scoped agent conversations support only `quick`.
+ *
+ * @remarks
+ * Required on the `/stream` route; optional on the non-streaming
+ * route.
  */
 export const AgentStreamCreateConversationRequestChatMode = {
   Quick: "quick",
 } as const;
 /**
- * Required execution mode. Scoped agent conversations currently
+ * Execution mode. Scoped agent conversations support only `quick`.
  *
  * @remarks
- * support only `quick`.
+ * Required on the `/stream` route; optional on the non-streaming
+ * route.
  */
 export type AgentStreamCreateConversationRequestChatMode = ClosedEnum<
   typeof AgentStreamCreateConversationRequestChatMode
@@ -114,10 +136,29 @@ export type AgentStreamCreateConversationRequest = {
    */
   attachments?: Array<ChatAttachmentRef> | undefined;
   /**
-   * Required execution mode. Scoped agent conversations currently
+   * Link the new agent conversation to a project the caller has at
    *
    * @remarks
-   * support only `quick`.
+   * least viewer access to. Same fallback/merge semantics as
+   * `POST /conversations/create`. Ignored on follow-up turns — the
+   * session row is the source of truth once the conversation exists.
+   */
+  projectId?: string | undefined;
+  /**
+   * Only meaningful together with `projectId`. Overrides the
+   *
+   * @remarks
+   * project's default sharing behavior for this one conversation.
+   */
+  projectVisibility?:
+    | AgentStreamCreateConversationRequestProjectVisibility
+    | undefined;
+  /**
+   * Execution mode. Scoped agent conversations support only `quick`.
+   *
+   * @remarks
+   * Required on the `/stream` route; optional on the non-streaming
+   * route.
    */
   chatMode: AgentStreamCreateConversationRequestChatMode;
   /**
@@ -176,7 +217,20 @@ export type AgentStreamCreateConversationRequest = {
    * `true`. Omitting the whole object applies every default.
    */
   agentCapabilities?: AgentCapabilities | undefined;
+  /**
+   * Client-generated identifier for this run. Send it here to enable
+   *
+   * @remarks
+   * `POST /agents/{agentKey}/conversations/{conversationId}/cancel
+   * {runId}` while the stream is still generating.
+   */
+  runId?: string | undefined;
 };
+
+/** @internal */
+export const AgentStreamCreateConversationRequestProjectVisibility$outboundSchema:
+  z.ZodMiniEnum<typeof AgentStreamCreateConversationRequestProjectVisibility> =
+    z.enum(AgentStreamCreateConversationRequestProjectVisibility);
 
 /** @internal */
 export const AgentStreamCreateConversationRequestChatMode$outboundSchema:
@@ -197,6 +251,8 @@ export type AgentStreamCreateConversationRequest$Outbound = {
   filters?: Filters$Outbound | undefined;
   appliedFilters?: AppliedFilters$Outbound | undefined;
   attachments?: Array<ChatAttachmentRef$Outbound> | undefined;
+  projectId?: string | undefined;
+  projectVisibility?: string | undefined;
   chatMode: string;
   modelKey?: string | undefined;
   modelName?: string | undefined;
@@ -206,6 +262,7 @@ export type AgentStreamCreateConversationRequest$Outbound = {
   tools?: Array<string> | undefined;
   protocol?: string | undefined;
   agentCapabilities?: AgentCapabilities$Outbound | undefined;
+  runId?: string | undefined;
 };
 
 /** @internal */
@@ -218,6 +275,10 @@ export const AgentStreamCreateConversationRequest$outboundSchema: z.ZodMiniType<
   filters: z.optional(Filters$outboundSchema),
   appliedFilters: z.optional(AppliedFilters$outboundSchema),
   attachments: z.optional(z.array(ChatAttachmentRef$outboundSchema)),
+  projectId: z.optional(z.string()),
+  projectVisibility: z.optional(
+    AgentStreamCreateConversationRequestProjectVisibility$outboundSchema,
+  ),
   chatMode: AgentStreamCreateConversationRequestChatMode$outboundSchema,
   modelKey: z.optional(z.string()),
   modelName: z.optional(z.string()),
@@ -229,6 +290,7 @@ export const AgentStreamCreateConversationRequest$outboundSchema: z.ZodMiniType<
     AgentStreamCreateConversationRequestProtocol$outboundSchema,
   ),
   agentCapabilities: z.optional(AgentCapabilities$outboundSchema),
+  runId: z.optional(z.string()),
 });
 
 export function agentStreamCreateConversationRequestToJSON(

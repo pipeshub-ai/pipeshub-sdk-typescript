@@ -18,13 +18,18 @@ Custom AI agents with specialized capabilities and tool integrations
 * [streamAgentConversation](#streamagentconversation) - Create agent conversation with streaming response
 * [streamAgentConversationMessage](#streamagentconversationmessage) - Add message to agent conversation with streaming response
 * [regenerateAgentConversationMessage](#regenerateagentconversationmessage) - Regenerate agent conversation message
+* [cancelAgentConversationStream](#cancelagentconversationstream) - Cancel an in-flight agent chat stream
 * [updateAgentConversationMessageFeedback](#updateagentconversationmessagefeedback) - Submit feedback for an agent message
+* [addAgentConversationMessage](#addagentconversationmessage) - Add message to agent conversation (non-streaming)
 * [archiveAgentConversation](#archiveagentconversation) - Archive an agent conversation
 * [unarchiveAgentConversation](#unarchiveagentconversation) - Unarchive an agent conversation
 * [updateAgentConversationTitle](#updateagentconversationtitle) - Update agent conversation title
+* [setAgentConversationProject](#setagentconversationproject) - Link or unlink an agent conversation to a project
+* [setAgentConversationProjectVisibility](#setagentconversationprojectvisibility) - Override an agent conversation's project visibility
 * [deleteAgentConversationById](#deleteagentconversationbyid) - Delete an agent conversation
 * [getAgentConversationById](#getagentconversationbyid) - Get agent conversation by ID
 * [listAgentConversations](#listagentconversations) - List agent conversations
+* [createAgentConversation](#createagentconversation) - Create agent conversation (non-streaming)
 
 ## listAgents
 
@@ -901,7 +906,7 @@ async function run() {
       },
       chatMode: "quick",
       modelKey: "5c1832f4-fa19-4167-b913-307fad3a6551",
-      modelName: "gpt-5.4-mini",
+      modelName: "gpt-5.6-luna",
       modelFriendlyName: "GPT 5.4 mini",
       timezone: "Asia/Kolkata",
       currentTime: new Date("2026-05-19T12:58:01+05:30"),
@@ -980,7 +985,7 @@ async function run() {
       },
       chatMode: "quick",
       modelKey: "5c1832f4-fa19-4167-b913-307fad3a6551",
-      modelName: "gpt-5.4-mini",
+      modelName: "gpt-5.6-luna",
       modelFriendlyName: "GPT 5.4 mini",
       timezone: "Asia/Kolkata",
       currentTime: new Date("2026-05-19T12:58:01+05:30"),
@@ -1082,7 +1087,7 @@ async function run() {
       },
       chatMode: "quick",
       modelKey: "5c1832f4-fa19-4167-b913-307fad3a6551",
-      modelName: "gpt-5.4-mini",
+      modelName: "gpt-5.6-luna",
       modelFriendlyName: "GPT 5.4 mini",
       timezone: "Asia/Kolkata",
       currentTime: new Date("2026-05-19T12:58:01+05:30"),
@@ -1155,7 +1160,7 @@ async function run() {
       },
       chatMode: "quick",
       modelKey: "5c1832f4-fa19-4167-b913-307fad3a6551",
-      modelName: "gpt-5.4-mini",
+      modelName: "gpt-5.6-luna",
       modelFriendlyName: "GPT 5.4 mini",
       timezone: "Asia/Kolkata",
       currentTime: new Date("2026-05-19T12:58:01+05:30"),
@@ -1339,6 +1344,105 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
+## cancelAgentConversationStream
+
+Cooperatively stop a `POST /agents/{agentKey}/conversations/stream`
+or `.../messages/stream` run that is still generating, using the
+`runId` sent when that stream started.
+
+Same synchronous JSON ack contract as the assistant
+`POST /conversations/{conversationId}/cancel` — both forward to the
+same backend cancellation endpoint, since the run registry is keyed
+by `runId` alone. `{ cancelled: false }` covers a `runId` that
+already finished or was never registered.
+
+`runId` must belong to a run started on THIS `conversationId` — a
+`runId` that exists but was registered under a different
+conversation (even one owned by the same caller) is rejected with
+`403`, same as a `runId` owned by a different user/org.
+
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="cancelAgentConversationStream" method="post" path="/agents/{agentKey}/conversations/{conversationId}/cancel" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.agents.cancelAgentConversationStream({
+    agentKey: "<value>",
+    conversationId: "<value>",
+    body: {
+      runId: "e5d40653-b5ed-4342-a031-b88c15731956",
+    },
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { agentsCancelAgentConversationStream } from "@pipeshub-ai/sdk/funcs/agents-cancel-agent-conversation-stream.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const res = await agentsCancelAgentConversationStream(pipeshub, {
+    agentKey: "<value>",
+    conversationId: "<value>",
+    body: {
+      runId: "e5d40653-b5ed-4342-a031-b88c15731956",
+    },
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("agentsCancelAgentConversationStream failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.CancelAgentConversationStreamRequest](../../models/operations/cancel-agent-conversation-stream-request.md)                                                         | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[operations.CancelAgentConversationStreamResponse](../../models/operations/cancel-agent-conversation-stream-response.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
 ## updateAgentConversationMessageFeedback
 
 Append structured feedback to a bot-response message in an agent
@@ -1424,6 +1528,199 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
+## addAgentConversationMessage
+
+Ask a follow-up in an existing agent conversation and wait for the
+complete answer. The JSON counterpart of
+`POST /agents/{agentKey}/conversations/{conversationId}/messages/stream`.
+
+**How a turn runs**
+
+1. The user's message is saved (in its own short transaction on a
+   replica set).
+2. The AI backend runs the same agent-loop pipeline as the `/stream`
+   route and returns only its final result. No transaction is held
+   during this call, and the call is never retried.
+3. The answer, citations and status are saved exactly as the
+   streaming route saves them, and the updated conversation is
+   returned.
+
+Every failure after step 1 is persisted: the conversation ends with
+status `Failed`, a `failReason`, and an `error` message, and the
+response carries `X-Conversation-Id` so the caller can fetch it.
+A 4xx from the AI backend (for example no model configured) keeps
+its status and user-facing message; other failures return 500 with
+a generic message.
+
+The response arrives only when the whole answer is ready, which can
+take minutes for agent runs. Allow a generous client and proxy
+timeout, or use the `/stream` variant for interactive clients.
+
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="addAgentConversationMessage" method="post" path="/agents/{agentKey}/conversations/{conversationId}/messages" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.agents.addAgentConversationMessage({
+    agentKey: "<value>",
+    conversationId: "<value>",
+    body: {
+      query: "can you elaborate on the latest headlines?",
+      filters: {
+        apps: [
+          "2605c882-61d4-4aa2-b480-a68c957c151d",
+          "ed6d6cc4-70bd-4838-9aeb-488e910c833a",
+        ],
+        kb: [
+          "8747da12-4724-4a95-ac92-827b88d79647",
+        ],
+      },
+      appliedFilters: {
+        apps: [
+          {
+            id: "2605c882-61d4-4aa2-b480-a68c957c151d",
+            name: "US Headlines, abcnews",
+            nodeType: "app",
+            connector: "RSS",
+          },
+          {
+            id: "ed6d6cc4-70bd-4838-9aeb-488e910c833a",
+            name: "ABC News RSS",
+            nodeType: "app",
+            connector: "RSS",
+          },
+        ],
+        kb: [
+          {
+            id: "8747da12-4724-4a95-ac92-827b88d79647",
+            name: "Siddhant Ota's Private",
+            nodeType: "recordGroup",
+            connector: "KB",
+          },
+        ],
+      },
+      chatMode: "quick",
+      modelKey: "5c1832f4-fa19-4167-b913-307fad3a6551",
+      modelName: "gpt-5.6-luna",
+      modelFriendlyName: "GPT 5.4 mini",
+      timezone: "Asia/Kolkata",
+      currentTime: new Date("2026-05-19T12:58:01+05:30"),
+      tools: [],
+    },
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { agentsAddAgentConversationMessage } from "@pipeshub-ai/sdk/funcs/agents-add-agent-conversation-message.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const res = await agentsAddAgentConversationMessage(pipeshub, {
+    agentKey: "<value>",
+    conversationId: "<value>",
+    body: {
+      query: "can you elaborate on the latest headlines?",
+      filters: {
+        apps: [
+          "2605c882-61d4-4aa2-b480-a68c957c151d",
+          "ed6d6cc4-70bd-4838-9aeb-488e910c833a",
+        ],
+        kb: [
+          "8747da12-4724-4a95-ac92-827b88d79647",
+        ],
+      },
+      appliedFilters: {
+        apps: [
+          {
+            id: "2605c882-61d4-4aa2-b480-a68c957c151d",
+            name: "US Headlines, abcnews",
+            nodeType: "app",
+            connector: "RSS",
+          },
+          {
+            id: "ed6d6cc4-70bd-4838-9aeb-488e910c833a",
+            name: "ABC News RSS",
+            nodeType: "app",
+            connector: "RSS",
+          },
+        ],
+        kb: [
+          {
+            id: "8747da12-4724-4a95-ac92-827b88d79647",
+            name: "Siddhant Ota's Private",
+            nodeType: "recordGroup",
+            connector: "KB",
+          },
+        ],
+      },
+      chatMode: "quick",
+      modelKey: "5c1832f4-fa19-4167-b913-307fad3a6551",
+      modelName: "gpt-5.6-luna",
+      modelFriendlyName: "GPT 5.4 mini",
+      timezone: "Asia/Kolkata",
+      currentTime: new Date("2026-05-19T12:58:01+05:30"),
+      tools: [],
+    },
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("agentsAddAgentConversationMessage failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.AddAgentConversationMessageRequest](../../models/operations/add-agent-conversation-message-request.md)                                                             | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[operations.AddAgentConversationMessageResponse](../../models/operations/add-agent-conversation-message-response.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 404                    | application/json            |
+| errors.ErrorResponse        | 424                         | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## archiveAgentConversation
@@ -1679,6 +1976,185 @@ run();
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.ErrorResponse        | 400, 401, 404               | application/json            |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
+## setAgentConversationProject
+
+Agent-conversation equivalent of
+`PUT /conversations/{conversationId}/project`. Set
+(`projectId: <id>`) or clear (`projectId: null`) the project this
+agent conversation belongs to. Initiator-only; linking requires at
+least viewer access to the target project.
+
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="setAgentConversationProject" method="put" path="/agents/{agentKey}/conversations/{conversationId}/project" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.agents.setAgentConversationProject({
+    agentKey: "<value>",
+    conversationId: "<value>",
+    body: {
+      projectId: "<value>",
+    },
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { projectsSetAgentConversationProject } from "@pipeshub-ai/sdk/funcs/projects-set-agent-conversation-project.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const res = await projectsSetAgentConversationProject(pipeshub, {
+    agentKey: "<value>",
+    conversationId: "<value>",
+    body: {
+      projectId: "<value>",
+    },
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("projectsSetAgentConversationProject failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.SetAgentConversationProjectRequest](../../models/operations/set-agent-conversation-project-request.md)                                                             | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[operations.SetAgentConversationProjectResponse](../../models/operations/set-agent-conversation-project-response.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
+## setAgentConversationProjectVisibility
+
+Agent-conversation equivalent of
+`PATCH /conversations/{conversationId}/project-visibility`.
+Initiator-only; requires the conversation to already be linked to a
+project.
+
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="setAgentConversationProjectVisibility" method="patch" path="/agents/{agentKey}/conversations/{conversationId}/project-visibility" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.agents.setAgentConversationProjectVisibility({
+    agentKey: "<value>",
+    conversationId: "<value>",
+    body: {
+      visibility: "private",
+    },
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { projectsSetAgentConversationProjectVisibility } from "@pipeshub-ai/sdk/funcs/projects-set-agent-conversation-project-visibility.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const res = await projectsSetAgentConversationProjectVisibility(pipeshub, {
+    agentKey: "<value>",
+    conversationId: "<value>",
+    body: {
+      visibility: "private",
+    },
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("projectsSetAgentConversationProjectVisibility failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.SetAgentConversationProjectVisibilityRequest](../../models/operations/set-agent-conversation-project-visibility-request.md)                                        | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[operations.SetAgentConversationProjectVisibilityResponse](../../models/operations/set-agent-conversation-project-visibility-response.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## deleteAgentConversationById
@@ -1944,4 +2420,208 @@ run();
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.ErrorResponse        | 400, 401                    | application/json            |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
+## createAgentConversation
+
+Start a conversation with an agent and wait for the complete answer.
+The JSON counterpart of `POST /agents/{agentKey}/conversations/stream`.
+
+**How a turn runs**
+
+1. The user's message is saved (in its own short transaction on a
+   replica set).
+2. The AI backend runs the same agent-loop pipeline as the `/stream`
+   route and returns only its final result. No transaction is held
+   during this call, and the call is never retried.
+3. The answer, citations and status are saved exactly as the
+   streaming route saves them, and the updated conversation is
+   returned.
+
+Every failure after step 1 is persisted: the conversation ends with
+status `Failed`, a `failReason`, and an `error` message, and the
+response carries `X-Conversation-Id` so the caller can fetch it.
+A 4xx from the AI backend (for example no model configured) keeps
+its status and user-facing message; other failures return 500 with
+a generic message.
+
+The response arrives only when the whole answer is ready, which can
+take minutes for agent runs. Allow a generous client and proxy
+timeout, or use the `/stream` variant for interactive clients.
+
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="createAgentConversation" method="post" path="/agents/{agentKey}/conversations" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.agents.createAgentConversation({
+    agentKey: "<value>",
+    body: {
+      query: "what are some latest tech news?",
+      filters: {
+        apps: [
+          "2605c882-61d4-4aa2-b480-a68c957c151d",
+          "ed6d6cc4-70bd-4838-9aeb-488e910c833a",
+          "aeab9ddc-fb9b-47c8-ad98-bd4744e19555",
+        ],
+        kb: [
+          "8747da12-4724-4a95-ac92-827b88d79647",
+        ],
+      },
+      appliedFilters: {
+        apps: [
+          {
+            id: "2605c882-61d4-4aa2-b480-a68c957c151d",
+            name: "US Headlines, abcnews",
+            nodeType: "app",
+            connector: "RSS",
+          },
+          {
+            id: "ed6d6cc4-70bd-4838-9aeb-488e910c833a",
+            name: "ABC News RSS",
+            nodeType: "app",
+            connector: "RSS",
+          },
+          {
+            id: "aeab9ddc-fb9b-47c8-ad98-bd4744e19555",
+            name: "Hacker news rss",
+            nodeType: "app",
+            connector: "RSS",
+          },
+        ],
+        kb: [
+          {
+            id: "8747da12-4724-4a95-ac92-827b88d79647",
+            name: "Siddhant Ota's Private",
+            nodeType: "recordGroup",
+            connector: "KB",
+          },
+        ],
+      },
+      chatMode: "quick",
+      modelKey: "5c1832f4-fa19-4167-b913-307fad3a6551",
+      modelName: "gpt-5.6-luna",
+      modelFriendlyName: "GPT 5.4 mini",
+      timezone: "Asia/Kolkata",
+      currentTime: new Date("2026-05-19T12:58:01+05:30"),
+      tools: [],
+    },
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { agentsCreateAgentConversation } from "@pipeshub-ai/sdk/funcs/agents-create-agent-conversation.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const res = await agentsCreateAgentConversation(pipeshub, {
+    agentKey: "<value>",
+    body: {
+      query: "what are some latest tech news?",
+      filters: {
+        apps: [
+          "2605c882-61d4-4aa2-b480-a68c957c151d",
+          "ed6d6cc4-70bd-4838-9aeb-488e910c833a",
+          "aeab9ddc-fb9b-47c8-ad98-bd4744e19555",
+        ],
+        kb: [
+          "8747da12-4724-4a95-ac92-827b88d79647",
+        ],
+      },
+      appliedFilters: {
+        apps: [
+          {
+            id: "2605c882-61d4-4aa2-b480-a68c957c151d",
+            name: "US Headlines, abcnews",
+            nodeType: "app",
+            connector: "RSS",
+          },
+          {
+            id: "ed6d6cc4-70bd-4838-9aeb-488e910c833a",
+            name: "ABC News RSS",
+            nodeType: "app",
+            connector: "RSS",
+          },
+          {
+            id: "aeab9ddc-fb9b-47c8-ad98-bd4744e19555",
+            name: "Hacker news rss",
+            nodeType: "app",
+            connector: "RSS",
+          },
+        ],
+        kb: [
+          {
+            id: "8747da12-4724-4a95-ac92-827b88d79647",
+            name: "Siddhant Ota's Private",
+            nodeType: "recordGroup",
+            connector: "KB",
+          },
+        ],
+      },
+      chatMode: "quick",
+      modelKey: "5c1832f4-fa19-4167-b913-307fad3a6551",
+      modelName: "gpt-5.6-luna",
+      modelFriendlyName: "GPT 5.4 mini",
+      timezone: "Asia/Kolkata",
+      currentTime: new Date("2026-05-19T12:58:01+05:30"),
+      tools: [],
+    },
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("agentsCreateAgentConversation failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.CreateAgentConversationRequest](../../models/operations/create-agent-conversation-request.md)                                                                      | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[operations.CreateAgentConversationResponse](../../models/operations/create-agent-conversation-response.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400                         | application/json            |
+| errors.ErrorResponse        | 424                         | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |

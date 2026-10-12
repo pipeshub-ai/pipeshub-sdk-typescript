@@ -4,12 +4,19 @@
 
 import * as z from "zod/v4-mini";
 import { PipeshubCore } from "../core.js";
-import { appendForm, encodeFormQuery, encodeSimple } from "../lib/encodings.js";
+import {
+  appendForm,
+  encodeFormQuery,
+  encodeSimple,
+  normalizeBlob,
+} from "../lib/encodings.js";
 import { EventStream } from "../lib/event-streams.js";
 import {
+  bytesToBlob,
   getContentTypeFromFileName,
   readableStreamToArrayBuffer,
 } from "../lib/files.js";
+import { matchStatusCode } from "../lib/http.js";
 import * as M from "../lib/matchers.js";
 import { compactMap } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
@@ -71,6 +78,8 @@ import { isReadableStream } from "../types/streams.js";
  * (including files rejected up front for size/type), followed by a final
  * `done` summary, then closes. See the
  * `UploadStreamSSEEvent` schema for the event/payload contract.
+ *
+ * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
 export function knowledgeBaseUploadRecords(
   client: PipeshubCore,
@@ -131,20 +140,27 @@ async function $do(
 
   for (const fileItem of payload.body.files ?? []) {
     if (isBlobLike(fileItem)) {
-      appendForm(body, "files", fileItem);
+      const file = fileItem;
+      const blob = await normalizeBlob(file);
+      const name = "name" in file ? (file.name as string) : undefined;
+      appendForm(body, "files", blob, name);
     } else if (isReadableStream(fileItem.content)) {
       const buffer = await readableStreamToArrayBuffer(fileItem.content);
       const contentType = getContentTypeFromFileName(fileItem.fileName)
         || "application/octet-stream";
-      const blob = new Blob([buffer], { type: contentType });
-      appendForm(body, "files", blob, fileItem.fileName);
+      appendForm(
+        body,
+        "files",
+        bytesToBlob(buffer, contentType),
+        fileItem.fileName,
+      );
     } else {
       const contentType = getContentTypeFromFileName(fileItem.fileName)
         || "application/octet-stream";
       appendForm(
         body,
         "files",
-        new Blob([fileItem.content], { type: contentType }),
+        bytesToBlob(fileItem.content, contentType),
         fileItem.fileName,
       );
     }
@@ -165,7 +181,6 @@ async function $do(
       charEncoding: "percent",
     }),
   };
-
   const path = pathToFunc("/knowledgeBase/{kbId}/upload")(pathParams);
 
   const query = encodeFormQuery({
@@ -177,7 +192,7 @@ async function $do(
   }));
 
   const securityInput = await extractSecurity(client._options.security);
-  const requestSecurity = resolveGlobalSecurity(securityInput);
+  const requestSecurity = resolveGlobalSecurity(securityInput, [0, 1]);
 
   const context = {
     options: client._options,
@@ -212,7 +227,8 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["400", "401", "403", "404", "413", "429", "4XX", "500", "5XX"],
+    isErrorStatusCode: (statusCode: number) =>
+      matchStatusCode({ status: statusCode } as Response, ["4XX", "5XX"]),
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -244,9 +260,10 @@ async function $do(
         z.transform(stream => {
           return new EventStream(stream, rawEvent => {
             return {
+              done: false,
               value: models.UploadStreamSSEEvent$inboundSchema.parse(rawEvent),
             };
-          });
+          }, { dataRequired: false });
         }),
       ),
     ),
@@ -254,8 +271,9 @@ async function $do(
       [400, 401, 403, 404, 413, 429],
       errors.ErrorResponse$inboundSchema,
     ),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
-    M.fail([500, "5XX"]),
+    M.fail("5XX"),
   )(response, req, { extraFields: responseFields });
   if (!result.ok) {
     return [result, { status: "complete", request: req, response }];

@@ -12,7 +12,7 @@ import { ClosedEnum } from "../../types/enums.js";
  * branch before the route-level non-archived guard is enforced.
  * Accepted values are `true` and `false`.
  */
-export const IsArchived = {
+export const ListAgentConversationsIsArchived = {
   True: "true",
   False: "false",
 } as const;
@@ -23,7 +23,9 @@ export const IsArchived = {
  * branch before the route-level non-archived guard is enforced.
  * Accepted values are `true` and `false`.
  */
-export type IsArchived = ClosedEnum<typeof IsArchived>;
+export type ListAgentConversationsIsArchived = ClosedEnum<
+  typeof ListAgentConversationsIsArchived
+>;
 
 export type ListAgentConversationsRequest = {
   /**
@@ -96,12 +98,21 @@ export type ListAgentConversationsRequest = {
    * branch before the route-level non-archived guard is enforced.
    * Accepted values are `true` and `false`.
    */
-  isArchived?: IsArchived | undefined;
+  isArchived?: ListAgentConversationsIsArchived | undefined;
+  /**
+   * Restrict results to a single project. Pass a project's `id`, or
+   *
+   * @remarks
+   * the literal string `unassigned` to list agent conversations with
+   * no `projectId`.
+   */
+  projectId?: string | undefined;
 };
 
 /** @internal */
-export const IsArchived$outboundSchema: z.ZodMiniEnum<typeof IsArchived> = z
-  .enum(IsArchived);
+export const ListAgentConversationsIsArchived$outboundSchema: z.ZodMiniEnum<
+  typeof ListAgentConversationsIsArchived
+> = z.enum(ListAgentConversationsIsArchived);
 
 /** @internal */
 export type ListAgentConversationsRequest$Outbound = {
@@ -115,6 +126,7 @@ export type ListAgentConversationsRequest$Outbound = {
   endDate?: string | undefined;
   status?: string | undefined;
   isArchived?: string | undefined;
+  projectId?: string | undefined;
 };
 
 /** @internal */
@@ -131,7 +143,8 @@ export const ListAgentConversationsRequest$outboundSchema: z.ZodMiniType<
   startDate: z.optional(z.string()),
   endDate: z.optional(z.string()),
   status: z.optional(z.string()),
-  isArchived: z.optional(IsArchived$outboundSchema),
+  isArchived: z.optional(ListAgentConversationsIsArchived$outboundSchema),
+  projectId: z.optional(z.string()),
 });
 
 export function listAgentConversationsRequestToJSON(

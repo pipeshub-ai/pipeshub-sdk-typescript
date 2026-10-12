@@ -9,6 +9,7 @@ import * as openEnums from "../types/enums.js";
 import { OpenEnum } from "../types/enums.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
+import { smartUnion } from "../types/smart-union.js";
 import {
   AppliedFilters,
   AppliedFilters$inboundSchema,
@@ -43,6 +44,10 @@ import {
   MessageToolCall,
   MessageToolCall$inboundSchema,
 } from "./message-tool-call.js";
+import {
+  PopulatedCitationReference,
+  PopulatedCitationReference$inboundSchema,
+} from "./populated-citation-reference.js";
 
 /**
  * Type of message:
@@ -88,6 +93,8 @@ export const MessageContentFormat = {
  * Format of the content for rendering
  */
 export type MessageContentFormat = OpenEnum<typeof MessageContentFormat>;
+
+export type CitationUnion = CitationReference | PopulatedCitationReference;
 
 export type MessageMetadata = {
   /**
@@ -173,9 +180,13 @@ export type Message = {
    */
   contentFormat: MessageContentFormat;
   /**
-   * References to source documents used in the response
+   * References to source documents used in the response. Routes that
+   *
+   * @remarks
+   * return the saved conversation after a turn (create, add message)
+   * populate each item to `{ citationId, citationData }`.
    */
-  citations?: Array<CitationReference> | undefined;
+  citations?: Array<CitationReference | PopulatedCitationReference> | undefined;
   /**
    * AI confidence in the answer. Present only on `bot_response` messages,
    *
@@ -249,6 +260,25 @@ export const MessageContentFormat$inboundSchema: z.ZodMiniType<
 > = openEnums.inboundSchema(MessageContentFormat);
 
 /** @internal */
+export const CitationUnion$inboundSchema: z.ZodMiniType<
+  CitationUnion,
+  unknown
+> = smartUnion([
+  CitationReference$inboundSchema,
+  PopulatedCitationReference$inboundSchema,
+]);
+
+export function citationUnionFromJSON(
+  jsonString: string,
+): SafeParseResult<CitationUnion, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => CitationUnion$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'CitationUnion' from JSON`,
+  );
+}
+
+/** @internal */
 export const MessageMetadata$inboundSchema: z.ZodMiniType<
   MessageMetadata,
   unknown
@@ -299,7 +329,14 @@ export const Message$inboundSchema: z.ZodMiniType<Message, unknown> = z.pipe(
     messageType: types.optional(MessageMessageType$inboundSchema),
     content: types.optional(types.string()),
     contentFormat: z._default(MessageContentFormat$inboundSchema, "MARKDOWN"),
-    citations: types.optional(z.array(CitationReference$inboundSchema)),
+    citations: types.optional(
+      z.array(
+        smartUnion([
+          CitationReference$inboundSchema,
+          PopulatedCitationReference$inboundSchema,
+        ]),
+      ),
+    ),
     confidence: z.optional(z.nullable(types.string())),
     followUpQuestions: types.optional(z.array(FollowUpQuestion$inboundSchema)),
     feedback: types.optional(z.array(MessageFeedback$inboundSchema)),

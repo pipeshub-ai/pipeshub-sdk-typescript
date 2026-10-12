@@ -88,12 +88,15 @@ export type GetArchivedConversationsRequest = {
  * - `Inprogress` — AI is processing
  * - `Complete` — response ready
  * - `Failed` — error occurred
+ * - `Stopped` — cancelled, or the client disconnected mid-answer;
+ *   the last message keeps the partial answer
  */
 export const GetArchivedConversationsStatus = {
   None: "None",
   Inprogress: "Inprogress",
   Complete: "Complete",
   Failed: "Failed",
+  Stopped: "Stopped",
 } as const;
 /**
  * Current status of the conversation:
@@ -103,6 +106,8 @@ export const GetArchivedConversationsStatus = {
  * - `Inprogress` — AI is processing
  * - `Complete` — response ready
  * - `Failed` — error occurred
+ * - `Stopped` — cancelled, or the client disconnected mid-answer;
+ *   the last message keeps the partial answer
  */
 export type GetArchivedConversationsStatus = OpenEnum<
   typeof GetArchivedConversationsStatus
@@ -165,6 +170,30 @@ export type GetArchivedConversationsAccessLevel = OpenEnum<
 >;
 
 /**
+ * Only meaningful when `projectId` is set. `private` (default)
+ *
+ * @remarks
+ * keeps the conversation visible to its owner only; `project`
+ * exposes it to every member of the linked project. See
+ * `PATCH /conversations/{conversationId}/project-visibility`.
+ */
+export const GetArchivedConversationsProjectVisibility = {
+  Private: "private",
+  Project: "project",
+} as const;
+/**
+ * Only meaningful when `projectId` is set. `private` (default)
+ *
+ * @remarks
+ * keeps the conversation visible to its owner only; `project`
+ * exposes it to every member of the linked project. See
+ * `PATCH /conversations/{conversationId}/project-visibility`.
+ */
+export type GetArchivedConversationsProjectVisibility = OpenEnum<
+  typeof GetArchivedConversationsProjectVisibility
+>;
+
+/**
  * A conversation represents a chat session between a user and the AI.
  *
  * @remarks
@@ -207,6 +236,8 @@ export type GetArchivedConversationsConversation = {
    * - `Inprogress` — AI is processing
    * - `Complete` — response ready
    * - `Failed` — error occurred
+   * - `Stopped` — cancelled, or the client disconnected mid-answer;
+   *   the last message keeps the partial answer
    */
   status?: GetArchivedConversationsStatus | undefined;
   /**
@@ -279,6 +310,33 @@ export type GetArchivedConversationsConversation = {
    * their entry in `sharedWith`, or `read` by default.
    */
   accessLevel?: GetArchivedConversationsAccessLevel | undefined;
+  /**
+   * The project this conversation is linked to, if any. Set via
+   *
+   * @remarks
+   * `PUT /conversations/{conversationId}/project` or at creation
+   * time; absent on conversations that were never linked.
+   */
+  projectId?: string | null | undefined;
+  /**
+   * Only meaningful when `projectId` is set. `private` (default)
+   *
+   * @remarks
+   * keeps the conversation visible to its owner only; `project`
+   * exposes it to every member of the linked project. See
+   * `PATCH /conversations/{conversationId}/project-visibility`.
+   */
+  projectVisibility?:
+    | GetArchivedConversationsProjectVisibility
+    | null
+    | undefined;
+  /**
+   * Present on conversations the caller received via share. Identifies the
+   *
+   * @remarks
+   * conversation initiator (the only user who can share a chat).
+   */
+  sharedBy?: models.ConversationSharedBy | undefined;
   /**
    * Timestamp when the conversation was archived
    */
@@ -713,6 +771,11 @@ export const GetArchivedConversationsAccessLevel$inboundSchema: z.ZodMiniType<
 > = openEnums.inboundSchema(GetArchivedConversationsAccessLevel);
 
 /** @internal */
+export const GetArchivedConversationsProjectVisibility$inboundSchema:
+  z.ZodMiniType<GetArchivedConversationsProjectVisibility, unknown> = openEnums
+    .inboundSchema(GetArchivedConversationsProjectVisibility);
+
+/** @internal */
 export const GetArchivedConversationsConversation$inboundSchema: z.ZodMiniType<
   GetArchivedConversationsConversation,
   unknown
@@ -749,6 +812,11 @@ export const GetArchivedConversationsConversation$inboundSchema: z.ZodMiniType<
     accessLevel: types.optional(
       GetArchivedConversationsAccessLevel$inboundSchema,
     ),
+    projectId: z.optional(z.nullable(types.string())),
+    projectVisibility: z.optional(
+      z.nullable(GetArchivedConversationsProjectVisibility$inboundSchema),
+    ),
+    sharedBy: types.optional(models.ConversationSharedBy$inboundSchema),
     archivedAt: types.optional(types.date()),
   }),
   z.transform((v) => {

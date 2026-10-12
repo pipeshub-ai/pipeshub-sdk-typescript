@@ -1,6 +1,6 @@
 {
   "name": "@pipeshub-ai/sdk",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "author": "Pipeshub",
   "type": "module",
   "tshy": {
@@ -32,10 +32,10 @@
     "@types/node": "^18.19.3",
     "eslint": "^9.26.0",
     "globals": "^15.14.0",
-    "tshy": "^2.0.0",
+    "tshy": "^3.3.2",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.26.0",
-    "vitest": "^3.0.5"
+    "vitest": "^3.2.6"
   },
   "dependencies": {
     "zod": "^3.25.65 || ^4.0.0"

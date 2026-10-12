@@ -46,6 +46,7 @@ export type SemanticSearchGraphRecord = {
   isVLMOcrProcessed?: boolean | null | undefined;
   deletedByUserId?: string | null | undefined;
   processingStartedAt?: number | null | undefined;
+  queuedAtTimestamp?: number | null | undefined;
   parsingStatus?: string | null | undefined;
   indexingStatus?: string | null | undefined;
   extractionStatus?: string | null | undefined;
@@ -104,6 +105,7 @@ export const SemanticSearchGraphRecord$inboundSchema: z.ZodMiniType<
     isVLMOcrProcessed: z.optional(z.nullable(types.boolean())),
     deletedByUserId: z.optional(z.nullable(types.string())),
     processingStartedAt: z.optional(z.nullable(types.number())),
+    queuedAtTimestamp: z.optional(z.nullable(types.number())),
     parsingStatus: z.optional(z.nullable(types.string())),
     indexingStatus: z.optional(z.nullable(types.string())),
     extractionStatus: z.optional(z.nullable(types.string())),

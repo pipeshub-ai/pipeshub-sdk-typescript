@@ -6,11 +6,11 @@
 import { MessagePartStatus } from "@pipeshub-ai/sdk/models";
 
 let value: MessagePartStatus = "blocked";
+
+// Open enum: unrecognized values are captured as Unrecognized<string>
 ```
 
 ## Values
-
-This is an open enum. Unrecognized values will be captured as the `Unrecognized<string>` branded type.
 
 ```typescript
 "running" | "completed" | "failed" | "blocked" | Unrecognized<string>

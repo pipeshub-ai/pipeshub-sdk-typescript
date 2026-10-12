@@ -12,9 +12,9 @@ omitted properties).
 import { KnowledgeHubNodesResponse } from "@pipeshub-ai/sdk/models";
 
 let value: KnowledgeHubNodesResponse = {
-  success: false,
-  error: null,
-  id: "<id>",
+  success: true,
+  error: "<value>",
+  id: null,
   currentNode: {
     id: "<id>",
     name: "<value>",
@@ -25,14 +25,44 @@ let value: KnowledgeHubNodesResponse = {
     name: "<value>",
     nodeType: "<value>",
   },
-  items: [],
+  items: [
+    {
+      id: "<id>",
+      name: "<value>",
+      nodeType: "recordGroup",
+      parentId: "<id>",
+      origin: "CONNECTOR",
+      connector: "<value>",
+      connectorId: null,
+      recordType: "<value>",
+      recordGroupType: null,
+      indexingStatus: "<value>",
+      reason: "<value>",
+      isInternal: false,
+      isPlaceholder: false,
+      createdAt: 88267,
+      updatedAt: 777139,
+      sizeInBytes: 12362,
+      mimeType: "<value>",
+      extension: "wav",
+      webUrl: "https://separate-pillow.biz",
+      hasChildren: false,
+      previewRenderable: false,
+      permission: {
+        role: "<value>",
+        canEdit: true,
+        canDelete: true,
+      },
+      sharingStatus: "<value>",
+    },
+  ],
   pagination: {
-    page: 714167,
-    limit: 834106,
-    totalItems: 649371,
-    totalPages: 34717,
+    page: 167842,
+    limit: 705510,
+    totalItems: 476931,
+    totalPages: 208529,
     hasNext: false,
-    hasPrev: true,
+    hasPrev: false,
   },
   filters: {
     applied: {
@@ -94,24 +124,23 @@ let value: KnowledgeHubNodesResponse = {
       sortOrder: [],
     },
   },
-  breadcrumbs: [
-    {
-      id: "<id>",
-      name: "<value>",
-      nodeType: "<value>",
-    },
-  ],
+  breadcrumbs: [],
   counts: {
-    items: [],
-    total: 777139,
+    items: [
+      {
+        label: "<value>",
+        count: 434157,
+      },
+    ],
+    total: 766076,
   },
   permissions: {
     role: "<value>",
     canUpload: true,
-    canCreateFolders: false,
-    canEdit: false,
-    canDelete: true,
-    canManagePermissions: false,
+    canCreateFolders: true,
+    canEdit: true,
+    canDelete: false,
+    canManagePermissions: true,
   },
 };
 ```
@@ -120,7 +149,7 @@ let value: KnowledgeHubNodesResponse = {
 
 | Field                                                                                              | Type                                                                                               | Required                                                                                           | Description                                                                                        |
 | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `success`                                                                                          | *boolean*                                                                                          | :heavy_check_mark:                                                                                 | Always `true` on HTTP 200. Failures use 4xx/5xx error envelopes, not this body shape.              |
+| `success`                                                                                          | *true*                                                                                             | :heavy_check_mark:                                                                                 | Always `true` on HTTP 200. Failures use 4xx/5xx error envelopes, not this body shape.              |
 | `error`                                                                                            | *string*                                                                                           | :heavy_check_mark:                                                                                 | Always `null` on HTTP 200.                                                                         |
 | `id`                                                                                               | *string*                                                                                           | :heavy_check_mark:                                                                                 | Current parent node ID when browsing children; `null` at root.                                     |
 | `currentNode`                                                                                      | [models.CurrentNode](../models/current-node.md)                                                    | :heavy_check_mark:                                                                                 | Node being browsed when `parentId` is in the path; `null` at root.                                 |

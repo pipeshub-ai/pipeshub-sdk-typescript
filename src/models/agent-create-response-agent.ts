@@ -33,6 +33,8 @@ export type AgentCreateResponseAgentWebSearch = {
   providerLabel?: string | undefined;
 };
 
+export type WebSearch = AgentCreateResponseAgentWebSearch;
+
 /**
  * Agent-level reasoning effort used when a chat request omits its own. Null when unset.
  */
@@ -67,6 +69,10 @@ export type AgentCreateResponseAgent = {
     | AgentCreateResponseAgentDefaultReasoningEffort
     | null
     | undefined;
+  /**
+   * When false, this agent omits user name/email/org from its system prompt.
+   */
+  sendUserContext?: boolean | undefined;
   isActive: boolean;
   isServiceAccount: boolean;
   createdBy: string;
@@ -101,6 +107,20 @@ export function agentCreateResponseAgentWebSearchFromJSON(
 }
 
 /** @internal */
+export const WebSearch$inboundSchema: z.ZodMiniType<WebSearch, unknown> = z
+  .lazy(() => AgentCreateResponseAgentWebSearch$inboundSchema);
+
+export function webSearchFromJSON(
+  jsonString: string,
+): SafeParseResult<WebSearch, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => WebSearch$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'WebSearch' from JSON`,
+  );
+}
+
+/** @internal */
 export const AgentCreateResponseAgentDefaultReasoningEffort$inboundSchema:
   z.ZodMiniType<AgentCreateResponseAgentDefaultReasoningEffort, unknown> =
     openEnums.inboundSchema(AgentCreateResponseAgentDefaultReasoningEffort);
@@ -125,6 +145,7 @@ export const AgentCreateResponseAgent$inboundSchema: z.ZodMiniType<
     defaultReasoningEffort: z.optional(
       z.nullable(AgentCreateResponseAgentDefaultReasoningEffort$inboundSchema),
     ),
+    sendUserContext: types.optional(types.boolean()),
     isActive: types.boolean(),
     isServiceAccount: types.boolean(),
     createdBy: types.string(),

@@ -8,11 +8,11 @@ Type of token
 import { TokenType } from "@pipeshub-ai/sdk/models";
 
 let value: TokenType = "refresh";
+
+// Open enum: unrecognized values are captured as Unrecognized<string>
 ```
 
 ## Values
-
-This is an open enum. Unrecognized values will be captured as the `Unrecognized<string>` branded type.
 
 ```typescript
 "access" | "refresh" | Unrecognized<string>

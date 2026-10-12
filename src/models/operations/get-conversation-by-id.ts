@@ -119,12 +119,13 @@ export const GetConversationByIdStatus = {
   Inprogress: "Inprogress",
   Complete: "Complete",
   Failed: "Failed",
+  Stopped: "Stopped",
 } as const;
 export type GetConversationByIdStatus = OpenEnum<
   typeof GetConversationByIdStatus
 >;
 
-export const GetConversationByIdMessageMessageType = {
+export const MessageMessageType = {
   UserQuery: "user_query",
   BotResponse: "bot_response",
   Error: "error",
@@ -132,18 +133,14 @@ export const GetConversationByIdMessageMessageType = {
   System: "system",
   ToolCall: "tool_call",
 } as const;
-export type GetConversationByIdMessageMessageType = OpenEnum<
-  typeof GetConversationByIdMessageMessageType
->;
+export type MessageMessageType = OpenEnum<typeof MessageMessageType>;
 
-export const GetConversationByIdContentFormat = {
+export const ContentFormat = {
   Markdown: "MARKDOWN",
   Json: "JSON",
   Html: "HTML",
 } as const;
-export type GetConversationByIdContentFormat = OpenEnum<
-  typeof GetConversationByIdContentFormat
->;
+export type ContentFormat = OpenEnum<typeof ContentFormat>;
 
 /**
  * AI confidence in the answer. Present only on `bot_response` messages, and only when the model emitted a trailing confidence block.
@@ -180,7 +177,7 @@ export type Citation = {
   citationData?: models.Citation | undefined;
 };
 
-export type GetConversationByIdReferenceDatum = {
+export type ReferenceDatum = {
   /**
    * Display name shown to the user.
    */
@@ -213,7 +210,7 @@ export type GetConversationByIdReferenceDatum = {
   metadata?: { [k: string]: string } | undefined;
 };
 
-export type GetConversationByIdAppliedFilters = {
+export type AppliedFilters = {
   apps?: Array<models.AppliedFilterNode> | undefined;
   kb?: Array<models.AppliedFilterNode> | undefined;
 };
@@ -224,11 +221,11 @@ export type GetConversationByIdMetadata = {
   aiTransactionId?: string | undefined;
 };
 
-export type GetConversationByIdMessage = {
+export type Message = {
   id?: string | undefined;
-  messageType?: GetConversationByIdMessageMessageType | undefined;
+  messageType?: MessageMessageType | undefined;
   content?: string | undefined;
-  contentFormat?: GetConversationByIdContentFormat | undefined;
+  contentFormat?: ContentFormat | undefined;
   /**
    * AI confidence in the answer. Present only on `bot_response` messages, and only when the model emitted a trailing confidence block.
    *
@@ -246,12 +243,12 @@ export type GetConversationByIdMessage = {
   /**
    * Reference IDs surfaced from tool responses, used for follow-up queries
    */
-  referenceData?: Array<GetConversationByIdReferenceDatum> | undefined;
+  referenceData?: Array<ReferenceDatum> | undefined;
   /**
    * AI model configuration recorded against a conversation or message.
    */
   modelInfo?: models.ConversationModelInfo | undefined;
-  appliedFilters?: GetConversationByIdAppliedFilters | undefined;
+  appliedFilters?: AppliedFilters | undefined;
   /**
    * Files uploaded for this message turn (see
    *
@@ -342,7 +339,7 @@ export type GetConversationByIdConversation = {
   /**
    * Page of messages, sliced by `pagination` and ordered by `sortingMessages`
    */
-  messages?: Array<GetConversationByIdMessage> | undefined;
+  messages?: Array<Message> | undefined;
   /**
    * AI model configuration recorded against a conversation or message.
    */
@@ -356,6 +353,13 @@ export type GetConversationByIdConversation = {
    */
   pagination?: ConversationPagination | undefined;
   access?: Access | undefined;
+  /**
+   * Present on conversations the caller received via share. Identifies the
+   *
+   * @remarks
+   * conversation initiator (the only user who can share a chat).
+   */
+  sharedBy?: models.ConversationSharedBy | undefined;
 };
 
 export type GetConversationByIdApplied = {
@@ -653,16 +657,16 @@ export const GetConversationByIdStatus$inboundSchema: z.ZodMiniType<
 > = openEnums.inboundSchema(GetConversationByIdStatus);
 
 /** @internal */
-export const GetConversationByIdMessageMessageType$inboundSchema: z.ZodMiniType<
-  GetConversationByIdMessageMessageType,
+export const MessageMessageType$inboundSchema: z.ZodMiniType<
+  MessageMessageType,
   unknown
-> = openEnums.inboundSchema(GetConversationByIdMessageMessageType);
+> = openEnums.inboundSchema(MessageMessageType);
 
 /** @internal */
-export const GetConversationByIdContentFormat$inboundSchema: z.ZodMiniType<
-  GetConversationByIdContentFormat,
+export const ContentFormat$inboundSchema: z.ZodMiniType<
+  ContentFormat,
   unknown
-> = openEnums.inboundSchema(GetConversationByIdContentFormat);
+> = openEnums.inboundSchema(ContentFormat);
 
 /** @internal */
 export const Confidence$inboundSchema: z.ZodMiniType<Confidence, unknown> =
@@ -686,8 +690,8 @@ export function citationFromJSON(
 }
 
 /** @internal */
-export const GetConversationByIdReferenceDatum$inboundSchema: z.ZodMiniType<
-  GetConversationByIdReferenceDatum,
+export const ReferenceDatum$inboundSchema: z.ZodMiniType<
+  ReferenceDatum,
   unknown
 > = z.object({
   name: types.optional(types.string()),
@@ -698,32 +702,32 @@ export const GetConversationByIdReferenceDatum$inboundSchema: z.ZodMiniType<
   metadata: types.optional(z.record(z.string(), types.string())),
 });
 
-export function getConversationByIdReferenceDatumFromJSON(
+export function referenceDatumFromJSON(
   jsonString: string,
-): SafeParseResult<GetConversationByIdReferenceDatum, SDKValidationError> {
+): SafeParseResult<ReferenceDatum, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => GetConversationByIdReferenceDatum$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetConversationByIdReferenceDatum' from JSON`,
+    (x) => ReferenceDatum$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ReferenceDatum' from JSON`,
   );
 }
 
 /** @internal */
-export const GetConversationByIdAppliedFilters$inboundSchema: z.ZodMiniType<
-  GetConversationByIdAppliedFilters,
+export const AppliedFilters$inboundSchema: z.ZodMiniType<
+  AppliedFilters,
   unknown
 > = z.object({
   apps: types.optional(z.array(models.AppliedFilterNode$inboundSchema)),
   kb: types.optional(z.array(models.AppliedFilterNode$inboundSchema)),
 });
 
-export function getConversationByIdAppliedFiltersFromJSON(
+export function appliedFiltersFromJSON(
   jsonString: string,
-): SafeParseResult<GetConversationByIdAppliedFilters, SDKValidationError> {
+): SafeParseResult<AppliedFilters, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => GetConversationByIdAppliedFilters$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetConversationByIdAppliedFilters' from JSON`,
+    (x) => AppliedFilters$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'AppliedFilters' from JSON`,
   );
 }
 
@@ -748,32 +752,23 @@ export function getConversationByIdMetadataFromJSON(
 }
 
 /** @internal */
-export const GetConversationByIdMessage$inboundSchema: z.ZodMiniType<
-  GetConversationByIdMessage,
-  unknown
-> = z.pipe(
+export const Message$inboundSchema: z.ZodMiniType<Message, unknown> = z.pipe(
   z.object({
     _id: types.optional(types.string()),
-    messageType: types.optional(
-      GetConversationByIdMessageMessageType$inboundSchema,
-    ),
+    messageType: types.optional(MessageMessageType$inboundSchema),
     content: types.optional(types.string()),
-    contentFormat: types.optional(
-      GetConversationByIdContentFormat$inboundSchema,
-    ),
+    contentFormat: types.optional(ContentFormat$inboundSchema),
     confidence: z.optional(z.nullable(Confidence$inboundSchema)),
     citations: types.optional(z.array(z.lazy(() => Citation$inboundSchema))),
     followUpQuestions: types.optional(
       z.array(models.FollowUpQuestion$inboundSchema),
     ),
     feedback: types.optional(z.array(models.MessageFeedback$inboundSchema)),
-    referenceData: types.optional(
-      z.array(z.lazy(() => GetConversationByIdReferenceDatum$inboundSchema)),
-    ),
+    referenceData: types.optional(z.array(z.lazy(() =>
+      ReferenceDatum$inboundSchema
+    ))),
     modelInfo: types.optional(models.ConversationModelInfo$inboundSchema),
-    appliedFilters: types.optional(
-      z.lazy(() => GetConversationByIdAppliedFilters$inboundSchema),
-    ),
+    appliedFilters: types.optional(z.lazy(() => AppliedFilters$inboundSchema)),
     attachments: types.optional(
       z.array(models.ChatAttachmentRef$inboundSchema),
     ),
@@ -795,13 +790,13 @@ export const GetConversationByIdMessage$inboundSchema: z.ZodMiniType<
   }),
 );
 
-export function getConversationByIdMessageFromJSON(
+export function messageFromJSON(
   jsonString: string,
-): SafeParseResult<GetConversationByIdMessage, SDKValidationError> {
+): SafeParseResult<Message, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => GetConversationByIdMessage$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetConversationByIdMessage' from JSON`,
+    (x) => Message$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Message' from JSON`,
   );
 }
 
@@ -883,14 +878,13 @@ export const GetConversationByIdConversation$inboundSchema: z.ZodMiniType<
   ),
   status: types.optional(GetConversationByIdStatus$inboundSchema),
   failReason: types.optional(types.string()),
-  messages: types.optional(
-    z.array(z.lazy(() => GetConversationByIdMessage$inboundSchema)),
-  ),
+  messages: types.optional(z.array(z.lazy(() => Message$inboundSchema))),
   modelInfo: types.optional(models.ConversationModelInfo$inboundSchema),
   pagination: types.optional(
     z.lazy(() => ConversationPagination$inboundSchema),
   ),
   access: types.optional(z.lazy(() => Access$inboundSchema)),
+  sharedBy: types.optional(models.ConversationSharedBy$inboundSchema),
 });
 
 export function getConversationByIdConversationFromJSON(

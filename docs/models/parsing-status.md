@@ -17,11 +17,11 @@ Parse-phase status (ahead of indexing/extraction):
 import { ParsingStatus } from "@pipeshub-ai/sdk/models";
 
 let value: ParsingStatus = "COMPLETED";
+
+// Open enum: unrecognized values are captured as Unrecognized<string>
 ```
 
 ## Values
-
-This is an open enum. Unrecognized values will be captured as the `Unrecognized<string>` branded type.
 
 ```typescript
 "NOT_STARTED" | "IN_PROGRESS" | "FAILED" | "COMPLETED" | "FILE_TYPE_NOT_SUPPORTED" | "AUTO_INDEX_OFF" | "EMPTY" | "QUEUED" | Unrecognized<string>

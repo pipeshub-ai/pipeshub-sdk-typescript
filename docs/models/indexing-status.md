@@ -19,11 +19,11 @@ Current indexing/processing status:
 import { IndexingStatus } from "@pipeshub-ai/sdk/models";
 
 let value: IndexingStatus = "COMPLETED";
+
+// Open enum: unrecognized values are captured as Unrecognized<string>
 ```
 
 ## Values
-
-This is an open enum. Unrecognized values will be captured as the `Unrecognized<string>` branded type.
 
 ```typescript
 "NOT_STARTED" | "PAUSED" | "IN_PROGRESS" | "COMPLETED" | "FAILED" | "FILE_TYPE_NOT_SUPPORTED" | "AUTO_INDEX_OFF" | "EMPTY" | "ENABLE_MULTIMODAL_MODELS" | "QUEUED" | Unrecognized<string>

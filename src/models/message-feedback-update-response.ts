@@ -12,7 +12,7 @@ import {
   MessageFeedbackAppendEntry$inboundSchema,
 } from "./message-feedback-append-entry.js";
 
-export type Meta = {
+export type MessageFeedbackUpdateResponseMeta = {
   /**
    * Server-side request identifier. Read from the `X-Request-ID`
    *
@@ -50,23 +50,26 @@ export type MessageFeedbackUpdateResponse = {
    * `timestamp`, and `metrics`.
    */
   feedback: MessageFeedbackAppendEntry;
-  meta: Meta;
+  meta: MessageFeedbackUpdateResponseMeta;
 };
 
 /** @internal */
-export const Meta$inboundSchema: z.ZodMiniType<Meta, unknown> = z.object({
+export const MessageFeedbackUpdateResponseMeta$inboundSchema: z.ZodMiniType<
+  MessageFeedbackUpdateResponseMeta,
+  unknown
+> = z.object({
   requestId: types.string(),
   timestamp: types.date(),
   duration: types.number(),
 });
 
-export function metaFromJSON(
+export function messageFeedbackUpdateResponseMetaFromJSON(
   jsonString: string,
-): SafeParseResult<Meta, SDKValidationError> {
+): SafeParseResult<MessageFeedbackUpdateResponseMeta, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => Meta$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Meta' from JSON`,
+    (x) => MessageFeedbackUpdateResponseMeta$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'MessageFeedbackUpdateResponseMeta' from JSON`,
   );
 }
 
@@ -78,7 +81,7 @@ export const MessageFeedbackUpdateResponse$inboundSchema: z.ZodMiniType<
   conversationId: types.string(),
   messageId: types.string(),
   feedback: MessageFeedbackAppendEntry$inboundSchema,
-  meta: z.lazy(() => Meta$inboundSchema),
+  meta: z.lazy(() => MessageFeedbackUpdateResponseMeta$inboundSchema),
 });
 
 export function messageFeedbackUpdateResponseFromJSON(

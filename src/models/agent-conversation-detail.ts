@@ -44,6 +44,7 @@ export const AgentConversationDetailStatus = {
   Inprogress: "Inprogress",
   Complete: "Complete",
   Failed: "Failed",
+  Stopped: "Stopped",
 } as const;
 export type AgentConversationDetailStatus = OpenEnum<
   typeof AgentConversationDetailStatus

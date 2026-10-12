@@ -12,7 +12,7 @@ import { SDKValidationError } from "./errors/sdk-validation-error.js";
  * Response returned by DELETE /knowledgeBase/record/{recordId}.
  */
 export type DeleteRecordResponseSchema = {
-  success: boolean;
+  success: true;
   message: string;
   recordId: string;
   connector?: string | null | undefined;
@@ -24,7 +24,7 @@ export const DeleteRecordResponseSchema$inboundSchema: z.ZodMiniType<
   DeleteRecordResponseSchema,
   unknown
 > = z.object({
-  success: types.boolean(),
+  success: types.literal(true),
   message: types.string(),
   recordId: types.string(),
   connector: z.optional(z.nullable(types.string())),

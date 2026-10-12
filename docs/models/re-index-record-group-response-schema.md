@@ -8,11 +8,11 @@ Response returned by POST /knowledgeBase/reindex/record-group/{recordGroupId}.
 import { ReIndexRecordGroupResponseSchema } from "@pipeshub-ai/sdk/models";
 
 let value: ReIndexRecordGroupResponseSchema = {
-  success: false,
+  success: true,
   message: "<value>",
   recordGroupId: "<id>",
-  depth: 812309,
-  eventPublished: true,
+  depth: 967671,
+  eventPublished: false,
 };
 ```
 
@@ -20,7 +20,7 @@ let value: ReIndexRecordGroupResponseSchema = {
 
 | Field              | Type               | Required           | Description        |
 | ------------------ | ------------------ | ------------------ | ------------------ |
-| `success`          | *boolean*          | :heavy_check_mark: | N/A                |
+| `success`          | *true*             | :heavy_check_mark: | N/A                |
 | `message`          | *string*           | :heavy_check_mark: | N/A                |
 | `recordGroupId`    | *string*           | :heavy_check_mark: | N/A                |
 | `depth`            | *number*           | :heavy_check_mark: | N/A                |

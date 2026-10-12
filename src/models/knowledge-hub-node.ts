@@ -77,6 +77,10 @@ export type KnowledgeHubNode = {
    */
   connector: string | null;
   /**
+   * Connector instance id for records and groups that come from a connector; otherwise `null` (Collections, and app nodes).
+   */
+  connectorId: string | null;
+  /**
    * Record type when `nodeType` is `record`; otherwise `null`.
    */
   recordType: string | null;
@@ -174,6 +178,7 @@ export const KnowledgeHubNode$inboundSchema: z.ZodMiniType<
   parentId: types.nullable(types.string()),
   origin: KnowledgeHubNodeOrigin$inboundSchema,
   connector: types.nullable(types.string()),
+  connectorId: types.nullable(types.string()),
   recordType: types.nullable(types.string()),
   recordGroupType: types.nullable(types.string()),
   indexingStatus: types.nullable(types.string()),

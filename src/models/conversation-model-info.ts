@@ -17,7 +17,7 @@ export type ConversationModelInfo = {
    */
   modelKey?: string | undefined;
   /**
-   * Provider-facing model name (e.g. `gpt-4o-mini`)
+   * Provider-facing model name (e.g. `gpt-5.6-luna`)
    */
   modelName?: string | undefined;
   /**

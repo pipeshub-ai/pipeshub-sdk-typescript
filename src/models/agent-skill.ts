@@ -26,7 +26,7 @@ export type AgentSkill = {
   subcategory?: string | null | undefined;
   version?: string | null | undefined;
   /**
-   * Lifecycle state of the skill — `active` or `deprecated`.
+   * Lifecycle state of the skill — `active`, `deprecated`, or `disabled`. `candidate` is a learning-loop record state, not an assignable skill, and is not returned here.
    */
   status?: string | null | undefined;
 };

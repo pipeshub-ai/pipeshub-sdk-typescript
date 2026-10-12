@@ -3,6 +3,7 @@
  */
 
 import { PipeshubCore } from "../core.js";
+import { matchStatusCode } from "../lib/http.js";
 import * as M from "../lib/matchers.js";
 import { compactMap } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
@@ -31,6 +32,13 @@ import { Result } from "../types/fp.js";
  *
  * **Authentication:** Session JWT or OAuth 2.0 access token via `Authorization: Bearer`.
  * OAuth tokens must include the `config:read` scope. Admin role is not required.
+ *
+ * **API keys:** for anyone who isn't an org admin, each provider's `configuration.apiKey`
+ * comes back as the placeholder `****************`. Admins get the stored key, unless the
+ * server hides secrets from everyone (`HIDE_SECRET_CONFIG=true`). When updating a provider,
+ * sending the placeholder back keeps the stored key.
+ *
+ * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
 export function webSearchGetWebSearchProviders(
   client: PipeshubCore,
@@ -82,7 +90,7 @@ async function $do(
   }));
 
   const securityInput = await extractSecurity(client._options.security);
-  const requestSecurity = resolveGlobalSecurity(securityInput);
+  const requestSecurity = resolveGlobalSecurity(securityInput, [0, 1]);
 
   const context = {
     options: client._options,
@@ -115,7 +123,8 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["401", "403", "4XX", "5XX"],
+    isErrorStatusCode: (statusCode: number) =>
+      matchStatusCode({ status: statusCode } as Response, ["4XX", "5XX"]),
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });

@@ -5,6 +5,7 @@
 import * as z from "zod/v4-mini";
 import { PipeshubCore } from "../core.js";
 import { encodeJSON, encodeSimple } from "../lib/encodings.js";
+import { matchStatusCode } from "../lib/http.js";
 import * as M from "../lib/matchers.js";
 import { compactMap } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
@@ -36,6 +37,8 @@ import { Result } from "../types/fp.js";
  * `DELETE /personal-access-tokens/{tokenId}`. Requires org-admin
  * privileges (`userAdminCheck`); returns `400` (not `403`) for a
  * non-admin caller, same as `GET /personal-access-tokens/admin`.
+ *
+ * If set, this operation will use {@link Security.bearerAuth} from the global security.
  */
 export function personalAccessTokensAdminRevokePersonalAccessToken(
   client: PipeshubCore,
@@ -106,7 +109,6 @@ async function $do(
       charEncoding: "percent",
     }),
   };
-
   const path = pathToFunc("/personal-access-tokens/admin/{tokenId}")(
     pathParams,
   );
@@ -117,13 +119,13 @@ async function $do(
   }));
 
   const securityInput = await extractSecurity(client._options.security);
-  const requestSecurity = resolveGlobalSecurity(securityInput);
+  const requestSecurity = resolveGlobalSecurity(securityInput, [0]);
 
   const context = {
     options: client._options,
     baseURL: options?.serverURL ?? client._baseURL ?? "",
     operationID: "adminRevokePersonalAccessToken",
-    oAuth2Scopes: [],
+    oAuth2Scopes: null,
 
     resolvedSecurity: requestSecurity,
 
@@ -151,7 +153,8 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["400", "401", "404", "429", "4XX", "5XX"],
+    isErrorStatusCode: (statusCode: number) =>
+      matchStatusCode({ status: statusCode } as Response, ["4XX", "5XX"]),
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });

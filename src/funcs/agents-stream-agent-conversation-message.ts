@@ -6,6 +6,7 @@ import * as z from "zod/v4-mini";
 import { PipeshubCore } from "../core.js";
 import { encodeJSON, encodeSimple } from "../lib/encodings.js";
 import { EventStream } from "../lib/event-streams.js";
+import { matchStatusCode } from "../lib/http.js";
 import * as M from "../lib/matchers.js";
 import { compactMap } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
@@ -37,6 +38,8 @@ import { Result } from "../types/fp.js";
  * AG-UI is the sole wire protocol. The request must include
  * `chatMode: quick`; see `AgentMessageStreamSSEEvent` for the event
  * vocabulary.
+ *
+ * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
 export function agentsStreamAgentConversationMessage(
   client: PipeshubCore,
@@ -107,7 +110,6 @@ async function $do(
       charEncoding: "percent",
     }),
   };
-
   const path = pathToFunc(
     "/agents/{agentKey}/conversations/{conversationId}/messages/stream",
   )(pathParams);
@@ -118,7 +120,7 @@ async function $do(
   }));
 
   const securityInput = await extractSecurity(client._options.security);
-  const requestSecurity = resolveGlobalSecurity(securityInput);
+  const requestSecurity = resolveGlobalSecurity(securityInput, [0, 1]);
 
   const context = {
     options: client._options,
@@ -152,7 +154,8 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["400", "401", "404", "4XX", "5XX"],
+    isErrorStatusCode: (statusCode: number) =>
+      matchStatusCode({ status: statusCode } as Response, ["4XX", "5XX"]),
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -179,11 +182,12 @@ async function $do(
         z.transform(stream => {
           return new EventStream(stream, rawEvent => {
             return {
+              done: false,
               value: models.AgentMessageStreamSSEEvent$inboundSchema.parse(
                 rawEvent,
               ),
             };
-          });
+          }, { dataRequired: false });
         }),
       ),
     ),

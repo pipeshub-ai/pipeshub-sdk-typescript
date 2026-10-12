@@ -12,7 +12,7 @@ import { SDKValidationError } from "./errors/sdk-validation-error.js";
  * Response returned by POST /knowledgeBase/reindex/record/{recordId}.
  */
 export type ReIndexRecordResponseSchema = {
-  success: boolean;
+  success: true;
   message: string;
   recordId?: string | null | undefined;
   recordName?: string | null | undefined;
@@ -27,7 +27,7 @@ export const ReIndexRecordResponseSchema$inboundSchema: z.ZodMiniType<
   ReIndexRecordResponseSchema,
   unknown
 > = z.object({
-  success: types.boolean(),
+  success: types.literal(true),
   message: types.string(),
   recordId: z.optional(z.nullable(types.string())),
   recordName: z.optional(z.nullable(types.string())),

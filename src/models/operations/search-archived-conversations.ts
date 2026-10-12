@@ -10,6 +10,7 @@ import { OpenEnum } from "../../types/enums.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
 
 export type SearchArchivedConversationsRequest = {
   /**
@@ -31,6 +32,7 @@ export const SearchArchivedConversationsStatus = {
   Inprogress: "Inprogress",
   Complete: "Complete",
   Failed: "Failed",
+  Stopped: "Stopped",
 } as const;
 export type SearchArchivedConversationsStatus = OpenEnum<
   typeof SearchArchivedConversationsStatus
@@ -72,6 +74,30 @@ export const SearchArchivedConversationsAccessLevel = {
 } as const;
 export type SearchArchivedConversationsAccessLevel = OpenEnum<
   typeof SearchArchivedConversationsAccessLevel
+>;
+
+/**
+ * Only meaningful when `projectId` is set. `private` (default)
+ *
+ * @remarks
+ * keeps the conversation visible to its owner only; `project`
+ * exposes it to every member of the linked project. See
+ * `PATCH /conversations/{conversationId}/project-visibility`.
+ */
+export const SearchArchivedConversationsProjectVisibility = {
+  Private: "private",
+  Project: "project",
+} as const;
+/**
+ * Only meaningful when `projectId` is set. `private` (default)
+ *
+ * @remarks
+ * keeps the conversation visible to its owner only; `project`
+ * exposes it to every member of the linked project. See
+ * `PATCH /conversations/{conversationId}/project-visibility`.
+ */
+export type SearchArchivedConversationsProjectVisibility = OpenEnum<
+  typeof SearchArchivedConversationsProjectVisibility
 >;
 
 /**
@@ -127,6 +153,33 @@ export type SearchArchivedConversationsConversation = {
   updatedAt?: Date | undefined;
   isOwner?: boolean | undefined;
   accessLevel?: SearchArchivedConversationsAccessLevel | undefined;
+  /**
+   * The project this conversation is linked to, if any. Set via
+   *
+   * @remarks
+   * `PUT /conversations/{conversationId}/project` or at creation
+   * time; absent on conversations that were never linked.
+   */
+  projectId?: string | null | undefined;
+  /**
+   * Only meaningful when `projectId` is set. `private` (default)
+   *
+   * @remarks
+   * keeps the conversation visible to its owner only; `project`
+   * exposes it to every member of the linked project. See
+   * `PATCH /conversations/{conversationId}/project-visibility`.
+   */
+  projectVisibility?:
+    | SearchArchivedConversationsProjectVisibility
+    | null
+    | undefined;
+  /**
+   * Present on conversations the caller received via share. Identifies the
+   *
+   * @remarks
+   * conversation initiator (the only user who can share a chat).
+   */
+  sharedBy?: models.ConversationSharedBy | undefined;
   /**
    * Origin collection of the conversation
    */
@@ -332,6 +385,11 @@ export const SearchArchivedConversationsAccessLevel$inboundSchema:
     .inboundSchema(SearchArchivedConversationsAccessLevel);
 
 /** @internal */
+export const SearchArchivedConversationsProjectVisibility$inboundSchema:
+  z.ZodMiniType<SearchArchivedConversationsProjectVisibility, unknown> =
+    openEnums.inboundSchema(SearchArchivedConversationsProjectVisibility);
+
+/** @internal */
 export const SearchArchivedConversationsSource$inboundSchema: z.ZodMiniType<
   SearchArchivedConversationsSource,
   unknown
@@ -371,6 +429,11 @@ export const SearchArchivedConversationsConversation$inboundSchema:
       accessLevel: types.optional(
         SearchArchivedConversationsAccessLevel$inboundSchema,
       ),
+      projectId: z.optional(z.nullable(types.string())),
+      projectVisibility: z.optional(
+        z.nullable(SearchArchivedConversationsProjectVisibility$inboundSchema),
+      ),
+      sharedBy: types.optional(models.ConversationSharedBy$inboundSchema),
       source: types.optional(SearchArchivedConversationsSource$inboundSchema),
       agentKey: types.optional(types.string()),
       archivedAt: types.optional(types.date()),

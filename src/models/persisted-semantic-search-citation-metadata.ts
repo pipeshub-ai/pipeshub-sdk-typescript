@@ -33,6 +33,14 @@ export type PersistedSemanticSearchCitationMetadata = {
   previewRenderable?: boolean | null | undefined;
   hideWeburl?: boolean | null | undefined;
   connector?: string | null | undefined;
+  /**
+   * The connector instance the record came from. `connector` names only
+   *
+   * @remarks
+   * the kind of source (for example `SLACK`), which several instances can
+   * share. Absent on citations saved before this field was stored.
+   */
+  connectorId?: string | null | undefined;
   recordType?: string | null | undefined;
   blockNum?: Array<number | null> | null | undefined;
   pageNum?: Array<number | null> | null | undefined;
@@ -67,6 +75,7 @@ export const PersistedSemanticSearchCitationMetadata$inboundSchema:
       previewRenderable: z.optional(z.nullable(types.boolean())),
       hideWeburl: z.optional(z.nullable(types.boolean())),
       connector: z.optional(z.nullable(types.string())),
+      connectorId: z.optional(z.nullable(types.string())),
       recordType: z.optional(z.nullable(types.string())),
       blockNum: z.optional(z.nullable(z.array(types.nullable(types.number())))),
       pageNum: z.optional(z.nullable(z.array(types.nullable(types.number())))),

@@ -4,11 +4,13 @@
 
 import * as z from "zod/v4-mini";
 import { PipeshubCore } from "../core.js";
-import { appendForm, encodeSimple } from "../lib/encodings.js";
+import { appendForm, encodeSimple, normalizeBlob } from "../lib/encodings.js";
 import {
+  bytesToBlob,
   getContentTypeFromFileName,
   readableStreamToArrayBuffer,
 } from "../lib/files.js";
+import { matchStatusCode } from "../lib/http.js";
 import * as M from "../lib/matchers.js";
 import { compactMap } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
@@ -55,6 +57,8 @@ import { isReadableStream } from "../types/streams.js";
  * - Updates `updatedAtTimestamp`
  * - Increments version if file content changed
  * - Triggers re-indexing for content changes
+ *
+ * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
 export function knowledgeBaseUpdateRecord(
   client: PipeshubCore,
@@ -115,7 +119,10 @@ async function $do(
   if (payload.body != null) {
     if (payload.body.file !== undefined) {
       if (isBlobLike(payload.body.file)) {
-        appendForm(body, "file", payload.body.file);
+        const file = payload.body.file;
+        const blob = await normalizeBlob(file);
+        const name = "name" in file ? (file.name as string) : undefined;
+        appendForm(body, "file", blob, name);
       } else if (isReadableStream(payload.body.file.content)) {
         const buffer = await readableStreamToArrayBuffer(
           payload.body.file.content,
@@ -123,8 +130,12 @@ async function $do(
         const contentType =
           getContentTypeFromFileName(payload.body.file.fileName)
           || "application/octet-stream";
-        const blob = new Blob([buffer], { type: contentType });
-        appendForm(body, "file", blob, payload.body.file.fileName);
+        appendForm(
+          body,
+          "file",
+          bytesToBlob(buffer, contentType),
+          payload.body.file.fileName,
+        );
       } else {
         const contentType =
           getContentTypeFromFileName(payload.body.file.fileName)
@@ -132,7 +143,7 @@ async function $do(
         appendForm(
           body,
           "file",
-          new Blob([payload.body.file.content], { type: contentType }),
+          bytesToBlob(payload.body.file.content, contentType),
           payload.body.file.fileName,
         );
       }
@@ -148,7 +159,6 @@ async function $do(
       charEncoding: "percent",
     }),
   };
-
   const path = pathToFunc("/knowledgeBase/record/{recordId}")(pathParams);
 
   const headers = new Headers(compactMap({
@@ -156,7 +166,7 @@ async function $do(
   }));
 
   const securityInput = await extractSecurity(client._options.security);
-  const requestSecurity = resolveGlobalSecurity(securityInput);
+  const requestSecurity = resolveGlobalSecurity(securityInput, [0, 1]);
 
   const context = {
     options: client._options,
@@ -190,7 +200,8 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["400", "401", "403", "404", "4XX", "500", "503", "5XX"],
+    isErrorStatusCode: (statusCode: number) =>
+      matchStatusCode({ status: statusCode } as Response, ["4XX", "5XX"]),
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });

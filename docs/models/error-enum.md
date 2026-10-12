@@ -16,11 +16,11 @@ Error code. Common values:
 import { ErrorEnum } from "@pipeshub-ai/sdk/models";
 
 let value: ErrorEnum = "unauthorized_client";
+
+// Open enum: unrecognized values are captured as Unrecognized<string>
 ```
 
 ## Values
-
-This is an open enum. Unrecognized values will be captured as the `Unrecognized<string>` branded type.
 
 ```typescript
 "invalid_request" | "invalid_client" | "invalid_grant" | "unauthorized_client" | "unsupported_grant_type" | "invalid_scope" | "access_denied" | "server_error" | Unrecognized<string>

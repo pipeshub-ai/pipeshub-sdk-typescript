@@ -5,6 +5,7 @@
 import * as z from "zod/v4-mini";
 import { PipeshubCore } from "../core.js";
 import { encodeJSON } from "../lib/encodings.js";
+import { matchStatusCode } from "../lib/http.js";
 import * as M from "../lib/matchers.js";
 import { compactMap } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
@@ -43,9 +44,16 @@ import { Result } from "../types/fp.js";
  * env var, not the full role-aware OAuth-app scope catalog — a
  * non-admin can request any scope in that set.
  *
+ * **Session only.** The bearer token must be the user's interactive
+ * session JWT. OAuth access tokens and personal access tokens
+ * (`phpat_...`) are rejected with `403`, so a token that is already
+ * issued cannot mint another with wider scopes or a longer life.
+ *
  * The response's `accessToken` is shown **once**; only its SHA-256
  * hash is stored. It's prefixed `phpat_` (see the `bearerAuth`
  * security scheme).
+ *
+ * If set, this operation will use {@link Security.bearerAuth} from the global security.
  */
 export function personalAccessTokensCreatePersonalAccessToken(
   client: PipeshubCore,
@@ -114,13 +122,13 @@ async function $do(
   }));
 
   const securityInput = await extractSecurity(client._options.security);
-  const requestSecurity = resolveGlobalSecurity(securityInput);
+  const requestSecurity = resolveGlobalSecurity(securityInput, [0]);
 
   const context = {
     options: client._options,
     baseURL: options?.serverURL ?? client._baseURL ?? "",
     operationID: "createPersonalAccessToken",
-    oAuth2Scopes: [],
+    oAuth2Scopes: null,
 
     resolvedSecurity: requestSecurity,
 
@@ -148,7 +156,8 @@ async function $do(
 
   const doResult = await client._do(req, {
     context,
-    errorCodes: ["400", "401", "429", "4XX", "5XX"],
+    isErrorStatusCode: (statusCode: number) =>
+      matchStatusCode({ status: statusCode } as Response, ["4XX", "5XX"]),
     retryConfig: context.retryConfig,
     retryCodes: context.retryCodes,
   });
@@ -175,7 +184,10 @@ async function $do(
     | SDKValidationError
   >(
     M.json(201, models.CreatePatResponse$inboundSchema),
-    M.jsonErr([400, 401], errors.ApplicationJsonErrorResponse$inboundSchema),
+    M.jsonErr(
+      [400, 401, 403],
+      errors.ApplicationJsonErrorResponse$inboundSchema,
+    ),
     M.jsonErr(429, errors.OAuthClientManagementRateLimitError$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

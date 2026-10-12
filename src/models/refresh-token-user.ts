@@ -5,9 +5,46 @@
 import * as z from "zod/v4-mini";
 import { remap as remap$ } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
+import * as openEnums from "../types/enums.js";
+import { OpenEnum } from "../types/enums.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
+import { Address, Address$inboundSchema } from "./address.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
+
+/**
+ * Whether this account is a person who signs in (`human`) or a
+ *
+ * @remarks
+ * machine identity that automation authenticates as (`service`).
+ * Absent on records written before service accounts existed, which
+ * are all human.
+ */
+export const Kind = {
+  Human: "human",
+  Service: "service",
+} as const;
+/**
+ * Whether this account is a person who signs in (`human`) or a
+ *
+ * @remarks
+ * machine identity that automation authenticates as (`service`).
+ * Absent on records written before service accounts existed, which
+ * are all human.
+ */
+export type Kind = OpenEnum<typeof Kind>;
+
+/**
+ * Organization role stored on the user document (`admin` or `member`)
+ */
+export const RefreshTokenUserRole = {
+  Admin: "admin",
+  Member: "member",
+} as const;
+/**
+ * Organization role stored on the user document (`admin` or `member`)
+ */
+export type RefreshTokenUserRole = OpenEnum<typeof RefreshTokenUserRole>;
 
 /**
  * User record returned with a refreshed access token
@@ -25,14 +62,76 @@ export type RefreshTokenUser = {
   fullName: string;
   firstName?: string | undefined;
   lastName?: string | undefined;
+  middleName?: string | undefined;
+  /**
+   * Mobile number (10-15 digits with optional +)
+   */
+  mobile?: string | undefined;
   designation?: string | undefined;
+  /**
+   * Whether this account is a person who signs in (`human`) or a
+   *
+   * @remarks
+   * machine identity that automation authenticates as (`service`).
+   * Absent on records written before service accounts existed, which
+   * are all human.
+   */
+  kind?: Kind | undefined;
+  /**
+   * Free text explaining what a service account is for. Unused for people.
+   */
+  description?: string | undefined;
+  /**
+   * The account is suspended: its tokens stop working and no session
+   *
+   * @remarks
+   * can be issued, but the record, its group memberships and its
+   * permission-graph node survive so it can be switched back on.
+   */
+  isDisabled: boolean;
+  /**
+   * Internal and transient. Present only while a deleted service
+   *
+   * @remarks
+   * account is being brought back, and cleared when that finishes
+   * either way. It lets the steps that complete or undo a restore tell
+   * their own attempt from a later one. Not something to depend on.
+   */
+  restoreOpId?: string | undefined;
+  /**
+   * Organization role stored on the user document (`admin` or `member`)
+   */
+  role?: RefreshTokenUserRole | undefined;
+  address?: Address | undefined;
+  /**
+   * Whether user has consented to data collection
+   */
+  dataCollectionConsent?: boolean | undefined;
   hasLoggedIn: boolean;
   isDeleted: boolean;
+  /**
+   * ID of user who deleted this user
+   */
+  deletedBy?: string | undefined;
+  /**
+   * Base64-encoded data URI of the user's display picture
+   */
+  profilePicture?: string | null | undefined;
   slug: string;
   createdAt: string;
   updatedAt: string;
   v: number;
 };
+
+/** @internal */
+export const Kind$inboundSchema: z.ZodMiniType<Kind, unknown> = openEnums
+  .inboundSchema(Kind);
+
+/** @internal */
+export const RefreshTokenUserRole$inboundSchema: z.ZodMiniType<
+  RefreshTokenUserRole,
+  unknown
+> = openEnums.inboundSchema(RefreshTokenUserRole);
 
 /** @internal */
 export const RefreshTokenUser$inboundSchema: z.ZodMiniType<
@@ -46,9 +145,20 @@ export const RefreshTokenUser$inboundSchema: z.ZodMiniType<
     fullName: types.string(),
     firstName: types.optional(types.string()),
     lastName: types.optional(types.string()),
+    middleName: types.optional(types.string()),
+    mobile: types.optional(types.string()),
     designation: types.optional(types.string()),
+    kind: types.optional(Kind$inboundSchema),
+    description: types.optional(types.string()),
+    isDisabled: z._default(types.boolean(), false),
+    restoreOpId: types.optional(types.string()),
+    role: types.optional(RefreshTokenUserRole$inboundSchema),
+    address: types.optional(Address$inboundSchema),
+    dataCollectionConsent: types.optional(types.boolean()),
     hasLoggedIn: types.boolean(),
     isDeleted: types.boolean(),
+    deletedBy: types.optional(types.string()),
+    profilePicture: z.optional(z.nullable(types.string())),
     slug: types.string(),
     createdAt: types.string(),
     updatedAt: types.string(),

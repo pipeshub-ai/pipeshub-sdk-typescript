@@ -9,6 +9,10 @@ import * as openEnums from "../types/enums.js";
 import { OpenEnum } from "../types/enums.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
+import {
+  ConversationSharedBy,
+  ConversationSharedBy$inboundSchema,
+} from "./conversation-shared-by.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
 export const ConversationListItemStatus = {
@@ -16,12 +20,13 @@ export const ConversationListItemStatus = {
   Inprogress: "Inprogress",
   Complete: "Complete",
   Failed: "Failed",
+  Stopped: "Stopped",
 } as const;
 export type ConversationListItemStatus = OpenEnum<
   typeof ConversationListItemStatus
 >;
 
-export type ModelInfo = {
+export type ConversationListItemModelInfo = {
   modelKey?: string | undefined;
   modelName?: string | undefined;
   modelFriendlyName?: string | undefined;
@@ -60,6 +65,30 @@ export type ConversationListItemAccessLevel = OpenEnum<
 >;
 
 /**
+ * Only meaningful when `projectId` is set. `private` (default)
+ *
+ * @remarks
+ * keeps the conversation visible to its owner only; `project`
+ * exposes it to every member of the linked project. See
+ * `PATCH /conversations/{conversationId}/project-visibility`.
+ */
+export const ConversationListItemProjectVisibility = {
+  Private: "private",
+  Project: "project",
+} as const;
+/**
+ * Only meaningful when `projectId` is set. `private` (default)
+ *
+ * @remarks
+ * keeps the conversation visible to its owner only; `project`
+ * exposes it to every member of the linked project. See
+ * `PATCH /conversations/{conversationId}/project-visibility`.
+ */
+export type ConversationListItemProjectVisibility = OpenEnum<
+  typeof ConversationListItemProjectVisibility
+>;
+
+/**
  * Conversation summary returned by list endpoints. Identical to
  *
  * @remarks
@@ -74,7 +103,7 @@ export type ConversationListItem = {
   initiator?: string | undefined;
   status?: ConversationListItemStatus | undefined;
   failReason?: string | undefined;
-  modelInfo?: ModelInfo | undefined;
+  modelInfo?: ConversationListItemModelInfo | undefined;
   isShared?: boolean | undefined;
   shareLink?: string | undefined;
   sharedWith?: Array<ConversationListItemSharedWith> | undefined;
@@ -96,6 +125,30 @@ export type ConversationListItem = {
   updatedAt?: Date | undefined;
   isOwner?: boolean | undefined;
   accessLevel?: ConversationListItemAccessLevel | undefined;
+  /**
+   * The project this conversation is linked to, if any. Set via
+   *
+   * @remarks
+   * `PUT /conversations/{conversationId}/project` or at creation
+   * time; absent on conversations that were never linked.
+   */
+  projectId?: string | null | undefined;
+  /**
+   * Only meaningful when `projectId` is set. `private` (default)
+   *
+   * @remarks
+   * keeps the conversation visible to its owner only; `project`
+   * exposes it to every member of the linked project. See
+   * `PATCH /conversations/{conversationId}/project-visibility`.
+   */
+  projectVisibility?: ConversationListItemProjectVisibility | null | undefined;
+  /**
+   * Present on conversations the caller received via share. Identifies the
+   *
+   * @remarks
+   * conversation initiator (the only user who can share a chat).
+   */
+  sharedBy?: ConversationSharedBy | undefined;
 };
 
 /** @internal */
@@ -105,22 +158,24 @@ export const ConversationListItemStatus$inboundSchema: z.ZodMiniType<
 > = openEnums.inboundSchema(ConversationListItemStatus);
 
 /** @internal */
-export const ModelInfo$inboundSchema: z.ZodMiniType<ModelInfo, unknown> = z
-  .object({
-    modelKey: types.optional(types.string()),
-    modelName: types.optional(types.string()),
-    modelFriendlyName: types.optional(types.string()),
-    modelProvider: types.optional(types.string()),
-    chatMode: types.optional(types.string()),
-  });
+export const ConversationListItemModelInfo$inboundSchema: z.ZodMiniType<
+  ConversationListItemModelInfo,
+  unknown
+> = z.object({
+  modelKey: types.optional(types.string()),
+  modelName: types.optional(types.string()),
+  modelFriendlyName: types.optional(types.string()),
+  modelProvider: types.optional(types.string()),
+  chatMode: types.optional(types.string()),
+});
 
-export function modelInfoFromJSON(
+export function conversationListItemModelInfoFromJSON(
   jsonString: string,
-): SafeParseResult<ModelInfo, SDKValidationError> {
+): SafeParseResult<ConversationListItemModelInfo, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => ModelInfo$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'ModelInfo' from JSON`,
+    (x) => ConversationListItemModelInfo$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ConversationListItemModelInfo' from JSON`,
   );
 }
 
@@ -181,6 +236,12 @@ export const ConversationListItemAccessLevel$inboundSchema: z.ZodMiniType<
 > = openEnums.inboundSchema(ConversationListItemAccessLevel);
 
 /** @internal */
+export const ConversationListItemProjectVisibility$inboundSchema: z.ZodMiniType<
+  ConversationListItemProjectVisibility,
+  unknown
+> = openEnums.inboundSchema(ConversationListItemProjectVisibility);
+
+/** @internal */
 export const ConversationListItem$inboundSchema: z.ZodMiniType<
   ConversationListItem,
   unknown
@@ -193,7 +254,9 @@ export const ConversationListItem$inboundSchema: z.ZodMiniType<
     initiator: types.optional(types.string()),
     status: types.optional(ConversationListItemStatus$inboundSchema),
     failReason: types.optional(types.string()),
-    modelInfo: types.optional(z.lazy(() => ModelInfo$inboundSchema)),
+    modelInfo: types.optional(
+      z.lazy(() => ConversationListItemModelInfo$inboundSchema),
+    ),
     isShared: types.optional(types.boolean()),
     shareLink: types.optional(types.string()),
     sharedWith: types.optional(
@@ -214,6 +277,11 @@ export const ConversationListItem$inboundSchema: z.ZodMiniType<
     updatedAt: types.optional(types.date()),
     isOwner: types.optional(types.boolean()),
     accessLevel: types.optional(ConversationListItemAccessLevel$inboundSchema),
+    projectId: z.optional(z.nullable(types.string())),
+    projectVisibility: z.optional(
+      z.nullable(ConversationListItemProjectVisibility$inboundSchema),
+    ),
+    sharedBy: types.optional(ConversationSharedBy$inboundSchema),
   }),
   z.transform((v) => {
     return remap$(v, {

@@ -1,4 +1,7 @@
 # pipeshub-sdk-typescript
+
+**Compatibility:** SDK version 1.7.0 is compatible with PipesHub [v0.9.1](https://github.com/pipeshub-ai/pipeshub-ai/releases/tag/v0.9.1).
+
 <!-- Start Summary [summary] -->
 ## Summary
 

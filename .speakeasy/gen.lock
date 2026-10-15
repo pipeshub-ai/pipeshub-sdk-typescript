@@ -3519,22 +3519,6 @@ trackedFiles:
     id: 461c8d07f6da
     last_write_checksum: sha1:9398f326377fe47f67af2df6eb6370750c0790b4
     pristine_git_object: 67bccfec985be20a00970d90155752832dd47135
-  examples/.env.template:
-    id: 52cbe5afed92
-    last_write_checksum: sha1:678c3e849a4dbd4fbfdb41e1d2b20fb1f6b6a487
-    pristine_git_object: c4540362d2f020e0e26ee0bbaea3df832094efaf
-  examples/README.md:
-    id: 9d0f69d6e677
-    last_write_checksum: sha1:a6371e2e91866594aaa4126aaed31f592f8cc7bf
-    pristine_git_object: 5b13e2922dc2b4b573fa15c8ba1227616497d23c
-  examples/oAuthProviderOauthToken.example.ts:
-    id: 46354c93eeb5
-    last_write_checksum: sha1:ac689f873644370824b0c0be351e35fd5657145d
-    pristine_git_object: 698813cd5a3979131c6da7b0ff3222b45d9b2c14
-  examples/package.json:
-    id: c1d7b0ec8e7e
-    last_write_checksum: sha1:60a9c8b1f2af03bad5dfcc7d8919a1118a0e88eb
-    pristine_git_object: 8989ad1bbc509f0ce1709a473a88ad2d72a806bc
   jsr.json:
     id: 7f6ab7767282
     last_write_checksum: sha1:e9a47c05a70eb799fdb86f44ab0540575032b274

@@ -61,7 +61,7 @@ typescript:
   formStringArrayEncodeMode: array
   forwardCompatibleEnumsByDefault: true
   forwardCompatibleUnionsByDefault: tagged-only
-  generateExamples: true
+  generateExamples: false
   imports:
     option: openapi
     paths:

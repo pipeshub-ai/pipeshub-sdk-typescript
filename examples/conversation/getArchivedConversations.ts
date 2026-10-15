@@ -1,3 +1,5 @@
+// List archived conversations.
+// No IDs needed.
 import "dotenv/config";
 import { Pipeshub } from "@pipeshub-ai/sdk";
 
@@ -15,27 +17,13 @@ const pipeshub = new Pipeshub({
 });
 
 async function main() {
-  const created = await pipeshub.conversations.createConversation({
-    query: "Who moved the cheese?",
-    chatMode: "internal_search",
-  }, { timeoutMs: 300_000 });
-
-  const conversationId = created.result.conversation.id;
-  if (!conversationId) throw new Error("createConversation returned no conversation id");
-
-  await pipeshub.conversations.archiveConversation({ conversationId });
-
   const result = await pipeshub.conversations.getArchivedConversations({
     limit: 20,
     sortBy: "lastActivityAt",
     sortOrder: "desc",
   });
 
-  for (const conversation of result.conversations ?? []) {
-    console.log(`${conversation.id}  ${conversation.title ?? "(untitled)"}`);
-  }
-
-  await pipeshub.conversations.deleteConversationById({ conversationId });
+  console.log(result.conversations?.map((c) => c.title));
 }
 
 main().catch(console.error);

@@ -1,3 +1,5 @@
+// Start a conversation and get the first answer (non-streaming).
+// No IDs needed.
 import "dotenv/config";
 import { Pipeshub } from "@pipeshub-ai/sdk";
 
@@ -15,23 +17,12 @@ const pipeshub = new Pipeshub({
 });
 
 async function main() {
-  // Non-streaming: the request returns once the answer is complete.
-  const { result } = await pipeshub.conversations.createConversation({
-    query: "Who moved the cheese?",
-    chatMode: "internal_search",
-  }, { timeoutMs: 300_000 });
+  const created = await pipeshub.conversations.createConversation(
+    { query: "Who moved the cheese?", chatMode: "internal_search" },
+    { timeoutMs: 300_000 },
+  );
 
-  const { conversation } = result;
-  if (!conversation.id) throw new Error("createConversation returned no conversation id");
-
-  const answer = conversation.messages
-    ?.filter((m) => m.messageType === "bot_response")
-    .at(-1);
-
-  console.log(`conversation id: ${conversation.id}`);
-  console.log(answer?.content);
-
-  await pipeshub.conversations.deleteConversationById({ conversationId: conversation.id });
+  console.log(created.result.conversation.id);
 }
 
 main().catch(console.error);

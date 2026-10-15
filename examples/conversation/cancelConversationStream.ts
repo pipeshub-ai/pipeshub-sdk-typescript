@@ -1,5 +1,6 @@
+// Cancel a running chat stream; runId is the one you passed to streamChat.
+// Needs PIPESHUB_CONVERSATION_ID, PIPESHUB_RUN_ID.
 import "dotenv/config";
-import { randomUUID } from "node:crypto";
 import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
@@ -15,39 +16,16 @@ const pipeshub = new Pipeshub({
   },
 });
 
-async function main() {
-  // A client-generated runId is what makes the run cancellable.
-  const runId = randomUUID();
+const conversationId = process.env["PIPESHUB_CONVERSATION_ID"] ?? "";
+const runId = process.env["PIPESHUB_RUN_ID"] ?? "";
 
-  const stream = await pipeshub.conversations.streamChat({
-    query: "Write a detailed, multi-section history of cheese making.",
-    chatMode: "internal_search",
-    runId,
+async function main() {
+  const cancelled = await pipeshub.conversations.cancelConversationStream({
+    conversationId,
+    body: { runId },
   });
 
-  let conversationId: string | undefined;
-
-  for await (const event of stream) {
-    const data = event.data ? JSON.parse(event.data) : undefined;
-    if (event.event === "RUN_ERROR") throw new Error(data.message);
-    if (event.event === "CUSTOM" && data.name === "conversation_created") {
-      conversationId = data.value.conversationId;
-    }
-
-    // Cancel as soon as the answer starts arriving.
-    if (event.event === "TEXT_MESSAGE_CONTENT" && conversationId) {
-      const cancelled = await pipeshub.conversations.cancelConversationStream({
-        conversationId,
-        body: { runId },
-      });
-      console.log(cancelled);
-      break;
-    }
-  }
-
-  if (!conversationId) throw new Error("stream ended without a conversation id");
-
-  await pipeshub.conversations.deleteConversationById({ conversationId });
+  console.log(cancelled);
 }
 
 main().catch(console.error);

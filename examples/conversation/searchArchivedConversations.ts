@@ -1,3 +1,5 @@
+// Search archived conversations by title.
+// No IDs needed.
 import "dotenv/config";
 import { Pipeshub } from "@pipeshub-ai/sdk";
 
@@ -15,31 +17,12 @@ const pipeshub = new Pipeshub({
 });
 
 async function main() {
-  const created = await pipeshub.conversations.createConversation({
-    query: "Who moved the cheese?",
-    chatMode: "internal_search",
-  }, { timeoutMs: 300_000 });
-
-  const conversationId = created.result.conversation.id;
-  if (!conversationId) throw new Error("createConversation returned no conversation id");
-
-  // Give it a known title so the search below has something to match.
-  await pipeshub.conversations.updateConversationTitle({
-    conversationId,
-    body: { title: "Cheese logistics review" },
-  });
-  await pipeshub.conversations.archiveConversation({ conversationId });
-
   const result = await pipeshub.conversations.searchArchivedConversations({
     search: "cheese logistics",
     limit: 20,
   });
 
-  for (const conversation of result.conversations ?? []) {
-    console.log(`${conversation.id}  ${conversation.source}  ${conversation.title}`);
-  }
-
-  await pipeshub.conversations.deleteConversationById({ conversationId });
+  console.log(result.conversations?.map((c) => c.title));
 }
 
 main().catch(console.error);

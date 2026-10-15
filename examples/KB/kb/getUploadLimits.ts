@@ -1,3 +1,5 @@
+// Read the upload limits (files per request, max file size).
+// No IDs needed.
 import "dotenv/config";
 import { Pipeshub } from "@pipeshub-ai/sdk";
 
@@ -17,8 +19,7 @@ const pipeshub = new Pipeshub({
 async function main() {
   const limits = await pipeshub.knowledgeBase.getUploadLimits();
 
-  console.log(`max files per request: ${limits.maxFilesPerRequest}`);
-  console.log(`max file size: ${(limits.maxFileSizeBytes / 1024 / 1024).toFixed(1)} MiB`);
+  console.log(limits);
 }
 
 main().catch(console.error);

@@ -1,6 +1,6 @@
+// List the deleted records of a knowledge base. Needs the Labs setting "Move Deleted Records to the Trash".
+// Needs PIPESHUB_KB_ID.
 import "dotenv/config";
-import { openAsBlob } from "node:fs";
-import { basename } from "node:path";
 import { Pipeshub } from "@pipeshub-ai/sdk";
 
 const pipeshub = new Pipeshub({
@@ -16,43 +16,12 @@ const pipeshub = new Pipeshub({
   },
 });
 
-const uploadPath = process.env["PIPESHUB_UPLOAD_PATH"] ?? "";
-
-// Needs the workspace Labs setting "Move Deleted Records to the Trash"
-// (ENABLE_SOFT_DELETE). Without it, deleted records are gone for good.
+const kbId = process.env["PIPESHUB_KB_ID"] ?? "";
 
 async function main() {
-  const kb = await pipeshub.knowledgeBase.createKnowledgeBase({
-    kbName: "Internal documents",
-  });
+  const trash = await pipeshub.knowledgeBase.listTrash({ kbId, limit: 20 });
 
-  const upload = await pipeshub.knowledgeBase.uploadRecords({
-    kbId: kb.id,
-    body: {
-      files: [{ fileName: basename(uploadPath), content: await openAsBlob(uploadPath) }],
-    },
-  }, { timeoutMs: 120_000 });
-
-  let recordId: string | undefined;
-
-  for await (const event of upload) {
-    if (event.event === "file:succeeded" && event.data) {
-      recordId = JSON.parse(event.data).recordId;
-    }
-  }
-
-  if (!recordId) throw new Error("upload finished without a file:succeeded event");
-
-  await pipeshub.knowledgeBase.deleteRecord({ recordId });
-
-  const trash = await pipeshub.knowledgeBase.listTrash({ kbId: kb.id, limit: 20 });
-
-  for (const item of trash.items) {
-    const deletedAt = new Date(item.deletedAtTimestamp).toISOString();
-    console.log(`${item.id}  ${item.name}  deleted ${deletedAt} by ${item.deletedBy?.email ?? "?"}`);
-  }
-
-  await pipeshub.knowledgeBase.deleteKnowledgeBase({ kbId: kb.id });
+  console.log(trash.items.map((item) => item.name));
 }
 
 main().catch(console.error);

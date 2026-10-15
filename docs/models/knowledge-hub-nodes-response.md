@@ -12,9 +12,10 @@ omitted properties).
 import { KnowledgeHubNodesResponse } from "@pipeshub-ai/sdk/models";
 
 let value: KnowledgeHubNodesResponse = {
+  maxFolderDepth: 957560,
   success: true,
-  error: "<value>",
-  id: null,
+  error: null,
+  id: "<id>",
   currentNode: {
     id: "<id>",
     name: "<value>",
@@ -25,44 +26,14 @@ let value: KnowledgeHubNodesResponse = {
     name: "<value>",
     nodeType: "<value>",
   },
-  items: [
-    {
-      id: "<id>",
-      name: "<value>",
-      nodeType: "recordGroup",
-      parentId: "<id>",
-      origin: "CONNECTOR",
-      connector: "<value>",
-      connectorId: null,
-      recordType: "<value>",
-      recordGroupType: null,
-      indexingStatus: "<value>",
-      reason: "<value>",
-      isInternal: false,
-      isPlaceholder: false,
-      createdAt: 88267,
-      updatedAt: 777139,
-      sizeInBytes: 12362,
-      mimeType: "<value>",
-      extension: "wav",
-      webUrl: "https://separate-pillow.biz",
-      hasChildren: false,
-      previewRenderable: false,
-      permission: {
-        role: "<value>",
-        canEdit: true,
-        canDelete: true,
-      },
-      sharingStatus: "<value>",
-    },
-  ],
+  items: [],
   pagination: {
-    page: 167842,
-    limit: 705510,
-    totalItems: 476931,
-    totalPages: 208529,
+    page: 714167,
+    limit: 834106,
+    totalItems: 649371,
+    totalPages: 34717,
     hasNext: false,
-    hasPrev: false,
+    hasPrev: true,
   },
   filters: {
     applied: {
@@ -124,23 +95,24 @@ let value: KnowledgeHubNodesResponse = {
       sortOrder: [],
     },
   },
-  breadcrumbs: [],
+  breadcrumbs: [
+    {
+      id: "<id>",
+      name: "<value>",
+      nodeType: "<value>",
+    },
+  ],
   counts: {
-    items: [
-      {
-        label: "<value>",
-        count: 434157,
-      },
-    ],
-    total: 766076,
+    items: [],
+    total: 777139,
   },
   permissions: {
     role: "<value>",
     canUpload: true,
-    canCreateFolders: true,
-    canEdit: true,
-    canDelete: false,
-    canManagePermissions: true,
+    canCreateFolders: false,
+    canEdit: false,
+    canDelete: true,
+    canManagePermissions: false,
   },
 };
 ```
@@ -149,6 +121,7 @@ let value: KnowledgeHubNodesResponse = {
 
 | Field                                                                                              | Type                                                                                               | Required                                                                                           | Description                                                                                        |
 | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `maxFolderDepth`                                                                                   | *number*                                                                                           | :heavy_check_mark:                                                                                 | Deepest a collection folder may be nested; a folder directly in the collection is depth 1.         |
 | `success`                                                                                          | *true*                                                                                             | :heavy_check_mark:                                                                                 | Always `true` on HTTP 200. Failures use 4xx/5xx error envelopes, not this body shape.              |
 | `error`                                                                                            | *string*                                                                                           | :heavy_check_mark:                                                                                 | Always `null` on HTTP 200.                                                                         |
 | `id`                                                                                               | *string*                                                                                           | :heavy_check_mark:                                                                                 | Current parent node ID when browsing children; `null` at root.                                     |

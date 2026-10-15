@@ -198,7 +198,7 @@ async function $do(
     options: client._options,
     baseURL: options?.serverURL ?? client._baseURL ?? "",
     operationID: "uploadRecords",
-    oAuth2Scopes: ["kb:upload"],
+    oAuth2Scopes: ["kb:upload", "kb:read"],
 
     resolvedSecurity: requestSecurity,
 
@@ -268,7 +268,7 @@ async function $do(
       ),
     ),
     M.jsonErr(
-      [400, 401, 403, 404, 413, 429],
+      [400, 401, 403, 404, 409, 413, 429],
       errors.ErrorResponse$inboundSchema,
     ),
     M.jsonErr(500, errors.ErrorResponse$inboundSchema),

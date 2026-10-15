@@ -24,6 +24,11 @@ import {
   Filters$Outbound,
   Filters$outboundSchema,
 } from "./filters.js";
+import {
+  ToolApprovalAnswer,
+  ToolApprovalAnswer$Outbound,
+  ToolApprovalAnswer$outboundSchema,
+} from "./tool-approval-answer.js";
 
 /**
  * Only meaningful together with `projectId`. Overrides the
@@ -102,6 +107,20 @@ export type ConversationStreamRequestProtocol = ClosedEnum<
 >;
 
 /**
+ * How long each search waits for the keyword (grep) match after its semantic results are in. `short` waits at most 5 seconds and keeps the keyword matches found by then, for callers that would rather answer sooner, such as agents calling chat over MCP. `full`, or leaving it out, waits for all of it. Deployments running `HIGH_ACCURACY_MODE` always wait in full.
+ */
+export const ConversationStreamRequestKeywordSearchBudget = {
+  Short: "short",
+  Full: "full",
+} as const;
+/**
+ * How long each search waits for the keyword (grep) match after its semantic results are in. `short` waits at most 5 seconds and keeps the keyword matches found by then, for callers that would rather answer sooner, such as agents calling chat over MCP. `full`, or leaving it out, waits for all of it. Deployments running `HIGH_ACCURACY_MODE` always wait in full.
+ */
+export type ConversationStreamRequestKeywordSearchBudget = ClosedEnum<
+  typeof ConversationStreamRequestKeywordSearchBudget
+>;
+
+/**
  * Request body for `POST /conversations/stream`. The public stream
  *
  * @remarks
@@ -173,7 +192,9 @@ export type ConversationStreamRequest = {
    * Identifier for the AI model configuration to use.
    *
    * @remarks
-   * Available models depend on organization settings.
+   * Available models depend on organization settings. When neither
+   * `modelKey` nor `modelName` is sent, the organization's default
+   * model answers and is saved in the conversation's `modelInfo`.
    */
   modelKey?: string | undefined;
   /**
@@ -235,6 +256,28 @@ export type ConversationStreamRequest = {
    */
   agentCapabilities?: AgentCapabilities | undefined;
   /**
+   * Opt in to measurement frames on this stream: CUSTOM `retrieval_context` events naming the records and blocks that reached the model, and one CUSTOM `run_usage` event carrying the run's token totals and loop outcome. Identifiers only, never block text. Does not change the answer.
+   */
+  includeRetrievalContext?: boolean | undefined;
+  /**
+   * How long each search waits for the keyword (grep) match after its semantic results are in. `short` waits at most 5 seconds and keeps the keyword matches found by then, for callers that would rather answer sooner, such as agents calling chat over MCP. `full`, or leaving it out, waits for all of it. Deployments running `HIGH_ACCURACY_MODE` always wait in full.
+   */
+  keywordSearchBudget?:
+    | ConversationStreamRequestKeywordSearchBudget
+    | undefined;
+  /**
+   * The person's answer to a tool approval card. The web app sends it with the query
+   *
+   * @remarks
+   * `Tool approval: allow` or `Tool approval: deny`, and the request carries on the turn that
+   * stopped on the card: the saved call runs (when allowed) and its result answers the call
+   * the model made, in the same reply. The call is the one saved server-side when the card was
+   * shown (answerable for 15 minutes, settled once, bound to the asking user and
+   * conversation); only its id and the answer travel here. A reply that answered a card
+   * can't be regenerated.
+   */
+  toolApproval?: ToolApprovalAnswer | undefined;
+  /**
    * Client-generated identifier for this run. Send it here to enable
    *
    * @remarks
@@ -262,6 +305,12 @@ export const ConversationStreamRequestProtocol$outboundSchema: z.ZodMiniEnum<
 > = z.enum(ConversationStreamRequestProtocol);
 
 /** @internal */
+export const ConversationStreamRequestKeywordSearchBudget$outboundSchema:
+  z.ZodMiniEnum<typeof ConversationStreamRequestKeywordSearchBudget> = z.enum(
+    ConversationStreamRequestKeywordSearchBudget,
+  );
+
+/** @internal */
 export type ConversationStreamRequest$Outbound = {
   query: string;
   recordIds?: Array<string> | undefined;
@@ -279,6 +328,9 @@ export type ConversationStreamRequest$Outbound = {
   tools?: Array<string> | undefined;
   protocol?: string | undefined;
   agentCapabilities?: AgentCapabilities$Outbound | undefined;
+  includeRetrievalContext: boolean;
+  keywordSearchBudget?: string | undefined;
+  toolApproval?: ToolApprovalAnswer$Outbound | undefined;
   runId?: string | undefined;
 };
 
@@ -305,6 +357,11 @@ export const ConversationStreamRequest$outboundSchema: z.ZodMiniType<
   tools: z.optional(z.array(z.string())),
   protocol: z.optional(ConversationStreamRequestProtocol$outboundSchema),
   agentCapabilities: z.optional(AgentCapabilities$outboundSchema),
+  includeRetrievalContext: z._default(z.boolean(), false),
+  keywordSearchBudget: z.optional(
+    ConversationStreamRequestKeywordSearchBudget$outboundSchema,
+  ),
+  toolApproval: z.optional(ToolApprovalAnswer$outboundSchema),
   runId: z.optional(z.string()),
 });
 

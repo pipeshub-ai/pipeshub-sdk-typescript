@@ -1,0 +1,29 @@
+# ConnectorSchema
+
+Configuration form for a connector type: the auth fields per auth type, the sync strategies and settings, and the sync and indexing filters.
+
+## Example Usage
+
+```typescript
+import { ConnectorSchema } from "@pipeshub-ai/sdk/models";
+
+let value: ConnectorSchema = {};
+```
+
+## Fields
+
+| Field                                                                                 | Type                                                                                  | Required                                                                              | Description                                                                           |
+| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `iconPath`                                                                            | *string*                                                                              | :heavy_minus_sign:                                                                    | N/A                                                                                   |
+| `supportsRealtime`                                                                    | *boolean*                                                                             | :heavy_minus_sign:                                                                    | N/A                                                                                   |
+| `supportsSync`                                                                        | *boolean*                                                                             | :heavy_minus_sign:                                                                    | N/A                                                                                   |
+| `supportsAgent`                                                                       | *boolean*                                                                             | :heavy_minus_sign:                                                                    | N/A                                                                                   |
+| `hideConnector`                                                                       | *boolean*                                                                             | :heavy_minus_sign:                                                                    | N/A                                                                                   |
+| `permissionModel`                                                                     | *string*                                                                              | :heavy_minus_sign:                                                                    | N/A                                                                                   |
+| `isAdminAccessRequired`                                                               | *boolean*                                                                             | :heavy_minus_sign:                                                                    | N/A                                                                                   |
+| `personalConnectorType`                                                               | *string*                                                                              | :heavy_minus_sign:                                                                    | N/A                                                                                   |
+| `supportsConnectionCheck`                                                             | *boolean*                                                                             | :heavy_minus_sign:                                                                    | Whether POST /connectors/registry/{connectorType}/test-connection works for this type |
+| `documentationLinks`                                                                  | [models.ConnectorDocumentationLink](../models/connector-documentation-link.md)[]      | :heavy_minus_sign:                                                                    | N/A                                                                                   |
+| `auth`                                                                                | [models.ConnectorSchemaAuth](../models/connector-schema-auth.md)                      | :heavy_minus_sign:                                                                    | N/A                                                                                   |
+| `sync`                                                                                | [models.ConnectorSchemaSync](../models/connector-schema-sync.md)                      | :heavy_minus_sign:                                                                    | N/A                                                                                   |
+| `filters`                                                                             | [models.ConnectorSchemaFilters](../models/connector-schema-filters.md)                | :heavy_minus_sign:                                                                    | N/A                                                                                   |

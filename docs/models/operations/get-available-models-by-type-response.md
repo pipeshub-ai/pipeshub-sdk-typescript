@@ -25,6 +25,7 @@ let value: GetAvailableModelsByTypeResponse = {
       isReasoning: true,
       isDefault: true,
       modelFriendlyName: "Reasoning model",
+      defaultReasoningEffort: "low",
     },
   ],
 };

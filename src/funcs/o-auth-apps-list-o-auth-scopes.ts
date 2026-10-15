@@ -151,7 +151,7 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.OAuthScopesGroupedResponse$inboundSchema),
-    M.jsonErr(401, errors.ApplicationJsonErrorResponse$inboundSchema),
+    M.jsonErr([401, 403], errors.ApplicationJsonErrorResponse$inboundSchema),
     M.jsonErr(429, errors.OAuthClientManagementRateLimitError$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

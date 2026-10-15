@@ -124,9 +124,9 @@ export class PersonalAccessTokens extends ClientSDK {
    * compromised laptop, where only the token's own creator could
    * otherwise see or revoke it.
    *
-   * Requires org-admin privileges (`userAdminCheck`) — note this returns
-   * **`400`**, not `403`, for a non-admin caller (shared middleware
-   * behavior across the codebase, not specific to this route).
+   * Requires org-admin privileges (`userAdminCheck`): a non-admin caller
+   * gets `403` (`ForbiddenError`, message
+   * "You need admin access to do this. Ask an admin in your organisation.").
    */
   async adminListPersonalAccessTokens(
     request?: operations.AdminListPersonalAccessTokensRequest | undefined,
@@ -146,8 +146,8 @@ export class PersonalAccessTokens extends ClientSDK {
    * Revokes a token by id, scoped to the org's PAT client but **not** to
    * a specific owning user — the admin counterpart to
    * `DELETE /personal-access-tokens/{tokenId}`. Requires org-admin
-   * privileges (`userAdminCheck`); returns `400` (not `403`) for a
-   * non-admin caller, same as `GET /personal-access-tokens/admin`.
+   * privileges (`userAdminCheck`); a non-admin caller gets `403`
+   * (`ForbiddenError`), same as `GET /personal-access-tokens/admin`.
    */
   async adminRevokePersonalAccessToken(
     request: operations.AdminRevokePersonalAccessTokenRequest,

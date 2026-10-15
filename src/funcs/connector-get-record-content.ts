@@ -4,7 +4,7 @@
 
 import * as z from "zod/v4-mini";
 import { PipeshubCore } from "../core.js";
-import { encodeSimple } from "../lib/encodings.js";
+import { encodeFormQuery, encodeSimple } from "../lib/encodings.js";
 import { matchStatusCode } from "../lib/http.js";
 import * as M from "../lib/matchers.js";
 import { compactMap } from "../lib/primitives.js";
@@ -51,6 +51,19 @@ import { Result } from "../types/fp.js";
  * a chat citation's `recordId`, then call this endpoint to read the
  * full content when the search snippet or citation excerpt isn't
  * enough to answer the question.
+ *
+ * **Reading part of a long record, or a whole Slack thread:**
+ *
+ * With no query parameters the whole record is returned, which for a
+ * pull request with its diffs or a long document can run to hundreds of
+ * thousands of characters. Pass any of `maxChars`, `startBlock`, `query`
+ * or `mode` for a budgeted read instead: the response stays within
+ * `maxChars` and says how to continue (`nextStartBlock`, or
+ * `nextStartRecord` for a thread). `query` makes a record too large for
+ * the budget show its most relevant blocks first, with the skipped
+ * ranges marked. `mode=thread` returns every message of the Slack
+ * thread the record belongs to, oldest first, as far as the caller may
+ * see them.
  *
  * **Permission scoping:**
  *
@@ -127,6 +140,14 @@ async function $do(
   };
   const path = pathToFunc("/connectors/record/{recordId}/content")(pathParams);
 
+  const query = encodeFormQuery({
+    "maxChars": payload.maxChars,
+    "mode": payload.mode,
+    "query": payload.query,
+    "startBlock": payload.startBlock,
+    "startRecord": payload.startRecord,
+  });
+
   const headers = new Headers(compactMap({
     Accept: "application/json",
   }));
@@ -155,6 +176,7 @@ async function $do(
     baseURL: options?.serverURL,
     path: path,
     headers: headers,
+    query: query,
     body: body,
     userAgent: client._options.userAgent,
     timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1,
@@ -193,7 +215,7 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.GetRecordContentResponseSchema$inboundSchema),
-    M.jsonErr([401, 403], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([401, 403, 422], errors.ErrorResponse$inboundSchema),
     M.jsonErr([500, 503], errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

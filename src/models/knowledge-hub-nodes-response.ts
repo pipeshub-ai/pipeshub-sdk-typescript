@@ -179,6 +179,16 @@ export type Permissions = {
   canEdit: boolean;
   canDelete: boolean;
   canManagePermissions: boolean;
+  /**
+   * The caller's own role on the collection (knowledge base) this node is in, as
+   *
+   * @remarks
+   * restore and `GET /knowledgeBase/{kbId}/trash` check it: OWNER, WRITER,
+   * FILEORGANIZER, COMMENTER or READER. Unlike `role`, which ranks record
+   * permissions inside a folder, it is the same at every level of the collection.
+   * Null outside a collection.
+   */
+  collectionRole?: string | null | undefined;
 };
 
 /**
@@ -190,6 +200,10 @@ export type Permissions = {
  * omitted properties).
  */
 export type KnowledgeHubNodesResponse = {
+  /**
+   * Deepest a collection folder may be nested; a folder directly in the collection is depth 1.
+   */
+  maxFolderDepth: number;
   /**
    * Always `true` on HTTP 200. Failures use 4xx/5xx error envelopes, not this body shape.
    */
@@ -476,6 +490,7 @@ export const Permissions$inboundSchema: z.ZodMiniType<Permissions, unknown> = z
     canEdit: types.boolean(),
     canDelete: types.boolean(),
     canManagePermissions: types.boolean(),
+    collectionRole: z.optional(z.nullable(types.string())),
   });
 
 export function permissionsFromJSON(
@@ -493,6 +508,7 @@ export const KnowledgeHubNodesResponse$inboundSchema: z.ZodMiniType<
   KnowledgeHubNodesResponse,
   unknown
 > = z.object({
+  maxFolderDepth: types.number(),
   success: types.literal(true),
   error: types.nullable(types.string()),
   id: types.nullable(types.string()),

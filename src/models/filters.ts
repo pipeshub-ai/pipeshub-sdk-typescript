@@ -3,6 +3,129 @@
  */
 
 import * as z from "zod/v4-mini";
+import { ClosedEnum } from "../types/enums.js";
+import { smartUnion } from "../types/smart-union.js";
+
+export const NamedEntityKind = {
+  Person: "person",
+  PersonType: "person_type",
+  Organization: "organization",
+  Event: "event",
+  Product: "product",
+  Skill: "skill",
+  Location: "location",
+  City: "city",
+  State: "state",
+  CountryRegion: "country_region",
+  Address: "address",
+  Date: "date",
+  DateRange: "date_range",
+  DateTime: "date_time",
+  Duration: "duration",
+  Currency: "currency",
+  Percentage: "percentage",
+  Age: "age",
+  Dimension: "dimension",
+  Email: "email",
+  Url: "url",
+  Phone: "phone",
+  Ip: "ip",
+} as const;
+export type NamedEntityKind = ClosedEnum<typeof NamedEntityKind>;
+
+export type From = number | string;
+
+export type To = number | string;
+
+/**
+ * Overlap with a date the record mentions; half-open, `from` must not be after `to`.
+ */
+export type MentionedDate = {
+  from?: number | string | undefined;
+  to?: number | string | undefined;
+};
+
+/**
+ * `min` must not be after `max`.
+ */
+export type Amount = {
+  min?: number | undefined;
+  max?: number | undefined;
+  /**
+   * ISO 4217 code, case-insensitive.
+   */
+  currency?: string | undefined;
+};
+
+/**
+ * In SI units of the dimension. `min` must not be after `max`.
+ */
+export type Quantity = {
+  min?: number | undefined;
+  max?: number | undefined;
+  /**
+   * For example `length`, `weight`, `speed`, `temperature`, `age`.
+   */
+  dimension?: string | undefined;
+};
+
+/**
+ * Fractions (0.125 is 12.5%). `min` must not be after `max`.
+ */
+export type Percent = {
+  min?: number | undefined;
+  max?: number | undefined;
+};
+
+/**
+ * **Experimental** named-entity constraints (Labs flag `ENABLE_NAMED_ENTITY_EXTRACTION`, or `HIGH_ACCURACY_MODE`).
+ *
+ * @remarks
+ * Every constraint must hold for the same record: an amount and a date match a record
+ * that mentions both, not one entity that is both. `name`/`entityIds` match entity nodes;
+ * `mentionedDate`, `amount`, `quantity` and `percent` match typed values the record
+ * mentions (any date mentioned, not a role such as "signed on"). A kind of a typed
+ * constraint's own kind narrows it (`currency` with `amount`); other kinds are a
+ * constraint of their own. Only records the caller may read are considered: every empty
+ * result reads the same.
+ *
+ * An unusable filter (unknown kind, bad currency, a range whose low end is above its high
+ * end, or a blank name) fails request validation with 400, including on conversation
+ * requests. On `POST /search`, a valid filter matching too many readable records is
+ * refused with 422. Conversation operations apply a valid filter to every search behind
+ * the answer; if retrieval refuses it, the request does not fail and the answer says why
+ * the filter could not be applied.
+ */
+export type EntityFilters = {
+  /**
+   * Lowercase, as listed. The server trims and lowercases each kind before checking it.
+   */
+  kinds?: Array<NamedEntityKind> | undefined;
+  /**
+   * Case-insensitive prefix of an entity name; surrounding blanks are trimmed and a blank name is refused.
+   */
+  name?: string | undefined;
+  /**
+   * Entity node ids, as returned by entity search. Typed values have no id.
+   */
+  entityIds?: Array<string> | undefined;
+  /**
+   * Overlap with a date the record mentions; half-open, `from` must not be after `to`.
+   */
+  mentionedDate?: MentionedDate | undefined;
+  /**
+   * `min` must not be after `max`.
+   */
+  amount?: Amount | undefined;
+  /**
+   * In SI units of the dimension. `min` must not be after `max`.
+   */
+  quantity?: Quantity | undefined;
+  /**
+   * Fractions (0.125 is 12.5%). `min` must not be after `max`.
+   */
+  percent?: Percent | undefined;
+};
 
 /**
  * App connector instance ids and knowledge-base / record-group ids that narrow retrieval
@@ -30,12 +153,167 @@ export type Filters = {
    * Each element must be a valid UUID.
    */
   kb?: Array<string> | undefined;
+  /**
+   * **Experimental** named-entity constraints (Labs flag `ENABLE_NAMED_ENTITY_EXTRACTION`, or `HIGH_ACCURACY_MODE`).
+   *
+   * @remarks
+   * Every constraint must hold for the same record: an amount and a date match a record
+   * that mentions both, not one entity that is both. `name`/`entityIds` match entity nodes;
+   * `mentionedDate`, `amount`, `quantity` and `percent` match typed values the record
+   * mentions (any date mentioned, not a role such as "signed on"). A kind of a typed
+   * constraint's own kind narrows it (`currency` with `amount`); other kinds are a
+   * constraint of their own. Only records the caller may read are considered: every empty
+   * result reads the same.
+   *
+   * An unusable filter (unknown kind, bad currency, a range whose low end is above its high
+   * end, or a blank name) fails request validation with 400, including on conversation
+   * requests. On `POST /search`, a valid filter matching too many readable records is
+   * refused with 422. Conversation operations apply a valid filter to every search behind
+   * the answer; if retrieval refuses it, the request does not fail and the answer says why
+   * the filter could not be applied.
+   */
+  entityFilters?: EntityFilters | undefined;
 };
+
+/** @internal */
+export const NamedEntityKind$outboundSchema: z.ZodMiniEnum<
+  typeof NamedEntityKind
+> = z.enum(NamedEntityKind);
+
+/** @internal */
+export type From$Outbound = number | string;
+
+/** @internal */
+export const From$outboundSchema: z.ZodMiniType<From$Outbound, From> =
+  smartUnion([z.int(), z.string()]);
+
+export function fromToJSON(from: From): string {
+  return JSON.stringify(From$outboundSchema.parse(from));
+}
+
+/** @internal */
+export type To$Outbound = number | string;
+
+/** @internal */
+export const To$outboundSchema: z.ZodMiniType<To$Outbound, To> = smartUnion([
+  z.int(),
+  z.string(),
+]);
+
+export function toToJSON(to: To): string {
+  return JSON.stringify(To$outboundSchema.parse(to));
+}
+
+/** @internal */
+export type MentionedDate$Outbound = {
+  from?: number | string | undefined;
+  to?: number | string | undefined;
+};
+
+/** @internal */
+export const MentionedDate$outboundSchema: z.ZodMiniType<
+  MentionedDate$Outbound,
+  MentionedDate
+> = z.object({
+  from: z.optional(smartUnion([z.int(), z.string()])),
+  to: z.optional(smartUnion([z.int(), z.string()])),
+});
+
+export function mentionedDateToJSON(mentionedDate: MentionedDate): string {
+  return JSON.stringify(MentionedDate$outboundSchema.parse(mentionedDate));
+}
+
+/** @internal */
+export type Amount$Outbound = {
+  min?: number | undefined;
+  max?: number | undefined;
+  currency?: string | undefined;
+};
+
+/** @internal */
+export const Amount$outboundSchema: z.ZodMiniType<Amount$Outbound, Amount> = z
+  .object({
+    min: z.optional(z.number()),
+    max: z.optional(z.number()),
+    currency: z.optional(z.string()),
+  });
+
+export function amountToJSON(amount: Amount): string {
+  return JSON.stringify(Amount$outboundSchema.parse(amount));
+}
+
+/** @internal */
+export type Quantity$Outbound = {
+  min?: number | undefined;
+  max?: number | undefined;
+  dimension?: string | undefined;
+};
+
+/** @internal */
+export const Quantity$outboundSchema: z.ZodMiniType<
+  Quantity$Outbound,
+  Quantity
+> = z.object({
+  min: z.optional(z.number()),
+  max: z.optional(z.number()),
+  dimension: z.optional(z.string()),
+});
+
+export function quantityToJSON(quantity: Quantity): string {
+  return JSON.stringify(Quantity$outboundSchema.parse(quantity));
+}
+
+/** @internal */
+export type Percent$Outbound = {
+  min?: number | undefined;
+  max?: number | undefined;
+};
+
+/** @internal */
+export const Percent$outboundSchema: z.ZodMiniType<Percent$Outbound, Percent> =
+  z.object({
+    min: z.optional(z.number()),
+    max: z.optional(z.number()),
+  });
+
+export function percentToJSON(percent: Percent): string {
+  return JSON.stringify(Percent$outboundSchema.parse(percent));
+}
+
+/** @internal */
+export type EntityFilters$Outbound = {
+  kinds?: Array<string> | undefined;
+  name?: string | undefined;
+  entityIds?: Array<string> | undefined;
+  mentionedDate?: MentionedDate$Outbound | undefined;
+  amount?: Amount$Outbound | undefined;
+  quantity?: Quantity$Outbound | undefined;
+  percent?: Percent$Outbound | undefined;
+};
+
+/** @internal */
+export const EntityFilters$outboundSchema: z.ZodMiniType<
+  EntityFilters$Outbound,
+  EntityFilters
+> = z.object({
+  kinds: z.optional(z.array(NamedEntityKind$outboundSchema)),
+  name: z.optional(z.string()),
+  entityIds: z.optional(z.array(z.string())),
+  mentionedDate: z.optional(z.lazy(() => MentionedDate$outboundSchema)),
+  amount: z.optional(z.lazy(() => Amount$outboundSchema)),
+  quantity: z.optional(z.lazy(() => Quantity$outboundSchema)),
+  percent: z.optional(z.lazy(() => Percent$outboundSchema)),
+});
+
+export function entityFiltersToJSON(entityFilters: EntityFilters): string {
+  return JSON.stringify(EntityFilters$outboundSchema.parse(entityFilters));
+}
 
 /** @internal */
 export type Filters$Outbound = {
   apps?: Array<string> | undefined;
   kb?: Array<string> | undefined;
+  entityFilters?: EntityFilters$Outbound | undefined;
 };
 
 /** @internal */
@@ -43,6 +321,7 @@ export const Filters$outboundSchema: z.ZodMiniType<Filters$Outbound, Filters> =
   z.object({
     apps: z.optional(z.array(z.string())),
     kb: z.optional(z.array(z.string())),
+    entityFilters: z.optional(z.lazy(() => EntityFilters$outboundSchema)),
   });
 
 export function filtersToJSON(filters: Filters): string {

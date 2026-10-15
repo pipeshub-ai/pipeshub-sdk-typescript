@@ -17,7 +17,7 @@ async function main() {
   let conversation;
 
   for await (const event of stream) {
-    const data = event.data ? JSON.parse(event.data) : undefined;
+    const data = event.data ?? {};
     if (event.event === "RUN_ERROR") throw new Error(data.message);
     // Sub-agent runs emit RUN_FINISHED too; only the root one carries `result`.
     if (event.event === "RUN_FINISHED" && data.result) conversation = data.result.conversation;
@@ -36,7 +36,7 @@ async function main() {
   });
 
   for await (const event of regenerated) {
-    const data = event.data ? JSON.parse(event.data) : undefined;
+    const data = event.data ?? {};
     if (event.event === "RUN_ERROR") throw new Error(data.message);
     if (event.event === "TEXT_MESSAGE_CONTENT") process.stdout.write(data.delta ?? "");
   }

@@ -26,7 +26,7 @@ async function main() {
 
   for await (const event of upload) {
     if (event.event === "file:succeeded" && event.data) {
-      recordId = JSON.parse(event.data).recordId;
+      recordId = event.data.recordId;
     }
   }
 

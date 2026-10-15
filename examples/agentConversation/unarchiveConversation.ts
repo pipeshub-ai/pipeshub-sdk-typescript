@@ -17,7 +17,7 @@ async function main() {
   let conversationId: string | undefined;
 
   for await (const event of stream) {
-    const data = event.data ? JSON.parse(event.data) : undefined;
+    const data = event.data ?? {};
     if (event.event === "RUN_ERROR") throw new Error(data.message);
     if (event.event === "CUSTOM" && data.name === "conversation_created") {
       conversationId = data.value.conversationId;

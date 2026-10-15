@@ -15,7 +15,7 @@ async function main() {
   let conversationId: string | undefined;
 
   for await (const event of stream) {
-    const data = event.data ? JSON.parse(event.data) : undefined;
+    const data = event.data ?? {};
 
     switch (event.event) {
       case "TEXT_MESSAGE_CONTENT":

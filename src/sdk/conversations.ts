@@ -11,11 +11,8 @@ import { conversationsDeleteConversationById } from "../funcs/conversations-dele
 import { conversationsGetAllConversations } from "../funcs/conversations-get-all-conversations.js";
 import { conversationsGetArchivedConversations } from "../funcs/conversations-get-archived-conversations.js";
 import { conversationsGetConversationById } from "../funcs/conversations-get-conversation-by-id.js";
-import { conversationsGetProjectConversations } from "../funcs/conversations-get-project-conversations.js";
 import { conversationsRegenerateAnswer } from "../funcs/conversations-regenerate-answer.js";
 import { conversationsSearchArchivedConversations } from "../funcs/conversations-search-archived-conversations.js";
-import { conversationsSetConversationProjectVisibility } from "../funcs/conversations-set-conversation-project-visibility.js";
-import { conversationsSetConversationProject } from "../funcs/conversations-set-conversation-project.js";
 import { conversationsStreamChat } from "../funcs/conversations-stream-chat.js";
 import { conversationsUnarchiveConversation } from "../funcs/conversations-unarchive-conversation.js";
 import { conversationsUpdateConversationTitle } from "../funcs/conversations-update-conversation-title.js";
@@ -559,84 +556,6 @@ export class Conversations extends ClientSDK {
     options?: RequestOptions,
   ): Promise<models.MessageFeedbackUpdateResponse> {
     return unwrapAsync(conversationsUpdateMessageFeedback(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
-   * Link or unlink a conversation to a project
-   *
-   * @remarks
-   * Set (`projectId: <id>`) or clear (`projectId: null`) the project this
-   * conversation belongs to. Initiator-only.
-   *
-   * **Access:**
-   *
-   * The caller must be the conversation's initiator. Linking to a
-   * non-null `projectId` also requires at least viewer access to that
-   * project (`404` if not visible to the caller — never `403`, to avoid
-   * leaking project existence across an org boundary).
-   *
-   * **Visibility on link:**
-   *
-   * When linking, `projectVisibility` defaults from the project's
-   * `chatSharing` setting (`members` → `project`, otherwise `private`)
-   * unless the conversation was already `project`-visible, in which case
-   * that is preserved. Use
-   * `PATCH /conversations/{conversationId}/project-visibility` to
-   * override it explicitly. Unlinking (`projectId: null`) always clears
-   * both `projectId` and `projectVisibility`.
-   */
-  async setConversationProject(
-    request: operations.SetConversationProjectRequest,
-    options?: RequestOptions,
-  ): Promise<operations.SetConversationProjectResponse> {
-    return unwrapAsync(conversationsSetConversationProject(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
-   * Override a conversation's project visibility
-   *
-   * @remarks
-   * Explicitly set whether a project-linked conversation is visible to
-   * other members of that project (`project`) or only to its owner
-   * (`private`). Initiator-only. Requires the conversation to already be
-   * linked to a project via
-   * `PUT /conversations/{conversationId}/project`.
-   */
-  async setConversationProjectVisibility(
-    request: operations.SetConversationProjectVisibilityRequest,
-    options?: RequestOptions,
-  ): Promise<operations.SetConversationProjectVisibilityResponse> {
-    return unwrapAsync(conversationsSetConversationProjectVisibility(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
-   * List a project's conversations
-   *
-   * @remarks
-   * Requires viewer access to the project. Returns both chat and agent
-   * sessions (`chatSessions`, discriminated by `sessionType`/`agentKey`)
-   * that the caller may see: rows they own, plus rows with
-   * `projectVisibility: project`. Access to the project is asserted
-   * first, so a private conversation belonging to a *different* project
-   * member never leaks through this endpoint.
-   */
-  async getProjectConversations(
-    request: operations.GetProjectConversationsRequest,
-    options?: RequestOptions,
-  ): Promise<operations.GetProjectConversationsResponse> {
-    return unwrapAsync(conversationsGetProjectConversations(
       this,
       request,
       options,

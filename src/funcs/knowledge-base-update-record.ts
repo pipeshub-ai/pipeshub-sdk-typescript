@@ -58,6 +58,8 @@ import { isReadableStream } from "../types/streams.js";
  * - Increments version if file content changed
  * - Triggers re-indexing for content changes
  *
+ * **OAuth scopes:** `kb:write`, plus `kb:read`: replacing the file first reads the record and its knowledge base with the caller's token.
+ *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
 export function knowledgeBaseUpdateRecord(
@@ -172,7 +174,7 @@ async function $do(
     options: client._options,
     baseURL: options?.serverURL ?? client._baseURL ?? "",
     operationID: "updateRecord",
-    oAuth2Scopes: ["kb:write"],
+    oAuth2Scopes: ["kb:write", "kb:read"],
 
     resolvedSecurity: requestSecurity,
 

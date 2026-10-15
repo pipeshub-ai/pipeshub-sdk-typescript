@@ -48,6 +48,36 @@ export type SemanticSearchRequest = {
    * Maximum number of results to return
    */
   limit?: number | undefined;
+  /**
+   * Only records the source created on or after this date. `YYYY-MM-DD` (the whole
+   *
+   * @remarks
+   * day, UTC) or an ISO 8601 datetime with a timezone offset. A date that is not
+   * one of these, or in the future, is a `400` that says why.
+   */
+  createdAfter?: string | undefined;
+  /**
+   * Only records the source created on or before this date. A `YYYY-MM-DD` value
+   *
+   * @remarks
+   * includes that whole day.
+   */
+  createdBefore?: string | undefined;
+  /**
+   * Only records last changed in the source on or after this date. Same format as
+   *
+   * @remarks
+   * `createdAfter`.
+   */
+  modifiedAfter?: string | undefined;
+  /**
+   * Only records last changed in the source on or before this date. Same format as
+   *
+   * @remarks
+   * `createdBefore`. Records with no source date are left out whenever a bound on
+   * that date is set.
+   */
+  modifiedBefore?: string | undefined;
 };
 
 /** @internal */
@@ -55,6 +85,10 @@ export type SemanticSearchRequest$Outbound = {
   query: string;
   filters?: Filters$Outbound | undefined;
   limit: number;
+  createdAfter?: string | undefined;
+  createdBefore?: string | undefined;
+  modifiedAfter?: string | undefined;
+  modifiedBefore?: string | undefined;
 };
 
 /** @internal */
@@ -65,6 +99,10 @@ export const SemanticSearchRequest$outboundSchema: z.ZodMiniType<
   query: z.string(),
   filters: z.optional(Filters$outboundSchema),
   limit: z._default(z.int(), 10),
+  createdAfter: z.optional(z.string()),
+  createdBefore: z.optional(z.string()),
+  modifiedAfter: z.optional(z.string()),
+  modifiedBefore: z.optional(z.string()),
 });
 
 export function semanticSearchRequestToJSON(

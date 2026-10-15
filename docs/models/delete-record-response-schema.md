@@ -16,10 +16,15 @@ let value: DeleteRecordResponseSchema = {
 
 ## Fields
 
-| Field              | Type               | Required           | Description        |
-| ------------------ | ------------------ | ------------------ | ------------------ |
-| `success`          | *true*             | :heavy_check_mark: | N/A                |
-| `message`          | *string*           | :heavy_check_mark: | N/A                |
-| `recordId`         | *string*           | :heavy_check_mark: | N/A                |
-| `connector`        | *string*           | :heavy_minus_sign: | N/A                |
-| `timestamp`        | *number*           | :heavy_minus_sign: | N/A                |
+| Field                                                            | Type                                                             | Required                                                         | Description                                                      |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `success`                                                        | *true*                                                           | :heavy_check_mark:                                               | N/A                                                              |
+| `message`                                                        | *string*                                                         | :heavy_check_mark:                                               | N/A                                                              |
+| `recordId`                                                       | *string*                                                         | :heavy_check_mark:                                               | N/A                                                              |
+| `connector`                                                      | *string*                                                         | :heavy_minus_sign:                                               | N/A                                                              |
+| `timestamp`                                                      | *number*                                                         | :heavy_minus_sign:                                               | N/A                                                              |
+| `softDeleted`                                                    | *boolean*                                                        | :heavy_minus_sign:                                               | True when the record went to the trash instead of being removed  |
+| `batchId`                                                        | *string*                                                         | :heavy_minus_sign:                                               | The delete batch; restoring any record in it restores all of it  |
+| `vectorCleanupPending`                                           | *boolean*                                                        | :heavy_minus_sign:                                               | The record is deleted, but removing its embeddings is still owed |
+| `vectorCleanupFailedRecordIds`                                   | *string*[]                                                       | :heavy_minus_sign:                                               | N/A                                                              |
+| `vectorCleanupFailedVirtualRecordIds`                            | *string*[]                                                       | :heavy_minus_sign:                                               | N/A                                                              |

@@ -138,7 +138,7 @@ async function $do(
     options: client._options,
     baseURL: options?.serverURL ?? client._baseURL ?? "",
     operationID: "createConversation",
-    oAuth2Scopes: ["conversation:write"],
+    oAuth2Scopes: ["conversation:chat"],
 
     resolvedSecurity: requestSecurity,
 

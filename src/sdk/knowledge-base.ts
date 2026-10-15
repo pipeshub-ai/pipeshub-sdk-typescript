@@ -13,9 +13,12 @@ import { knowledgeBaseGetKnowledgeHubRootNodes } from "../funcs/knowledge-base-g
 import { knowledgeBaseGetRecordById } from "../funcs/knowledge-base-get-record-by-id.js";
 import { knowledgeBaseGetUploadLimits } from "../funcs/knowledge-base-get-upload-limits.js";
 import { knowledgeBaseListKnowledgeBases } from "../funcs/knowledge-base-list-knowledge-bases.js";
+import { knowledgeBaseListTrash } from "../funcs/knowledge-base-list-trash.js";
 import { knowledgeBaseMoveRecord } from "../funcs/knowledge-base-move-record.js";
 import { knowledgeBaseReindexRecordGroup } from "../funcs/knowledge-base-reindex-record-group.js";
 import { knowledgeBaseReindexRecord } from "../funcs/knowledge-base-reindex-record.js";
+import { knowledgeBaseRestoreRecord } from "../funcs/knowledge-base-restore-record.js";
+import { knowledgeBaseRestoreRecords } from "../funcs/knowledge-base-restore-records.js";
 import { knowledgeBaseStreamRecordBuffer } from "../funcs/knowledge-base-stream-record-buffer.js";
 import { knowledgeBaseUpdateFolder } from "../funcs/knowledge-base-update-folder.js";
 import { knowledgeBaseUpdateKnowledgeBase } from "../funcs/knowledge-base-update-knowledge-base.js";
@@ -238,6 +241,8 @@ export class KnowledgeBase extends ClientSDK {
    * - Updates `updatedAtTimestamp`
    * - Increments version if file content changed
    * - Triggers re-indexing for content changes
+   *
+   * **OAuth scopes:** `kb:write`, plus `kb:read`: replacing the file first reads the record and its knowledge base with the caller's token.
    */
   async updateRecord(
     request: operations.UpdateRecordRequest,
@@ -254,7 +259,7 @@ export class KnowledgeBase extends ClientSDK {
    * Delete record
    *
    * @remarks
-   * Permanently delete a record from the knowledge base.
+   * Delete a record from the knowledge base.
    *
    * **Required permission:**
    *
@@ -266,13 +271,111 @@ export class KnowledgeBase extends ClientSDK {
    * - Associated storage file
    * - Indexed content and embeddings
    *
-   * **Warning:** This action is irreversible.
+   * **Trash:** With "Move Deleted Records to the Trash" on in Labs, the record
+   * goes to the trash instead: it disappears from search, chat and lists at once,
+   * its embeddings are removed, and the record and its file stay until the scheduled
+   * purge. The response then carries `softDeleted: true` and the `batchId`, and the
+   * record can be brought back with `POST /knowledgeBase/record/{recordId}/restore`.
+   * With the setting off, the delete is immediate and cannot be undone.
    */
   async deleteRecord(
     request: operations.DeleteRecordRequest,
     options?: RequestOptions,
   ): Promise<models.DeleteRecordResponseSchema> {
     return unwrapAsync(knowledgeBaseDeleteRecord(
+      this,
+      request,
+      options,
+    ));
+  }
+
+  /**
+   * Restore a deleted record
+   *
+   * @remarks
+   * Bring a record back from the trash, together with everything deleted in the
+   * same action: a folder comes back with its contents, a file with its
+   * attachments, a multi-select delete with every item it removed.
+   *
+   * Needs "Move Deleted Records to the Trash" on in Labs.
+   *
+   * **Required permission:** the role the delete needed. A single file needs
+   * OWNER, WRITER or FILEORGANIZER on its collection; a folder or several items
+   * need OWNER or WRITER.
+   *
+   * **Names:** an item whose name another item next to it now uses comes back
+   * as "name (restored)" (a file keeps its extension: "report (restored).pdf").
+   *
+   * **Search:** restored files are indexed again, so they return to search and
+   * chat once indexing finishes. `reindexPending` lists any that could not be
+   * queued; reindex those by hand. A file that is back but whose indexing never
+   * started is queued again when it is restored again, and the indexing service
+   * queues it on its own after about an hour.
+   *
+   * A record that is not in the trash answers 200 with nothing restored.
+   */
+  async restoreRecord(
+    request: operations.RestoreRecordRequest,
+    options?: RequestOptions,
+  ): Promise<models.RestoreRecordResponseSchema> {
+    return unwrapAsync(knowledgeBaseRestoreRecord(
+      this,
+      request,
+      options,
+    ));
+  }
+
+  /**
+   * Restore several deleted records
+   *
+   * @remarks
+   * Restore up to 100 records from the trash. Each id is restored as
+   * `POST /knowledgeBase/record/{recordId}/restore` restores it, with everything
+   * deleted along with it; ids from one delete are restored once. Every id gets its
+   * own outcome in `results`, so one refusal does not hold the others back, and the
+   * answer is 200 whatever the outcomes.
+   */
+  async restoreRecords(
+    request: models.RestoreRecordsRequestBody,
+    options?: RequestOptions,
+  ): Promise<models.RestoreRecordsResponseSchema> {
+    return unwrapAsync(knowledgeBaseRestoreRecords(
+      this,
+      request,
+      options,
+    ));
+  }
+
+  /**
+   * List a collection's recently deleted items
+   *
+   * @remarks
+   * One page of what was deleted from a collection and can still be restored,
+   * newest first. Each item is what one delete removed, as a restore brings it back
+   * whole: a folder deleted with its contents is one item, and so is a multi-select
+   * delete (`rootCount` items selected, some named in `otherRootNames`). `itemCount`
+   * says how many records it holds.
+   * Restore an item with `POST /knowledgeBase/record/{recordId}/restore`, using its `id`.
+   *
+   * Needs "Move Deleted Records to the Trash" on in Labs.
+   *
+   * **Who sees what:** the list holds what the caller may restore. OWNER and
+   * WRITER see every item; FILEORGANIZER sees single files only; other roles are
+   * refused. The workspace and user always come from the sign-in.
+   *
+   * **Removed for good:** the scheduled cleanup may remove an item from
+   * `removableAfterTimestamp` on (at least 14 days after it was deleted by
+   * default; it runs every 14 days, so an item stays 14 to 28 days). It is
+   * absent when the retention settings can't be read.
+   *
+   * An item whose folder is also in the trash (`parentInTrash`) can only be
+   * restored after that folder.
+   */
+  async listTrash(
+    request: operations.ListTrashRequest,
+    options?: RequestOptions,
+  ): Promise<models.ListTrashResponseSchema> {
+    return unwrapAsync(knowledgeBaseListTrash(
       this,
       request,
       options,

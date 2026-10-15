@@ -37,14 +37,14 @@ export type Kind = OpenEnum<typeof Kind>;
 /**
  * Organization role stored on the user document (`admin` or `member`)
  */
-export const RefreshTokenUserRole = {
+export const Role = {
   Admin: "admin",
   Member: "member",
 } as const;
 /**
  * Organization role stored on the user document (`admin` or `member`)
  */
-export type RefreshTokenUserRole = OpenEnum<typeof RefreshTokenUserRole>;
+export type Role = OpenEnum<typeof Role>;
 
 /**
  * User record returned with a refreshed access token
@@ -101,7 +101,7 @@ export type RefreshTokenUser = {
   /**
    * Organization role stored on the user document (`admin` or `member`)
    */
-  role?: RefreshTokenUserRole | undefined;
+  role?: Role | undefined;
   address?: Address | undefined;
   /**
    * Whether user has consented to data collection
@@ -128,10 +128,8 @@ export const Kind$inboundSchema: z.ZodMiniType<Kind, unknown> = openEnums
   .inboundSchema(Kind);
 
 /** @internal */
-export const RefreshTokenUserRole$inboundSchema: z.ZodMiniType<
-  RefreshTokenUserRole,
-  unknown
-> = openEnums.inboundSchema(RefreshTokenUserRole);
+export const Role$inboundSchema: z.ZodMiniType<Role, unknown> = openEnums
+  .inboundSchema(Role);
 
 /** @internal */
 export const RefreshTokenUser$inboundSchema: z.ZodMiniType<
@@ -152,7 +150,7 @@ export const RefreshTokenUser$inboundSchema: z.ZodMiniType<
     description: types.optional(types.string()),
     isDisabled: z._default(types.boolean(), false),
     restoreOpId: types.optional(types.string()),
-    role: types.optional(RefreshTokenUserRole$inboundSchema),
+    role: types.optional(Role$inboundSchema),
     address: types.optional(Address$inboundSchema),
     dataCollectionConsent: types.optional(types.boolean()),
     hasLoggedIn: types.boolean(),

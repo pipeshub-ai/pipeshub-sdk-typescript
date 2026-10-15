@@ -5,6 +5,7 @@
 import { webSearchGetWebSearchProviders } from "../funcs/web-search-get-web-search-providers.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
 import * as models from "../models/index.js";
+import * as operations from "../models/operations/index.js";
 import { unwrapAsync } from "../types/fp.js";
 
 export class WebSearch extends ClientSDK {
@@ -23,10 +24,12 @@ export class WebSearch extends ClientSDK {
    * sending the placeholder back keeps the stored key.
    */
   async getWebSearchProviders(
+    request?: operations.GetWebSearchProvidersRequest | undefined,
     options?: RequestOptions,
   ): Promise<models.WebSearchProvidersResponse> {
     return unwrapAsync(webSearchGetWebSearchProviders(
       this,
+      request,
       options,
     ));
   }

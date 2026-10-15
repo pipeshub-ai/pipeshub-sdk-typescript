@@ -24,8 +24,6 @@ import { agentsUpdateAgentConversationMessageFeedback } from "../funcs/agents-up
 import { agentsUpdateAgentConversationTitle } from "../funcs/agents-update-agent-conversation-title.js";
 import { agentsUpdateAgent } from "../funcs/agents-update-agent.js";
 import { agentsUploadAgentConversationChatAttachments } from "../funcs/agents-upload-agent-conversation-chat-attachments.js";
-import { projectsSetAgentConversationProjectVisibility } from "../funcs/projects-set-agent-conversation-project-visibility.js";
-import { projectsSetAgentConversationProject } from "../funcs/projects-set-agent-conversation-project.js";
 import { EventStream } from "../lib/event-streams.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
 import * as models from "../models/index.js";
@@ -518,47 +516,6 @@ export class Agents extends ClientSDK {
     options?: RequestOptions,
   ): Promise<models.AgentConversationTitleUpdateResponse> {
     return unwrapAsync(agentsUpdateAgentConversationTitle(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
-   * Link or unlink an agent conversation to a project
-   *
-   * @remarks
-   * Agent-conversation equivalent of
-   * `PUT /conversations/{conversationId}/project`. Set
-   * (`projectId: <id>`) or clear (`projectId: null`) the project this
-   * agent conversation belongs to. Initiator-only; linking requires at
-   * least viewer access to the target project.
-   */
-  async setAgentConversationProject(
-    request: operations.SetAgentConversationProjectRequest,
-    options?: RequestOptions,
-  ): Promise<operations.SetAgentConversationProjectResponse> {
-    return unwrapAsync(projectsSetAgentConversationProject(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
-   * Override an agent conversation's project visibility
-   *
-   * @remarks
-   * Agent-conversation equivalent of
-   * `PATCH /conversations/{conversationId}/project-visibility`.
-   * Initiator-only; requires the conversation to already be linked to a
-   * project.
-   */
-  async setAgentConversationProjectVisibility(
-    request: operations.SetAgentConversationProjectVisibilityRequest,
-    options?: RequestOptions,
-  ): Promise<operations.SetAgentConversationProjectVisibilityResponse> {
-    return unwrapAsync(projectsSetAgentConversationProjectVisibility(
       this,
       request,
       options,

@@ -35,6 +35,19 @@ export class Connector extends ClientSDK {
    * full content when the search snippet or citation excerpt isn't
    * enough to answer the question.
    *
+   * **Reading part of a long record, or a whole Slack thread:**
+   *
+   * With no query parameters the whole record is returned, which for a
+   * pull request with its diffs or a long document can run to hundreds of
+   * thousands of characters. Pass any of `maxChars`, `startBlock`, `query`
+   * or `mode` for a budgeted read instead: the response stays within
+   * `maxChars` and says how to continue (`nextStartBlock`, or
+   * `nextStartRecord` for a thread). `query` makes a record too large for
+   * the budget show its most relevant blocks first, with the skipped
+   * ranges marked. `mode=thread` returns every message of the Slack
+   * thread the record belongs to, oldest first, as far as the caller may
+   * see them.
+   *
    * **Permission scoping:**
    *
    * The requesting user/token must have access to the record; access is

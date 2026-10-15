@@ -103,11 +103,12 @@ run();
 
 ### Errors
 
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 400                         | application/json            |
-| errors.ErrorResponse        | 500                         | application/json            |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+| Error Type                    | Status Code                   | Content Type                  |
+| ----------------------------- | ----------------------------- | ----------------------------- |
+| errors.ErrorResponse          | 400                           | application/json              |
+| errors.RateLimitErrorResponse | 429                           | application/json              |
+| errors.ErrorResponse          | 500                           | application/json              |
+| errors.PipeshubDefaultError   | 4XX, 5XX                      | \*/\*                         |
 
 ## authenticate
 
@@ -218,11 +219,12 @@ run();
 
 ### Errors
 
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 400, 401, 404               | application/json            |
-| errors.ErrorResponse        | 500                         | application/json            |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+| Error Type                    | Status Code                   | Content Type                  |
+| ----------------------------- | ----------------------------- | ----------------------------- |
+| errors.ErrorResponse          | 400, 401, 404                 | application/json              |
+| errors.RateLimitErrorResponse | 429                           | application/json              |
+| errors.ErrorResponse          | 500                           | application/json              |
+| errors.PipeshubDefaultError   | 4XX, 5XX                      | \*/\*                         |
 
 ## refreshToken
 
@@ -392,8 +394,9 @@ run();
 
 ### Errors
 
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 400, 401, 404               | application/json            |
-| errors.ErrorResponse        | 500                         | application/json            |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+| Error Type                    | Status Code                   | Content Type                  |
+| ----------------------------- | ----------------------------- | ----------------------------- |
+| errors.ErrorResponse          | 400, 401, 404                 | application/json              |
+| errors.RateLimitErrorResponse | 429                           | application/json              |
+| errors.ErrorResponse          | 500                           | application/json              |
+| errors.PipeshubDefaultError   | 4XX, 5XX                      | \*/\*                         |

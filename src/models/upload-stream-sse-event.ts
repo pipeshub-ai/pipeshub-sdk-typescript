@@ -29,7 +29,7 @@ export type UploadStreamSSEEventEvent = OpenEnum<
  * These endpoints respond with `Content-Type: text/event-stream`: the upload
  * and its per-file progress are a single request. The body streams one
  * terminal event per file, then a final `done` summary, then closes. `data`
- * is a JSON-encoded string whose decoded shape depends on `event`:
+ * is the decoded JSON object for the frame; its shape depends on `event`:
  *
  * - `file:succeeded` — see `UploadSucceededFileDetail`. The file was
  *   uploaded and its record created; content indexing then continues
@@ -53,9 +53,9 @@ export type UploadStreamSSEEventEvent = OpenEnum<
 export type UploadStreamSSEEvent = {
   event?: UploadStreamSSEEventEvent | undefined;
   /**
-   * JSON-encoded event payload. Shape depends on `event`.
+   * Decoded JSON payload. Shape depends on `event`.
    */
-  data?: string | undefined;
+  data?: { [k: string]: any } | undefined;
 };
 
 /** @internal */
@@ -70,7 +70,26 @@ export const UploadStreamSSEEvent$inboundSchema: z.ZodMiniType<
   unknown
 > = z.object({
   event: types.optional(UploadStreamSSEEventEvent$inboundSchema),
-  data: types.optional(types.string()),
+  data: z.pipe(
+    z.pipe(
+      z.optional(z.unknown()),
+      z.transform((v, ctx) => {
+        if (v === undefined) return undefined;
+        if (typeof v !== "string") return v;
+        try {
+          return JSON.parse(v);
+        } catch (err) {
+          ctx.issues.push({
+            input: v,
+            code: "custom",
+            message: `malformed json: ${err}`,
+          });
+          return z.NEVER;
+        }
+      }),
+    ),
+    types.optional(z.record(z.string(), z.any())),
+  ),
 });
 
 export function uploadStreamSSEEventFromJSON(

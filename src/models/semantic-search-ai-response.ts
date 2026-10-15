@@ -39,6 +39,15 @@ export type SemanticSearchAiResponse = {
    */
   appliedFilters?: SemanticSearchAppliedFilters | undefined;
   /**
+   * Present only when some records lost passages to the per-record cap: maps a
+   *
+   * @remarks
+   * `recordId` to how many of its passages were left out. Each record keeps at most
+   * `max(SEARCH_PER_RECORD_FLOOR, limit / SEARCH_PER_RECORD_DIVISOR)` passages
+   * (4 at the default limit): the passages that matched first, then those nearest a match.
+   */
+  omittedPassages?: { [k: string]: number } | undefined;
+  /**
    * Maps virtual record id (object property name) to the accessible graph record document for that id.
    */
   virtualToRecordMap?: { [k: string]: SemanticSearchGraphRecord } | undefined;
@@ -56,6 +65,7 @@ export const SemanticSearchAiResponse$inboundSchema: z.ZodMiniType<
     status_code: types.number(),
     message: types.string(),
     appliedFilters: types.optional(SemanticSearchAppliedFilters$inboundSchema),
+    omittedPassages: types.optional(z.record(z.string(), types.number())),
     virtual_to_record_map: types.optional(
       z.record(z.string(), SemanticSearchGraphRecord$inboundSchema),
     ),

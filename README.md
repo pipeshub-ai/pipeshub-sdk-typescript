@@ -191,8 +191,6 @@ run();
 * [archiveAgentConversation](docs/sdks/agents/README.md#archiveagentconversation) - Archive an agent conversation
 * [unarchiveAgentConversation](docs/sdks/agents/README.md#unarchiveagentconversation) - Unarchive an agent conversation
 * [updateAgentConversationTitle](docs/sdks/agents/README.md#updateagentconversationtitle) - Update agent conversation title
-* [setAgentConversationProject](docs/sdks/agents/README.md#setagentconversationproject) - Link or unlink an agent conversation to a project
-* [setAgentConversationProjectVisibility](docs/sdks/agents/README.md#setagentconversationprojectvisibility) - Override an agent conversation's project visibility
 * [deleteAgentConversationById](docs/sdks/agents/README.md#deleteagentconversationbyid) - Delete an agent conversation
 * [getAgentConversationById](docs/sdks/agents/README.md#getagentconversationbyid) - Get agent conversation by ID
 * [listAgentConversations](docs/sdks/agents/README.md#listagentconversations) - List agent conversations
@@ -207,6 +205,45 @@ run();
 * [getRecordContent](docs/sdks/connector/README.md#getrecordcontent) - Get a record's full parsed content and metadata
 * [navigateKnowledgeGraph](docs/sdks/connector/README.md#navigateknowledgegraph) - Browse the knowledge graph from a node
 * [lookupRecordByIdentifier](docs/sdks/connector/README.md#lookuprecordbyidentifier) - Resolve a URL, issue key or external ID to a Record ID
+
+### [ConnectorConfiguration](docs/sdks/connectorconfiguration/README.md)
+
+* [getConnectorConfig](docs/sdks/connectorconfiguration/README.md#getconnectorconfig) - Get connector configuration
+* [updateConnectorConfig](docs/sdks/connectorconfiguration/README.md#updateconnectorconfig) - Update connector configuration
+* [updateConnectorAuthConfig](docs/sdks/connectorconfiguration/README.md#updateconnectorauthconfig) - Update authentication configuration
+* [updateConnectorFiltersSyncConfig](docs/sdks/connectorconfiguration/README.md#updateconnectorfilterssyncconfig) - Update filters and sync configuration
+
+### [ConnectorControl](docs/sdks/connectorcontrol/README.md)
+
+* [toggleConnector](docs/sdks/connectorcontrol/README.md#toggleconnector) - Toggle connector sync or agent
+
+### [ConnectorFilters](docs/sdks/connectorfilters/README.md)
+
+* [getConnectorFilters](docs/sdks/connectorfilters/README.md#getconnectorfilters) - Get filter options
+* [saveConnectorFilters](docs/sdks/connectorfilters/README.md#saveconnectorfilters) - Save filter selections
+* [getFilterFieldOptions](docs/sdks/connectorfilters/README.md#getfilterfieldoptions) - Get dynamic filter options
+
+### [ConnectorInstances](docs/sdks/connectorinstances/README.md)
+
+* [listConnectorInstances](docs/sdks/connectorinstances/README.md#listconnectorinstances) - List connector instances
+* [createConnectorInstance](docs/sdks/connectorinstances/README.md#createconnectorinstance) - Create connector instance
+* [getConnectorInstance](docs/sdks/connectorinstances/README.md#getconnectorinstance) - Get connector instance
+* [deleteConnectorInstance](docs/sdks/connectorinstances/README.md#deleteconnectorinstance) - Delete connector instance
+* [getConnectorStats](docs/sdks/connectorinstances/README.md#getconnectorstats) - Get connector statistics
+* [resyncConnector](docs/sdks/connectorinstances/README.md#resyncconnector) - Resync connector
+* [stopConnectorSync](docs/sdks/connectorinstances/README.md#stopconnectorsync) - Stop the running sync for a connector
+
+### [ConnectorOAuth](docs/sdks/connectoroauth/README.md)
+
+* [getOAuthAuthorizationUrl](docs/sdks/connectoroauth/README.md#getoauthauthorizationurl) - Get OAuth authorization URL
+* [handleOAuthCallback](docs/sdks/connectoroauth/README.md#handleoauthcallback) - OAuth callback handler
+
+### [ConnectorRegistry](docs/sdks/connectorregistry/README.md)
+
+* [getConnectorRegistry](docs/sdks/connectorregistry/README.md#getconnectorregistry) - List available connector types
+* [getConnectorSchema](docs/sdks/connectorregistry/README.md#getconnectorschema) - Get connector configuration schema
+* [testConnectorConnection](docs/sdks/connectorregistry/README.md#testconnectorconnection) - Test connector credentials before saving
+* [getConnectorEgressIps](docs/sdks/connectorregistry/README.md#getconnectoregressips) - Get the IP addresses connectors connect from
 
 ### [Conversations](docs/sdks/conversations/README.md)
 
@@ -225,9 +262,6 @@ run();
 * [regenerateAnswer](docs/sdks/conversations/README.md#regenerateanswer) - Regenerate AI response
 * [cancelConversationStream](docs/sdks/conversations/README.md#cancelconversationstream) - Cancel an in-flight chat stream
 * [updateMessageFeedback](docs/sdks/conversations/README.md#updatemessagefeedback) - Submit feedback on AI response
-* [setConversationProject](docs/sdks/conversations/README.md#setconversationproject) - Link or unlink a conversation to a project
-* [setConversationProjectVisibility](docs/sdks/conversations/README.md#setconversationprojectvisibility) - Override a conversation's project visibility
-* [getProjectConversations](docs/sdks/conversations/README.md#getprojectconversations) - List a project's conversations
 
 ### [KnowledgeBase](docs/sdks/knowledgebase/README.md)
 
@@ -239,6 +273,9 @@ run();
 * [getRecordById](docs/sdks/knowledgebase/README.md#getrecordbyid) - Get record by ID
 * [updateRecord](docs/sdks/knowledgebase/README.md#updaterecord) - Update record
 * [deleteRecord](docs/sdks/knowledgebase/README.md#deleterecord) - Delete record
+* [restoreRecord](docs/sdks/knowledgebase/README.md#restorerecord) - Restore a deleted record
+* [restoreRecords](docs/sdks/knowledgebase/README.md#restorerecords) - Restore several deleted records
+* [listTrash](docs/sdks/knowledgebase/README.md#listtrash) - List a collection's recently deleted items
 * [streamRecordBuffer](docs/sdks/knowledgebase/README.md#streamrecordbuffer) - Stream record content
 * [createFolder](docs/sdks/knowledgebase/README.md#createfolder) - Create folder
 * [updateFolder](docs/sdks/knowledgebase/README.md#updatefolder) - Update folder
@@ -270,6 +307,17 @@ run();
 * [listOAuthAppTokens](docs/sdks/oauthapps/README.md#listoauthapptokens) - List app tokens
 * [revokeAllOAuthAppTokens](docs/sdks/oauthapps/README.md#revokealloauthapptokens) - Revoke all app tokens
 
+### [OAuthConfiguration](docs/sdks/oauthconfiguration/README.md)
+
+* [getOAuthRegistry](docs/sdks/oauthconfiguration/README.md#getoauthregistry) - List OAuth-capable connector types
+* [getOAuthConnectorType](docs/sdks/oauthconfiguration/README.md#getoauthconnectortype) - Get OAuth connector type details
+* [listOAuthConfigs](docs/sdks/oauthconfiguration/README.md#listoauthconfigs) - List OAuth configurations
+* [listOAuthConfigsByType](docs/sdks/oauthconfiguration/README.md#listoauthconfigsbytype) - List OAuth configs for connector type
+* [createOAuthConfig](docs/sdks/oauthconfiguration/README.md#createoauthconfig) - Create OAuth configuration
+* [getOAuthConfig](docs/sdks/oauthconfiguration/README.md#getoauthconfig) - Get OAuth configuration
+* [updateOAuthConfig](docs/sdks/oauthconfiguration/README.md#updateoauthconfig) - Update OAuth configuration
+* [deleteOAuthConfig](docs/sdks/oauthconfiguration/README.md#deleteoauthconfig) - Delete OAuth configuration
+
 ### [OAuthProvider](docs/sdks/oauthprovider/README.md)
 
 * [oauthToken](docs/sdks/oauthprovider/README.md#oauthtoken) - Exchange authorization code for tokens
@@ -298,27 +346,6 @@ run();
 * [revokePersonalAccessToken](docs/sdks/personalaccesstokens/README.md#revokepersonalaccesstoken) - Revoke one of your own personal access tokens
 * [adminListPersonalAccessTokens](docs/sdks/personalaccesstokens/README.md#adminlistpersonalaccesstokens) - Admin: list every active personal access token in the org
 * [adminRevokePersonalAccessToken](docs/sdks/personalaccesstokens/README.md#adminrevokepersonalaccesstoken) - Admin: revoke any user's personal access token by id
-
-### [Projects](docs/sdks/projects/README.md)
-
-* [setConversationProject](docs/sdks/projects/README.md#setconversationproject) - Link or unlink a conversation to a project
-* [setConversationProjectVisibility](docs/sdks/projects/README.md#setconversationprojectvisibility) - Override a conversation's project visibility
-* [createProject](docs/sdks/projects/README.md#createproject) - Create a project
-* [listProjects](docs/sdks/projects/README.md#listprojects) - List projects
-* [getProjectById](docs/sdks/projects/README.md#getprojectbyid) - Get a project
-* [updateProject](docs/sdks/projects/README.md#updateproject) - Update a project
-* [deleteProject](docs/sdks/projects/README.md#deleteproject) - Delete a project
-* [archiveProject](docs/sdks/projects/README.md#archiveproject) - Archive a project
-* [unarchiveProject](docs/sdks/projects/README.md#unarchiveproject) - Unarchive a project
-* [pinProject](docs/sdks/projects/README.md#pinproject) - Pin a project
-* [unpinProject](docs/sdks/projects/README.md#unpinproject) - Unpin a project
-* [getProjectConversations](docs/sdks/projects/README.md#getprojectconversations) - List a project's conversations
-* [ensureProjectKnowledgeBase](docs/sdks/projects/README.md#ensureprojectknowledgebase) - Ensure (create-if-absent) the project's hidden file Collection
-* [listProjectMembers](docs/sdks/projects/README.md#listprojectmembers) - List project members
-* [upsertProjectMembers](docs/sdks/projects/README.md#upsertprojectmembers) - Add or update project members
-* [removeProjectMember](docs/sdks/projects/README.md#removeprojectmember) - Remove a project member
-* [setAgentConversationProject](docs/sdks/projects/README.md#setagentconversationproject) - Link or unlink an agent conversation to a project
-* [setAgentConversationProjectVisibility](docs/sdks/projects/README.md#setagentconversationprojectvisibility) - Override an agent conversation's project visibility
 
 ### [SemanticSearch](docs/sdks/semanticsearch/README.md)
 
@@ -382,9 +409,30 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`agentsUpdateAgentConversationTitle`](docs/sdks/agents/README.md#updateagentconversationtitle) - Update agent conversation title
 - [`agentsUploadAgentConversationChatAttachments`](docs/sdks/agents/README.md#uploadagentconversationchatattachments) - Upload agent chat attachments
 - [`aiModelsProvidersGetAvailableModelsByType`](docs/sdks/aimodelsproviders/README.md#getavailablemodelsbytype) - Get available models by type
+- [`connectorConfigurationGetConnectorConfig`](docs/sdks/connectorconfiguration/README.md#getconnectorconfig) - Get connector configuration
+- [`connectorConfigurationUpdateConnectorAuthConfig`](docs/sdks/connectorconfiguration/README.md#updateconnectorauthconfig) - Update authentication configuration
+- [`connectorConfigurationUpdateConnectorConfig`](docs/sdks/connectorconfiguration/README.md#updateconnectorconfig) - Update connector configuration
+- [`connectorConfigurationUpdateConnectorFiltersSyncConfig`](docs/sdks/connectorconfiguration/README.md#updateconnectorfilterssyncconfig) - Update filters and sync configuration
+- [`connectorControlToggleConnector`](docs/sdks/connectorcontrol/README.md#toggleconnector) - Toggle connector sync or agent
+- [`connectorFiltersGetConnectorFilters`](docs/sdks/connectorfilters/README.md#getconnectorfilters) - Get filter options
+- [`connectorFiltersGetFilterFieldOptions`](docs/sdks/connectorfilters/README.md#getfilterfieldoptions) - Get dynamic filter options
+- [`connectorFiltersSaveConnectorFilters`](docs/sdks/connectorfilters/README.md#saveconnectorfilters) - Save filter selections
 - [`connectorGetRecordContent`](docs/sdks/connector/README.md#getrecordcontent) - Get a record's full parsed content and metadata
+- [`connectorInstancesCreateConnectorInstance`](docs/sdks/connectorinstances/README.md#createconnectorinstance) - Create connector instance
+- [`connectorInstancesDeleteConnectorInstance`](docs/sdks/connectorinstances/README.md#deleteconnectorinstance) - Delete connector instance
+- [`connectorInstancesGetConnectorInstance`](docs/sdks/connectorinstances/README.md#getconnectorinstance) - Get connector instance
+- [`connectorInstancesGetConnectorStats`](docs/sdks/connectorinstances/README.md#getconnectorstats) - Get connector statistics
+- [`connectorInstancesListConnectorInstances`](docs/sdks/connectorinstances/README.md#listconnectorinstances) - List connector instances
+- [`connectorInstancesResyncConnector`](docs/sdks/connectorinstances/README.md#resyncconnector) - Resync connector
+- [`connectorInstancesStopConnectorSync`](docs/sdks/connectorinstances/README.md#stopconnectorsync) - Stop the running sync for a connector
 - [`connectorLookupRecordByIdentifier`](docs/sdks/connector/README.md#lookuprecordbyidentifier) - Resolve a URL, issue key or external ID to a Record ID
 - [`connectorNavigateKnowledgeGraph`](docs/sdks/connector/README.md#navigateknowledgegraph) - Browse the knowledge graph from a node
+- [`connectorOAuthGetOAuthAuthorizationUrl`](docs/sdks/connectoroauth/README.md#getoauthauthorizationurl) - Get OAuth authorization URL
+- [`connectorOAuthHandleOAuthCallback`](docs/sdks/connectoroauth/README.md#handleoauthcallback) - OAuth callback handler
+- [`connectorRegistryGetConnectorEgressIps`](docs/sdks/connectorregistry/README.md#getconnectoregressips) - Get the IP addresses connectors connect from
+- [`connectorRegistryGetConnectorRegistry`](docs/sdks/connectorregistry/README.md#getconnectorregistry) - List available connector types
+- [`connectorRegistryGetConnectorSchema`](docs/sdks/connectorregistry/README.md#getconnectorschema) - Get connector configuration schema
+- [`connectorRegistryTestConnectorConnection`](docs/sdks/connectorregistry/README.md#testconnectorconnection) - Test connector credentials before saving
 - [`conversationsAddMessage`](docs/sdks/conversations/README.md#addmessage) - Add message (non-streaming)
 - [`conversationsAddMessageStream`](docs/sdks/conversations/README.md#addmessagestream) - Add message to a conversation with streaming response
 - [`conversationsArchiveConversation`](docs/sdks/conversations/README.md#archiveconversation) - Archive conversation
@@ -394,14 +442,8 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`conversationsGetAllConversations`](docs/sdks/conversations/README.md#getallconversations) - List all conversations
 - [`conversationsGetArchivedConversations`](docs/sdks/conversations/README.md#getarchivedconversations) - List archived conversations
 - [`conversationsGetConversationById`](docs/sdks/conversations/README.md#getconversationbyid) - Get conversation by ID
-- [`conversationsGetProjectConversations`](docs/sdks/conversations/README.md#getprojectconversations) - List a project's conversations
-- [`conversationsGetProjectConversations`](docs/sdks/projects/README.md#getprojectconversations) - List a project's conversations
 - [`conversationsRegenerateAnswer`](docs/sdks/conversations/README.md#regenerateanswer) - Regenerate AI response
 - [`conversationsSearchArchivedConversations`](docs/sdks/conversations/README.md#searcharchivedconversations) - Search archived conversations
-- [`conversationsSetConversationProject`](docs/sdks/conversations/README.md#setconversationproject) - Link or unlink a conversation to a project
-- [`conversationsSetConversationProject`](docs/sdks/projects/README.md#setconversationproject) - Link or unlink a conversation to a project
-- [`conversationsSetConversationProjectVisibility`](docs/sdks/conversations/README.md#setconversationprojectvisibility) - Override a conversation's project visibility
-- [`conversationsSetConversationProjectVisibility`](docs/sdks/projects/README.md#setconversationprojectvisibility) - Override a conversation's project visibility
 - [`conversationsStreamChat`](docs/sdks/conversations/README.md#streamchat) - Create conversation with streaming response
 - [`conversationsUnarchiveConversation`](docs/sdks/conversations/README.md#unarchiveconversation) - Unarchive conversation
 - [`conversationsUpdateConversationTitle`](docs/sdks/conversations/README.md#updateconversationtitle) - Update conversation title
@@ -415,9 +457,12 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`knowledgeBaseGetRecordById`](docs/sdks/knowledgebase/README.md#getrecordbyid) - Get record by ID
 - [`knowledgeBaseGetUploadLimits`](docs/sdks/knowledgebase/README.md#getuploadlimits) - Get knowledge base upload limits
 - [`knowledgeBaseListKnowledgeBases`](docs/sdks/knowledgebase/README.md#listknowledgebases) - List all knowledge bases
+- [`knowledgeBaseListTrash`](docs/sdks/knowledgebase/README.md#listtrash) - List a collection's recently deleted items
 - [`knowledgeBaseMoveRecord`](docs/sdks/knowledgebase/README.md#moverecord) - Move record to another location
 - [`knowledgeBaseReindexRecord`](docs/sdks/knowledgebase/README.md#reindexrecord) - Reindex single record
 - [`knowledgeBaseReindexRecordGroup`](docs/sdks/knowledgebase/README.md#reindexrecordgroup) - Reindex record group
+- [`knowledgeBaseRestoreRecord`](docs/sdks/knowledgebase/README.md#restorerecord) - Restore a deleted record
+- [`knowledgeBaseRestoreRecords`](docs/sdks/knowledgebase/README.md#restorerecords) - Restore several deleted records
 - [`knowledgeBaseStreamRecordBuffer`](docs/sdks/knowledgebase/README.md#streamrecordbuffer) - Stream record content
 - [`knowledgeBaseUpdateFolder`](docs/sdks/knowledgebase/README.md#updatefolder) - Update folder
 - [`knowledgeBaseUpdateKnowledgeBase`](docs/sdks/knowledgebase/README.md#updateknowledgebase) - Update knowledge base
@@ -434,6 +479,14 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`oAuthAppsRevokeAllOAuthAppTokens`](docs/sdks/oauthapps/README.md#revokealloauthapptokens) - Revoke all app tokens
 - [`oAuthAppsSuspendOAuthApp`](docs/sdks/oauthapps/README.md#suspendoauthapp) - Suspend OAuth app
 - [`oAuthAppsUpdateOAuthApp`](docs/sdks/oauthapps/README.md#updateoauthapp) - Update OAuth app
+- [`oAuthConfigurationCreateOAuthConfig`](docs/sdks/oauthconfiguration/README.md#createoauthconfig) - Create OAuth configuration
+- [`oAuthConfigurationDeleteOAuthConfig`](docs/sdks/oauthconfiguration/README.md#deleteoauthconfig) - Delete OAuth configuration
+- [`oAuthConfigurationGetOAuthConfig`](docs/sdks/oauthconfiguration/README.md#getoauthconfig) - Get OAuth configuration
+- [`oAuthConfigurationGetOAuthConnectorType`](docs/sdks/oauthconfiguration/README.md#getoauthconnectortype) - Get OAuth connector type details
+- [`oAuthConfigurationGetOAuthRegistry`](docs/sdks/oauthconfiguration/README.md#getoauthregistry) - List OAuth-capable connector types
+- [`oAuthConfigurationListOAuthConfigs`](docs/sdks/oauthconfiguration/README.md#listoauthconfigs) - List OAuth configurations
+- [`oAuthConfigurationListOAuthConfigsByType`](docs/sdks/oauthconfiguration/README.md#listoauthconfigsbytype) - List OAuth configs for connector type
+- [`oAuthConfigurationUpdateOAuthConfig`](docs/sdks/oauthconfiguration/README.md#updateoauthconfig) - Update OAuth configuration
 - [`oAuthProviderOauthIntrospect`](docs/sdks/oauthprovider/README.md#oauthintrospect) - Introspect a token
 - [`oAuthProviderOauthRevoke`](docs/sdks/oauthprovider/README.md#oauthrevoke) - Revoke an access or refresh token
 - [`oAuthProviderOauthToken`](docs/sdks/oauthprovider/README.md#oauthtoken) - Exchange authorization code for tokens
@@ -448,23 +501,6 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`personalAccessTokensListPersonalAccessTokens`](docs/sdks/personalaccesstokens/README.md#listpersonalaccesstokens) - List your own personal access tokens
 - [`personalAccessTokensListPersonalAccessTokenScopes`](docs/sdks/personalaccesstokens/README.md#listpersonalaccesstokenscopes) - List scopes available for a new personal access token
 - [`personalAccessTokensRevokePersonalAccessToken`](docs/sdks/personalaccesstokens/README.md#revokepersonalaccesstoken) - Revoke one of your own personal access tokens
-- [`projectsArchiveProject`](docs/sdks/projects/README.md#archiveproject) - Archive a project
-- [`projectsCreateProject`](docs/sdks/projects/README.md#createproject) - Create a project
-- [`projectsDeleteProject`](docs/sdks/projects/README.md#deleteproject) - Delete a project
-- [`projectsEnsureProjectKnowledgeBase`](docs/sdks/projects/README.md#ensureprojectknowledgebase) - Ensure (create-if-absent) the project's hidden file Collection
-- [`projectsGetProjectById`](docs/sdks/projects/README.md#getprojectbyid) - Get a project
-- [`projectsListProjectMembers`](docs/sdks/projects/README.md#listprojectmembers) - List project members
-- [`projectsListProjects`](docs/sdks/projects/README.md#listprojects) - List projects
-- [`projectsPinProject`](docs/sdks/projects/README.md#pinproject) - Pin a project
-- [`projectsRemoveProjectMember`](docs/sdks/projects/README.md#removeprojectmember) - Remove a project member
-- [`projectsSetAgentConversationProject`](docs/sdks/agents/README.md#setagentconversationproject) - Link or unlink an agent conversation to a project
-- [`projectsSetAgentConversationProject`](docs/sdks/projects/README.md#setagentconversationproject) - Link or unlink an agent conversation to a project
-- [`projectsSetAgentConversationProjectVisibility`](docs/sdks/agents/README.md#setagentconversationprojectvisibility) - Override an agent conversation's project visibility
-- [`projectsSetAgentConversationProjectVisibility`](docs/sdks/projects/README.md#setagentconversationprojectvisibility) - Override an agent conversation's project visibility
-- [`projectsUnarchiveProject`](docs/sdks/projects/README.md#unarchiveproject) - Unarchive a project
-- [`projectsUnpinProject`](docs/sdks/projects/README.md#unpinproject) - Unpin a project
-- [`projectsUpdateProject`](docs/sdks/projects/README.md#updateproject) - Update a project
-- [`projectsUpsertProjectMembers`](docs/sdks/projects/README.md#upsertprojectmembers) - Add or update project members
 - [`semanticSearchArchiveSearch`](docs/sdks/semanticsearch/README.md#archivesearch) - Archive a search
 - [`semanticSearchDeleteSearchById`](docs/sdks/semanticsearch/README.md#deletesearchbyid) - Delete search by ID
 - [`semanticSearchDeleteSearchHistory`](docs/sdks/semanticsearch/README.md#deletesearchhistory) - Clear all search history
@@ -678,7 +714,7 @@ run();
 **Primary error:**
 * [`PipeshubError`](./src/models/errors/pipeshub-error.ts): The base class for HTTP error responses.
 
-<details><summary>Less common errors (34)</summary>
+<details><summary>Less common errors (36)</summary>
 
 <br />
 
@@ -691,34 +727,36 @@ run();
 
 
 **Inherit from [`PipeshubError`](./src/models/errors/pipeshub-error.ts)**:
-* [`ErrorResponse`](./src/models/errors/error-response.ts): Standard error envelope returned by all errors routed through `ErrorMiddleware`. Applies to all `BaseError` subclasses including `HttpError`, `ValidationError`, and others. The `code` field is a machine-readable string identifying the error type (e.g. `HTTP_UNAUTHORIZED`, `HTTP_NOT_FOUND`, `VALIDATION_ERROR`, `INTERNAL_ERROR`). Applicable to 44 of 122 methods.*
-* [`OAuthClientManagementRateLimitError`](./src/models/errors/o-auth-client-management-rate-limit-error.ts): JSON body when OAuth client management routes exceed the per-minute rate limit (same limiter as other `/oauth-clients/*` routes). Status code `429`. Applicable to 20 of 122 methods.*
-* [`ApplicationJsonErrorResponse`](./src/models/errors/application-json-error-response.ts): Standard JSON error envelope from `ErrorMiddleware` for `BaseError` subclasses (`error.middleware.ts`). Returned for most API 4xx errors (unauthorized, forbidden, not found, validation failures, etc.). Applicable to 17 of 122 methods.*
-* [`OAuthErrorResponse`](./src/models/errors/o-auth-error-response.ts): OAuth 2.0 Error Response (RFC 6749 Section 5.2). Standard error format for OAuth endpoints. Status code `401`. Applicable to 3 of 122 methods.*
-* [`GetKnowledgeHubRootNodesBadRequestError`](./src/models/errors/get-knowledge-hub-root-nodes-bad-request-error.ts): Invalid request parameters. The backend's validation message is returned verbatim in `error.message`. See the examples below for the common triggers. Status code `400`. Applicable to 1 of 122 methods.*
-* [`GetKnowledgeHubChildNodesBadRequestError`](./src/models/errors/get-knowledge-hub-child-nodes-bad-request-error.ts): Invalid request parameters or path values. The backend's validation message is returned verbatim in `error.message`. See the examples below for the common triggers. Status code `400`. Applicable to 1 of 122 methods.*
-* [`SearchHistoryBadRequestError`](./src/models/errors/search-history-bad-request-error.ts): Error envelope for a failed request. Status code `400`. Applicable to 1 of 122 methods.*
-* [`GetSearchByIdBadRequestError`](./src/models/errors/get-search-by-id-bad-request-error.ts): Invalid request — `searchId` failed Zod validation (not a valid ObjectId). Status code `400`. Applicable to 1 of 122 methods.*
-* [`DeleteAgentConversationChatAttachmentBadRequestError`](./src/models/errors/delete-agent-conversation-chat-attachment-bad-request-error.ts): Invalid or blank path params (`agentKey` or `recordId`). Status code `400`. Applicable to 1 of 122 methods.*
-* [`GetAvailableModelsByTypeBadRequestError`](./src/models/errors/get-available-models-by-type-bad-request-error.ts): Invalid `modelType` path parameter.  The `modelType` value was not one of the supported enum categories. This response is produced by the Zod validation middleware **before** the handler runs. The `error.metadata.errors` array contains per-field detail about exactly which constraint failed. Status code `400`. Applicable to 1 of 122 methods.*
-* [`GetKnowledgeHubRootNodesUnauthorizedError`](./src/models/errors/get-knowledge-hub-root-nodes-unauthorized-error.ts): Missing or invalid authentication token.  The bearer token was absent, expired, malformed, or could not be verified by the auth middleware. Status code `401`. Applicable to 1 of 122 methods.*
-* [`GetKnowledgeHubChildNodesUnauthorizedError`](./src/models/errors/get-knowledge-hub-child-nodes-unauthorized-error.ts): Missing or invalid authentication token.  The bearer token was absent, expired, malformed, or could not be verified by the auth middleware. Status code `401`. Applicable to 1 of 122 methods.*
-* [`SearchHistoryUnauthorizedError`](./src/models/errors/search-history-unauthorized-error.ts): Error envelope for a failed request. Status code `401`. Applicable to 1 of 122 methods.*
-* [`GetSearchByIdUnauthorizedError`](./src/models/errors/get-search-by-id-unauthorized-error.ts): Missing or invalid bearer token. Status code `401`. Applicable to 1 of 122 methods.*
-* [`GetAvailableModelsByTypeUnauthorizedError`](./src/models/errors/get-available-models-by-type-unauthorized-error.ts): Missing or invalid authentication token.  The bearer token was absent, expired, malformed, or could not be verified by the auth middleware. Status code `401`. Applicable to 1 of 122 methods.*
-* [`GetKnowledgeHubRootNodesForbiddenError`](./src/models/errors/get-knowledge-hub-root-nodes-forbidden-error.ts): Insufficient OAuth scope.  Only applies to OAuth tokens. The token did not carry the `kb:read` scope required by this endpoint. Regular (non-OAuth) JWT bearer tokens are not subject to scope enforcement and will not receive this error. Status code `403`. Applicable to 1 of 122 methods.*
-* [`GetKnowledgeHubChildNodesForbiddenError`](./src/models/errors/get-knowledge-hub-child-nodes-forbidden-error.ts): Insufficient OAuth scope.  Only applies to OAuth tokens. The token did not carry the `kb:read` scope required by this endpoint. Regular (non-OAuth) JWT bearer tokens are not subject to scope enforcement and will not receive this error. Status code `403`. Applicable to 1 of 122 methods.*
-* [`SearchHistoryForbiddenError`](./src/models/errors/search-history-forbidden-error.ts): Error envelope for a failed request. Status code `403`. Applicable to 1 of 122 methods.*
-* [`GetSearchByIdForbiddenError`](./src/models/errors/get-search-by-id-forbidden-error.ts): Bearer token lacks the `semantic:read` scope. Status code `403`. Applicable to 1 of 122 methods.*
-* [`GetAvailableModelsByTypeForbiddenError`](./src/models/errors/get-available-models-by-type-forbidden-error.ts): Insufficient OAuth scope.  Only applies to OAuth tokens. The token did not carry the `config:read` scope required by this endpoint. Regular (non-OAuth) JWT bearer tokens are not subject to scope enforcement and will not receive this error. Status code `403`. Applicable to 1 of 122 methods.*
-* [`StreamRecordErrorResponse`](./src/models/errors/stream-record-error-response.ts): Error payload returned by the legacy record-stream proxy when the downstream streaming request fails after route middleware has passed. Applicable to 1 of 122 methods.*
-* [`GetKnowledgeHubChildNodesNotFoundError`](./src/models/errors/get-knowledge-hub-child-nodes-not-found-error.ts): Parent node not found.  The `parentId` does not correspond to an existing node of the specified `parentType`, or the node has been deleted. Status code `404`. Applicable to 1 of 122 methods.*
-* [`GetSearchByIdNotFoundError`](./src/models/errors/get-search-by-id-not-found-error.ts): Reserved for parity with sibling routes; this endpoint currently returns `200` with an empty array for an unknown id rather than emitting `404`. Status code `404`. Applicable to 1 of 122 methods.*
-* [`GetKnowledgeHubRootNodesInternalServerError`](./src/models/errors/get-knowledge-hub-root-nodes-internal-server-error.ts): An unexpected error occurred on the server. Status code `500`. Applicable to 1 of 122 methods.*
-* [`GetKnowledgeHubChildNodesInternalServerError`](./src/models/errors/get-knowledge-hub-child-nodes-internal-server-error.ts): An unexpected error occurred on the server. Status code `500`. Applicable to 1 of 122 methods.*
-* [`SearchHistoryInternalServerError`](./src/models/errors/search-history-internal-server-error.ts): Error envelope for a failed request. Status code `500`. Applicable to 1 of 122 methods.*
-* [`GetSearchByIdInternalServerError`](./src/models/errors/get-search-by-id-internal-server-error.ts): Server error. Possible causes:  - Explicit `InternalServerError`   or any other 500 `BaseError` thrown by the handler. - Non-`BaseError` exception caught by the   global error middleware. - Response serializer fallback. Status code `500`. Applicable to 1 of 122 methods.*
-* [`GetAvailableModelsByTypeInternalServerError`](./src/models/errors/get-available-models-by-type-internal-server-error.ts): An unexpected error occurred on the server. Status code `500`. Applicable to 1 of 122 methods.*
+* [`ErrorResponse`](./src/models/errors/error-response.ts): Standard error envelope returned by all errors routed through `ErrorMiddleware`. Applies to all `BaseError` subclasses including `HttpError`, `ValidationError`, and others. The `code` field is a machine-readable string identifying the error type (e.g. `HTTP_UNAUTHORIZED`, `HTTP_NOT_FOUND`, `VALIDATION_ERROR`, `INTERNAL_ERROR`). Applicable to 77 of 131 methods.*
+* [`OAuthClientManagementRateLimitError`](./src/models/errors/o-auth-client-management-rate-limit-error.ts): JSON body when OAuth client management routes exceed the per-minute rate limit (same limiter as other `/oauth-clients/*` routes). Status code `429`. Applicable to 20 of 131 methods.*
+* [`ApplicationJsonErrorResponse`](./src/models/errors/application-json-error-response.ts): Standard JSON error envelope from `ErrorMiddleware` for `BaseError` subclasses (`error.middleware.ts`). Returned for most API 4xx errors (unauthorized, forbidden, not found, validation failures, etc.). Applicable to 17 of 131 methods.*
+* [`OAuthErrorResponse`](./src/models/errors/o-auth-error-response.ts): OAuth 2.0 Error Response (RFC 6749 Section 5.2). Standard error format for OAuth endpoints. Status code `401`. Applicable to 3 of 131 methods.*
+* [`RateLimitErrorResponse`](./src/models/errors/rate-limit-error-response.ts): Rate-limit error payload (shape differs from standard error responses). Status code `429`. Applicable to 3 of 131 methods.*
+* [`LocalFsDesktopRefusalError`](./src/models/errors/local-fs-desktop-refusal-error.ts): 409 body returned when a Local FS connector cannot sync because of its owner device. Status code `409`. Applicable to 2 of 131 methods.*
+* [`GetKnowledgeHubRootNodesBadRequestError`](./src/models/errors/get-knowledge-hub-root-nodes-bad-request-error.ts): Invalid request parameters. The backend's validation message is returned verbatim in `error.message`. See the examples below for the common triggers. Status code `400`. Applicable to 1 of 131 methods.*
+* [`GetKnowledgeHubChildNodesBadRequestError`](./src/models/errors/get-knowledge-hub-child-nodes-bad-request-error.ts): Invalid request parameters or path values. The backend's validation message is returned verbatim in `error.message`. See the examples below for the common triggers. Status code `400`. Applicable to 1 of 131 methods.*
+* [`SearchHistoryBadRequestError`](./src/models/errors/search-history-bad-request-error.ts): Error envelope for a failed request. Status code `400`. Applicable to 1 of 131 methods.*
+* [`GetSearchByIdBadRequestError`](./src/models/errors/get-search-by-id-bad-request-error.ts): Invalid request — `searchId` failed Zod validation (not a valid ObjectId). Status code `400`. Applicable to 1 of 131 methods.*
+* [`DeleteAgentConversationChatAttachmentBadRequestError`](./src/models/errors/delete-agent-conversation-chat-attachment-bad-request-error.ts): Invalid or blank path params (`agentKey` or `recordId`). Status code `400`. Applicable to 1 of 131 methods.*
+* [`GetAvailableModelsByTypeBadRequestError`](./src/models/errors/get-available-models-by-type-bad-request-error.ts): Invalid `modelType` path parameter.  The `modelType` value was not one of the supported enum categories. This response is produced by the Zod validation middleware **before** the handler runs. The `error.metadata.errors` array contains per-field detail about exactly which constraint failed. Status code `400`. Applicable to 1 of 131 methods.*
+* [`GetKnowledgeHubRootNodesUnauthorizedError`](./src/models/errors/get-knowledge-hub-root-nodes-unauthorized-error.ts): Missing or invalid authentication token.  The bearer token was absent, expired, malformed, or could not be verified by the auth middleware. Status code `401`. Applicable to 1 of 131 methods.*
+* [`GetKnowledgeHubChildNodesUnauthorizedError`](./src/models/errors/get-knowledge-hub-child-nodes-unauthorized-error.ts): Missing or invalid authentication token.  The bearer token was absent, expired, malformed, or could not be verified by the auth middleware. Status code `401`. Applicable to 1 of 131 methods.*
+* [`SearchHistoryUnauthorizedError`](./src/models/errors/search-history-unauthorized-error.ts): Error envelope for a failed request. Status code `401`. Applicable to 1 of 131 methods.*
+* [`GetSearchByIdUnauthorizedError`](./src/models/errors/get-search-by-id-unauthorized-error.ts): Missing or invalid bearer token. Status code `401`. Applicable to 1 of 131 methods.*
+* [`GetAvailableModelsByTypeUnauthorizedError`](./src/models/errors/get-available-models-by-type-unauthorized-error.ts): Missing or invalid authentication token.  The bearer token was absent, expired, malformed, or could not be verified by the auth middleware. Status code `401`. Applicable to 1 of 131 methods.*
+* [`GetKnowledgeHubRootNodesForbiddenError`](./src/models/errors/get-knowledge-hub-root-nodes-forbidden-error.ts): Insufficient OAuth scope.  Only applies to OAuth tokens. The token did not carry the `kb:read` scope required by this endpoint. Regular (non-OAuth) JWT bearer tokens are not subject to scope enforcement and will not receive this error. Status code `403`. Applicable to 1 of 131 methods.*
+* [`GetKnowledgeHubChildNodesForbiddenError`](./src/models/errors/get-knowledge-hub-child-nodes-forbidden-error.ts): Insufficient OAuth scope.  Only applies to OAuth tokens. The token did not carry the `kb:read` scope required by this endpoint. Regular (non-OAuth) JWT bearer tokens are not subject to scope enforcement and will not receive this error. Status code `403`. Applicable to 1 of 131 methods.*
+* [`SearchHistoryForbiddenError`](./src/models/errors/search-history-forbidden-error.ts): Error envelope for a failed request. Status code `403`. Applicable to 1 of 131 methods.*
+* [`GetSearchByIdForbiddenError`](./src/models/errors/get-search-by-id-forbidden-error.ts): Bearer token lacks the `semantic:read` scope. Status code `403`. Applicable to 1 of 131 methods.*
+* [`GetAvailableModelsByTypeForbiddenError`](./src/models/errors/get-available-models-by-type-forbidden-error.ts): Insufficient OAuth scope.  Only applies to OAuth tokens. The token did not carry the `config:read` scope required by this endpoint. Regular (non-OAuth) JWT bearer tokens are not subject to scope enforcement and will not receive this error. Status code `403`. Applicable to 1 of 131 methods.*
+* [`StreamRecordErrorResponse`](./src/models/errors/stream-record-error-response.ts): Error payload returned by the legacy record-stream proxy when the downstream streaming request fails after route middleware has passed. Applicable to 1 of 131 methods.*
+* [`GetKnowledgeHubChildNodesNotFoundError`](./src/models/errors/get-knowledge-hub-child-nodes-not-found-error.ts): Parent node not found.  The `parentId` does not correspond to an existing node of the specified `parentType`, or the node has been deleted. Status code `404`. Applicable to 1 of 131 methods.*
+* [`GetSearchByIdNotFoundError`](./src/models/errors/get-search-by-id-not-found-error.ts): Reserved for parity with sibling routes; this endpoint currently returns `200` with an empty array for an unknown id rather than emitting `404`. Status code `404`. Applicable to 1 of 131 methods.*
+* [`GetKnowledgeHubRootNodesInternalServerError`](./src/models/errors/get-knowledge-hub-root-nodes-internal-server-error.ts): An unexpected error occurred on the server. Status code `500`. Applicable to 1 of 131 methods.*
+* [`GetKnowledgeHubChildNodesInternalServerError`](./src/models/errors/get-knowledge-hub-child-nodes-internal-server-error.ts): An unexpected error occurred on the server. Status code `500`. Applicable to 1 of 131 methods.*
+* [`SearchHistoryInternalServerError`](./src/models/errors/search-history-internal-server-error.ts): Error envelope for a failed request. Status code `500`. Applicable to 1 of 131 methods.*
+* [`GetSearchByIdInternalServerError`](./src/models/errors/get-search-by-id-internal-server-error.ts): Server error. Possible causes:  - Explicit `InternalServerError`   or any other 500 `BaseError` thrown by the handler. - Non-`BaseError` exception caught by the   global error middleware. - Response serializer fallback. Status code `500`. Applicable to 1 of 131 methods.*
+* [`GetAvailableModelsByTypeInternalServerError`](./src/models/errors/get-available-models-by-type-internal-server-error.ts): An unexpected error occurred on the server. Status code `500`. Applicable to 1 of 131 methods.*
 * [`ResponseValidationError`](./src/models/errors/response-validation-error.ts): Type mismatch between the data returned from the server and the structure expected by the SDK. See `error.rawValue` for the raw value and `error.pretty()` for a nicely formatted multi-line string.
 
 </details>

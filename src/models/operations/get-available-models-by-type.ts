@@ -125,6 +125,21 @@ export type GetAvailableModelsByTypeStatus = ClosedEnum<
   typeof GetAvailableModelsByTypeStatus
 >;
 
+/**
+ * The model's own reasoning effort. It applies only when the chat request sets no `reasoningEffort` and the agent has no `defaultReasoningEffort`; a level the user picks always wins. Read from `configuration.defaultReasoningEffort`, falling back to a top-level `defaultReasoningEffort`. Present on every model expanded from the entry, and left out when no default is stored. `none` is a legacy value that runs as `low`.
+ */
+export const DefaultReasoningEffort = {
+  None: "none",
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Max: "max",
+} as const;
+/**
+ * The model's own reasoning effort. It applies only when the chat request sets no `reasoningEffort` and the agent has no `defaultReasoningEffort`; a level the user picks always wins. Read from `configuration.defaultReasoningEffort`, falling back to a top-level `defaultReasoningEffort`. Present on every model expanded from the entry, and left out when no default is stored. `none` is a legacy value that runs as `low`.
+ */
+export type DefaultReasoningEffort = OpenEnum<typeof DefaultReasoningEffort>;
+
 export type Model = {
   /**
    * Model category — always matches the `{modelType}` path parameter.
@@ -158,6 +173,10 @@ export type Model = {
    * Optional human-readable display name. Only present when the provider configuration entry contains exactly one model name (not a comma-separated list) **and** a friendly name was added during configuration.
    */
   modelFriendlyName?: string | undefined;
+  /**
+   * The model's own reasoning effort. It applies only when the chat request sets no `reasoningEffort` and the agent has no `defaultReasoningEffort`; a level the user picks always wins. Read from `configuration.defaultReasoningEffort`, falling back to a top-level `defaultReasoningEffort`. Present on every model expanded from the entry, and left out when no default is stored. `none` is a legacy value that runs as `low`.
+   */
+  defaultReasoningEffort?: DefaultReasoningEffort | undefined;
 };
 
 /**
@@ -382,6 +401,12 @@ export const GetAvailableModelsByTypeStatus$inboundSchema: z.ZodMiniEnum<
 > = z.enum(GetAvailableModelsByTypeStatus);
 
 /** @internal */
+export const DefaultReasoningEffort$inboundSchema: z.ZodMiniType<
+  DefaultReasoningEffort,
+  unknown
+> = openEnums.inboundSchema(DefaultReasoningEffort);
+
+/** @internal */
 export const Model$inboundSchema: z.ZodMiniType<Model, unknown> = z.object({
   modelType: models.ModelType$inboundSchema,
   provider: types.string(),
@@ -391,6 +416,7 @@ export const Model$inboundSchema: z.ZodMiniType<Model, unknown> = z.object({
   isReasoning: types.boolean(),
   isDefault: types.boolean(),
   modelFriendlyName: types.optional(types.string()),
+  defaultReasoningEffort: types.optional(DefaultReasoningEffort$inboundSchema),
 });
 
 export function modelFromJSON(

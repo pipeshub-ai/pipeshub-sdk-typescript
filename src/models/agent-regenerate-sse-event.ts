@@ -63,13 +63,13 @@ export type AgentRegenerateSSEEventEvent = OpenEnum<
 export type AgentRegenerateSSEEvent = {
   event?: AgentRegenerateSSEEventEvent | undefined;
   /**
-   * JSON-encoded event payload. The decoded JSON includes a `"type"`
+   * Decoded JSON payload. It includes a `"type"`
    *
    * @remarks
    * field matching `event`, plus type-specific fields. Shape depends
    * on `event`.
    */
-  data?: string | undefined;
+  data?: { [k: string]: any } | undefined;
 };
 
 /** @internal */
@@ -84,7 +84,26 @@ export const AgentRegenerateSSEEvent$inboundSchema: z.ZodMiniType<
   unknown
 > = z.object({
   event: types.optional(AgentRegenerateSSEEventEvent$inboundSchema),
-  data: types.optional(types.string()),
+  data: z.pipe(
+    z.pipe(
+      z.optional(z.unknown()),
+      z.transform((v, ctx) => {
+        if (v === undefined) return undefined;
+        if (typeof v !== "string") return v;
+        try {
+          return JSON.parse(v);
+        } catch (err) {
+          ctx.issues.push({
+            input: v,
+            code: "custom",
+            message: `malformed json: ${err}`,
+          });
+          return z.NEVER;
+        }
+      }),
+    ),
+    types.optional(z.record(z.string(), z.any())),
+  ),
 });
 
 export function agentRegenerateSSEEventFromJSON(

@@ -1,0 +1,19 @@
+# RequestBody2
+
+## Example Usage
+
+```typescript
+import { RequestBody2 } from "@pipeshub-ai/sdk/models/operations";
+
+let value: RequestBody2 = {
+  config: {},
+};
+```
+
+## Fields
+
+| Field                                                                                                                                                                                 | Type                                                                                                                                                                                  | Required                                                                                                                                                                              | Description                                                                                                                                                                           |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `oauthInstanceName`                                                                                                                                                                   | *string*                                                                                                                                                                              | :heavy_minus_sign:                                                                                                                                                                    | New name; must not be taken by another of the org's apps for this connector type.                                                                                                     |
+| `config`                                                                                                                                                                              | [operations.Config2](../../models/operations/config2.md)                                                                                                                              | :heavy_check_mark:                                                                                                                                                                    | OAuth app fields to change, merged over the saved ones. Keys follow<br/>the connector type's OAuth fields; a masked secret sent back as<br/>returned is ignored, so the saved value is kept.<br/> |
+| `baseUrl`                                                                                                                                                                             | *string*                                                                                                                                                                              | :heavy_minus_sign:                                                                                                                                                                    | PipesHub's public origin. Used only when the stored configuration has no redirectUri yet, to build one; an existing redirectUri is kept whether or not this is sent.                  |

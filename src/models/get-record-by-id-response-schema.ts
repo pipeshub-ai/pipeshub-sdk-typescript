@@ -61,6 +61,14 @@ export type GetRecordByIdResponseSchemaRecord = {
    * connectors that do not set it.
    */
   rootRecordGroupId?: string | null | undefined;
+  /**
+   * User id of whoever uploaded the file to the knowledge base.
+   *
+   * @remarks
+   * Absent for connector records and for files uploaded before the
+   * field existed.
+   */
+  uploadedBy?: string | null | undefined;
   connectorId: string;
   /**
    * Name of the source connector. Mirrors the values of the backend
@@ -315,6 +323,7 @@ export const GetRecordByIdResponseSchemaRecord$inboundSchema: z.ZodMiniType<
   externalRevisionId: z.optional(z.nullable(types.string())),
   recordGroupId: z.optional(z.nullable(types.string())),
   rootRecordGroupId: z.optional(z.nullable(types.string())),
+  uploadedBy: z.optional(z.nullable(types.string())),
   connectorId: types.string(),
   connectorName: ConnectorNameEnum$inboundSchema,
   recordType: RecordTypeEnum$inboundSchema,

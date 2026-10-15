@@ -44,8 +44,8 @@ export type ConversationMessageStreamSSEEventEvent = OpenEnum<
  * `internal_search`, or `web_search` on an existing conversation. AG-UI
  * is the sole wire protocol.
  *
- * `event` carries the AG-UI type name and `data` is a JSON-encoded
- * object that includes a `"type"` field matching `event`, plus
+ * `event` carries the AG-UI type name and `data` is the decoded JSON
+ * object, which includes a `"type"` field matching `event`, plus
  * type-specific fields. Universal `agent` mode may emit step and nested
  * child-run events. Stable gateway-generated top-level outcomes:
  *
@@ -69,14 +69,14 @@ export type ConversationMessageStreamSSEEventEvent = OpenEnum<
 export type ConversationMessageStreamSSEEvent = {
   event?: ConversationMessageStreamSSEEventEvent | undefined;
   /**
-   * JSON-encoded event payload. The decoded JSON includes a `"type"`
+   * Decoded JSON payload. It includes a `"type"`
    *
    * @remarks
    * field matching `event`, plus type-specific fields. Shape depends
    * on `event`. Forwarded lifecycle events may carry `runId`,
    * `threadId`, and `parentRunId`.
    */
-  data?: string | undefined;
+  data?: { [k: string]: any } | undefined;
 };
 
 /** @internal */
@@ -90,7 +90,26 @@ export const ConversationMessageStreamSSEEvent$inboundSchema: z.ZodMiniType<
   unknown
 > = z.object({
   event: types.optional(ConversationMessageStreamSSEEventEvent$inboundSchema),
-  data: types.optional(types.string()),
+  data: z.pipe(
+    z.pipe(
+      z.optional(z.unknown()),
+      z.transform((v, ctx) => {
+        if (v === undefined) return undefined;
+        if (typeof v !== "string") return v;
+        try {
+          return JSON.parse(v);
+        } catch (err) {
+          ctx.issues.push({
+            input: v,
+            code: "custom",
+            message: `malformed json: ${err}`,
+          });
+          return z.NEVER;
+        }
+      }),
+    ),
+    types.optional(z.record(z.string(), z.any())),
+  ),
 });
 
 export function conversationMessageStreamSSEEventFromJSON(

@@ -2,10 +2,14 @@
   "name": "@pipeshub-ai/sdk-examples",
   "version": "1.0.0",
   "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit -p ."
+  },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "dotenv": "^16.4.5",
-    "tsx": "^4.19.2"
+    "tsx": "^4.19.2",
+    "typescript": "~5.8.3"
   },
   "dependencies": {
     "@pipeshub-ai/sdk": "^1.7.0"

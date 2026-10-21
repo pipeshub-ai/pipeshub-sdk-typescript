@@ -103,11 +103,20 @@ export type GetKnowledgeHubChildNodesRequest = {
    */
   onlyContainers?: boolean | undefined;
   /**
-   * Page number (1-indexed). Combined with `limit` to paginate results.
+   * Page number (1-indexed, at most 50). Combined with `limit` to paginate results.
    *
    * @remarks
+   * Prefer `cursor`: a page number is reached by reading the pages before it.
    */
   page?: number | undefined;
+  /**
+   * Opaque cursor from `pagination.nextCursor` or `pagination.prevCursor` of a previous
+   *
+   * @remarks
+   * response. Send it with the same path, filters and sort as the request that returned
+   * it; a cursor issued for another place, user or listing mode is refused with 400.
+   */
+  cursor?: string | undefined;
   /**
    * Maximum number of items to return per page.
    *
@@ -314,6 +323,7 @@ export type GetKnowledgeHubChildNodesRequest$Outbound = {
   parentId: string;
   onlyContainers: boolean;
   page: number;
+  cursor?: string | undefined;
   limit: number;
   sortBy: string;
   sortOrder: string;
@@ -339,6 +349,7 @@ export const GetKnowledgeHubChildNodesRequest$outboundSchema: z.ZodMiniType<
   parentId: z.string(),
   onlyContainers: z._default(z.boolean(), false),
   page: z._default(z.int(), 1),
+  cursor: z.optional(z.string()),
   limit: z._default(z.int(), 50),
   sortBy: z._default(
     GetKnowledgeHubChildNodesSortBy$outboundSchema,

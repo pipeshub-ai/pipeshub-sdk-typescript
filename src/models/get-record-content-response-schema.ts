@@ -4,9 +4,61 @@
 
 import * as z from "zod/v4-mini";
 import { safeParse } from "../lib/schemas.js";
+import * as openEnums from "../types/enums.js";
+import { OpenEnum } from "../types/enums.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
+
+/**
+ * Budgeted reads only. Which kind of read this was.
+ */
+export const Mode = {
+  Record: "record",
+  Thread: "thread",
+} as const;
+/**
+ * Budgeted reads only. Which kind of read this was.
+ */
+export type Mode = OpenEnum<typeof Mode>;
+
+/**
+ * Budgeted record reads only. `relevance` when `query` chose which blocks to show; the blocks are then not contiguous.
+ */
+export const Order = {
+  InOrder: "in_order",
+  Relevance: "relevance",
+} as const;
+/**
+ * Budgeted record reads only. `relevance` when `query` chose which blocks to show; the blocks are then not contiguous.
+ */
+export type Order = OpenEnum<typeof Order>;
+
+export type GivenUpBlock = {
+  recordId?: string | undefined;
+  block?: number | undefined;
+};
+
+export type GetRecordContentResponseSchemaRecord = {
+  recordId?: string | undefined;
+  recordName?: string | null | undefined;
+  startBlock?: number | undefined;
+  complete?: boolean | undefined;
+  truncatedBy?: string | null | undefined;
+  givenUpBlock?: number | null | undefined;
+  nextStartBlock?: number | null | undefined;
+};
+
+export type Thread = {
+  /**
+   * The thread's record group.
+   */
+  threadRecordGroupId?: string | undefined;
+  /**
+   * Replies of this thread the caller may see.
+   */
+  recordCount?: number | undefined;
+};
 
 /**
  * Response returned by GET /connectors/record/{recordId}/content.
@@ -20,15 +72,173 @@ import { SDKValidationError } from "./errors/sdk-validation-error.js";
  *
  * For `TICKET` records (e.g. Jira) the metadata header is refreshed with
  * live ticket fields (status, assignee, comments) at request time rather
- * than the last-indexed snapshot. `content` may be empty for records with
- * no extractable text (e.g. image-only or not-yet-parsed records).
+ * than the last-indexed snapshot. `content` may be empty for an indexed
+ * record with no extractable text (e.g. image-only).
+ *
+ * A record that exists and that the caller may read, but whose content
+ * is not indexed yet (`indexingStatus` other than `COMPLETED`), has no
+ * parsed text. `content` is then a description of the record instead:
+ * its metadata header (name, link, dates, type-specific fields) followed
+ * by a paragraph that starts `Not indexed:` and names the status, e.g.
+ * `(status: AUTO_INDEX_OFF)`. It is not the record's text.
+ *
+ * `content` is the literal `No record found` when the caller may read
+ * an indexed record but its stored content could not be loaded. An id
+ * that does not exist, a record in the trash, and a record the caller
+ * may not read all answer `403` instead.
  */
 export type GetRecordContentResponseSchema = {
   /**
-   * The record's full parsed content as a single plain-text string.
+   * The record's full parsed content as a single plain-text string; for a record whose content is not indexed yet, a description of the record and its indexing status instead (see above). In a budgeted read, the part of the record (or thread) that fit.
    */
   content: string;
+  /**
+   * Budgeted reads only. Which kind of read this was.
+   */
+  mode?: Mode | undefined;
+  /**
+   * Budgeted record reads only. The record read.
+   */
+  recordId?: string | undefined;
+  /**
+   * Budgeted record reads only. `relevance` when `query` chose which blocks to show; the blocks are then not contiguous.
+   */
+  order?: Order | undefined;
+  /**
+   * Budgeted reads only. Where this read started (in a thread read, within the record at `startRecord`).
+   */
+  startBlock?: number | undefined;
+  /**
+   * Budgeted record reads only. Blocks in the record.
+   */
+  totalBlocks?: number | undefined;
+  /**
+   * Budgeted record reads only. The block ranges shown, as `[first, last]` pairs.
+   */
+  shownBlocks?: Array<Array<number>> | undefined;
+  /**
+   * Budgeted reads only. True when nothing of the record (or thread) is left to read after this one. A block larger than the largest `maxChars` (140000) is returned cut and given up; when nothing follows it, `complete` is true and `truncatedBy` is `clipped`.
+   */
+  complete?: boolean | undefined;
+  /**
+   * Budgeted reads. Why the read stopped short: `chars`, `selection`, or `clipped` (a block larger than `maxChars` was cut; it takes precedence over the others). Null when the read lost nothing. `clipped` can come with `complete: true`: a block given up at the largest `maxChars` with nothing after it.
+   */
+  truncatedBy?: string | null | undefined;
+  /**
+   * Budgeted record reads only. A block larger than the largest `maxChars` (140000) that this read cut and gave up: no read can return the rest of it. Set in the read that gave it up, even when more of the record follows.
+   */
+  givenUpBlock?: number | null | undefined;
+  /**
+   * Thread reads only. Every block this read gave up at the largest `maxChars`, by record.
+   */
+  givenUpBlocks?: Array<GivenUpBlock> | undefined;
+  /**
+   * Pass as `startBlock` to read on; null when nothing is left. In a thread read it is the block of the record at `nextStartRecord` (0 unless that record was cut short). A block larger than `maxChars` holds it on that block: send it again with a larger `maxChars` (up to 140000) to read the block whole.
+   */
+  nextStartBlock?: number | null | undefined;
+  /**
+   * Thread reads only. Records in the thread the caller may see.
+   */
+  threadRecordCount?: number | undefined;
+  /**
+   * Thread reads only. Where this read started.
+   */
+  startRecord?: number | undefined;
+  /**
+   * Thread reads only. Pass as `startRecord`, with `nextStartBlock` as `startBlock`, to read on. It stays on a record that was cut short until that record has been read to its end. A block larger than `maxChars` holds the cursor on that block; send the same cursor with a larger `maxChars` to read it. Null when nothing is left to read, and `complete` is then true. A block given up at the largest `maxChars` is named in the text, and its record's entry in `records` has `truncatedBy: clipped`.
+   */
+  nextStartRecord?: number | null | undefined;
+  /**
+   * Thread reads only. The records shown, oldest first.
+   */
+  records?: Array<GetRecordContentResponseSchemaRecord> | undefined;
+  /**
+   * Thread reads only. Records of the thread the caller may see whose content could not be loaded.
+   */
+  unreadableRecordIds?: Array<string> | undefined;
+  /**
+   * Thread reads of a Slack record in no single thread only (several channel messages in one record, or a message without replies). The threads its messages started whose replies follow it in `records`, in the order their first messages were posted; empty when none of its messages has replies the caller may see.
+   */
+  threads?: Array<Thread> | undefined;
+  /**
+   * Thread reads of a Slack record in no single thread only. Threads of its messages left out because one read covers at most 10.
+   */
+  threadsNotRead?: number | undefined;
+  /**
+   * Budgeted reads only. Characters in `content`.
+   */
+  chars?: number | undefined;
+  /**
+   * Budgeted reads only. The budget this read used.
+   */
+  maxChars?: number | undefined;
 };
+
+/** @internal */
+export const Mode$inboundSchema: z.ZodMiniType<Mode, unknown> = openEnums
+  .inboundSchema(Mode);
+
+/** @internal */
+export const Order$inboundSchema: z.ZodMiniType<Order, unknown> = openEnums
+  .inboundSchema(Order);
+
+/** @internal */
+export const GivenUpBlock$inboundSchema: z.ZodMiniType<GivenUpBlock, unknown> =
+  z.object({
+    recordId: types.optional(types.string()),
+    block: types.optional(types.number()),
+  });
+
+export function givenUpBlockFromJSON(
+  jsonString: string,
+): SafeParseResult<GivenUpBlock, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GivenUpBlock$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GivenUpBlock' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetRecordContentResponseSchemaRecord$inboundSchema: z.ZodMiniType<
+  GetRecordContentResponseSchemaRecord,
+  unknown
+> = z.object({
+  recordId: types.optional(types.string()),
+  recordName: z.optional(z.nullable(types.string())),
+  startBlock: types.optional(types.number()),
+  complete: types.optional(types.boolean()),
+  truncatedBy: z.optional(z.nullable(types.string())),
+  givenUpBlock: z.optional(z.nullable(types.number())),
+  nextStartBlock: z.optional(z.nullable(types.number())),
+});
+
+export function getRecordContentResponseSchemaRecordFromJSON(
+  jsonString: string,
+): SafeParseResult<GetRecordContentResponseSchemaRecord, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetRecordContentResponseSchemaRecord$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetRecordContentResponseSchemaRecord' from JSON`,
+  );
+}
+
+/** @internal */
+export const Thread$inboundSchema: z.ZodMiniType<Thread, unknown> = z.object({
+  threadRecordGroupId: types.optional(types.string()),
+  recordCount: types.optional(types.number()),
+});
+
+export function threadFromJSON(
+  jsonString: string,
+): SafeParseResult<Thread, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Thread$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Thread' from JSON`,
+  );
+}
 
 /** @internal */
 export const GetRecordContentResponseSchema$inboundSchema: z.ZodMiniType<
@@ -36,6 +246,30 @@ export const GetRecordContentResponseSchema$inboundSchema: z.ZodMiniType<
   unknown
 > = z.object({
   content: types.string(),
+  mode: types.optional(Mode$inboundSchema),
+  recordId: types.optional(types.string()),
+  order: types.optional(Order$inboundSchema),
+  startBlock: types.optional(types.number()),
+  totalBlocks: types.optional(types.number()),
+  shownBlocks: types.optional(z.array(z.array(types.number()))),
+  complete: types.optional(types.boolean()),
+  truncatedBy: z.optional(z.nullable(types.string())),
+  givenUpBlock: z.optional(z.nullable(types.number())),
+  givenUpBlocks: types.optional(
+    z.array(z.lazy(() => GivenUpBlock$inboundSchema)),
+  ),
+  nextStartBlock: z.optional(z.nullable(types.number())),
+  threadRecordCount: types.optional(types.number()),
+  startRecord: types.optional(types.number()),
+  nextStartRecord: z.optional(z.nullable(types.number())),
+  records: types.optional(
+    z.array(z.lazy(() => GetRecordContentResponseSchemaRecord$inboundSchema)),
+  ),
+  unreadableRecordIds: types.optional(z.array(types.string())),
+  threads: types.optional(z.array(z.lazy(() => Thread$inboundSchema))),
+  threadsNotRead: types.optional(types.number()),
+  chars: types.optional(types.number()),
+  maxChars: types.optional(types.number()),
 });
 
 export function getRecordContentResponseSchemaFromJSON(

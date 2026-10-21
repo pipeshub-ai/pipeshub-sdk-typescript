@@ -32,7 +32,7 @@ import { Result } from "../types/fp.js";
  * Delete record
  *
  * @remarks
- * Permanently delete a record from the knowledge base.
+ * Delete a record from the knowledge base.
  *
  * **Required permission:**
  *
@@ -44,7 +44,12 @@ import { Result } from "../types/fp.js";
  * - Associated storage file
  * - Indexed content and embeddings
  *
- * **Warning:** This action is irreversible.
+ * **Trash:** With "Move Deleted Records to the Trash" on in Labs, the record
+ * goes to the trash instead: it disappears from search, chat and lists at once,
+ * its embeddings are removed, and the record and its file stay until the scheduled
+ * purge. The response then carries `softDeleted: true` and the `batchId`, and the
+ * record can be brought back with `POST /knowledgeBase/record/{recordId}/restore`.
+ * With the setting off, the delete is immediate and cannot be undone.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */

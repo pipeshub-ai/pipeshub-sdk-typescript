@@ -210,11 +210,6 @@ export type ReferenceDatum = {
   metadata?: { [k: string]: string } | undefined;
 };
 
-export type AppliedFilters = {
-  apps?: Array<models.AppliedFilterNode> | undefined;
-  kb?: Array<models.AppliedFilterNode> | undefined;
-};
-
 export type GetConversationByIdMetadata = {
   processingTimeMs?: number | undefined;
   modelVersion?: string | undefined;
@@ -248,7 +243,14 @@ export type Message = {
    * AI model configuration recorded against a conversation or message.
    */
   modelInfo?: models.ConversationModelInfo | undefined;
-  appliedFilters?: AppliedFilters | undefined;
+  /**
+   * Rich filter state selected by the user, used for display and persistence only.
+   *
+   * @remarks
+   * This mirrors the active selection shown in the UI and is distinct from the
+   * machine-readable `filters` field used for retrieval scoping.
+   */
+  appliedFilters?: models.AppliedFilters | undefined;
   /**
    * Files uploaded for this message turn (see
    *
@@ -713,25 +715,6 @@ export function referenceDatumFromJSON(
 }
 
 /** @internal */
-export const AppliedFilters$inboundSchema: z.ZodMiniType<
-  AppliedFilters,
-  unknown
-> = z.object({
-  apps: types.optional(z.array(models.AppliedFilterNode$inboundSchema)),
-  kb: types.optional(z.array(models.AppliedFilterNode$inboundSchema)),
-});
-
-export function appliedFiltersFromJSON(
-  jsonString: string,
-): SafeParseResult<AppliedFilters, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => AppliedFilters$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'AppliedFilters' from JSON`,
-  );
-}
-
-/** @internal */
 export const GetConversationByIdMetadata$inboundSchema: z.ZodMiniType<
   GetConversationByIdMetadata,
   unknown
@@ -768,7 +751,7 @@ export const Message$inboundSchema: z.ZodMiniType<Message, unknown> = z.pipe(
       ReferenceDatum$inboundSchema
     ))),
     modelInfo: types.optional(models.ConversationModelInfo$inboundSchema),
-    appliedFilters: types.optional(z.lazy(() => AppliedFilters$inboundSchema)),
+    appliedFilters: types.optional(models.AppliedFilters$inboundSchema),
     attachments: types.optional(
       z.array(models.ChatAttachmentRef$inboundSchema),
     ),

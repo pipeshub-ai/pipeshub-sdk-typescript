@@ -13,12 +13,20 @@ export type StreamRecordBufferRequest = {
    * Target format for conversion
    */
   convertTo?: string | undefined;
+  /**
+   * Registry version to pin ARTIFACT record content to. Omit to stream
+   *
+   * @remarks
+   * the latest version. Ignored for non-artifact records.
+   */
+  version?: number | undefined;
 };
 
 /** @internal */
 export type StreamRecordBufferRequest$Outbound = {
   recordId: string;
   convertTo?: string | undefined;
+  version?: number | undefined;
 };
 
 /** @internal */
@@ -28,6 +36,7 @@ export const StreamRecordBufferRequest$outboundSchema: z.ZodMiniType<
 > = z.object({
   recordId: z.string(),
   convertTo: z.optional(z.string()),
+  version: z.optional(z.int()),
 });
 
 export function streamRecordBufferRequestToJSON(

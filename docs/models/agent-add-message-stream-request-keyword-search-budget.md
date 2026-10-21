@@ -1,0 +1,17 @@
+# AgentAddMessageStreamRequestKeywordSearchBudget
+
+How long each search waits for the keyword (grep) match after its semantic results are in. `short` waits at most 5 seconds and keeps the keyword matches found by then, for callers that would rather answer sooner, such as agents calling chat over MCP. `full`, or leaving it out, waits for all of it. Deployments running `HIGH_ACCURACY_MODE` always wait in full.
+
+## Example Usage
+
+```typescript
+import { AgentAddMessageStreamRequestKeywordSearchBudget } from "@pipeshub-ai/sdk/models";
+
+let value: AgentAddMessageStreamRequestKeywordSearchBudget = "full";
+```
+
+## Values
+
+```typescript
+"short" | "full"
+```

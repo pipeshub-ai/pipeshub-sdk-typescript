@@ -43,9 +43,9 @@ export type AgentRegenerateSSEEventEvent = OpenEnum<
  * @remarks
  * AG-UI is the sole wire protocol.
  *
- * `event` carries the AG-UI type name and `data` is a JSON object that
- * includes a `"type"` field matching `event`, plus type-specific
- * fields. Stable gateway-generated top-level outcomes:
+ * `event` carries the AG-UI type name and `data` is a JSON-encoded
+ * object that includes a `"type"` field matching `event`, plus
+ * type-specific fields. Stable gateway-generated top-level outcomes:
  *
  * - `RUN_FINISHED` returns `{ type, result }` where
  *   `result` is `{ conversation, recordsUsed, meta }` — the updated

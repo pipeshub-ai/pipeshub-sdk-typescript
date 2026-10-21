@@ -67,6 +67,7 @@ export function userAccountInitAuth(
   Result<
     operations.InitAuthResponse,
     | errors.ErrorResponse
+    | errors.RateLimitErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -93,6 +94,7 @@ async function $do(
     Result<
       operations.InitAuthResponse,
       | errors.ErrorResponse
+      | errors.RateLimitErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -174,6 +176,7 @@ async function $do(
   const [result] = await M.match<
     operations.InitAuthResponse,
     | errors.ErrorResponse
+    | errors.RateLimitErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -188,6 +191,7 @@ async function $do(
       key: "Result",
     }),
     M.jsonErr(400, errors.ErrorResponse$inboundSchema),
+    M.jsonErr(429, errors.RateLimitErrorResponse$inboundSchema),
     M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

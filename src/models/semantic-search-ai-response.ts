@@ -20,6 +20,14 @@ import {
   SemanticSearchHit,
   SemanticSearchHit$inboundSchema,
 } from "./semantic-search-hit.js";
+import {
+  SemanticSearchOutsideDates,
+  SemanticSearchOutsideDates$inboundSchema,
+} from "./semantic-search-outside-dates.js";
+import {
+  SemanticSearchTimeline,
+  SemanticSearchTimeline$inboundSchema,
+} from "./semantic-search-timeline.js";
 
 /**
  * Payload returned by the AI retrieval service for a semantic search (embedded in `searchResponse`).
@@ -39,9 +47,42 @@ export type SemanticSearchAiResponse = {
    */
   appliedFilters?: SemanticSearchAppliedFilters | undefined;
   /**
+   * Present only when some records lost passages to the per-record cap: maps a
+   *
+   * @remarks
+   * `recordId` to how many of its passages were left out. Each record keeps at most
+   * `max(SEARCH_PER_RECORD_FLOOR, limit / SEARCH_PER_RECORD_DIVISOR)` passages
+   * (4 at the default limit): the passages that matched first, then those nearest a match.
+   */
+  omittedPassages?: { [k: string]: number } | undefined;
+  /**
    * Maps virtual record id (object property name) to the accessible graph record document for that id.
    */
   virtualToRecordMap?: { [k: string]: SemanticSearchGraphRecord } | undefined;
+  /**
+   * Present only on a search run as a timeline: one with `timeline` set, or one over a span
+   *
+   * @remarks
+   * of more than 31 days with it left out. `searchResults` then come period by period,
+   * oldest first, and by record date within a period; each hit's `timelinePeriod` is its
+   * period's index in `periods`.
+   */
+  timeline?: SemanticSearchTimeline | undefined;
+  /**
+   * Present only on a search with date bounds, when the same search without them found
+   *
+   * @remarks
+   * matches the bounds left out. Date bounds match when a record was written or last changed,
+   * not when the event it describes happened, so release notes, a retrospective or a weekly
+   * summary written after a period are left out of a search bounded to that period. The
+   * search without dates, with the same query, filters and permissions and a limit of 10,
+   * runs beside the bounded search (or beside a timeline's searches: one plain search, not a
+   * second timeline). Its best matches outside the bounds, up to 3 records, best first, come
+   * here, never in `searchResults`, which are unchanged. When nothing inside the bounds
+   * matched, the response is then a `200` with empty `searchResults`. A server whose
+   * `DATE_FILTER_SAFETY_NET` setting is `false` never sends this field.
+   */
+  outsideDates?: SemanticSearchOutsideDates | undefined;
 };
 
 /** @internal */
@@ -56,9 +97,12 @@ export const SemanticSearchAiResponse$inboundSchema: z.ZodMiniType<
     status_code: types.number(),
     message: types.string(),
     appliedFilters: types.optional(SemanticSearchAppliedFilters$inboundSchema),
+    omittedPassages: types.optional(z.record(z.string(), types.number())),
     virtual_to_record_map: types.optional(
       z.record(z.string(), SemanticSearchGraphRecord$inboundSchema),
     ),
+    timeline: types.optional(SemanticSearchTimeline$inboundSchema),
+    outsideDates: types.optional(SemanticSearchOutsideDates$inboundSchema),
   }),
   z.transform((v) => {
     return remap$(v, {

@@ -30,6 +30,18 @@ export type AppliedFilters = {
    * Applied knowledge-base filter nodes
    */
   kb?: Array<AppliedFilterNode> | undefined;
+  /**
+   * Applied record-group filter nodes
+   */
+  recordGroups?: Array<AppliedFilterNode> | undefined;
+  /**
+   * Applied folder and record filter nodes (each with everything under it)
+   */
+  records?: Array<AppliedFilterNode> | undefined;
+  /**
+   * Applied record filter nodes selected alone
+   */
+  recordsExact?: Array<AppliedFilterNode> | undefined;
 };
 
 /** @internal */
@@ -39,11 +51,17 @@ export const AppliedFilters$inboundSchema: z.ZodMiniType<
 > = z.object({
   apps: types.optional(z.array(AppliedFilterNode$inboundSchema)),
   kb: types.optional(z.array(AppliedFilterNode$inboundSchema)),
+  recordGroups: types.optional(z.array(AppliedFilterNode$inboundSchema)),
+  records: types.optional(z.array(AppliedFilterNode$inboundSchema)),
+  recordsExact: types.optional(z.array(AppliedFilterNode$inboundSchema)),
 });
 /** @internal */
 export type AppliedFilters$Outbound = {
   apps?: Array<AppliedFilterNode$Outbound> | undefined;
   kb?: Array<AppliedFilterNode$Outbound> | undefined;
+  recordGroups?: Array<AppliedFilterNode$Outbound> | undefined;
+  records?: Array<AppliedFilterNode$Outbound> | undefined;
+  recordsExact?: Array<AppliedFilterNode$Outbound> | undefined;
 };
 
 /** @internal */
@@ -53,6 +71,9 @@ export const AppliedFilters$outboundSchema: z.ZodMiniType<
 > = z.object({
   apps: z.optional(z.array(AppliedFilterNode$outboundSchema)),
   kb: z.optional(z.array(AppliedFilterNode$outboundSchema)),
+  recordGroups: z.optional(z.array(AppliedFilterNode$outboundSchema)),
+  records: z.optional(z.array(AppliedFilterNode$outboundSchema)),
+  recordsExact: z.optional(z.array(AppliedFilterNode$outboundSchema)),
 });
 
 export function appliedFiltersToJSON(appliedFilters: AppliedFilters): string {

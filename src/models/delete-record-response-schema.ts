@@ -17,6 +17,20 @@ export type DeleteRecordResponseSchema = {
   recordId: string;
   connector?: string | null | undefined;
   timestamp?: number | null | undefined;
+  /**
+   * True when the record went to the trash instead of being removed
+   */
+  softDeleted?: boolean | undefined;
+  /**
+   * The delete batch; restoring any record in it restores all of it
+   */
+  batchId?: string | null | undefined;
+  /**
+   * The record is deleted, but removing its embeddings is still owed
+   */
+  vectorCleanupPending?: boolean | undefined;
+  vectorCleanupFailedRecordIds?: Array<string> | undefined;
+  vectorCleanupFailedVirtualRecordIds?: Array<string> | undefined;
 };
 
 /** @internal */
@@ -29,6 +43,11 @@ export const DeleteRecordResponseSchema$inboundSchema: z.ZodMiniType<
   recordId: types.string(),
   connector: z.optional(z.nullable(types.string())),
   timestamp: z.optional(z.nullable(types.number())),
+  softDeleted: types.optional(types.boolean()),
+  batchId: z.optional(z.nullable(types.string())),
+  vectorCleanupPending: types.optional(types.boolean()),
+  vectorCleanupFailedRecordIds: types.optional(z.array(types.string())),
+  vectorCleanupFailedVirtualRecordIds: types.optional(z.array(types.string())),
 });
 
 export function deleteRecordResponseSchemaFromJSON(

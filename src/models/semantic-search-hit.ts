@@ -41,6 +41,22 @@ export type SemanticSearchHit = {
    */
   blockType?: string | null | undefined;
   blockIndex?: number | null | undefined;
+  /**
+   * Set on a passage returned because a match inside its section (a thread, a list,
+   *
+   * @remarks
+   * a table) brought the whole section back: how many blocks it sits from the passage
+   * the search matched nearest to it. `0` is a matched passage. Absent when the hit matched
+   * directly or the section matched as a whole.
+   */
+  distanceFromMatch?: number | undefined;
+  /**
+   * Set only on a search with `timeline`: the index in `timeline.periods` of the period
+   *
+   * @remarks
+   * this hit's record is dated in.
+   */
+  timelinePeriod?: number | undefined;
 };
 
 /** @internal */
@@ -57,6 +73,8 @@ export const SemanticSearchHit$inboundSchema: z.ZodMiniType<
     virtual_record_id: z.optional(z.nullable(types.string())),
     block_type: z.optional(z.nullable(types.string())),
     block_index: z.optional(z.nullable(types.number())),
+    distanceFromMatch: types.optional(types.number()),
+    timelinePeriod: types.optional(types.number()),
   }),
   z.transform((v) => {
     return remap$(v, {

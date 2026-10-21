@@ -19,6 +19,7 @@ export const ModelType = {
   ImageGeneration: "imageGeneration",
   Tts: "tts",
   Stt: "stt",
+  Decision: "decision",
 } as const;
 /**
  * Type of AI model

@@ -8,6 +8,10 @@ import { safeParse } from "../lib/schemas.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
+import {
+  SemanticSearchLinkedRecord,
+  SemanticSearchLinkedRecord$inboundSchema,
+} from "./semantic-search-linked-record.js";
 
 /**
  * Graph record vertex returned in `records` and as values of `virtual_to_record_map`.
@@ -69,6 +73,25 @@ export type SemanticSearchGraphRecord = {
   definition?: string | null | undefined;
   sourceTables?: Array<string> | null | undefined;
   rowCount?: number | null | undefined;
+  /**
+   * Where a ticket, pull request or project stands, in one short phrase, on
+   *
+   * @remarks
+   * `records` entries only: for example `Merged 2026-09-25 by alice`,
+   * `Closed without merging 2026-09-26`, or
+   * `DONE (Jira: Done), resolved 2026-06-06, assignee Bo, priority HIGH`.
+   * Dates are days in UTC. Absent for record types with no state of their own.
+   */
+  statusSummary?: string | undefined;
+  /**
+   * On `records` entries only: the records that name this one (`mentionedIn`) and
+   *
+   * @remarks
+   * that it names (`linksTo`) by web address or issue key, across connectors,
+   * limited to records the caller may read, at most 10 per relation. Absent when
+   * there are none.
+   */
+  linkedRecords?: Array<SemanticSearchLinkedRecord> | undefined;
 };
 
 /** @internal */
@@ -128,6 +151,10 @@ export const SemanticSearchGraphRecord$inboundSchema: z.ZodMiniType<
     definition: z.optional(z.nullable(types.string())),
     sourceTables: z.optional(z.nullable(z.array(types.string()))),
     rowCount: z.optional(z.nullable(types.number())),
+    statusSummary: types.optional(types.string()),
+    linkedRecords: types.optional(
+      z.array(SemanticSearchLinkedRecord$inboundSchema),
+    ),
   }),
   z.transform((v) => {
     return remap$(v, {

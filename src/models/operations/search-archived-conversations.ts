@@ -154,6 +154,15 @@ export type SearchArchivedConversationsConversation = {
   isOwner?: boolean | undefined;
   accessLevel?: SearchArchivedConversationsAccessLevel | undefined;
   /**
+   * `true` when the owner pinned this conversation. Absent on
+   *
+   * @remarks
+   * conversations that are not pinned (never `false`). Set via
+   * `PATCH /conversations/{conversationId}/pin`. Only returned to the
+   * owner: lists with `source=shared` omit it.
+   */
+  isPinned?: boolean | undefined;
+  /**
    * The project this conversation is linked to, if any. Set via
    *
    * @remarks
@@ -429,6 +438,7 @@ export const SearchArchivedConversationsConversation$inboundSchema:
       accessLevel: types.optional(
         SearchArchivedConversationsAccessLevel$inboundSchema,
       ),
+      isPinned: types.optional(types.boolean()),
       projectId: z.optional(z.nullable(types.string())),
       projectVisibility: z.optional(
         z.nullable(SearchArchivedConversationsProjectVisibility$inboundSchema),

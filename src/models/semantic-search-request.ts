@@ -3,11 +3,71 @@
  */
 
 import * as z from "zod/v4-mini";
+import { ClosedEnum } from "../types/enums.js";
 import {
   Filters,
   Filters$Outbound,
   Filters$outboundSchema,
 } from "./filters.js";
+
+/**
+ * Search a span of time period by period instead of ranking matches over the whole
+ *
+ * @remarks
+ * span, for questions such as "how did this evolve" or "what changed between March
+ * and May". A plain search returns the best matches overall, which bunch around one
+ * moment; a timeline splits the span into up to 6 periods (calendar months, or weeks
+ * within one month), searches each period on its own and beside one search of the
+ * whole span, and returns the matches in date order, each labelled with its period.
+ *
+ * The value is the date records are placed by: `created` (when the record was
+ * created at its source) or `modified` (its last change). The span is that date's
+ * bounds (`createdAfter` / `createdBefore`, or `modifiedAfter` / `modifiedBefore`);
+ * with no start it covers the year before the end, or further back to the earliest
+ * of the best matches. Bounds on the other date apply to every period. `limit` is the
+ * number of matches each period's own search asks for (10 when left out); matches from
+ * the search of the whole span (up to 50) are added to the periods their records are
+ * dated in, so a period can hold more than `limit`. Each search applies the same permissions
+ * and filters as a plain search.
+ *
+ * Left out, a search whose bounds on one date have a start and cover more than 31
+ * days (a missing end is today) runs as a timeline on that date, and
+ * `timeline.automatic` is `true`; any other search is a plain ranked search. `off`
+ * is always a plain ranked search. A server whose `TIMELINE_SUMMARIES` setting is
+ * `false` ignores the field and never runs a timeline.
+ */
+export const Timeline = {
+  Created: "created",
+  Modified: "modified",
+  Off: "off",
+} as const;
+/**
+ * Search a span of time period by period instead of ranking matches over the whole
+ *
+ * @remarks
+ * span, for questions such as "how did this evolve" or "what changed between March
+ * and May". A plain search returns the best matches overall, which bunch around one
+ * moment; a timeline splits the span into up to 6 periods (calendar months, or weeks
+ * within one month), searches each period on its own and beside one search of the
+ * whole span, and returns the matches in date order, each labelled with its period.
+ *
+ * The value is the date records are placed by: `created` (when the record was
+ * created at its source) or `modified` (its last change). The span is that date's
+ * bounds (`createdAfter` / `createdBefore`, or `modifiedAfter` / `modifiedBefore`);
+ * with no start it covers the year before the end, or further back to the earliest
+ * of the best matches. Bounds on the other date apply to every period. `limit` is the
+ * number of matches each period's own search asks for (10 when left out); matches from
+ * the search of the whole span (up to 50) are added to the periods their records are
+ * dated in, so a period can hold more than `limit`. Each search applies the same permissions
+ * and filters as a plain search.
+ *
+ * Left out, a search whose bounds on one date have a start and cover more than 31
+ * days (a missing end is today) runs as a timeline on that date, and
+ * `timeline.automatic` is `true`; any other search is a plain ranked search. `off`
+ * is always a plain ranked search. A server whose `TIMELINE_SUMMARIES` setting is
+ * `false` ignores the field and never runs a timeline.
+ */
+export type Timeline = ClosedEnum<typeof Timeline>;
 
 /**
  * Request body for performing semantic search across the enterprise knowledge base.
@@ -24,6 +84,14 @@ import {
  * **Filtering:**
  *
  * Use filters to narrow search scope to specific apps or knowledge bases.
+ *
+ * **Date bounds** (`createdAfter`, `createdBefore`, `modifiedAfter`, `modifiedBefore`)
+ * match when a record was written or last changed, not when an event it describes
+ * happened. With any of them set, and while the server's `DATE_FILTER_SAFETY_NET` setting
+ * is on (the default), the same search also runs once without dates, and its best matches
+ * that the bounds left out come back apart from the results, in
+ * `searchResponse.outsideDates`. With the setting off, no such search runs and
+ * `outsideDates` is omitted.
  */
 export type SemanticSearchRequest = {
   /**
@@ -34,14 +102,30 @@ export type SemanticSearchRequest = {
    */
   query: string;
   /**
-   * App connector instance ids and knowledge-base / record-group ids that narrow retrieval
+   * What retrieval is narrowed to for a turn: whole apps, and selections below app
    *
    * @remarks
-   * for a turn. For **org assistant** chat streams, send explicit `apps` / `kb` lists.
-   * For **agent** chat streams, send explicit id lists, or **omit** `filters` (and `tools`)
-   * to let the service use the agent’s stored knowledge and tool configuration. Sending
-   * `{ "apps": [], "kb": [] }` on an agent stream means **no** knowledge sources for that
-   * turn (it is not “full org default”).
+   * level (record groups, folders, records). The keys are a union. For **org assistant**
+   * chat streams, send explicit lists. For **agent** chat streams, send explicit id lists,
+   * or **omit** `filters` (and `tools`) to let the service use the agent’s stored knowledge
+   * and tool configuration. Sending `{ "apps": [], "kb": [] }` on an agent stream means
+   * **no** knowledge sources for that turn (it is not “full org default”).
+   *
+   * A selection below app level is the whole scope of the turn: with `recordGroups`,
+   * `records` or `recordsExact` present, an absent or empty `apps` / `kb` means none of
+   * them. A selected node that does not exist or that the caller cannot read contributes
+   * nothing; when nothing valid remains the turn searches nothing. `/search` answers 404
+   * for that; a chat turn is not failed, its search simply finds nothing.
+   * At most 200 ids may be sent in one request, counted across all keys, and every id must
+   * be a valid UUID. A key this schema does not list is ignored by the gateway rather than
+   * refused.
+   *
+   * A selection that covers more than the configured number of nodes (50,000 by default),
+   * or that touches a source still being prepared for folder-level search, is refused:
+   * `/search` and the non-streaming chat routes answer 422 with the message, and a chat
+   * stream ends with an error frame (`RUN_ERROR`, or `error` on the legacy protocol)
+   * whose `code` is `selection_too_large` or `selection_not_ready` and whose `message`
+   * says what to change. No model call is made for such a turn.
    */
   filters?: Filters | undefined;
   /**
@@ -78,7 +162,48 @@ export type SemanticSearchRequest = {
    * that date is set.
    */
   modifiedBefore?: string | undefined;
+  /**
+   * Whether the AI model rewrites the query and adds expanded variants before
+   *
+   * @remarks
+   * searching. Set it to `false` to search the query exactly as sent, with no
+   * model call: faster, and suited to callers that write their own queries, such
+   * as an agent. The results can differ from a search with the rewrite.
+   */
+  rewriteQuery?: boolean | undefined;
+  /**
+   * Search a span of time period by period instead of ranking matches over the whole
+   *
+   * @remarks
+   * span, for questions such as "how did this evolve" or "what changed between March
+   * and May". A plain search returns the best matches overall, which bunch around one
+   * moment; a timeline splits the span into up to 6 periods (calendar months, or weeks
+   * within one month), searches each period on its own and beside one search of the
+   * whole span, and returns the matches in date order, each labelled with its period.
+   *
+   * The value is the date records are placed by: `created` (when the record was
+   * created at its source) or `modified` (its last change). The span is that date's
+   * bounds (`createdAfter` / `createdBefore`, or `modifiedAfter` / `modifiedBefore`);
+   * with no start it covers the year before the end, or further back to the earliest
+   * of the best matches. Bounds on the other date apply to every period. `limit` is the
+   * number of matches each period's own search asks for (10 when left out); matches from
+   * the search of the whole span (up to 50) are added to the periods their records are
+   * dated in, so a period can hold more than `limit`. Each search applies the same permissions
+   * and filters as a plain search.
+   *
+   * Left out, a search whose bounds on one date have a start and cover more than 31
+   * days (a missing end is today) runs as a timeline on that date, and
+   * `timeline.automatic` is `true`; any other search is a plain ranked search. `off`
+   * is always a plain ranked search. A server whose `TIMELINE_SUMMARIES` setting is
+   * `false` ignores the field and never runs a timeline.
+   */
+  timeline?: Timeline | undefined;
 };
+
+/** @internal */
+export const Timeline$outboundSchema: z.ZodMiniEnum<typeof Timeline> = z.enum(
+  Timeline,
+);
 
 /** @internal */
 export type SemanticSearchRequest$Outbound = {
@@ -89,6 +214,8 @@ export type SemanticSearchRequest$Outbound = {
   createdBefore?: string | undefined;
   modifiedAfter?: string | undefined;
   modifiedBefore?: string | undefined;
+  rewriteQuery: boolean;
+  timeline?: string | undefined;
 };
 
 /** @internal */
@@ -103,6 +230,8 @@ export const SemanticSearchRequest$outboundSchema: z.ZodMiniType<
   createdBefore: z.optional(z.string()),
   modifiedAfter: z.optional(z.string()),
   modifiedBefore: z.optional(z.string()),
+  rewriteQuery: z._default(z.boolean(), true),
+  timeline: z.optional(Timeline$outboundSchema),
 });
 
 export function semanticSearchRequestToJSON(

@@ -18,6 +18,7 @@ Custom AI agents with specialized capabilities and tool integrations
 * [streamAgentConversation](#streamagentconversation) - Create agent conversation with streaming response
 * [streamAgentConversationMessage](#streamagentconversationmessage) - Add message to agent conversation with streaming response
 * [regenerateAgentConversationMessage](#regenerateagentconversationmessage) - Regenerate agent conversation message
+* [forkAgentConversation](#forkagentconversation) - Fork agent conversation from a message
 * [cancelAgentConversationStream](#cancelagentconversationstream) - Cancel an in-flight agent chat stream
 * [updateAgentConversationMessageFeedback](#updateagentconversationmessagefeedback) - Submit feedback for an agent message
 * [addAgentConversationMessage](#addagentconversationmessage) - Add message to agent conversation (non-streaming)
@@ -1342,6 +1343,92 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
+## forkAgentConversation
+
+Copy this agent conversation into a new private chat owned by the
+caller, including every message up to and including `messageId`. The
+original conversation is left unchanged.
+
+Only the owner of the conversation can fork it; anyone else gets 404.
+
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="forkAgentConversation" method="post" path="/agents/{agentKey}/conversations/{conversationId}/message/{messageId}/fork" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.agents.forkAgentConversation({
+    agentKey: "<value>",
+    conversationId: "<value>",
+    messageId: "<value>",
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { agentsForkAgentConversation } from "@pipeshub-ai/sdk/funcs/agents-fork-agent-conversation.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const res = await agentsForkAgentConversation(pipeshub, {
+    agentKey: "<value>",
+    conversationId: "<value>",
+    messageId: "<value>",
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("agentsForkAgentConversation failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.ForkAgentConversationRequest](../../models/operations/fork-agent-conversation-request.md)                                                                          | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[models.ForkConversationResponse](../../models/fork-conversation-response.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
 ## cancelAgentConversationStream
 
 Cooperatively stop a `POST /agents/{agentKey}/conversations/stream`
@@ -1989,6 +2076,12 @@ This makes the operation idempotent:
 - deleting a nonexistent conversation returns success with `null`
 - deleting through a different `agentKey` returns success with `null`
 - deleting an already deleted conversation returns success with `null`
+
+**Artifacts:** before the conversation is marked deleted, every artifact
+the caller created in it is deleted for good (every version and stored
+file). Artifacts another participant created stay theirs. If the cleanup
+cannot be done the conversation is left in place and the error is
+returned (for example 503); repeating the request finishes it.
 
 
 ### Example Usage

@@ -7,7 +7,7 @@ Type of AI model
 ```typescript
 import { ModelType } from "@pipeshub-ai/sdk/models";
 
-let value: ModelType = "ocr";
+let value: ModelType = "slm";
 
 // Open enum: unrecognized values are captured as Unrecognized<string>
 ```
@@ -15,5 +15,5 @@ let value: ModelType = "ocr";
 ## Values
 
 ```typescript
-"llm" | "embedding" | "ocr" | "slm" | "reasoning" | "multiModal" | "imageGeneration" | "tts" | "stt" | Unrecognized<string>
+"llm" | "embedding" | "ocr" | "slm" | "reasoning" | "multiModal" | "imageGeneration" | "tts" | "stt" | "decision" | Unrecognized<string>
 ```

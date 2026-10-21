@@ -11,7 +11,7 @@ let value: WebSearchProvidersResponse = {
   status: "success",
   providers: [
     {
-      provider: "duckduckgo",
+      provider: "serper",
       providerKey: "<value>",
       configuration: {
         "key": "<value>",

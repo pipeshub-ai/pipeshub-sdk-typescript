@@ -24,6 +24,9 @@ Most endpoints require JWT Bearer token authentication. Some internal endpoints 
 
 ## Base URLs
 All endpoints use the `/api/v1` prefix unless otherwise noted.
+
+## Query parameter names
+On every `/api/v1` and `/mcp` endpoint, a query parameter whose name starts with `$` or contains `.` (including a nested name such as `filter[$ne]` or `a.b`) is refused with `400` and error code `VALIDATION_ERROR`. Only names are checked: values may contain dots, such as file names.
 <!-- End Summary [summary] -->
 
 <!-- Start Table of Contents [toc] -->
@@ -32,6 +35,7 @@ All endpoints use the `/api/v1` prefix unless otherwise noted.
 * [pipeshub-sdk-typescript](#pipeshub-sdk-typescript)
   * [Authentication](#authentication)
   * [Base URLs](#base-urls)
+  * [Query parameter names](#query-parameter-names)
   * [SDK Installation](#sdk-installation)
   * [Requirements](#requirements)
   * [SDK Example Usage](#sdk-example-usage)
@@ -185,6 +189,7 @@ run();
 * [streamAgentConversation](docs/sdks/agents/README.md#streamagentconversation) - Create agent conversation with streaming response
 * [streamAgentConversationMessage](docs/sdks/agents/README.md#streamagentconversationmessage) - Add message to agent conversation with streaming response
 * [regenerateAgentConversationMessage](docs/sdks/agents/README.md#regenerateagentconversationmessage) - Regenerate agent conversation message
+* [forkAgentConversation](docs/sdks/agents/README.md#forkagentconversation) - Fork agent conversation from a message
 * [cancelAgentConversationStream](docs/sdks/agents/README.md#cancelagentconversationstream) - Cancel an in-flight agent chat stream
 * [updateAgentConversationMessageFeedback](docs/sdks/agents/README.md#updateagentconversationmessagefeedback) - Submit feedback for an agent message
 * [addAgentConversationMessage](docs/sdks/agents/README.md#addagentconversationmessage) - Add message to agent conversation (non-streaming)
@@ -220,7 +225,7 @@ run();
 ### [ConnectorFilters](docs/sdks/connectorfilters/README.md)
 
 * [getConnectorFilters](docs/sdks/connectorfilters/README.md#getconnectorfilters) - Get filter options
-* [saveConnectorFilters](docs/sdks/connectorfilters/README.md#saveconnectorfilters) - Save filter selections
+* [~~saveConnectorFilters~~](docs/sdks/connectorfilters/README.md#saveconnectorfilters) - Save filter selections (deprecated) :warning: **Deprecated**
 * [getFilterFieldOptions](docs/sdks/connectorfilters/README.md#getfilterfieldoptions) - Get dynamic filter options
 
 ### [ConnectorInstances](docs/sdks/connectorinstances/README.md)
@@ -259,7 +264,10 @@ run();
 * [updateConversationTitle](docs/sdks/conversations/README.md#updateconversationtitle) - Update conversation title
 * [archiveConversation](docs/sdks/conversations/README.md#archiveconversation) - Archive conversation
 * [unarchiveConversation](docs/sdks/conversations/README.md#unarchiveconversation) - Unarchive conversation
+* [pinConversation](docs/sdks/conversations/README.md#pinconversation) - Pin conversation
+* [unpinConversation](docs/sdks/conversations/README.md#unpinconversation) - Unpin conversation
 * [regenerateAnswer](docs/sdks/conversations/README.md#regenerateanswer) - Regenerate AI response
+* [forkConversation](docs/sdks/conversations/README.md#forkconversation) - Fork conversation from a message
 * [cancelConversationStream](docs/sdks/conversations/README.md#cancelconversationstream) - Cancel an in-flight chat stream
 * [updateMessageFeedback](docs/sdks/conversations/README.md#updatemessagefeedback) - Submit feedback on AI response
 
@@ -394,6 +402,7 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`agentsDeleteAgent`](docs/sdks/agents/README.md#deleteagent) - Delete agent
 - [`agentsDeleteAgentConversationById`](docs/sdks/agents/README.md#deleteagentconversationbyid) - Delete an agent conversation
 - [`agentsDeleteAgentConversationChatAttachment`](docs/sdks/agents/README.md#deleteagentconversationchatattachment) - Delete an agent chat attachment
+- [`agentsForkAgentConversation`](docs/sdks/agents/README.md#forkagentconversation) - Fork agent conversation from a message
 - [`agentsGetAgent`](docs/sdks/agents/README.md#getagent) - Get agent
 - [`agentsGetAgentConversationById`](docs/sdks/agents/README.md#getagentconversationbyid) - Get agent conversation by ID
 - [`agentsListAgentArchivedConversationsGrouped`](docs/sdks/agents/README.md#listagentarchivedconversationsgrouped) - List archived agent conversations grouped by agent
@@ -416,7 +425,6 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`connectorControlToggleConnector`](docs/sdks/connectorcontrol/README.md#toggleconnector) - Toggle connector sync or agent
 - [`connectorFiltersGetConnectorFilters`](docs/sdks/connectorfilters/README.md#getconnectorfilters) - Get filter options
 - [`connectorFiltersGetFilterFieldOptions`](docs/sdks/connectorfilters/README.md#getfilterfieldoptions) - Get dynamic filter options
-- [`connectorFiltersSaveConnectorFilters`](docs/sdks/connectorfilters/README.md#saveconnectorfilters) - Save filter selections
 - [`connectorGetRecordContent`](docs/sdks/connector/README.md#getrecordcontent) - Get a record's full parsed content and metadata
 - [`connectorInstancesCreateConnectorInstance`](docs/sdks/connectorinstances/README.md#createconnectorinstance) - Create connector instance
 - [`connectorInstancesDeleteConnectorInstance`](docs/sdks/connectorinstances/README.md#deleteconnectorinstance) - Delete connector instance
@@ -439,13 +447,16 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`conversationsCancelConversationStream`](docs/sdks/conversations/README.md#cancelconversationstream) - Cancel an in-flight chat stream
 - [`conversationsCreateConversation`](docs/sdks/conversations/README.md#createconversation) - Create conversation (non-streaming)
 - [`conversationsDeleteConversationById`](docs/sdks/conversations/README.md#deleteconversationbyid) - Delete conversation
+- [`conversationsForkConversation`](docs/sdks/conversations/README.md#forkconversation) - Fork conversation from a message
 - [`conversationsGetAllConversations`](docs/sdks/conversations/README.md#getallconversations) - List all conversations
 - [`conversationsGetArchivedConversations`](docs/sdks/conversations/README.md#getarchivedconversations) - List archived conversations
 - [`conversationsGetConversationById`](docs/sdks/conversations/README.md#getconversationbyid) - Get conversation by ID
+- [`conversationsPinConversation`](docs/sdks/conversations/README.md#pinconversation) - Pin conversation
 - [`conversationsRegenerateAnswer`](docs/sdks/conversations/README.md#regenerateanswer) - Regenerate AI response
 - [`conversationsSearchArchivedConversations`](docs/sdks/conversations/README.md#searcharchivedconversations) - Search archived conversations
 - [`conversationsStreamChat`](docs/sdks/conversations/README.md#streamchat) - Create conversation with streaming response
 - [`conversationsUnarchiveConversation`](docs/sdks/conversations/README.md#unarchiveconversation) - Unarchive conversation
+- [`conversationsUnpinConversation`](docs/sdks/conversations/README.md#unpinconversation) - Unpin conversation
 - [`conversationsUpdateConversationTitle`](docs/sdks/conversations/README.md#updateconversationtitle) - Update conversation title
 - [`conversationsUpdateMessageFeedback`](docs/sdks/conversations/README.md#updatemessagefeedback) - Submit feedback on AI response
 - [`knowledgeBaseCreateFolder`](docs/sdks/knowledgebase/README.md#createfolder) - Create folder
@@ -513,6 +524,7 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`userAccountRefreshToken`](docs/sdks/useraccount/README.md#refreshtoken) - Refresh access token
 - [`userAccountResetPassword`](docs/sdks/useraccount/README.md#resetpassword) - Reset password
 - [`webSearchGetWebSearchProviders`](docs/sdks/websearch/README.md#getwebsearchproviders) - Get all web search providers
+- ~~[`connectorFiltersSaveConnectorFilters`](docs/sdks/connectorfilters/README.md#saveconnectorfilters)~~ - Save filter selections (deprecated) :warning: **Deprecated**
 - ~~[`knowledgeBaseGetKnowledgeHubChildNodes`](docs/sdks/knowledgebase/README.md#getknowledgehubchildnodes)~~ - Get knowledge hub child nodes :warning: **Deprecated**
 - ~~[`knowledgeBaseGetKnowledgeHubChildNodes`](docs/sdks/knowledgehub/README.md#getknowledgehubchildnodes)~~ - Get knowledge hub child nodes :warning: **Deprecated**
 - ~~[`knowledgeBaseGetKnowledgeHubRootNodes`](docs/sdks/knowledgebase/README.md#getknowledgehubrootnodes)~~ - Get knowledge hub root nodes :warning: **Deprecated**
@@ -699,8 +711,11 @@ async function run() {
       console.log(error.headers);
 
       // Depending on the method different errors may be thrown
-      if (error instanceof errors.ErrorResponse) {
-        console.log(error.data$.error); // models.ErrorResponseError
+      if (error instanceof errors.OAuthErrorResponse) {
+        console.log(error.data$.error); // models.ErrorEnum
+        console.log(error.data$.errorDescription); // string
+        console.log(error.data$.errorUri); // string
+        console.log(error.data$.state); // string
       }
     }
   }
@@ -727,36 +742,36 @@ run();
 
 
 **Inherit from [`PipeshubError`](./src/models/errors/pipeshub-error.ts)**:
-* [`ErrorResponse`](./src/models/errors/error-response.ts): Standard error envelope returned by all errors routed through `ErrorMiddleware`. Applies to all `BaseError` subclasses including `HttpError`, `ValidationError`, and others. The `code` field is a machine-readable string identifying the error type (e.g. `HTTP_UNAUTHORIZED`, `HTTP_NOT_FOUND`, `VALIDATION_ERROR`, `INTERNAL_ERROR`). Applicable to 77 of 131 methods.*
-* [`OAuthClientManagementRateLimitError`](./src/models/errors/o-auth-client-management-rate-limit-error.ts): JSON body when OAuth client management routes exceed the per-minute rate limit (same limiter as other `/oauth-clients/*` routes). Status code `429`. Applicable to 20 of 131 methods.*
-* [`ApplicationJsonErrorResponse`](./src/models/errors/application-json-error-response.ts): Standard JSON error envelope from `ErrorMiddleware` for `BaseError` subclasses (`error.middleware.ts`). Returned for most API 4xx errors (unauthorized, forbidden, not found, validation failures, etc.). Applicable to 17 of 131 methods.*
-* [`OAuthErrorResponse`](./src/models/errors/o-auth-error-response.ts): OAuth 2.0 Error Response (RFC 6749 Section 5.2). Standard error format for OAuth endpoints. Status code `401`. Applicable to 3 of 131 methods.*
-* [`RateLimitErrorResponse`](./src/models/errors/rate-limit-error-response.ts): Rate-limit error payload (shape differs from standard error responses). Status code `429`. Applicable to 3 of 131 methods.*
-* [`LocalFsDesktopRefusalError`](./src/models/errors/local-fs-desktop-refusal-error.ts): 409 body returned when a Local FS connector cannot sync because of its owner device. Status code `409`. Applicable to 2 of 131 methods.*
-* [`GetKnowledgeHubRootNodesBadRequestError`](./src/models/errors/get-knowledge-hub-root-nodes-bad-request-error.ts): Invalid request parameters. The backend's validation message is returned verbatim in `error.message`. See the examples below for the common triggers. Status code `400`. Applicable to 1 of 131 methods.*
-* [`GetKnowledgeHubChildNodesBadRequestError`](./src/models/errors/get-knowledge-hub-child-nodes-bad-request-error.ts): Invalid request parameters or path values. The backend's validation message is returned verbatim in `error.message`. See the examples below for the common triggers. Status code `400`. Applicable to 1 of 131 methods.*
-* [`SearchHistoryBadRequestError`](./src/models/errors/search-history-bad-request-error.ts): Error envelope for a failed request. Status code `400`. Applicable to 1 of 131 methods.*
-* [`GetSearchByIdBadRequestError`](./src/models/errors/get-search-by-id-bad-request-error.ts): Invalid request — `searchId` failed Zod validation (not a valid ObjectId). Status code `400`. Applicable to 1 of 131 methods.*
-* [`DeleteAgentConversationChatAttachmentBadRequestError`](./src/models/errors/delete-agent-conversation-chat-attachment-bad-request-error.ts): Invalid or blank path params (`agentKey` or `recordId`). Status code `400`. Applicable to 1 of 131 methods.*
-* [`GetAvailableModelsByTypeBadRequestError`](./src/models/errors/get-available-models-by-type-bad-request-error.ts): Invalid `modelType` path parameter.  The `modelType` value was not one of the supported enum categories. This response is produced by the Zod validation middleware **before** the handler runs. The `error.metadata.errors` array contains per-field detail about exactly which constraint failed. Status code `400`. Applicable to 1 of 131 methods.*
-* [`GetKnowledgeHubRootNodesUnauthorizedError`](./src/models/errors/get-knowledge-hub-root-nodes-unauthorized-error.ts): Missing or invalid authentication token.  The bearer token was absent, expired, malformed, or could not be verified by the auth middleware. Status code `401`. Applicable to 1 of 131 methods.*
-* [`GetKnowledgeHubChildNodesUnauthorizedError`](./src/models/errors/get-knowledge-hub-child-nodes-unauthorized-error.ts): Missing or invalid authentication token.  The bearer token was absent, expired, malformed, or could not be verified by the auth middleware. Status code `401`. Applicable to 1 of 131 methods.*
-* [`SearchHistoryUnauthorizedError`](./src/models/errors/search-history-unauthorized-error.ts): Error envelope for a failed request. Status code `401`. Applicable to 1 of 131 methods.*
-* [`GetSearchByIdUnauthorizedError`](./src/models/errors/get-search-by-id-unauthorized-error.ts): Missing or invalid bearer token. Status code `401`. Applicable to 1 of 131 methods.*
-* [`GetAvailableModelsByTypeUnauthorizedError`](./src/models/errors/get-available-models-by-type-unauthorized-error.ts): Missing or invalid authentication token.  The bearer token was absent, expired, malformed, or could not be verified by the auth middleware. Status code `401`. Applicable to 1 of 131 methods.*
-* [`GetKnowledgeHubRootNodesForbiddenError`](./src/models/errors/get-knowledge-hub-root-nodes-forbidden-error.ts): Insufficient OAuth scope.  Only applies to OAuth tokens. The token did not carry the `kb:read` scope required by this endpoint. Regular (non-OAuth) JWT bearer tokens are not subject to scope enforcement and will not receive this error. Status code `403`. Applicable to 1 of 131 methods.*
-* [`GetKnowledgeHubChildNodesForbiddenError`](./src/models/errors/get-knowledge-hub-child-nodes-forbidden-error.ts): Insufficient OAuth scope.  Only applies to OAuth tokens. The token did not carry the `kb:read` scope required by this endpoint. Regular (non-OAuth) JWT bearer tokens are not subject to scope enforcement and will not receive this error. Status code `403`. Applicable to 1 of 131 methods.*
-* [`SearchHistoryForbiddenError`](./src/models/errors/search-history-forbidden-error.ts): Error envelope for a failed request. Status code `403`. Applicable to 1 of 131 methods.*
-* [`GetSearchByIdForbiddenError`](./src/models/errors/get-search-by-id-forbidden-error.ts): Bearer token lacks the `semantic:read` scope. Status code `403`. Applicable to 1 of 131 methods.*
-* [`GetAvailableModelsByTypeForbiddenError`](./src/models/errors/get-available-models-by-type-forbidden-error.ts): Insufficient OAuth scope.  Only applies to OAuth tokens. The token did not carry the `config:read` scope required by this endpoint. Regular (non-OAuth) JWT bearer tokens are not subject to scope enforcement and will not receive this error. Status code `403`. Applicable to 1 of 131 methods.*
-* [`StreamRecordErrorResponse`](./src/models/errors/stream-record-error-response.ts): Error payload returned by the legacy record-stream proxy when the downstream streaming request fails after route middleware has passed. Applicable to 1 of 131 methods.*
-* [`GetKnowledgeHubChildNodesNotFoundError`](./src/models/errors/get-knowledge-hub-child-nodes-not-found-error.ts): Parent node not found.  The `parentId` does not correspond to an existing node of the specified `parentType`, or the node has been deleted. Status code `404`. Applicable to 1 of 131 methods.*
-* [`GetSearchByIdNotFoundError`](./src/models/errors/get-search-by-id-not-found-error.ts): Reserved for parity with sibling routes; this endpoint currently returns `200` with an empty array for an unknown id rather than emitting `404`. Status code `404`. Applicable to 1 of 131 methods.*
-* [`GetKnowledgeHubRootNodesInternalServerError`](./src/models/errors/get-knowledge-hub-root-nodes-internal-server-error.ts): An unexpected error occurred on the server. Status code `500`. Applicable to 1 of 131 methods.*
-* [`GetKnowledgeHubChildNodesInternalServerError`](./src/models/errors/get-knowledge-hub-child-nodes-internal-server-error.ts): An unexpected error occurred on the server. Status code `500`. Applicable to 1 of 131 methods.*
-* [`SearchHistoryInternalServerError`](./src/models/errors/search-history-internal-server-error.ts): Error envelope for a failed request. Status code `500`. Applicable to 1 of 131 methods.*
-* [`GetSearchByIdInternalServerError`](./src/models/errors/get-search-by-id-internal-server-error.ts): Server error. Possible causes:  - Explicit `InternalServerError`   or any other 500 `BaseError` thrown by the handler. - Non-`BaseError` exception caught by the   global error middleware. - Response serializer fallback. Status code `500`. Applicable to 1 of 131 methods.*
-* [`GetAvailableModelsByTypeInternalServerError`](./src/models/errors/get-available-models-by-type-internal-server-error.ts): An unexpected error occurred on the server. Status code `500`. Applicable to 1 of 131 methods.*
+* [`ErrorResponse`](./src/models/errors/error-response.ts): Standard error envelope returned by all errors routed through `ErrorMiddleware`. Applies to all `BaseError` subclasses including `HttpError`, `ValidationError`, and others. The `code` field is a machine-readable string identifying the error type (e.g. `HTTP_UNAUTHORIZED`, `HTTP_NOT_FOUND`, `VALIDATION_ERROR`, `INTERNAL_ERROR`). Applicable to 76 of 135 methods.*
+* [`OAuthClientManagementRateLimitError`](./src/models/errors/o-auth-client-management-rate-limit-error.ts): JSON body when OAuth client management routes exceed the per-minute rate limit (same limiter as other `/oauth-clients/*` routes). Status code `429`. Applicable to 20 of 135 methods.*
+* [`ApplicationJsonErrorResponse`](./src/models/errors/application-json-error-response.ts): Standard JSON error envelope from `ErrorMiddleware` for `BaseError` subclasses (`error.middleware.ts`). Returned for most API 4xx errors (unauthorized, forbidden, not found, validation failures, etc.). Applicable to 17 of 135 methods.*
+* [`OAuthErrorResponse`](./src/models/errors/o-auth-error-response.ts): OAuth 2.0 Error Response (RFC 6749 Section 5.2). Standard error format for OAuth endpoints. Applicable to 3 of 135 methods.*
+* [`RateLimitErrorResponse`](./src/models/errors/rate-limit-error-response.ts): Rate-limit error payload (shape differs from standard error responses). Status code `429`. Applicable to 3 of 135 methods.*
+* [`LocalFsDesktopRefusalError`](./src/models/errors/local-fs-desktop-refusal-error.ts): 409 body returned when a Local FS connector cannot sync because of its owner device. Status code `409`. Applicable to 2 of 135 methods.*
+* [`GetKnowledgeHubRootNodesBadRequestError`](./src/models/errors/get-knowledge-hub-root-nodes-bad-request-error.ts): Invalid request parameters. The backend's validation message is returned verbatim in `error.message`. See the examples below for the common triggers. Status code `400`. Applicable to 1 of 135 methods.*
+* [`GetKnowledgeHubChildNodesBadRequestError`](./src/models/errors/get-knowledge-hub-child-nodes-bad-request-error.ts): Invalid request parameters or path values. The backend's validation message is returned verbatim in `error.message`. See the examples below for the common triggers. Status code `400`. Applicable to 1 of 135 methods.*
+* [`SearchHistoryBadRequestError`](./src/models/errors/search-history-bad-request-error.ts): Error envelope for a failed request. Status code `400`. Applicable to 1 of 135 methods.*
+* [`GetSearchByIdBadRequestError`](./src/models/errors/get-search-by-id-bad-request-error.ts): Invalid request — `searchId` failed Zod validation (not a valid ObjectId). Status code `400`. Applicable to 1 of 135 methods.*
+* [`DeleteAgentConversationChatAttachmentBadRequestError`](./src/models/errors/delete-agent-conversation-chat-attachment-bad-request-error.ts): Invalid or blank path params (`agentKey` or `recordId`). Status code `400`. Applicable to 1 of 135 methods.*
+* [`GetAvailableModelsByTypeBadRequestError`](./src/models/errors/get-available-models-by-type-bad-request-error.ts): Invalid `modelType` path parameter.  The `modelType` value was not one of the supported enum categories. This response is produced by the Zod validation middleware **before** the handler runs. The `error.metadata.errors` array contains per-field detail about exactly which constraint failed. Status code `400`. Applicable to 1 of 135 methods.*
+* [`GetKnowledgeHubRootNodesUnauthorizedError`](./src/models/errors/get-knowledge-hub-root-nodes-unauthorized-error.ts): Missing or invalid authentication token.  The bearer token was absent, expired, malformed, or could not be verified by the auth middleware. Status code `401`. Applicable to 1 of 135 methods.*
+* [`GetKnowledgeHubChildNodesUnauthorizedError`](./src/models/errors/get-knowledge-hub-child-nodes-unauthorized-error.ts): Missing or invalid authentication token.  The bearer token was absent, expired, malformed, or could not be verified by the auth middleware. Status code `401`. Applicable to 1 of 135 methods.*
+* [`SearchHistoryUnauthorizedError`](./src/models/errors/search-history-unauthorized-error.ts): Error envelope for a failed request. Status code `401`. Applicable to 1 of 135 methods.*
+* [`GetSearchByIdUnauthorizedError`](./src/models/errors/get-search-by-id-unauthorized-error.ts): Missing or invalid bearer token. Status code `401`. Applicable to 1 of 135 methods.*
+* [`GetAvailableModelsByTypeUnauthorizedError`](./src/models/errors/get-available-models-by-type-unauthorized-error.ts): Missing or invalid authentication token.  The bearer token was absent, expired, malformed, or could not be verified by the auth middleware. Status code `401`. Applicable to 1 of 135 methods.*
+* [`GetKnowledgeHubRootNodesForbiddenError`](./src/models/errors/get-knowledge-hub-root-nodes-forbidden-error.ts): Insufficient OAuth scope.  Only applies to OAuth tokens. The token did not carry the `kb:read` scope required by this endpoint. Regular (non-OAuth) JWT bearer tokens are not subject to scope enforcement and will not receive this error. Status code `403`. Applicable to 1 of 135 methods.*
+* [`GetKnowledgeHubChildNodesForbiddenError`](./src/models/errors/get-knowledge-hub-child-nodes-forbidden-error.ts): Insufficient OAuth scope.  Only applies to OAuth tokens. The token did not carry the `kb:read` scope required by this endpoint. Regular (non-OAuth) JWT bearer tokens are not subject to scope enforcement and will not receive this error. Status code `403`. Applicable to 1 of 135 methods.*
+* [`SearchHistoryForbiddenError`](./src/models/errors/search-history-forbidden-error.ts): Error envelope for a failed request. Status code `403`. Applicable to 1 of 135 methods.*
+* [`GetSearchByIdForbiddenError`](./src/models/errors/get-search-by-id-forbidden-error.ts): Bearer token lacks the `semantic:read` scope. Status code `403`. Applicable to 1 of 135 methods.*
+* [`GetAvailableModelsByTypeForbiddenError`](./src/models/errors/get-available-models-by-type-forbidden-error.ts): Insufficient OAuth scope.  Only applies to OAuth tokens. The token did not carry the `config:read` scope required by this endpoint. Regular (non-OAuth) JWT bearer tokens are not subject to scope enforcement and will not receive this error. Status code `403`. Applicable to 1 of 135 methods.*
+* [`StreamRecordErrorResponse`](./src/models/errors/stream-record-error-response.ts): Error payload returned by the legacy record-stream proxy when the downstream streaming request fails after route middleware has passed. Applicable to 1 of 135 methods.*
+* [`GetKnowledgeHubChildNodesNotFoundError`](./src/models/errors/get-knowledge-hub-child-nodes-not-found-error.ts): Parent node not found.  The `parentId` does not correspond to an existing node of the specified `parentType`, or the node has been deleted. Status code `404`. Applicable to 1 of 135 methods.*
+* [`GetSearchByIdNotFoundError`](./src/models/errors/get-search-by-id-not-found-error.ts): Reserved for parity with sibling routes; this endpoint currently returns `200` with an empty array for an unknown id rather than emitting `404`. Status code `404`. Applicable to 1 of 135 methods.*
+* [`GetKnowledgeHubRootNodesInternalServerError`](./src/models/errors/get-knowledge-hub-root-nodes-internal-server-error.ts): An unexpected error occurred on the server. Status code `500`. Applicable to 1 of 135 methods.*
+* [`GetKnowledgeHubChildNodesInternalServerError`](./src/models/errors/get-knowledge-hub-child-nodes-internal-server-error.ts): An unexpected error occurred on the server. Status code `500`. Applicable to 1 of 135 methods.*
+* [`SearchHistoryInternalServerError`](./src/models/errors/search-history-internal-server-error.ts): Error envelope for a failed request. Status code `500`. Applicable to 1 of 135 methods.*
+* [`GetSearchByIdInternalServerError`](./src/models/errors/get-search-by-id-internal-server-error.ts): Server error. Possible causes:  - Explicit `InternalServerError`   or any other 500 `BaseError` thrown by the handler. - Non-`BaseError` exception caught by the   global error middleware. - Response serializer fallback. Status code `500`. Applicable to 1 of 135 methods.*
+* [`GetAvailableModelsByTypeInternalServerError`](./src/models/errors/get-available-models-by-type-internal-server-error.ts): An unexpected error occurred on the server. Status code `500`. Applicable to 1 of 135 methods.*
 * [`ResponseValidationError`](./src/models/errors/response-validation-error.ts): Type mismatch between the data returned from the server and the structure expected by the SDK. See `error.rawValue` for the raw value and `error.pretty()` for a nicely formatted multi-line string.
 
 </details>

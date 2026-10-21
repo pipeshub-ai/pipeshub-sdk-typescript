@@ -10,6 +10,15 @@ import * as types from "../types/primitives.js";
 import { AgentFilters, AgentFilters$inboundSchema } from "./agent-filters.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
+export type KnowledgeNode = {
+  id: string;
+  name: string;
+  /**
+   * `recordGroup`, `folder` or `record`.
+   */
+  nodeType: string;
+};
+
 /**
  * Server-derived read-only object parsed from the stored
  *
@@ -19,13 +28,17 @@ import { SDKValidationError } from "./errors/sdk-validation-error.js";
  */
 export type FiltersParsed = {
   /**
-   * Deprecated/legacy: record-group ids for connector record-group scoping (e.g. Confluence spaces, Jira projects). No longer set for KB (Collection) entries — a KB is identified by its own `connectorId`, not by an id in this list.
+   * Record-group ids (e.g. Confluence spaces, Jira projects), each with the groups nested in it. Not set for KB (Collection) entries — a KB is identified by its own `connectorId`; an id equal to a source's `connectorId` is ignored.
    */
   recordGroups?: Array<string> | undefined;
   /**
-   * Individual record ids in scope.
+   * Folder or record ids, each with everything under it.
    */
   records?: Array<string> | undefined;
+  /**
+   * Names of the ids above, for display. Not used for search.
+   */
+  nodes?: Array<KnowledgeNode> | undefined;
 };
 
 /**
@@ -61,12 +74,33 @@ export type Knowledge = {
 };
 
 /** @internal */
+export const KnowledgeNode$inboundSchema: z.ZodMiniType<
+  KnowledgeNode,
+  unknown
+> = z.object({
+  id: types.string(),
+  name: types.string(),
+  nodeType: types.string(),
+});
+
+export function knowledgeNodeFromJSON(
+  jsonString: string,
+): SafeParseResult<KnowledgeNode, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => KnowledgeNode$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'KnowledgeNode' from JSON`,
+  );
+}
+
+/** @internal */
 export const FiltersParsed$inboundSchema: z.ZodMiniType<
   FiltersParsed,
   unknown
 > = z.object({
   recordGroups: types.optional(z.array(types.string())),
   records: types.optional(z.array(types.string())),
+  nodes: types.optional(z.array(z.lazy(() => KnowledgeNode$inboundSchema))),
 });
 
 export function filtersParsedFromJSON(

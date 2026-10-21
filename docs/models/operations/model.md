@@ -6,7 +6,7 @@
 import { Model } from "@pipeshub-ai/sdk/models/operations";
 
 let value: Model = {
-  modelType: "reasoning",
+  modelType: "multiModal",
   provider: "azureOpenAI",
   modelName: "gpt-5.6-luna",
   modelKey: "f3a4b5b6-5b6c-4e85-9097-3202cfe696fc",

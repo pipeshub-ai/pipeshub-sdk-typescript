@@ -55,6 +55,26 @@ export type KnowledgeHubNodesResponsePagination = {
   totalPages: number;
   hasNext: boolean;
   hasPrev: boolean;
+  /**
+   * Cursor for the next page; null on the last page.
+   */
+  nextCursor?: string | null | undefined;
+  /**
+   * Cursor for the previous page; null on the first page.
+   */
+  prevCursor?: string | null | undefined;
+  /**
+   * 1-based index of the first item on this page, when known.
+   */
+  startIndex?: number | null | undefined;
+  /**
+   * 1-based index of the last item on this page, when known.
+   */
+  endIndex?: number | null | undefined;
+  /**
+   * Number of items on this page.
+   */
+  currentPageItems?: number | null | undefined;
 };
 
 /**
@@ -293,6 +313,11 @@ export const KnowledgeHubNodesResponsePagination$inboundSchema: z.ZodMiniType<
   totalPages: types.number(),
   hasNext: types.boolean(),
   hasPrev: types.boolean(),
+  nextCursor: z.optional(z.nullable(types.string())),
+  prevCursor: z.optional(z.nullable(types.string())),
+  startIndex: z.optional(z.nullable(types.number())),
+  endIndex: z.optional(z.nullable(types.number())),
+  currentPageItems: z.optional(z.nullable(types.number())),
 });
 
 export function knowledgeHubNodesResponsePaginationFromJSON(

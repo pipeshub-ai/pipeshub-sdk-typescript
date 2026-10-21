@@ -5,6 +5,8 @@
 import * as z from "zod/v4-mini";
 import { remap as remap$ } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
+import * as openEnums from "../types/enums.js";
+import { OpenEnum } from "../types/enums.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import {
@@ -24,6 +26,20 @@ import {
   ConnectorScope$inboundSchema,
 } from "./connector-scope.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
+
+/**
+ * How the last sync run ended
+ */
+export const LastSyncOutcome = {
+  Succeeded: "succeeded",
+  Failed: "failed",
+  Stopped: "stopped",
+  Skipped: "skipped",
+} as const;
+/**
+ * How the last sync run ended
+ */
+export type LastSyncOutcome = OpenEnum<typeof LastSyncOutcome>;
 
 /**
  * A connector instance: its type's registry entry plus the instance's own state.
@@ -121,10 +137,32 @@ export type ConnectorInstance = {
    */
   updatedAtTimestamp?: number | undefined;
   /**
+   * Epoch ms when the last sync run started; absent before the first run
+   */
+  lastSyncStartedAtTimestamp?: number | null | undefined;
+  /**
+   * Epoch ms when the last sync run ended, however it ended; absent until a run ends
+   */
+  lastSyncFinishedAtTimestamp?: number | null | undefined;
+  /**
+   * How the last sync run ended
+   */
+  lastSyncOutcome?: LastSyncOutcome | null | undefined;
+  /**
+   * What the last run did, in the connector's own terms. For a Web connector: pagesSaved (written this run), pagesStored (kept after it, which Maximum pages caps), pagesVisited, failed, failedByStatus, robotsSkipped, noindexSkipped, skippedMaxPages, deferred, pruned, sitemapUrls, stopReason (max_pages, time_limit, stalled, rate_limited or null) and resumed.
+   */
+  lastSyncSummary?: { [k: string]: any } | null | undefined;
+  /**
    * Configuration form for a connector type: the auth fields per auth type, the sync strategies and settings, and the sync and indexing filters.
    */
   config?: ConnectorSchema | undefined;
 };
+
+/** @internal */
+export const LastSyncOutcome$inboundSchema: z.ZodMiniType<
+  LastSyncOutcome,
+  unknown
+> = openEnums.inboundSchema(LastSyncOutcome);
 
 /** @internal */
 export const ConnectorInstance$inboundSchema: z.ZodMiniType<
@@ -167,6 +205,10 @@ export const ConnectorInstance$inboundSchema: z.ZodMiniType<
     updatedBy: z.optional(z.nullable(types.string())),
     createdAtTimestamp: types.optional(types.number()),
     updatedAtTimestamp: types.optional(types.number()),
+    lastSyncStartedAtTimestamp: z.optional(z.nullable(types.number())),
+    lastSyncFinishedAtTimestamp: z.optional(z.nullable(types.number())),
+    lastSyncOutcome: z.optional(z.nullable(LastSyncOutcome$inboundSchema)),
+    lastSyncSummary: z.optional(z.nullable(z.record(z.string(), z.any()))),
     config: types.optional(ConnectorSchema$inboundSchema),
   }),
   z.transform((v) => {

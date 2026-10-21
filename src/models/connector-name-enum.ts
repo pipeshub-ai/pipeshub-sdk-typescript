@@ -56,6 +56,7 @@ export const ConnectorNameEnum = {
   AzureFiles: "AZURE FILES",
   Linear: "LINEAR",
   Zammad: "ZAMMAD",
+  Zendesk: "ZENDESK",
   Zoom: "ZOOM",
   Gitlab: "GITLAB",
   GitlabPersonal: "GITLAB PERSONAL",

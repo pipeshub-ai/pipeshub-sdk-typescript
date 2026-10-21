@@ -48,6 +48,9 @@ import { Result } from "../types/fp.js";
  * **Sorting:**
  *
  * Conversations are sorted by last activity timestamp (most recent first) by default.
+ * With `source=owned`, conversations the caller pinned
+ * (`PATCH /conversations/{conversationId}/pin`) come first, in the same order,
+ * whatever `sortBy` is. `source=shared` is never pinned-first.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */

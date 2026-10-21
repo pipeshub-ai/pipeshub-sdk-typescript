@@ -50,6 +50,13 @@ export type SemanticSearchHit = {
    * directly or the section matched as a whole.
    */
   distanceFromMatch?: number | undefined;
+  /**
+   * Set only on a search with `timeline`: the index in `timeline.periods` of the period
+   *
+   * @remarks
+   * this hit's record is dated in.
+   */
+  timelinePeriod?: number | undefined;
 };
 
 /** @internal */
@@ -67,6 +74,7 @@ export const SemanticSearchHit$inboundSchema: z.ZodMiniType<
     block_type: z.optional(z.nullable(types.string())),
     block_index: z.optional(z.nullable(types.number())),
     distanceFromMatch: types.optional(types.number()),
+    timelinePeriod: types.optional(types.number()),
   }),
   z.transform((v) => {
     return remap$(v, {

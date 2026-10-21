@@ -213,7 +213,8 @@ export type AgentStreamCreateConversationRequest = {
    *
    * @remarks
    * to let the agent use its default toolset; send `[]` to disable
-   * tools for this turn.
+   * tools for this turn. A list that leaves out `web_search` turns off
+   * the agent's web search for the turn.
    */
   tools?: Array<string> | undefined;
   /**

@@ -7,16 +7,20 @@ import * as openEnums from "../types/enums.js";
 import { OpenEnum } from "../types/enums.js";
 
 /**
- * Supported web search provider
+ * Supported web search provider. crawl4ai only reads pages (it backs up the built-in page reader) and cannot be the default; firecrawl both searches and reads pages. searxng, firecrawl and crawl4ai take a baseUrl; firecrawl defaults to its cloud API.
  */
 export const WebSearchProviderType = {
   Duckduckgo: "duckduckgo",
   Serper: "serper",
   Tavily: "tavily",
   Exa: "exa",
+  Brave: "brave",
+  Searxng: "searxng",
+  Firecrawl: "firecrawl",
+  Crawl4ai: "crawl4ai",
 } as const;
 /**
- * Supported web search provider
+ * Supported web search provider. crawl4ai only reads pages (it backs up the built-in page reader) and cannot be the default; firecrawl both searches and reads pages. searxng, firecrawl and crawl4ai take a baseUrl; firecrawl defaults to its cloud API.
  */
 export type WebSearchProviderType = OpenEnum<typeof WebSearchProviderType>;
 

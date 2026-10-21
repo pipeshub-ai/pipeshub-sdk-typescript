@@ -44,6 +44,12 @@ import { Result } from "../types/fp.js";
  * been shared with may delete it only when their `sharedWith.accessLevel`
  * is `write`.
  *
+ * **Artifacts:** before the conversation is marked deleted, every artifact
+ * the caller created in it is deleted for good (every version and stored
+ * file), and so are older stored outputs of the conversation. If that cannot
+ * be done the conversation is left in place and the error is returned
+ * (for example 503); repeating the request finishes the cleanup.
+ *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
 export function conversationsDeleteConversationById(

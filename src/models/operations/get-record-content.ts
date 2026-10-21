@@ -6,14 +6,14 @@ import * as z from "zod/v4-mini";
 import { ClosedEnum } from "../../types/enums.js";
 
 /**
- * `record` (default) reads this record. `thread` reads every record of the Slack thread this message belongs to, oldest first; a record outside any thread answers `422`.
+ * `record` (default) reads this record. `thread` reads every record of the Slack thread this message belongs to, oldest first. A Slack record in no single thread reads as itself, then the threads its messages started (at most 10). A record that is not from Slack answers `422`.
  */
 export const Mode = {
   Record: "record",
   Thread: "thread",
 } as const;
 /**
- * `record` (default) reads this record. `thread` reads every record of the Slack thread this message belongs to, oldest first; a record outside any thread answers `422`.
+ * `record` (default) reads this record. `thread` reads every record of the Slack thread this message belongs to, oldest first. A Slack record in no single thread reads as itself, then the threads its messages started (at most 10). A record that is not from Slack answers `422`.
  */
 export type Mode = ClosedEnum<typeof Mode>;
 
@@ -35,7 +35,7 @@ export type GetRecordContentRequest = {
    */
   query?: string | undefined;
   /**
-   * `record` (default) reads this record. `thread` reads every record of the Slack thread this message belongs to, oldest first; a record outside any thread answers `422`.
+   * `record` (default) reads this record. `thread` reads every record of the Slack thread this message belongs to, oldest first. A Slack record in no single thread reads as itself, then the threads its messages started (at most 10). A record that is not from Slack answers `422`.
    */
   mode?: Mode | undefined;
   /**

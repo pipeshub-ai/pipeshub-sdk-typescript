@@ -17,7 +17,7 @@ import {
  */
 export type WebSearchProviderItem = {
   /**
-   * Supported web search provider
+   * Supported web search provider. crawl4ai only reads pages (it backs up the built-in page reader) and cannot be the default; firecrawl both searches and reads pages. searxng, firecrawl and crawl4ai take a baseUrl; firecrawl defaults to its cloud API.
    */
   provider: WebSearchProviderType;
   /**
@@ -28,7 +28,8 @@ export type WebSearchProviderItem = {
    * Provider-specific configuration as stored and returned by the gateway (open record).
    *
    * @remarks
-   * Serper, Tavily, and Exa typically include `apiKey`; additional keys may be present.
+   * API providers include `apiKey` (masked for non-admins); searxng, firecrawl and crawl4ai
+   * include `baseUrl`. Additional keys may be present.
    */
   configuration: { [k: string]: any };
   isDefault: boolean;

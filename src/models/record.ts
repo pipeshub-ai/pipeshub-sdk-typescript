@@ -280,6 +280,16 @@ export type RecordT = {
    */
   parsingStatus?: ParsingStatus | undefined;
   /**
+   * True after the record is indexed (every COMPLETED write, including the upgrade
+   *
+   * @remarks
+   * backfill for records indexed earlier), and false once it is marked EMPTY. A later
+   * re-queue or a failed re-index leaves it as it is, so search keeps returning the
+   * previous indexed copy until the new version is indexed. Absent until the first
+   * COMPLETED or EMPTY write sets it.
+   */
+  hasIndexedCopy?: boolean | undefined;
+  /**
    * Current indexing/processing status:
    *
    * @remarks
@@ -420,6 +430,7 @@ export const RecordT$inboundSchema: z.ZodMiniType<RecordT, unknown> = z.object({
   processingStartedAt: z.optional(z.nullable(types.number())),
   queuedAtTimestamp: z.optional(z.nullable(types.number())),
   parsingStatus: types.optional(ParsingStatus$inboundSchema),
+  hasIndexedCopy: types.optional(types.boolean()),
   indexingStatus: types.optional(IndexingStatus$inboundSchema),
   isDeleted: z._default(types.boolean(), false),
   isArchived: z._default(types.boolean(), false),

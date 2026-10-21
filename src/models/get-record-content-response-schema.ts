@@ -49,6 +49,17 @@ export type GetRecordContentResponseSchemaRecord = {
   nextStartBlock?: number | null | undefined;
 };
 
+export type Thread = {
+  /**
+   * The thread's record group.
+   */
+  threadRecordGroupId?: string | undefined;
+  /**
+   * Replies of this thread the caller may see.
+   */
+  recordCount?: number | undefined;
+};
+
 /**
  * Response returned by GET /connectors/record/{recordId}/content.
  *
@@ -146,6 +157,14 @@ export type GetRecordContentResponseSchema = {
    */
   unreadableRecordIds?: Array<string> | undefined;
   /**
+   * Thread reads of a Slack record in no single thread only (several channel messages in one record, or a message without replies). The threads its messages started whose replies follow it in `records`, in the order their first messages were posted; empty when none of its messages has replies the caller may see.
+   */
+  threads?: Array<Thread> | undefined;
+  /**
+   * Thread reads of a Slack record in no single thread only. Threads of its messages left out because one read covers at most 10.
+   */
+  threadsNotRead?: number | undefined;
+  /**
    * Budgeted reads only. Characters in `content`.
    */
   chars?: number | undefined;
@@ -206,6 +225,22 @@ export function getRecordContentResponseSchemaRecordFromJSON(
 }
 
 /** @internal */
+export const Thread$inboundSchema: z.ZodMiniType<Thread, unknown> = z.object({
+  threadRecordGroupId: types.optional(types.string()),
+  recordCount: types.optional(types.number()),
+});
+
+export function threadFromJSON(
+  jsonString: string,
+): SafeParseResult<Thread, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Thread$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Thread' from JSON`,
+  );
+}
+
+/** @internal */
 export const GetRecordContentResponseSchema$inboundSchema: z.ZodMiniType<
   GetRecordContentResponseSchema,
   unknown
@@ -231,6 +266,8 @@ export const GetRecordContentResponseSchema$inboundSchema: z.ZodMiniType<
     z.array(z.lazy(() => GetRecordContentResponseSchemaRecord$inboundSchema)),
   ),
   unreadableRecordIds: types.optional(z.array(types.string())),
+  threads: types.optional(z.array(z.lazy(() => Thread$inboundSchema))),
+  threadsNotRead: types.optional(types.number()),
   chars: types.optional(types.number()),
   maxChars: types.optional(types.number()),
 });

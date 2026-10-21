@@ -17,7 +17,7 @@ export type GetAvailableModelsByTypeRequest = {
    *
    * @remarks
    *
-   * Must be one of: `llm`, `embedding`, `ocr`, `slm`, `reasoning`, `multiModal`, `imageGeneration`, `tts`, `stt`.
+   * Must be one of: `llm`, `embedding`, `ocr`, `slm`, `reasoning`, `multiModal`, `imageGeneration`, `tts`, `stt`, `decision`.
    */
   modelType: models.ModelType;
 };

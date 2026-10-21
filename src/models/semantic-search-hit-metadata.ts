@@ -37,6 +37,10 @@ export type SemanticSearchHitMetadata = {
   origin?: string | null | undefined;
   connector?: string | null | undefined;
   connectorId?: string | null | undefined;
+  /**
+   * The name the admin gave the connector instance; `connector` is only its type.
+   */
+  connectorInstanceName?: string | null | undefined;
   connectorName?: string | null | undefined;
   blockText?: string | null | undefined;
   /**
@@ -137,6 +141,7 @@ export const SemanticSearchHitMetadata$inboundSchema: z.ZodMiniType<
     origin: z.optional(z.nullable(types.string())),
     connector: z.optional(z.nullable(types.string())),
     connectorId: z.optional(z.nullable(types.string())),
+    connectorInstanceName: z.optional(z.nullable(types.string())),
     connectorName: z.optional(z.nullable(types.string())),
     blockText: z.optional(z.nullable(types.string())),
     blockType: z.optional(z.nullable(types.string())),

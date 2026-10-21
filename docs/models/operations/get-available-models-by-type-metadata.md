@@ -12,7 +12,7 @@ let value: GetAvailableModelsByTypeMetadata = {
     {
       field: "params.modelType",
       message:
-        "Invalid enum value. Expected 'ocr' | 'embedding' | 'llm' | 'slm' | 'reasoning' | 'multiModal' | 'imageGeneration' | 'tts' | 'stt', received 'llmr'",
+        "Invalid enum value. Expected 'ocr' | 'embedding' | 'llm' | 'slm' | 'reasoning' | 'multiModal' | 'imageGeneration' | 'tts' | 'stt' | 'decision', received 'llmr'",
       code: "INVALID_ENUM",
       value: "",
     },

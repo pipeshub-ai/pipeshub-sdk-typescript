@@ -18,12 +18,12 @@ AI-powered conversational chat management with citations and follow-up questions
 * [updateConversationTitle](#updateconversationtitle) - Update conversation title
 * [archiveConversation](#archiveconversation) - Archive conversation
 * [unarchiveConversation](#unarchiveconversation) - Unarchive conversation
+* [pinConversation](#pinconversation) - Pin conversation
+* [unpinConversation](#unpinconversation) - Unpin conversation
 * [regenerateAnswer](#regenerateanswer) - Regenerate AI response
+* [forkConversation](#forkconversation) - Fork conversation from a message
 * [cancelConversationStream](#cancelconversationstream) - Cancel an in-flight chat stream
 * [updateMessageFeedback](#updatemessagefeedback) - Submit feedback on AI response
-* [setConversationProject](#setconversationproject) - Link or unlink a conversation to a project
-* [setConversationProjectVisibility](#setconversationprojectvisibility) - Override a conversation's project visibility
-* [getProjectConversations](#getprojectconversations) - List a project's conversations
 
 ## createConversation
 
@@ -365,6 +365,9 @@ Defaults to `owned` when omitted. Each call returns one list; call twice if you 
 **Sorting:**
 
 Conversations are sorted by last activity timestamp (most recent first) by default.
+With `source=owned`, conversations the caller pinned
+(`PATCH /conversations/{conversationId}/pin`) come first, in the same order,
+whatever `sortBy` is. `source=shared` is never pinned-first.
 
 
 ### Example Usage
@@ -738,6 +741,12 @@ referenced by messages in the conversation are also soft-deleted.
 The conversation initiator can always delete. Users the conversation has
 been shared with may delete it only when their `sharedWith.accessLevel`
 is `write`.
+
+**Artifacts:** before the conversation is marked deleted, every artifact
+the caller created in it is deleted for good (every version and stored
+file), and so are older stored outputs of the conversation. If that cannot
+be done the conversation is left in place and the error is returned
+(for example 503); repeating the request finishes the cleanup.
 
 
 ### Example Usage
@@ -1324,6 +1333,191 @@ run();
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
+## pinConversation
+
+Pin a conversation so it is listed first in the caller's own conversation list.
+
+**Access:**
+
+Owner only: the caller must be the conversation's `initiator`. People the
+conversation is shared with, even with `write` access, cannot pin it, and
+their own lists are not affected by the owner's pin.
+
+**Behaviour:**
+
+Idempotent: pinning an already pinned conversation succeeds and changes nothing.
+Archived and deleted conversations cannot be pinned. Archiving a pinned
+conversation removes its pin. Pinning does not change `lastActivityAt` or
+`updatedAt`, so the conversation keeps its place among the other pinned chats.
+
+- Path params: `conversationId`
+- Query params: none
+- Body: none
+
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="pinConversation" method="patch" path="/conversations/{conversationId}/pin" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.conversations.pinConversation({
+    conversationId: "<value>",
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { conversationsPinConversation } from "@pipeshub-ai/sdk/funcs/conversations-pin-conversation.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const res = await conversationsPinConversation(pipeshub, {
+    conversationId: "<value>",
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("conversationsPinConversation failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.PinConversationRequest](../../models/operations/pin-conversation-request.md)                                                                                       | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[models.ConversationPinResponse](../../models/conversation-pin-response.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
+## unpinConversation
+
+Remove a conversation's pin so it is listed by recent activity again.
+
+**Access:**
+
+Owner only, as for `PATCH /conversations/{conversationId}/pin`.
+
+**Behaviour:**
+
+Idempotent: unpinning a conversation that is not pinned succeeds and changes nothing.
+
+- Path params: `conversationId`
+- Query params: none
+- Body: none
+
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="unpinConversation" method="patch" path="/conversations/{conversationId}/unpin" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.conversations.unpinConversation({
+    conversationId: "<value>",
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { conversationsUnpinConversation } from "@pipeshub-ai/sdk/funcs/conversations-unpin-conversation.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const res = await conversationsUnpinConversation(pipeshub, {
+    conversationId: "<value>",
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("conversationsUnpinConversation failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.UnpinConversationRequest](../../models/operations/unpin-conversation-request.md)                                                                                   | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[models.ConversationPinResponse](../../models/conversation-pin-response.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
 ## regenerateAnswer
 
 Regenerate the AI response for a specific message and stream the new
@@ -1454,6 +1648,95 @@ run();
 ### Response
 
 **Promise\<[EventStream<models.SSEEvent>](../../models/.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
+## forkConversation
+
+Copy this conversation into a new private chat owned by the caller,
+including every message up to and including `messageId`. The original
+conversation is left unchanged.
+
+Only the owner of the conversation can fork it. A shared recipient or a
+project member gets 404, because their access to the original's
+attachments and artifacts is revoked on unshare. The fork does not
+inherit share settings. If the source is linked to a project the caller
+can still see, the fork stays in that project but is private to the
+caller; otherwise it is created outside the project.
+
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="forkConversation" method="post" path="/conversations/{conversationId}/message/{messageId}/fork" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.conversations.forkConversation({
+    conversationId: "<value>",
+    messageId: "<value>",
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { conversationsForkConversation } from "@pipeshub-ai/sdk/funcs/conversations-fork-conversation.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const res = await conversationsForkConversation(pipeshub, {
+    conversationId: "<value>",
+    messageId: "<value>",
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("conversationsForkConversation failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.ForkConversationRequest](../../models/operations/fork-conversation-request.md)                                                                                     | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[models.ForkConversationResponse](../../models/fork-conversation-response.md)\>**
 
 ### Errors
 
@@ -1654,279 +1937,6 @@ run();
 ### Response
 
 **Promise\<[models.MessageFeedbackUpdateResponse](../../models/message-feedback-update-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## setConversationProject
-
-Set (`projectId: <id>`) or clear (`projectId: null`) the project this
-conversation belongs to. Initiator-only.
-
-**Access:**
-
-The caller must be the conversation's initiator. Linking to a
-non-null `projectId` also requires at least viewer access to that
-project (`404` if not visible to the caller — never `403`, to avoid
-leaking project existence across an org boundary).
-
-**Visibility on link:**
-
-When linking, `projectVisibility` defaults from the project's
-`chatSharing` setting (`members` → `project`, otherwise `private`)
-unless the conversation was already `project`-visible, in which case
-that is preserved. Use
-`PATCH /conversations/{conversationId}/project-visibility` to
-override it explicitly. Unlinking (`projectId: null`) always clears
-both `projectId` and `projectVisibility`.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="setConversationProject" method="put" path="/conversations/{conversationId}/project" -->
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-
-const pipeshub = new Pipeshub({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const result = await pipeshub.conversations.setConversationProject({
-    conversationId: "<value>",
-    body: {
-      projectId: "<value>",
-    },
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
-import { conversationsSetConversationProject } from "@pipeshub-ai/sdk/funcs/conversations-set-conversation-project.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const res = await conversationsSetConversationProject(pipeshub, {
-    conversationId: "<value>",
-    body: {
-      projectId: "<value>",
-    },
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("conversationsSetConversationProject failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.SetConversationProjectRequest](../../models/operations/set-conversation-project-request.md)                                                                        | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.SetConversationProjectResponse](../../models/operations/set-conversation-project-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## setConversationProjectVisibility
-
-Explicitly set whether a project-linked conversation is visible to
-other members of that project (`project`) or only to its owner
-(`private`). Initiator-only. Requires the conversation to already be
-linked to a project via
-`PUT /conversations/{conversationId}/project`.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="setConversationProjectVisibility" method="patch" path="/conversations/{conversationId}/project-visibility" -->
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-
-const pipeshub = new Pipeshub({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const result = await pipeshub.conversations.setConversationProjectVisibility({
-    conversationId: "<value>",
-    body: {
-      visibility: "project",
-    },
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
-import { conversationsSetConversationProjectVisibility } from "@pipeshub-ai/sdk/funcs/conversations-set-conversation-project-visibility.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const res = await conversationsSetConversationProjectVisibility(pipeshub, {
-    conversationId: "<value>",
-    body: {
-      visibility: "project",
-    },
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("conversationsSetConversationProjectVisibility failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.SetConversationProjectVisibilityRequest](../../models/operations/set-conversation-project-visibility-request.md)                                                   | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.SetConversationProjectVisibilityResponse](../../models/operations/set-conversation-project-visibility-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## getProjectConversations
-
-Requires viewer access to the project. Returns both chat and agent
-sessions (`chatSessions`, discriminated by `sessionType`/`agentKey`)
-that the caller may see: rows they own, plus rows with
-`projectVisibility: project`. Access to the project is asserted
-first, so a private conversation belonging to a *different* project
-member never leaks through this endpoint.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="getProjectConversations" method="get" path="/projects/{projectId}/conversations" -->
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-
-const pipeshub = new Pipeshub({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const result = await pipeshub.conversations.getProjectConversations({
-    projectId: "<value>",
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
-import { conversationsGetProjectConversations } from "@pipeshub-ai/sdk/funcs/conversations-get-project-conversations.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const res = await conversationsGetProjectConversations(pipeshub, {
-    projectId: "<value>",
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("conversationsGetProjectConversations failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.GetProjectConversationsRequest](../../models/operations/get-project-conversations-request.md)                                                                      | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.GetProjectConversationsResponse](../../models/operations/get-project-conversations-response.md)\>**
 
 ### Errors
 

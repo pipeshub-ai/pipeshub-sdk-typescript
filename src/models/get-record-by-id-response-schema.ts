@@ -18,6 +18,31 @@ import {
   RecordTypeEnum$inboundSchema,
 } from "./record-type-enum.js";
 
+/**
+ * How this record's own permissions combine with its ancestors'.
+ *
+ * @remarks
+ * OPEN: an accessible parent, or a direct grant, is enough.
+ * STRICT: every ancestor up to the connector must be accessible too.
+ * RESTRICTED: strict, and a grant on the record itself is required.
+ * Absent on records written before the field existed; read as OPEN.
+ */
+export const AccessRule = {
+  Open: "OPEN",
+  Strict: "STRICT",
+  Restricted: "RESTRICTED",
+} as const;
+/**
+ * How this record's own permissions combine with its ancestors'.
+ *
+ * @remarks
+ * OPEN: an accessible parent, or a direct grant, is enough.
+ * STRICT: every ancestor up to the connector must be accessible too.
+ * RESTRICTED: strict, and a grant on the record itself is required.
+ * Absent on records written before the field existed; read as OPEN.
+ */
+export type AccessRule = OpenEnum<typeof AccessRule>;
+
 export type GetRecordByIdResponseSchemaFileRecord = {
   id: string;
   orgId: string;
@@ -61,6 +86,24 @@ export type GetRecordByIdResponseSchemaRecord = {
    * connectors that do not set it.
    */
   rootRecordGroupId?: string | null | undefined;
+  /**
+   * How this record's own permissions combine with its ancestors'.
+   *
+   * @remarks
+   * OPEN: an accessible parent, or a direct grant, is enough.
+   * STRICT: every ancestor up to the connector must be accessible too.
+   * RESTRICTED: strict, and a grant on the record itself is required.
+   * Absent on records written before the field existed; read as OPEN.
+   */
+  accessRule?: AccessRule | undefined;
+  /**
+   * User id of whoever uploaded the file to the knowledge base.
+   *
+   * @remarks
+   * Absent for connector records and for files uploaded before the
+   * field existed.
+   */
+  uploadedBy?: string | null | undefined;
   connectorId: string;
   /**
    * Name of the source connector. Mirrors the values of the backend
@@ -123,6 +166,16 @@ export type GetRecordByIdResponseSchemaRecord = {
   queuedAtTimestamp?: number | null | undefined;
   parsingStatus?: string | null | undefined;
   indexingStatus: string;
+  /**
+   * True after the record is indexed (every COMPLETED write, including the upgrade
+   *
+   * @remarks
+   * backfill for records indexed earlier), and false once it is marked EMPTY. A later
+   * re-queue or a failed re-index leaves it as it is, so search keeps returning the
+   * previous indexed copy until the new version is indexed. Absent until the first
+   * COMPLETED or EMPTY write sets it.
+   */
+  hasIndexedCopy?: boolean | undefined;
   extractionStatus: string;
   reason?: string | null | undefined;
   isDeleted: boolean;
@@ -235,6 +288,10 @@ export type GetRecordByIdResponseSchema = {
 };
 
 /** @internal */
+export const AccessRule$inboundSchema: z.ZodMiniType<AccessRule, unknown> =
+  openEnums.inboundSchema(AccessRule);
+
+/** @internal */
 export const GetRecordByIdResponseSchemaFileRecord$inboundSchema: z.ZodMiniType<
   GetRecordByIdResponseSchemaFileRecord,
   unknown
@@ -315,6 +372,8 @@ export const GetRecordByIdResponseSchemaRecord$inboundSchema: z.ZodMiniType<
   externalRevisionId: z.optional(z.nullable(types.string())),
   recordGroupId: z.optional(z.nullable(types.string())),
   rootRecordGroupId: z.optional(z.nullable(types.string())),
+  accessRule: types.optional(AccessRule$inboundSchema),
+  uploadedBy: z.optional(z.nullable(types.string())),
   connectorId: types.string(),
   connectorName: ConnectorNameEnum$inboundSchema,
   recordType: RecordTypeEnum$inboundSchema,
@@ -332,6 +391,7 @@ export const GetRecordByIdResponseSchemaRecord$inboundSchema: z.ZodMiniType<
   queuedAtTimestamp: z.optional(z.nullable(types.number())),
   parsingStatus: z.optional(z.nullable(types.string())),
   indexingStatus: types.string(),
+  hasIndexedCopy: types.optional(types.boolean()),
   extractionStatus: types.string(),
   reason: z.optional(z.nullable(types.string())),
   isDeleted: types.boolean(),

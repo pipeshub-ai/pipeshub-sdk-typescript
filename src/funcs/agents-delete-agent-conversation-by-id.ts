@@ -44,6 +44,12 @@ import { Result } from "../types/fp.js";
  * - deleting through a different `agentKey` returns success with `null`
  * - deleting an already deleted conversation returns success with `null`
  *
+ * **Artifacts:** before the conversation is marked deleted, every artifact
+ * the caller created in it is deleted for good (every version and stored
+ * file). Artifacts another participant created stay theirs. If the cleanup
+ * cannot be done the conversation is left in place and the error is
+ * returned (for example 503); repeating the request finishes it.
+ *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
 export function agentsDeleteAgentConversationById(

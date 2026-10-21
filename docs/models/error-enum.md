@@ -8,6 +8,11 @@ Error code. Common values:
 - `unsupported_grant_type` - Grant type not supported
 - `invalid_scope` - Requested scope is invalid or exceeds allowed
 - `access_denied` - User denied authorization
+- `invalid_target` - The requested subject cannot be acted as
+  (RFC 8693). Returned by the token-exchange grant for every
+  refusal about the person asked for, with one wording, so a
+  service token cannot tell "no such person" from "not on your
+  list". The real cause is in the delegation log.
 
 
 ## Example Usage
@@ -15,7 +20,7 @@ Error code. Common values:
 ```typescript
 import { ErrorEnum } from "@pipeshub-ai/sdk/models";
 
-let value: ErrorEnum = "unauthorized_client";
+let value: ErrorEnum = "invalid_target";
 
 // Open enum: unrecognized values are captured as Unrecognized<string>
 ```
@@ -23,5 +28,5 @@ let value: ErrorEnum = "unauthorized_client";
 ## Values
 
 ```typescript
-"invalid_request" | "invalid_client" | "invalid_grant" | "unauthorized_client" | "unsupported_grant_type" | "invalid_scope" | "access_denied" | "server_error" | Unrecognized<string>
+"invalid_request" | "invalid_client" | "invalid_grant" | "invalid_target" | "unauthorized_client" | "unsupported_grant_type" | "invalid_scope" | "access_denied" | "server_error" | Unrecognized<string>
 ```

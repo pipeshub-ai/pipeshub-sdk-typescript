@@ -72,6 +72,7 @@ export function userAccountAuthenticate(
   Result<
     models.AuthenticateResponse,
     | errors.ErrorResponse
+    | errors.RateLimitErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -98,6 +99,7 @@ async function $do(
     Result<
       models.AuthenticateResponse,
       | errors.ErrorResponse
+      | errors.RateLimitErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -181,6 +183,7 @@ async function $do(
   const [result] = await M.match<
     models.AuthenticateResponse,
     | errors.ErrorResponse
+    | errors.RateLimitErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -192,6 +195,7 @@ async function $do(
   >(
     M.json(200, models.AuthenticateResponse$inboundSchema),
     M.jsonErr([400, 401, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(429, errors.RateLimitErrorResponse$inboundSchema),
     M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

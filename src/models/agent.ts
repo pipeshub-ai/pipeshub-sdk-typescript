@@ -16,6 +16,23 @@ import { Knowledge, Knowledge$inboundSchema } from "./knowledge.js";
 import { McpServer, McpServer$inboundSchema } from "./mcp-server.js";
 import { Toolset, Toolset$inboundSchema } from "./toolset.js";
 
+/**
+ * The model's own reasoning effort, read from its stored configuration. It applies only when the chat request sets no `reasoningEffort` and the agent has no `defaultReasoningEffort`. Omitted when nothing valid is stored; `none` is a legacy value that runs as `low`.
+ */
+export const ModelDefaultReasoningEffort = {
+  None: "none",
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Max: "max",
+} as const;
+/**
+ * The model's own reasoning effort, read from its stored configuration. It applies only when the chat request sets no `reasoningEffort` and the agent has no `defaultReasoningEffort`. Omitted when nothing valid is stored; `none` is a legacy value that runs as `low`.
+ */
+export type ModelDefaultReasoningEffort = OpenEnum<
+  typeof ModelDefaultReasoningEffort
+>;
+
 export type Model = {
   modelKey?: string | undefined;
   modelName?: string | undefined;
@@ -31,6 +48,10 @@ export type Model = {
    */
   modelType?: string | undefined;
   modelFriendlyName?: string | undefined;
+  /**
+   * The model's own reasoning effort, read from its stored configuration. It applies only when the chat request sets no `reasoningEffort` and the agent has no `defaultReasoningEffort`. Omitted when nothing valid is stored; `none` is a legacy value that runs as `low`.
+   */
+  defaultReasoningEffort?: ModelDefaultReasoningEffort | undefined;
 };
 
 export type ModelUnion = string | Model;
@@ -220,6 +241,12 @@ export type Agent = {
 };
 
 /** @internal */
+export const ModelDefaultReasoningEffort$inboundSchema: z.ZodMiniType<
+  ModelDefaultReasoningEffort,
+  unknown
+> = openEnums.inboundSchema(ModelDefaultReasoningEffort);
+
+/** @internal */
 export const Model$inboundSchema: z.ZodMiniType<Model, unknown> = z.object({
   modelKey: types.optional(types.string()),
   modelName: types.optional(types.string()),
@@ -229,6 +256,9 @@ export const Model$inboundSchema: z.ZodMiniType<Model, unknown> = z.object({
   isDefault: types.optional(types.boolean()),
   modelType: types.optional(types.string()),
   modelFriendlyName: types.optional(types.string()),
+  defaultReasoningEffort: types.optional(
+    ModelDefaultReasoningEffort$inboundSchema,
+  ),
 });
 
 export function modelFromJSON(

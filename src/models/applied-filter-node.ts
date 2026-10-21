@@ -28,6 +28,18 @@ export type AppliedFilterNode = {
    * Connector identifier associated with this node
    */
   connector?: string | undefined;
+  /**
+   * File extension of a record node, for its icon
+   */
+  extension?: string | undefined;
+  /**
+   * MIME type of a record node, for its icon
+   */
+  mimeType?: string | undefined;
+  /**
+   * True when the node was picked with an @ mention in the message
+   */
+  mentioned?: boolean | undefined;
 };
 
 /** @internal */
@@ -39,6 +51,9 @@ export const AppliedFilterNode$inboundSchema: z.ZodMiniType<
   name: types.optional(types.string()),
   nodeType: types.optional(types.string()),
   connector: types.optional(types.string()),
+  extension: types.optional(types.string()),
+  mimeType: types.optional(types.string()),
+  mentioned: types.optional(types.boolean()),
 });
 /** @internal */
 export type AppliedFilterNode$Outbound = {
@@ -46,6 +61,9 @@ export type AppliedFilterNode$Outbound = {
   name?: string | undefined;
   nodeType?: string | undefined;
   connector?: string | undefined;
+  extension?: string | undefined;
+  mimeType?: string | undefined;
+  mentioned?: boolean | undefined;
 };
 
 /** @internal */
@@ -57,6 +75,9 @@ export const AppliedFilterNode$outboundSchema: z.ZodMiniType<
   name: z.optional(z.string()),
   nodeType: z.optional(z.string()),
   connector: z.optional(z.string()),
+  extension: z.optional(z.string()),
+  mimeType: z.optional(z.string()),
+  mentioned: z.optional(z.boolean()),
 });
 
 export function appliedFilterNodeToJSON(

@@ -3,17 +3,58 @@
  */
 
 import * as z from "zod/v4-mini";
+import { ClosedEnum } from "../../types/enums.js";
+
+/**
+ * `record` (default) reads this record. `thread` reads every record of the Slack thread this message belongs to, oldest first. A Slack record in no single thread reads as itself, then the threads its messages started (at most 10). A record that is not from Slack answers `422`.
+ */
+export const Mode = {
+  Record: "record",
+  Thread: "thread",
+} as const;
+/**
+ * `record` (default) reads this record. `thread` reads every record of the Slack thread this message belongs to, oldest first. A Slack record in no single thread reads as itself, then the threads its messages started (at most 10). A record that is not from Slack answers `422`.
+ */
+export type Mode = ClosedEnum<typeof Mode>;
 
 export type GetRecordContentRequest = {
   /**
    * Record ID to fetch. Obtain it from a `pipeshub_search` result (`hits[*].recordId`) or a chat citation (`citations[*].recordId`).
    */
   recordId: string;
+  /**
+   * Most characters of `content` to return. Asks for a budgeted read; 40000 when another budgeted-read parameter is given without it.
+   */
+  maxChars?: number | undefined;
+  /**
+   * Read in order from this block: the `nextStartBlock` of a previous read, or 0 for the top. Takes precedence over `query`. In thread mode it applies to the record at `startRecord`; later records are read from their start.
+   */
+  startBlock?: number | undefined;
+  /**
+   * What you are looking for in the record. When the record does not fit in `maxChars`, the blocks most relevant to it are shown first and the skipped ranges are marked.
+   */
+  query?: string | undefined;
+  /**
+   * `record` (default) reads this record. `thread` reads every record of the Slack thread this message belongs to, oldest first. A Slack record in no single thread reads as itself, then the threads its messages started (at most 10). A record that is not from Slack answers `422`.
+   */
+  mode?: Mode | undefined;
+  /**
+   * Thread mode: start at this record of the thread, the `nextStartRecord` of a previous read. Pass the read's `nextStartBlock` with it.
+   */
+  startRecord?: number | undefined;
 };
+
+/** @internal */
+export const Mode$outboundSchema: z.ZodMiniEnum<typeof Mode> = z.enum(Mode);
 
 /** @internal */
 export type GetRecordContentRequest$Outbound = {
   recordId: string;
+  maxChars?: number | undefined;
+  startBlock?: number | undefined;
+  query?: string | undefined;
+  mode?: string | undefined;
+  startRecord?: number | undefined;
 };
 
 /** @internal */
@@ -22,6 +63,11 @@ export const GetRecordContentRequest$outboundSchema: z.ZodMiniType<
   GetRecordContentRequest
 > = z.object({
   recordId: z.string(),
+  maxChars: z.optional(z.int()),
+  startBlock: z.optional(z.int()),
+  query: z.optional(z.string()),
+  mode: z.optional(Mode$outboundSchema),
+  startRecord: z.optional(z.int()),
 });
 
 export function getRecordContentRequestToJSON(

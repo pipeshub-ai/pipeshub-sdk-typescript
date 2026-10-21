@@ -10,6 +10,7 @@ import { agentsCreateAgent } from "../funcs/agents-create-agent.js";
 import { agentsDeleteAgentConversationById } from "../funcs/agents-delete-agent-conversation-by-id.js";
 import { agentsDeleteAgentConversationChatAttachment } from "../funcs/agents-delete-agent-conversation-chat-attachment.js";
 import { agentsDeleteAgent } from "../funcs/agents-delete-agent.js";
+import { agentsForkAgentConversation } from "../funcs/agents-fork-agent-conversation.js";
 import { agentsGetAgentConversationById } from "../funcs/agents-get-agent-conversation-by-id.js";
 import { agentsGetAgent } from "../funcs/agents-get-agent.js";
 import { agentsListAgentArchivedConversationsGrouped } from "../funcs/agents-list-agent-archived-conversations-grouped.js";
@@ -24,8 +25,6 @@ import { agentsUpdateAgentConversationMessageFeedback } from "../funcs/agents-up
 import { agentsUpdateAgentConversationTitle } from "../funcs/agents-update-agent-conversation-title.js";
 import { agentsUpdateAgent } from "../funcs/agents-update-agent.js";
 import { agentsUploadAgentConversationChatAttachments } from "../funcs/agents-upload-agent-conversation-chat-attachments.js";
-import { projectsSetAgentConversationProjectVisibility } from "../funcs/projects-set-agent-conversation-project-visibility.js";
-import { projectsSetAgentConversationProject } from "../funcs/projects-set-agent-conversation-project.js";
 import { EventStream } from "../lib/event-streams.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
 import * as models from "../models/index.js";
@@ -375,6 +374,27 @@ export class Agents extends ClientSDK {
   }
 
   /**
+   * Fork agent conversation from a message
+   *
+   * @remarks
+   * Copy this agent conversation into a new private chat owned by the
+   * caller, including every message up to and including `messageId`. The
+   * original conversation is left unchanged.
+   *
+   * Only the owner of the conversation can fork it; anyone else gets 404.
+   */
+  async forkAgentConversation(
+    request: operations.ForkAgentConversationRequest,
+    options?: RequestOptions,
+  ): Promise<models.ForkConversationResponse> {
+    return unwrapAsync(agentsForkAgentConversation(
+      this,
+      request,
+      options,
+    ));
+  }
+
+  /**
    * Cancel an in-flight agent chat stream
    *
    * @remarks
@@ -525,47 +545,6 @@ export class Agents extends ClientSDK {
   }
 
   /**
-   * Link or unlink an agent conversation to a project
-   *
-   * @remarks
-   * Agent-conversation equivalent of
-   * `PUT /conversations/{conversationId}/project`. Set
-   * (`projectId: <id>`) or clear (`projectId: null`) the project this
-   * agent conversation belongs to. Initiator-only; linking requires at
-   * least viewer access to the target project.
-   */
-  async setAgentConversationProject(
-    request: operations.SetAgentConversationProjectRequest,
-    options?: RequestOptions,
-  ): Promise<operations.SetAgentConversationProjectResponse> {
-    return unwrapAsync(projectsSetAgentConversationProject(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
-   * Override an agent conversation's project visibility
-   *
-   * @remarks
-   * Agent-conversation equivalent of
-   * `PATCH /conversations/{conversationId}/project-visibility`.
-   * Initiator-only; requires the conversation to already be linked to a
-   * project.
-   */
-  async setAgentConversationProjectVisibility(
-    request: operations.SetAgentConversationProjectVisibilityRequest,
-    options?: RequestOptions,
-  ): Promise<operations.SetAgentConversationProjectVisibilityResponse> {
-    return unwrapAsync(projectsSetAgentConversationProjectVisibility(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
    * Delete an agent conversation
    *
    * @remarks
@@ -580,6 +559,12 @@ export class Agents extends ClientSDK {
    * - deleting a nonexistent conversation returns success with `null`
    * - deleting through a different `agentKey` returns success with `null`
    * - deleting an already deleted conversation returns success with `null`
+   *
+   * **Artifacts:** before the conversation is marked deleted, every artifact
+   * the caller created in it is deleted for good (every version and stored
+   * file). Artifacts another participant created stay theirs. If the cleanup
+   * cannot be done the conversation is left in place and the error is
+   * returned (for example 503); repeating the request finishes it.
    */
   async deleteAgentConversationById(
     request: operations.DeleteAgentConversationByIdRequest,

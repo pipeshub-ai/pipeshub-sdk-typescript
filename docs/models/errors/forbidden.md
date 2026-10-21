@@ -12,8 +12,9 @@ Forbidden. Returned either when the OAuth token is missing the required
 ```typescript
 const value: errors.ErrorResponse = {
   error: {
-    code: "HTTP_BAD_REQUEST",
-    message: "Admin access required",
+    code: "HTTP_FORBIDDEN",
+    message:
+      "You need admin access to do this. Ask an admin in your organisation.",
   },
 };
 ```

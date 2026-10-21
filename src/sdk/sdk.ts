@@ -5,17 +5,23 @@
 import { ClientSDK } from "../lib/sdks.js";
 import { Agents } from "./agents.js";
 import { AIModelsProviders } from "./ai-models-providers.js";
+import { ConnectorConfiguration } from "./connector-configuration.js";
+import { ConnectorControl } from "./connector-control.js";
+import { ConnectorFilters } from "./connector-filters.js";
+import { ConnectorInstances } from "./connector-instances.js";
+import { ConnectorOAuth } from "./connector-o-auth.js";
+import { ConnectorRegistry } from "./connector-registry.js";
 import { Connector } from "./connector.js";
 import { Conversations } from "./conversations.js";
 import { KnowledgeBase } from "./knowledge-base.js";
 import { KnowledgeHub } from "./knowledge-hub.js";
 import { OAuthApps } from "./o-auth-apps.js";
+import { OAuthConfiguration } from "./o-auth-configuration.js";
 import { OAuthProvider } from "./o-auth-provider.js";
 import { OpenIDConnect } from "./open-id-connect.js";
 import { OrganizationAuthConfig } from "./organization-auth-config.js";
 import { Organizations } from "./organizations.js";
 import { PersonalAccessTokens } from "./personal-access-tokens.js";
-import { Projects } from "./projects.js";
 import { SemanticSearch } from "./semantic-search.js";
 import { UserAccount } from "./user-account.js";
 import { WebSearch } from "./web-search.js";
@@ -75,11 +81,6 @@ export class Pipeshub extends ClientSDK {
     return (this._conversations ??= new Conversations(this._options));
   }
 
-  private _projects?: Projects;
-  get projects(): Projects {
-    return (this._projects ??= new Projects(this._options));
-  }
-
   private _semanticSearch?: SemanticSearch;
   get semanticSearch(): SemanticSearch {
     return (this._semanticSearch ??= new SemanticSearch(this._options));
@@ -90,9 +91,46 @@ export class Pipeshub extends ClientSDK {
     return (this._agents ??= new Agents(this._options));
   }
 
+  private _connectorRegistry?: ConnectorRegistry;
+  get connectorRegistry(): ConnectorRegistry {
+    return (this._connectorRegistry ??= new ConnectorRegistry(this._options));
+  }
+
+  private _connectorInstances?: ConnectorInstances;
+  get connectorInstances(): ConnectorInstances {
+    return (this._connectorInstances ??= new ConnectorInstances(this._options));
+  }
+
   private _connector?: Connector;
   get connector(): Connector {
     return (this._connector ??= new Connector(this._options));
+  }
+
+  private _connectorConfiguration?: ConnectorConfiguration;
+  get connectorConfiguration(): ConnectorConfiguration {
+    return (this._connectorConfiguration ??= new ConnectorConfiguration(
+      this._options,
+    ));
+  }
+
+  private _connectorControl?: ConnectorControl;
+  get connectorControl(): ConnectorControl {
+    return (this._connectorControl ??= new ConnectorControl(this._options));
+  }
+
+  private _connectorOAuth?: ConnectorOAuth;
+  get connectorOAuth(): ConnectorOAuth {
+    return (this._connectorOAuth ??= new ConnectorOAuth(this._options));
+  }
+
+  private _connectorFilters?: ConnectorFilters;
+  get connectorFilters(): ConnectorFilters {
+    return (this._connectorFilters ??= new ConnectorFilters(this._options));
+  }
+
+  private _oAuthConfiguration?: OAuthConfiguration;
+  get oAuthConfiguration(): OAuthConfiguration {
+    return (this._oAuthConfiguration ??= new OAuthConfiguration(this._options));
   }
 
   private _aiModelsProviders?: AIModelsProviders;

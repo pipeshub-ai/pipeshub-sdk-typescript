@@ -13,11 +13,18 @@ import { ClosedEnum } from "../types/enums.js";
  * - `authorization_code`: Exchange auth code for tokens
  * - `client_credentials`: Machine-to-machine auth
  * - `refresh_token`: Get new access token using refresh token
+ * - `urn:ietf:params:oauth:grant-type:token-exchange`: Service-account
+ *   delegation (RFC 8693). Exchanges a service token for a
+ *   short-lived token that acts as one named person. Enterprise
+ *   edition; kept in this enum because the request shape is the same
+ *   wherever the grant is offered.
  */
 export const GrantType = {
   AuthorizationCode: "authorization_code",
   ClientCredentials: "client_credentials",
   RefreshToken: "refresh_token",
+  UrnIetfParamsOauthGrantTypeTokenExchange:
+    "urn:ietf:params:oauth:grant-type:token-exchange",
 } as const;
 /**
  * OAuth grant type:
@@ -26,6 +33,11 @@ export const GrantType = {
  * - `authorization_code`: Exchange auth code for tokens
  * - `client_credentials`: Machine-to-machine auth
  * - `refresh_token`: Get new access token using refresh token
+ * - `urn:ietf:params:oauth:grant-type:token-exchange`: Service-account
+ *   delegation (RFC 8693). Exchanges a service token for a
+ *   short-lived token that acts as one named person. Enterprise
+ *   edition; kept in this enum because the request shape is the same
+ *   wherever the grant is offered.
  */
 export type GrantType = ClosedEnum<typeof GrantType>;
 
@@ -43,6 +55,11 @@ export type OAuthTokenRequest = {
    * - `authorization_code`: Exchange auth code for tokens
    * - `client_credentials`: Machine-to-machine auth
    * - `refresh_token`: Get new access token using refresh token
+   * - `urn:ietf:params:oauth:grant-type:token-exchange`: Service-account
+   *   delegation (RFC 8693). Exchanges a service token for a
+   *   short-lived token that acts as one named person. Enterprise
+   *   edition; kept in this enum because the request shape is the same
+   *   wherever the grant is offered.
    */
   grantType: GrantType;
   /**
@@ -76,6 +93,30 @@ export type OAuthTokenRequest = {
    * Must be 43-128 characters from [A-Za-z0-9-._~]
    */
   codeVerifier?: string | undefined;
+  /**
+   * The service token being exchanged (token-exchange grant only).
+   *
+   * @remarks
+   * This is the only authentication the grant has: no `client_id` or
+   * `client_secret` is sent, because the service token already carries
+   * a verified identity and the scopes that bound it.
+   */
+  subjectToken?: string | undefined;
+  /**
+   * Optional. Must be `urn:ietf:params:oauth:token-type:access_token`
+   *
+   * @remarks
+   * when sent (token-exchange grant only).
+   */
+  subjectTokenType?: string | undefined;
+  /**
+   * The person to act as, by user id or email address (token-exchange
+   *
+   * @remarks
+   * grant only). Must be on the service account's allow-list, and must
+   * not be an administrator.
+   */
+  requestedSubject?: string | undefined;
 };
 
 /** @internal */
@@ -93,6 +134,9 @@ export type OAuthTokenRequest$Outbound = {
   refresh_token?: string | undefined;
   scope?: string | undefined;
   code_verifier?: string | undefined;
+  subject_token?: string | undefined;
+  subject_token_type?: string | undefined;
+  requested_subject?: string | undefined;
 };
 
 /** @internal */
@@ -109,6 +153,9 @@ export const OAuthTokenRequest$outboundSchema: z.ZodMiniType<
     refreshToken: z.optional(z.string()),
     scope: z.optional(z.string()),
     codeVerifier: z.optional(z.string()),
+    subjectToken: z.optional(z.string()),
+    subjectTokenType: z.optional(z.string()),
+    requestedSubject: z.optional(z.string()),
   }),
   z.transform((v) => {
     return remap$(v, {
@@ -118,6 +165,9 @@ export const OAuthTokenRequest$outboundSchema: z.ZodMiniType<
       clientSecret: "client_secret",
       refreshToken: "refresh_token",
       codeVerifier: "code_verifier",
+      subjectToken: "subject_token",
+      subjectTokenType: "subject_token_type",
+      requestedSubject: "requested_subject",
     });
   }),
 );

@@ -24,6 +24,11 @@ import {
   Filters$Outbound,
   Filters$outboundSchema,
 } from "./filters.js";
+import {
+  ToolApprovalAnswer,
+  ToolApprovalAnswer$Outbound,
+  ToolApprovalAnswer$outboundSchema,
+} from "./tool-approval-answer.js";
 
 /**
  * Only meaningful together with `projectId`. Overrides the
@@ -89,6 +94,20 @@ export const AgentCreateConversationRequestProtocol = {
  */
 export type AgentCreateConversationRequestProtocol = ClosedEnum<
   typeof AgentCreateConversationRequestProtocol
+>;
+
+/**
+ * How long each search waits for the keyword (grep) match after its semantic results are in. `short` waits at most 5 seconds and keeps the keyword matches found by then, for callers that would rather answer sooner, such as agents calling chat over MCP. `full`, or leaving it out, waits for all of it. Deployments running `HIGH_ACCURACY_MODE` always wait in full.
+ */
+export const AgentCreateConversationRequestKeywordSearchBudget = {
+  Short: "short",
+  Full: "full",
+} as const;
+/**
+ * How long each search waits for the keyword (grep) match after its semantic results are in. `short` waits at most 5 seconds and keeps the keyword matches found by then, for callers that would rather answer sooner, such as agents calling chat over MCP. `full`, or leaving it out, waits for all of it. Deployments running `HIGH_ACCURACY_MODE` always wait in full.
+ */
+export type AgentCreateConversationRequestKeywordSearchBudget = ClosedEnum<
+  typeof AgentCreateConversationRequestKeywordSearchBudget
 >;
 
 /**
@@ -196,7 +215,8 @@ export type AgentCreateConversationRequest = {
    *
    * @remarks
    * to let the agent use its default toolset; send `[]` to disable
-   * tools for this turn.
+   * tools for this turn. A list that leaves out `web_search` turns off
+   * the agent's web search for the turn.
    */
   tools?: Array<string> | undefined;
   /**
@@ -218,6 +238,28 @@ export type AgentCreateConversationRequest = {
    * `true`. Omitting the whole object applies every default.
    */
   agentCapabilities?: AgentCapabilities | undefined;
+  /**
+   * Opt in to measurement frames on this stream: CUSTOM `retrieval_context` events naming the records and blocks that reached the model, and one CUSTOM `run_usage` event carrying the run's token totals and loop outcome. Identifiers only, never block text. Does not change the answer.
+   */
+  includeRetrievalContext?: boolean | undefined;
+  /**
+   * How long each search waits for the keyword (grep) match after its semantic results are in. `short` waits at most 5 seconds and keeps the keyword matches found by then, for callers that would rather answer sooner, such as agents calling chat over MCP. `full`, or leaving it out, waits for all of it. Deployments running `HIGH_ACCURACY_MODE` always wait in full.
+   */
+  keywordSearchBudget?:
+    | AgentCreateConversationRequestKeywordSearchBudget
+    | undefined;
+  /**
+   * The person's answer to a tool approval card. The web app sends it with the query
+   *
+   * @remarks
+   * `Tool approval: allow` or `Tool approval: deny`, and the request carries on the turn that
+   * stopped on the card: the saved call runs (when allowed) and its result answers the call
+   * the model made, in the same reply. The call is the one saved server-side when the card was
+   * shown (answerable for 15 minutes, settled once, bound to the asking user and
+   * conversation); only its id and the answer travel here. A reply that answered a card
+   * can't be regenerated.
+   */
+  toolApproval?: ToolApprovalAnswer | undefined;
   /**
    * Client-generated identifier for this run. Send it here to enable
    *
@@ -246,6 +288,11 @@ export const AgentCreateConversationRequestProtocol$outboundSchema:
   );
 
 /** @internal */
+export const AgentCreateConversationRequestKeywordSearchBudget$outboundSchema:
+  z.ZodMiniEnum<typeof AgentCreateConversationRequestKeywordSearchBudget> = z
+    .enum(AgentCreateConversationRequestKeywordSearchBudget);
+
+/** @internal */
 export type AgentCreateConversationRequest$Outbound = {
   query: string;
   recordIds?: Array<string> | undefined;
@@ -263,6 +310,9 @@ export type AgentCreateConversationRequest$Outbound = {
   tools?: Array<string> | undefined;
   protocol?: string | undefined;
   agentCapabilities?: AgentCapabilities$Outbound | undefined;
+  includeRetrievalContext: boolean;
+  keywordSearchBudget?: string | undefined;
+  toolApproval?: ToolApprovalAnswer$Outbound | undefined;
   runId?: string | undefined;
 };
 
@@ -289,6 +339,11 @@ export const AgentCreateConversationRequest$outboundSchema: z.ZodMiniType<
   tools: z.optional(z.array(z.string())),
   protocol: z.optional(AgentCreateConversationRequestProtocol$outboundSchema),
   agentCapabilities: z.optional(AgentCapabilities$outboundSchema),
+  includeRetrievalContext: z._default(z.boolean(), false),
+  keywordSearchBudget: z.optional(
+    AgentCreateConversationRequestKeywordSearchBudget$outboundSchema,
+  ),
+  toolApproval: z.optional(ToolApprovalAnswer$outboundSchema),
   runId: z.optional(z.string()),
 });
 

@@ -30,6 +30,7 @@
   "devDependencies": {
     "@eslint/js": "^9.26.0",
     "@types/node": "^18.19.3",
+    "ai": "^7.0.153",
     "eslint": "^9.26.0",
     "globals": "^15.14.0",
     "tshy": "^3.3.2",

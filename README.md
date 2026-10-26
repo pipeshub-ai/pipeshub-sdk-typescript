@@ -114,6 +114,31 @@ run();
 ```
 <!-- End SDK Example Usage [usage] -->
 
+## Retrieval for RAG and the Vercel AI SDK
+
+`semanticSearch.retrieve` returns permission-filtered passages ("chunks"), each with its record and a citation link. It stores no search history, so you can call it on every request your application serves. See the [Retrieval API](https://docs.pipeshub.com/developer/retrieval-api) docs.
+
+```typescript
+const { chunks } = await pipeshub.semanticSearch.retrieve({ query: "How do we roll back a canary deploy?", limit: 5 });
+for (const chunk of chunks) console.log(chunk.score, chunk.record.name, chunk.citation.url);
+```
+
+`pipeshubRetrieveTool` turns it into a [Vercel AI SDK](https://ai-sdk.dev) tool. It works with AI SDK 5 and later, and the SDK itself does not depend on `ai`:
+
+```typescript
+import { generateText, stepCountIs } from "ai";
+import { pipeshubRetrieveTool } from "@pipeshub-ai/sdk/integrations/ai-sdk";
+
+const { text } = await generateText({
+  model,
+  tools: { searchCompanyKnowledge: pipeshubRetrieveTool(pipeshub, { limit: 5 }) },
+  stopWhen: stepCountIs(3),
+  prompt: "How do we roll back a canary deploy?",
+});
+```
+
+The tool takes one input, `query`. Its options (`limit`, `filters`, `maxChunksPerRecord`, `rewriteQuery`, `description`) apply to every call. The model gets back the chunks with their citation `url`s.
+
 <!-- Start Authentication [security] -->
 ## Authentication
 

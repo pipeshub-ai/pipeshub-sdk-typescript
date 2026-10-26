@@ -36,7 +36,8 @@ typescript:
   additionalDependencies:
     dependencies: {}
     dev: {}
-    devDependencies: {}
+    devDependencies:
+      ai: ^7.0.153
     main: {}
     peerDependencies: {}
   additionalPackageJSON: {}

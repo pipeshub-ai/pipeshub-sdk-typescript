@@ -17,6 +17,35 @@ import {
   RecordTypeEnum,
   RecordTypeEnum$inboundSchema,
 } from "./record-type-enum.js";
+import {
+  StageStateSummary,
+  StageStateSummary$inboundSchema,
+} from "./stage-state-summary.js";
+
+/**
+ * How this record's own permissions combine with its ancestors'.
+ *
+ * @remarks
+ * OPEN: an accessible parent, or a direct grant, is enough.
+ * STRICT: every ancestor up to the connector must be accessible too.
+ * RESTRICTED: strict, and a grant on the record itself is required.
+ * Absent on records written before the field existed; read as OPEN.
+ */
+export const AccessRule = {
+  Open: "OPEN",
+  Strict: "STRICT",
+  Restricted: "RESTRICTED",
+} as const;
+/**
+ * How this record's own permissions combine with its ancestors'.
+ *
+ * @remarks
+ * OPEN: an accessible parent, or a direct grant, is enough.
+ * STRICT: every ancestor up to the connector must be accessible too.
+ * RESTRICTED: strict, and a grant on the record itself is required.
+ * Absent on records written before the field existed; read as OPEN.
+ */
+export type AccessRule = OpenEnum<typeof AccessRule>;
 
 export type GetRecordByIdResponseSchemaFileRecord = {
   id: string;
@@ -33,8 +62,25 @@ export type GetRecordByIdResponseSchemaFileRecord = {
   mimeType?: string | null | undefined;
   sizeInBytes?: number | null | undefined;
   isFile: boolean;
+  /**
+   * Where the file opens in its source. Kept for a connected
+   *
+   * @remarks
+   * app with a limit too; it can contain the names of the
+   * folders above the file.
+   */
   webUrl?: string | null | undefined;
+  /**
+   * The file's path in its source, which names every folder
+   *
+   * @remarks
+   * above it. `null` for a connected app whose limit does not
+   * cover the file's whole app or collection.
+   */
   path?: string | null | undefined;
+  /**
+   * The same path on local storage; `null` in the same cases as `path`.
+   */
   localFsRelativePath?: string | null | undefined;
 };
 
@@ -61,6 +107,59 @@ export type GetRecordByIdResponseSchemaRecord = {
    * connectors that do not set it.
    */
   rootRecordGroupId?: string | null | undefined;
+  /**
+   * How this record's own permissions combine with its ancestors'.
+   *
+   * @remarks
+   * OPEN: an accessible parent, or a direct grant, is enough.
+   * STRICT: every ancestor up to the connector must be accessible too.
+   * RESTRICTED: strict, and a grant on the record itself is required.
+   * Absent on records written before the field existed; read as OPEN.
+   */
+  accessRule?: AccessRule | undefined;
+  /**
+   * User id of whoever uploaded the file to the knowledge base.
+   *
+   * @remarks
+   * Absent for connector records and for files uploaded before the
+   * field existed.
+   */
+  uploadedBy?: string | null | undefined;
+  /**
+   * Knowledge-base uploads only: what set sourceCreatedAtTimestamp
+   *
+   * @remarks
+   * and sourceLastModifiedTimestamp. `upload`: the upload time (the
+   * file came without a last-modified time); `file`: the file's
+   * last-modified time sent with the upload; `content`: dates the
+   * document states in its header (CONTENT_DOCUMENT_DATES), stored at
+   * midnight UTC of each stated day. Absent for connector records,
+   * whose timestamps are the source system's, and for files uploaded
+   * before the field existed.
+   */
+  sourceTimestampOrigin?: string | undefined;
+  /**
+   * With sourceTimestampOrigin `content`: the
+   *
+   * @remarks
+   * sourceCreatedAtTimestamp the upload had set, kept so it can be
+   * restored.
+   */
+  uploadSourceCreatedAtTimestamp?: number | null | undefined;
+  /**
+   * With sourceTimestampOrigin `content`: the
+   *
+   * @remarks
+   * sourceLastModifiedTimestamp the upload had set.
+   */
+  uploadSourceLastModifiedTimestamp?: number | null | undefined;
+  /**
+   * With sourceTimestampOrigin `content`: what had set the upload's
+   *
+   * @remarks
+   * values (`upload` or `file`).
+   */
+  uploadSourceTimestampOrigin?: string | undefined;
   connectorId: string;
   /**
    * Name of the source connector. Mirrors the values of the backend
@@ -119,21 +218,97 @@ export type GetRecordByIdResponseSchemaRecord = {
   lastSyncTimestamp?: number | null | undefined;
   lastIndexTimestamp?: number | undefined;
   lastExtractionTimestamp?: number | undefined;
+  /**
+   * Where named-entity extraction (people, organizations, dates and
+   *
+   * @remarks
+   * other values found in the content) stands for this record:
+   * NOT_STARTED, IN_PROGRESS, COMPLETED, PARTIAL, FAILED or SKIPPED.
+   * Absent when no status has been stored on the record; read that
+   * as not extracted. New values may be added, so treat an unknown
+   * one as not finished.
+   */
+  entityExtractionStatus?: string | undefined;
+  /**
+   * When named-entity extraction last ran on the record (epoch milliseconds). Absent until it is written.
+   */
+  lastEntityExtractionTimestamp?: number | null | undefined;
+  /**
+   * How the named entities were found: `deterministic` (pattern
+   *
+   * @remarks
+   * recognizers only), `single_call` (one model call) or `agent`.
+   * Absent until it is written.
+   */
+  entityExtractionStrategy?: string | null | undefined;
+  /**
+   * Version of the named-entity extractor that produced the record's entities, for example `ner-1`. Absent until it is written.
+   */
+  entityExtractorVersion?: string | null | undefined;
+  /**
+   * Credentials (keys, tokens, passwords) removed from a code repository file before it was indexed. Present once the file has been scanned, 0 when nothing was found.
+   */
+  secretsRedacted?: number | undefined;
   processingStartedAt?: number | null | undefined;
   queuedAtTimestamp?: number | null | undefined;
+  /**
+   * Set while the record is QUEUED because its source rate-limited
+   *
+   * @remarks
+   * the content fetch: the earliest time (epoch milliseconds)
+   * indexing reads it again. `reason` then says when indexing
+   * resumes. Null or absent once the source serves the record or
+   * indexing ends; a value on a record that is no longer QUEUED is
+   * left over from an earlier wait and means nothing.
+   */
+  retryNotBefore?: number | null | undefined;
   parsingStatus?: string | null | undefined;
   indexingStatus: string;
+  /**
+   * True after the record is indexed (every COMPLETED write, including the upgrade
+   *
+   * @remarks
+   * backfill for records indexed earlier), and false once it is marked EMPTY. A later
+   * re-queue or a failed re-index leaves it as it is, so search keeps returning the
+   * previous indexed copy until the new version is indexed. Absent until the first
+   * COMPLETED or EMPTY write sets it.
+   */
+  hasIndexedCopy?: boolean | undefined;
   extractionStatus: string;
   reason?: string | null | undefined;
   isDeleted: boolean;
   isArchived: boolean;
   deletedByUserId?: string | null | undefined;
+  /**
+   * When a restore last brought this knowledge-base file back from
+   *
+   * @remarks
+   * the trash and queued it to be indexed again (epoch
+   * milliseconds). Absent on records never restored, on folders, and
+   * on files restored while their indexing was turned off.
+   */
+  restoredAtTimestamp?: number | null | undefined;
   isDirty?: boolean | null | undefined;
   isVLMOcrProcessed: boolean | null;
   mimeType: string | null;
   sizeInBytes: number | null;
   md5Checksum?: string | null | undefined;
   virtualRecordId?: string | null | undefined;
+  /**
+   * Revision of the record's content, 16 lowercase hex characters:
+   *
+   * @remarks
+   * the start of the SHA-256 of the content the indexer received
+   * for the record. If a record still has no revision stored when
+   * its vectors are written, a digest of its parsed blocks is
+   * stored instead.
+   * Identical content gives the same value, and a copy whose content
+   * matches another record carries that record's value.
+   * `stageStates` describes this revision. Set when indexing
+   * starts; absent on records not indexed since pipeline stages
+   * were introduced.
+   */
+  contentRev?: string | null | undefined;
   summaryDocumentId?: string | null | undefined;
   storageDocumentId?: string | null | undefined;
   webUrl: string | null;
@@ -225,14 +400,37 @@ export type GetRecordByIdResponseSchemaPermission = {
 
 /**
  * Response returned by GET /knowledgeBase/record/{recordId}.
+ *
+ * @remarks
+ *
+ * For a connected app with a limit, a collection or folder the limit
+ * leaves out is not named: `knowledgeBase` and `folder` are `null` for
+ * it, as are the record's own `recordGroupId` (with `externalGroupId`),
+ * `rootRecordGroupId` and `parentNodeId` (with `externalParentId`).
+ * `externalParentId` is also `null` when there is no `parentNodeId` to
+ * check it by, unless the limit covers the record's whole app.
+ * `fileRecord.path` is `null` unless the limit covers the whole app or
+ * collection; `webUrl` is kept.
  */
 export type GetRecordByIdResponseSchema = {
   record: GetRecordByIdResponseSchemaRecord;
+  /**
+   * Per-stage pipeline status for the record's current content revision.
+   *
+   * @remarks
+   * Empty for records indexed before pipeline stages existed. The
+   * `classify` stage's status is mirrored on `record.extractionStatus`.
+   */
+  stageStates?: Array<StageStateSummary> | undefined;
   knowledgeBase: GetRecordByIdResponseSchemaKnowledgeBase | null;
   folder: GetRecordByIdResponseSchemaFolder | null;
   metadata: GetRecordByIdResponseSchemaMetadata;
   permissions: Array<GetRecordByIdResponseSchemaPermission>;
 };
+
+/** @internal */
+export const AccessRule$inboundSchema: z.ZodMiniType<AccessRule, unknown> =
+  openEnums.inboundSchema(AccessRule);
 
 /** @internal */
 export const GetRecordByIdResponseSchemaFileRecord$inboundSchema: z.ZodMiniType<
@@ -315,6 +513,12 @@ export const GetRecordByIdResponseSchemaRecord$inboundSchema: z.ZodMiniType<
   externalRevisionId: z.optional(z.nullable(types.string())),
   recordGroupId: z.optional(z.nullable(types.string())),
   rootRecordGroupId: z.optional(z.nullable(types.string())),
+  accessRule: types.optional(AccessRule$inboundSchema),
+  uploadedBy: z.optional(z.nullable(types.string())),
+  sourceTimestampOrigin: types.optional(types.string()),
+  uploadSourceCreatedAtTimestamp: z.optional(z.nullable(types.number())),
+  uploadSourceLastModifiedTimestamp: z.optional(z.nullable(types.number())),
+  uploadSourceTimestampOrigin: types.optional(types.string()),
   connectorId: types.string(),
   connectorName: ConnectorNameEnum$inboundSchema,
   recordType: RecordTypeEnum$inboundSchema,
@@ -328,21 +532,30 @@ export const GetRecordByIdResponseSchemaRecord$inboundSchema: z.ZodMiniType<
   lastSyncTimestamp: z.optional(z.nullable(types.number())),
   lastIndexTimestamp: types.optional(types.number()),
   lastExtractionTimestamp: types.optional(types.number()),
+  entityExtractionStatus: types.optional(types.string()),
+  lastEntityExtractionTimestamp: z.optional(z.nullable(types.number())),
+  entityExtractionStrategy: z.optional(z.nullable(types.string())),
+  entityExtractorVersion: z.optional(z.nullable(types.string())),
+  secretsRedacted: types.optional(types.number()),
   processingStartedAt: z.optional(z.nullable(types.number())),
   queuedAtTimestamp: z.optional(z.nullable(types.number())),
+  retryNotBefore: z.optional(z.nullable(types.number())),
   parsingStatus: z.optional(z.nullable(types.string())),
   indexingStatus: types.string(),
+  hasIndexedCopy: types.optional(types.boolean()),
   extractionStatus: types.string(),
   reason: z.optional(z.nullable(types.string())),
   isDeleted: types.boolean(),
   isArchived: types.boolean(),
   deletedByUserId: z.optional(z.nullable(types.string())),
+  restoredAtTimestamp: z.optional(z.nullable(types.number())),
   isDirty: z.optional(z.nullable(types.boolean())),
   isVLMOcrProcessed: types.nullable(types.boolean()),
   mimeType: types.nullable(types.string()),
   sizeInBytes: types.nullable(types.number()),
   md5Checksum: z.optional(z.nullable(types.string())),
   virtualRecordId: z.optional(z.nullable(types.string())),
+  contentRev: z.optional(z.nullable(types.string())),
   summaryDocumentId: z.optional(z.nullable(types.string())),
   storageDocumentId: z.optional(z.nullable(types.string())),
   webUrl: types.nullable(types.string()),
@@ -602,6 +815,7 @@ export const GetRecordByIdResponseSchema$inboundSchema: z.ZodMiniType<
   unknown
 > = z.object({
   record: z.lazy(() => GetRecordByIdResponseSchemaRecord$inboundSchema),
+  stageStates: types.optional(z.array(StageStateSummary$inboundSchema)),
   knowledgeBase: types.nullable(
     z.lazy(() => GetRecordByIdResponseSchemaKnowledgeBase$inboundSchema),
   ),

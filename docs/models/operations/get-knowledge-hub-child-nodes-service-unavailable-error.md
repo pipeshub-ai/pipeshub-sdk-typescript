@@ -1,0 +1,21 @@
+# GetKnowledgeHubChildNodesServiceUnavailableError
+
+## Example Usage
+
+```typescript
+import { GetKnowledgeHubChildNodesServiceUnavailableError } from "@pipeshub-ai/sdk/models/operations";
+
+let value: GetKnowledgeHubChildNodesServiceUnavailableError = {
+  code: "HTTP_SERVICE_UNAVAILABLE",
+  message:
+    "This part of PipesHub is briefly unavailable. Please try again in 5 seconds.",
+};
+```
+
+## Fields
+
+| Field                                                                                                                                           | Type                                                                                                                                            | Required                                                                                                                                        | Description                                                                                                                                     | Example                                                                                                                                         |
+| ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `code`                                                                                                                                          | [operations.GetKnowledgeHubChildNodesServiceUnavailableCode](../../models/operations/get-knowledge-hub-child-nodes-service-unavailable-code.md) | :heavy_check_mark:                                                                                                                              | N/A                                                                                                                                             | HTTP_SERVICE_UNAVAILABLE                                                                                                                        |
+| `message`                                                                                                                                       | *string*                                                                                                                                        | :heavy_check_mark:                                                                                                                              | N/A                                                                                                                                             | This part of PipesHub is briefly unavailable. Please try again in 5 seconds.                                                                    |
+| `requestId`                                                                                                                                     | *string*                                                                                                                                        | :heavy_minus_sign:                                                                                                                              | N/A                                                                                                                                             |                                                                                                                                                 |

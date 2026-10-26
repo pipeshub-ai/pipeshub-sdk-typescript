@@ -100,7 +100,7 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 400, 401, 404               | application/json            |
+| errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
 | errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
@@ -115,16 +115,13 @@ This allows admins to configure single or multi-factor authentication.
 - No duplicate methods within the same step
 - No method can appear in multiple steps
 - Each step must have at least one allowed method
-- `samlSso` is only allowed in a single-step policy; it can't be combined with other steps
+- `samlSso` and `oauth` were removed in 1.0 and are refused; use `microsoft` in place of `azureAd`
 
 **Available Methods:**
 - `password`: Email/password authentication
 - `otp`: One-time password via email
 - `google`: Google OAuth 2.0
 - `microsoft`: Microsoft OAuth 2.0
-- `azureAd`: Azure Active Directory
-- `samlSso`: SAML 2.0 Single Sign-On
-- `oauth`: Generic OAuth 2.0 provider
 
 **Example - Single Factor (Password or Google):**
 
@@ -169,7 +166,7 @@ async function run() {
         order: 195644,
         allowedMethods: [
           {
-            type: "samlSso",
+            type: "google",
           },
         ],
       },
@@ -205,7 +202,7 @@ async function run() {
         order: 195644,
         allowedMethods: [
           {
-            type: "samlSso",
+            type: "google",
           },
         ],
       },
@@ -239,7 +236,7 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 400, 401, 404               | application/json            |
+| errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
 | errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
@@ -323,6 +320,6 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 400, 401, 404               | application/json            |
+| errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
 | errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |

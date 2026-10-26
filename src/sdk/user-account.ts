@@ -68,10 +68,9 @@ export class UserAccount extends ClientSDK {
    * - `otp`: `{ "credentials": { "otp": "123456" } }` (6-digit code, valid for 10 minutes)
    * - `google`: `{ "credentials": "google-id-token-string" }`
    * - `microsoft`: `{ "credentials": { "accessToken": "...", "idToken": "..." } }`
-   * - `azureAd`: `{ "credentials": { "accessToken": "...", "idToken": "..." } }`
-   * - `oauth`: `{ "credentials": { "accessToken": "...", "idToken": "..." } }`
-   * - `samlSso`: not accepted here; this endpoint answers `400`. SAML sign-in runs as a browser
-   *   redirect: send the browser to `/saml/signIn` instead
+   *
+   * SAML (`samlSso`), generic OAuth (`oauth`) and Azure AD (`azureAd`) sign-in were removed in 1.0;
+   * this endpoint answers `400` for them. Azure AD accounts sign in with `microsoft`.
    *
    * **Multi-Step Response:**
    *

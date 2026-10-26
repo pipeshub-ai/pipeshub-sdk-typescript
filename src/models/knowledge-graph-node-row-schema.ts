@@ -20,7 +20,7 @@ export type KnowledgeGraphNodeRowSchema = {
   id: string;
   name: string;
   /**
-   * One of `recordGroup`, `folder`, `record`. Listings never contain `app` nodes.
+   * One of `recordGroup`, `folder`, `record`, or `app`. A listing holds `app` nodes only at the root of a connected app whose limit names spaces, folders or files as well as whole sources: there it lists those sources.
    */
   nodeType: string;
   subType: string | null;

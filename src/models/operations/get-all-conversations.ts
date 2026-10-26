@@ -15,7 +15,8 @@ import * as models from "../index.js";
  * `owned` — owner list (`userId` filter only).
  *
  * @remarks
- * `shared` — explicit share grant list (`isShared` + `sharedWith`).
+ * `shared` — explicit share grant list (`isShared` + `sharedWith`). Includes agent
+ * conversations shared with the caller; those rows carry `agentKey`.
  * Defaults to `owned` when omitted.
  */
 export const QueryParamSource = {
@@ -26,7 +27,8 @@ export const QueryParamSource = {
  * `owned` — owner list (`userId` filter only).
  *
  * @remarks
- * `shared` — explicit share grant list (`isShared` + `sharedWith`).
+ * `shared` — explicit share grant list (`isShared` + `sharedWith`). Includes agent
+ * conversations shared with the caller; those rows carry `agentKey`.
  * Defaults to `owned` when omitted.
  */
 export type QueryParamSource = ClosedEnum<typeof QueryParamSource>;
@@ -65,7 +67,8 @@ export type GetAllConversationsRequest = {
    * `owned` — owner list (`userId` filter only).
    *
    * @remarks
-   * `shared` — explicit share grant list (`isShared` + `sharedWith`).
+   * `shared` — explicit share grant list (`isShared` + `sharedWith`). Includes agent
+   * conversations shared with the caller; those rows carry `agentKey`.
    * Defaults to `owned` when omitted.
    */
   source?: QueryParamSource | undefined;

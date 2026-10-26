@@ -15,5 +15,5 @@ let value: AgentCreateToolsetName = "lumos";
 ## Values
 
 ```typescript
-"calendar" | "clickup" | "confluence" | "confluencedatacenter" | "drive" | "github" | "gmail" | "jira" | "jiradatacenter" | "lumos" | "mariadb" | "onedrive" | "outlook" | "redshift" | "salesforce" | "sharepoint" | "slack" | "teams" | "zoom" | Unrecognized<string>
+"calendar" | "clickup" | "confluence" | "confluencedatacenter" | "docs" | "drive" | "github" | "gmail" | "jira" | "jiradatacenter" | "lumos" | "mariadb" | "onedrive" | "outlook" | "redshift" | "salesforce" | "sharepoint" | "sheets" | "slack" | "teams" | "zoom" | Unrecognized<string>
 ```

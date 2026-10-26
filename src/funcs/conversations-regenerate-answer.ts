@@ -46,6 +46,12 @@ import { Result } from "../types/fp.js";
  * - Only the *last* message of the conversation can be regenerated.
  * - The target message must be of type `bot_response`.
  *
+ * **Editing the question:**
+ *
+ * Send `query` to re-ask the last question with new wording. The answer
+ * is regenerated for the edited question, which replaces the stored one
+ * once the new answer is saved.
+ *
  * **Use Cases:**
  *
  * - Response was incomplete or unclear

@@ -14,8 +14,12 @@ Knowledge base management operations
 * [getRecordById](#getrecordbyid) - Get record by ID
 * [updateRecord](#updaterecord) - Update record
 * [deleteRecord](#deleterecord) - Delete record
+* [restoreRecord](#restorerecord) - Restore a deleted record
+* [restoreRecords](#restorerecords) - Restore several deleted records
+* [listTrash](#listtrash) - List a collection's recently deleted items
 * [streamRecordBuffer](#streamrecordbuffer) - Stream record content
 * [createFolder](#createfolder) - Create folder
+* [createSubfolder](#createsubfolder) - Create subfolder
 * [updateFolder](#updatefolder) - Update folder
 * [deleteFolder](#deletefolder) - Delete folder
 * [uploadRecords](#uploadrecords) - Upload files to knowledge base or folder
@@ -621,6 +625,8 @@ Include a new file in the request to replace the existing content. The file exte
 - Increments version if file content changed
 - Triggers re-indexing for content changes
 
+**OAuth scopes:** `kb:write`, plus `kb:read`: replacing the file first reads the record and its knowledge base with the caller's token.
+
 
 ### Example Usage
 
@@ -699,7 +705,7 @@ run();
 
 ## deleteRecord
 
-Permanently delete a record from the knowledge base.
+Delete a record from the knowledge base.
 
 **Required permission:**
 
@@ -711,7 +717,12 @@ WRITER or higher
 - Associated storage file
 - Indexed content and embeddings
 
-**Warning:** This action is irreversible.
+**Trash:** With "Move Deleted Records to the Trash" on in Labs, the record
+goes to the trash instead: it disappears from search, chat and lists at once,
+its embeddings are removed, and the record and its file stay until the scheduled
+purge. The response then carries `softDeleted: true` and the `batchId`, and the
+record can be brought back with `POST /knowledgeBase/record/{recordId}/restore`.
+With the setting off, the delete is immediate and cannot be undone.
 
 
 ### Example Usage
@@ -780,6 +791,294 @@ run();
 ### Response
 
 **Promise\<[models.DeleteRecordResponseSchema](../../models/delete-record-response-schema.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
+| errors.ErrorResponse        | 500, 503                    | application/json            |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
+## restoreRecord
+
+Bring a record back from the trash, together with everything deleted in the
+same action: a folder comes back with its contents, a file with its
+attachments, a multi-select delete with every item it removed.
+
+Needs "Move Deleted Records to the Trash" on in Labs.
+
+**Required permission:** the role the delete needed. A single file needs
+OWNER, WRITER or FILEORGANIZER on its collection; a folder or several items
+need OWNER or WRITER.
+
+**Names:** an item whose name another item next to it now uses comes back
+as "name (restored)" (a file keeps its extension: "report (restored).pdf").
+
+**Search:** restored files are indexed again, so they return to search and
+chat once indexing finishes. `reindexPending` lists any that could not be
+queued; reindex those by hand. A file that is back but whose indexing never
+started is queued again when it is restored again, and the indexing service
+queues it on its own after about an hour.
+
+A record that is not in the trash answers 200 with nothing restored.
+
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="restoreRecord" method="post" path="/knowledgeBase/record/{recordId}/restore" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.knowledgeBase.restoreRecord({
+    recordId: "<id>",
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { knowledgeBaseRestoreRecord } from "@pipeshub-ai/sdk/funcs/knowledge-base-restore-record.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const res = await knowledgeBaseRestoreRecord(pipeshub, {
+    recordId: "<id>",
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("knowledgeBaseRestoreRecord failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.RestoreRecordRequest](../../models/operations/restore-record-request.md)                                                                                           | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[models.RestoreRecordResponseSchema](../../models/restore-record-response-schema.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 401, 403, 404, 409          | application/json            |
+| errors.ErrorResponse        | 500, 503                    | application/json            |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
+## restoreRecords
+
+Restore up to 100 records from the trash. Each id is restored as
+`POST /knowledgeBase/record/{recordId}/restore` restores it, with everything
+deleted along with it; ids from one delete are restored once. Every id gets its
+own outcome in `results`, so one refusal does not hold the others back, and the
+answer is 200 whatever the outcomes.
+
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="restoreRecords" method="post" path="/knowledgeBase/records/restore" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.knowledgeBase.restoreRecords({
+    recordIds: [
+      "<value 1>",
+      "<value 2>",
+    ],
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { knowledgeBaseRestoreRecords } from "@pipeshub-ai/sdk/funcs/knowledge-base-restore-records.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const res = await knowledgeBaseRestoreRecords(pipeshub, {
+    recordIds: [
+      "<value 1>",
+      "<value 2>",
+    ],
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("knowledgeBaseRestoreRecords failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [models.RestoreRecordsRequestBody](../../models/restore-records-request-body.md)                                                                                               | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[models.RestoreRecordsResponseSchema](../../models/restore-records-response-schema.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 401, 403               | application/json            |
+| errors.ErrorResponse        | 500, 503                    | application/json            |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
+## listTrash
+
+One page of what was deleted from a collection and can still be restored,
+newest first. Each item is what one delete removed, as a restore brings it back
+whole: a folder deleted with its contents is one item, and so is a multi-select
+delete (`rootCount` items selected, some named in `otherRootNames`). `itemCount`
+says how many records it holds.
+Restore an item with `POST /knowledgeBase/record/{recordId}/restore`, using its `id`.
+
+Needs "Move Deleted Records to the Trash" on in Labs.
+
+**Who sees what:** the list holds what the caller may restore. OWNER and
+WRITER see every item; FILEORGANIZER sees single files only; other roles are
+refused. The workspace and user always come from the sign-in.
+
+**Removed for good:** the scheduled cleanup may remove an item from
+`removableAfterTimestamp` on (at least 14 days after it was deleted by
+default; it runs every 14 days, so an item stays 14 to 28 days). It is
+absent when the retention settings can't be read.
+
+An item whose folder is also in the trash (`parentInTrash`) can only be
+restored after that folder.
+
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="listTrash" method="get" path="/knowledgeBase/{kbId}/trash" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.knowledgeBase.listTrash({
+    kbId: "<id>",
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { knowledgeBaseListTrash } from "@pipeshub-ai/sdk/funcs/knowledge-base-list-trash.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const res = await knowledgeBaseListTrash(pipeshub, {
+    kbId: "<id>",
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("knowledgeBaseListTrash failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.ListTrashRequest](../../models/operations/list-trash-request.md)                                                                                                   | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[models.ListTrashResponseSchema](../../models/list-trash-response-schema.md)\>**
 
 ### Errors
 
@@ -975,6 +1274,111 @@ run();
 | Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `request`                                                                                                                                                                      | [operations.CreateFolderRequest](../../models/operations/create-folder-request.md)                                                                                             | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[models.FolderCreateResponseSchema](../../models/folder-create-response-schema.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 401, 403, 404, 409     | application/json            |
+| errors.ErrorResponse        | 500, 503                    | application/json            |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
+## createSubfolder
+
+Create a nested subfolder inside an existing parent folder.
+
+**Required permission:** WRITER or higher
+
+**Folder features:**
+
+- Organize records hierarchically
+- Support nested subfolders (unlimited depth)
+- Inherit parent KB permissions
+
+**Naming rules:**
+
+- 1–255 characters
+- XSS protection applied
+- Spaces and special characters allowed
+- Duplicate names rejected within the same parent (`409`)
+
+**Response:** Returns `id` and `name` for the created folder.
+
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="createSubfolder" method="post" path="/knowledgeBase/{kbId}/folder/{folderId}/subfolder" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.knowledgeBase.createSubfolder({
+    kbId: "<id>",
+    folderId: "<id>",
+    body: {
+      folderName: "<value>",
+    },
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { knowledgeBaseCreateSubfolder } from "@pipeshub-ai/sdk/funcs/knowledge-base-create-subfolder.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const res = await knowledgeBaseCreateSubfolder(pipeshub, {
+    kbId: "<id>",
+    folderId: "<id>",
+    body: {
+      folderName: "<value>",
+    },
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("knowledgeBaseCreateSubfolder failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.CreateSubfolderRequest](../../models/operations/create-subfolder-request.md)                                                                                       | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
 | `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
 | `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
 | `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
@@ -1288,11 +1692,11 @@ run();
 
 ### Errors
 
-| Error Type                   | Status Code                  | Content Type                 |
-| ---------------------------- | ---------------------------- | ---------------------------- |
-| errors.ErrorResponse         | 400, 401, 403, 404, 413, 429 | application/json             |
-| errors.ErrorResponse         | 500                          | application/json             |
-| errors.PipeshubDefaultError  | 4XX, 5XX                     | \*/\*                        |
+| Error Type                        | Status Code                       | Content Type                      |
+| --------------------------------- | --------------------------------- | --------------------------------- |
+| errors.ErrorResponse              | 400, 401, 403, 404, 409, 413, 429 | application/json                  |
+| errors.ErrorResponse              | 500                               | application/json                  |
+| errors.PipeshubDefaultError       | 4XX, 5XX                          | \*/\*                             |
 
 ## getUploadLimits
 
@@ -1701,7 +2105,7 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
+| errors.ErrorResponse        | 400, 401, 403, 404, 409     | application/json            |
 | errors.ErrorResponse        | 500, 503                    | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
@@ -1742,6 +2146,29 @@ Use the `include` parameter to request additional sections:
 - `counts` — adds a `counts` summary broken down by node type
 - `breadcrumbs` — adds the breadcrumb trail (empty at root level)
 - `permissions` — adds the caller's permission flags
+
+**A connected app with a limit**
+
+A token that may see only some sources pages and counts only what
+its limit lets it see:
+- Limited to whole sources (apps or collections) only: the listing
+  and the search cover those, with exact totals and counts.
+- Limited to any spaces, folders or files, alone or beside whole
+  sources: the listing returns each whole source, space (record
+  group), folder and file the limit names, one item each, to open
+  by its `id`. `totalItems` counts those items, not what is inside
+  them. A search reads
+  forward only (`prevCursor` is always null), and takes a `page`
+  number up to 5; for later pages, send `nextCursor`. Its `totalItems` counts
+  the matches found so far and can grow from page to page; it is
+  final once `hasNext` is false. `counts` is returned only when the
+  whole result fits in the first page read, and is `null` otherwise.
+- An item can sit in a folder the limit leaves out, as a file the
+  limit names does. Its `parentId` and `parent` are then `null`: the
+  item is returned, and the folder above it is not named.
+- A `nextCursor` or `prevCursor` belongs to the limit it was read
+  under. A token with a different limit that sends it gets a `400`;
+  start that listing again without a cursor.
 
 **Access control**
 
@@ -1835,17 +2262,19 @@ run();
 
 ### Response
 
-**Promise\<[models.KnowledgeHubNodesResponse](../../models/knowledge-hub-nodes-response.md)\>**
+**Promise\<[operations.GetKnowledgeHubRootNodesResponse](../../models/operations/get-knowledge-hub-root-nodes-response.md)\>**
 
 ### Errors
 
-| Error Type                                         | Status Code                                        | Content Type                                       |
-| -------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------- |
-| errors.GetKnowledgeHubRootNodesBadRequestError     | 400                                                | application/json                                   |
-| errors.GetKnowledgeHubRootNodesUnauthorizedError   | 401                                                | application/json                                   |
-| errors.GetKnowledgeHubRootNodesForbiddenError      | 403                                                | application/json                                   |
-| errors.GetKnowledgeHubRootNodesInternalServerError | 500                                                | application/json                                   |
-| errors.PipeshubDefaultError                        | 4XX, 5XX                                           | \*/\*                                              |
+| Error Type                                              | Status Code                                             | Content Type                                            |
+| ------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------- |
+| errors.GetKnowledgeHubRootNodesBadRequestError          | 400                                                     | application/json                                        |
+| errors.GetKnowledgeHubRootNodesUnauthorizedError        | 401                                                     | application/json                                        |
+| errors.GetKnowledgeHubRootNodesForbiddenError           | 403                                                     | application/json                                        |
+| errors.GetKnowledgeHubRootNodesUnprocessableEntityError | 422                                                     | application/json                                        |
+| errors.GetKnowledgeHubRootNodesInternalServerError      | 500                                                     | application/json                                        |
+| errors.GetKnowledgeHubRootNodesServiceUnavailableError  | 503                                                     | application/json                                        |
+| errors.PipeshubDefaultError                             | 4XX, 5XX                                                | \*/\*                                                   |
 
 ## ~~getKnowledgeHubChildNodes~~
 
@@ -1876,8 +2305,9 @@ provided, the search spans all descendants of the parent node.
 
 When `include=breadcrumbs` is set, the response contains a
 `breadcrumbs` array tracing the path from the root to the current
-node. The `currentNode` and `parentNode` objects are always populated
-for non-root requests.
+node. The `currentNode` object is always populated for non-root
+requests. `parentNode` is too, except at the top of a source and for
+a connected app whose limit leaves that parent out: it is `null` then.
 
 **Access control**
 
@@ -1975,15 +2405,17 @@ run();
 
 ### Response
 
-**Promise\<[models.KnowledgeHubNodesResponse](../../models/knowledge-hub-nodes-response.md)\>**
+**Promise\<[operations.GetKnowledgeHubChildNodesResponse](../../models/operations/get-knowledge-hub-child-nodes-response.md)\>**
 
 ### Errors
 
-| Error Type                                          | Status Code                                         | Content Type                                        |
-| --------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------- |
-| errors.GetKnowledgeHubChildNodesBadRequestError     | 400                                                 | application/json                                    |
-| errors.GetKnowledgeHubChildNodesUnauthorizedError   | 401                                                 | application/json                                    |
-| errors.GetKnowledgeHubChildNodesForbiddenError      | 403                                                 | application/json                                    |
-| errors.GetKnowledgeHubChildNodesNotFoundError       | 404                                                 | application/json                                    |
-| errors.GetKnowledgeHubChildNodesInternalServerError | 500                                                 | application/json                                    |
-| errors.PipeshubDefaultError                         | 4XX, 5XX                                            | \*/\*                                               |
+| Error Type                                               | Status Code                                              | Content Type                                             |
+| -------------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------- |
+| errors.GetKnowledgeHubChildNodesBadRequestError          | 400                                                      | application/json                                         |
+| errors.GetKnowledgeHubChildNodesUnauthorizedError        | 401                                                      | application/json                                         |
+| errors.GetKnowledgeHubChildNodesForbiddenError           | 403                                                      | application/json                                         |
+| errors.GetKnowledgeHubChildNodesNotFoundError            | 404                                                      | application/json                                         |
+| errors.GetKnowledgeHubChildNodesUnprocessableEntityError | 422                                                      | application/json                                         |
+| errors.GetKnowledgeHubChildNodesInternalServerError      | 500                                                      | application/json                                         |
+| errors.GetKnowledgeHubChildNodesServiceUnavailableError  | 503                                                      | application/json                                         |
+| errors.PipeshubDefaultError                              | 4XX, 5XX                                                 | \*/\*                                                    |

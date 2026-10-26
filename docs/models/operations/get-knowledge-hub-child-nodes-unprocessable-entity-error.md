@@ -1,0 +1,21 @@
+# GetKnowledgeHubChildNodesUnprocessableEntityError
+
+## Example Usage
+
+```typescript
+import { GetKnowledgeHubChildNodesUnprocessableEntityError } from "@pipeshub-ai/sdk/models/operations";
+
+let value: GetKnowledgeHubChildNodesUnprocessableEntityError = {
+  code: "HTTP_UNPROCESSABLE_ENTITY",
+  message:
+    "This view has too many records to list at once. Open a folder, or narrow by search.",
+};
+```
+
+## Fields
+
+| Field                                                                                                                                             | Type                                                                                                                                              | Required                                                                                                                                          | Description                                                                                                                                       | Example                                                                                                                                           |
+| ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `code`                                                                                                                                            | [operations.GetKnowledgeHubChildNodesUnprocessableEntityCode](../../models/operations/get-knowledge-hub-child-nodes-unprocessable-entity-code.md) | :heavy_check_mark:                                                                                                                                | N/A                                                                                                                                               | HTTP_UNPROCESSABLE_ENTITY                                                                                                                         |
+| `message`                                                                                                                                         | *string*                                                                                                                                          | :heavy_check_mark:                                                                                                                                | N/A                                                                                                                                               | This view has too many records to list at once. Open a folder, or narrow by search.                                                               |
+| `requestId`                                                                                                                                       | *string*                                                                                                                                          | :heavy_minus_sign:                                                                                                                                | N/A                                                                                                                                               |                                                                                                                                                   |

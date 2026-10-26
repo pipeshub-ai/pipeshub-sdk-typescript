@@ -5,6 +5,9 @@ not the raw `AgentConversation` document shape: fields like `agentKey`,
 `userId`, `orgId`, `conversationSource`, and root-level `messages`
 metadata outside the selected slice are omitted.
 
+`sharedWith` is the owner's list of recipients, so it is present only for the
+owner. A recipient gets `sharedBy` (who shared the chat) instead.
+
 
 ## Example Usage
 
@@ -15,20 +18,19 @@ let value: AgentConversationDetail = {
   id: "<value>",
   createdAt: new Date("2024-08-11T15:04:12.874Z"),
   isShared: true,
-  sharedWith: [
+  messages: [
     {},
   ],
-  messages: [],
   pagination: {
-    page: 773583,
-    limit: 794657,
-    totalCount: 349869,
-    totalPages: 320693,
+    page: 728517,
+    limit: 773583,
+    totalCount: 794657,
+    totalPages: 349869,
     hasNextPage: true,
     hasPrevPage: true,
     messageRange: {
-      start: 647137,
-      end: 943674,
+      start: 455264,
+      end: 647137,
     },
   },
   access: {},
@@ -44,9 +46,10 @@ let value: AgentConversationDetail = {
 | `initiator`                                                                                                                                                                                           | *string*                                                                                                                                                                                              | :heavy_minus_sign:                                                                                                                                                                                    | N/A                                                                                                                                                                                                   |
 | `createdAt`                                                                                                                                                                                           | [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)                                                                                                         | :heavy_check_mark:                                                                                                                                                                                    | N/A                                                                                                                                                                                                   |
 | `isShared`                                                                                                                                                                                            | *boolean*                                                                                                                                                                                             | :heavy_check_mark:                                                                                                                                                                                    | N/A                                                                                                                                                                                                   |
-| `sharedWith`                                                                                                                                                                                          | [models.AgentConversationDetailSharedWith](../models/agent-conversation-detail-shared-with.md)[]                                                                                                      | :heavy_check_mark:                                                                                                                                                                                    | N/A                                                                                                                                                                                                   |
+| `sharedWith`                                                                                                                                                                                          | [models.AgentConversationDetailSharedWith](../models/agent-conversation-detail-shared-with.md)[]                                                                                                      | :heavy_minus_sign:                                                                                                                                                                                    | N/A                                                                                                                                                                                                   |
 | `status`                                                                                                                                                                                              | [models.AgentConversationDetailStatus](../models/agent-conversation-detail-status.md)                                                                                                                 | :heavy_minus_sign:                                                                                                                                                                                    | N/A                                                                                                                                                                                                   |
 | `failReason`                                                                                                                                                                                          | *string*                                                                                                                                                                                              | :heavy_minus_sign:                                                                                                                                                                                    | N/A                                                                                                                                                                                                   |
+| `sharedBy`                                                                                                                                                                                            | [models.ConversationSharedBy](../models/conversation-shared-by.md)                                                                                                                                    | :heavy_minus_sign:                                                                                                                                                                                    | Present on conversations the caller received via share. Identifies the<br/>conversation initiator (the only user who can share a chat).<br/>                                                          |
 | `messages`                                                                                                                                                                                            | [models.AgentConversationDetailMessage](../models/agent-conversation-detail-message.md)[]                                                                                                             | :heavy_check_mark:                                                                                                                                                                                    | N/A                                                                                                                                                                                                   |
 | `modelInfo`                                                                                                                                                                                           | [models.ConversationModelInfo](../models/conversation-model-info.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                                                    | AI model configuration recorded against a conversation or message.                                                                                                                                    |
 | `pagination`                                                                                                                                                                                          | [models.AgentConversationDetailPagination](../models/agent-conversation-detail-pagination.md)                                                                                                         | :heavy_check_mark:                                                                                                                                                                                    | Message pagination returned inside the `conversation` object. The<br/>handler paginates backwards from the end of the stored message array,<br/>then sorts the selected page in memory before serialization.<br/> |

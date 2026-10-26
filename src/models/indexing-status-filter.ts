@@ -10,7 +10,9 @@ import { ClosedEnum } from "../types/enums.js";
  *
  * @remarks
  * reindex (record or record-group). Omit `statusFilters` to reindex all
- * descendants regardless of status.
+ * descendants regardless of status. `SKIPPED` only matches a pipeline
+ * stage's status (a stage that did not apply to the record), so it is
+ * useful with a connector reindex that sets `stages`.
  */
 export const IndexingStatusFilter = {
   NotStarted: "NOT_STARTED",
@@ -21,13 +23,16 @@ export const IndexingStatusFilter = {
   FileTypeNotSupported: "FILE_TYPE_NOT_SUPPORTED",
   AutoIndexOff: "AUTO_INDEX_OFF",
   Empty: "EMPTY",
+  Skipped: "SKIPPED",
 } as const;
 /**
  * Indexing status used to filter which records are included in a scoped
  *
  * @remarks
  * reindex (record or record-group). Omit `statusFilters` to reindex all
- * descendants regardless of status.
+ * descendants regardless of status. `SKIPPED` only matches a pipeline
+ * stage's status (a stage that did not apply to the record), so it is
+ * useful with a connector reindex that sets `stages`.
  */
 export type IndexingStatusFilter = ClosedEnum<typeof IndexingStatusFilter>;
 

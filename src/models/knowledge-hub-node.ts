@@ -25,6 +25,43 @@ export const NodeType = {
 export type NodeType = OpenEnum<typeof NodeType>;
 
 /**
+ * Parent node type; opened as `/nodes/{nodeType}/{id}`.
+ */
+export const ParentNodeType = {
+  App: "app",
+  RecordGroup: "recordGroup",
+  Folder: "folder",
+  Record: "record",
+} as const;
+/**
+ * Parent node type; opened as `/nodes/{nodeType}/{id}`.
+ */
+export type ParentNodeType = OpenEnum<typeof ParentNodeType>;
+
+/**
+ * The parent this node is listed under, with what a client needs to
+ *
+ * @remarks
+ * open it and name it; `null` exactly when `parentId` is. It is the
+ * node's placement parent: an ancestor the user cannot open is
+ * replaced, never named.
+ */
+export type Parent = {
+  /**
+   * Parent node ID.
+   */
+  id: string;
+  /**
+   * Parent node type; opened as `/nodes/{nodeType}/{id}`.
+   */
+  nodeType: ParentNodeType;
+  /**
+   * Parent display name.
+   */
+  name?: string | null | undefined;
+};
+
+/**
  * Origin type.
  */
 export const KnowledgeHubNodeOrigin = {
@@ -65,9 +102,22 @@ export type KnowledgeHubNode = {
    */
   nodeType: NodeType;
   /**
-   * Parent node ID, or `null` at the root browse level.
+   * Parent node ID, or `null` at the root browse level. Also `null`
+   *
+   * @remarks
+   * for a connected app whose limit leaves the parent out: the node is
+   * listed, and the folder above it is not named.
    */
   parentId: string | null;
+  /**
+   * The parent this node is listed under, with what a client needs to
+   *
+   * @remarks
+   * open it and name it; `null` exactly when `parentId` is. It is the
+   * node's placement parent: an ancestor the user cannot open is
+   * replaced, never named.
+   */
+  parent?: Parent | null | undefined;
   /**
    * Origin type.
    */
@@ -142,6 +192,29 @@ export const NodeType$inboundSchema: z.ZodMiniType<NodeType, unknown> =
   openEnums.inboundSchema(NodeType);
 
 /** @internal */
+export const ParentNodeType$inboundSchema: z.ZodMiniType<
+  ParentNodeType,
+  unknown
+> = openEnums.inboundSchema(ParentNodeType);
+
+/** @internal */
+export const Parent$inboundSchema: z.ZodMiniType<Parent, unknown> = z.object({
+  id: types.string(),
+  nodeType: ParentNodeType$inboundSchema,
+  name: z.optional(z.nullable(types.string())),
+});
+
+export function parentFromJSON(
+  jsonString: string,
+): SafeParseResult<Parent, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Parent$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Parent' from JSON`,
+  );
+}
+
+/** @internal */
 export const KnowledgeHubNodeOrigin$inboundSchema: z.ZodMiniType<
   KnowledgeHubNodeOrigin,
   unknown
@@ -176,6 +249,7 @@ export const KnowledgeHubNode$inboundSchema: z.ZodMiniType<
   name: types.string(),
   nodeType: NodeType$inboundSchema,
   parentId: types.nullable(types.string()),
+  parent: z.optional(z.nullable(z.lazy(() => Parent$inboundSchema))),
   origin: KnowledgeHubNodeOrigin$inboundSchema,
   connector: types.nullable(types.string()),
   connectorId: types.nullable(types.string()),

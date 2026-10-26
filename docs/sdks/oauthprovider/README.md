@@ -21,11 +21,13 @@ PipesHub OAuth 2.0 Authorization Server implementing RFC 6749, RFC 7636 (PKCE), 
 - Discovery endpoint for automatic configuration
 
 **Machine tokens (`client_credentials`) — gateway and downstream identity:**
-Access tokens may encode **`userId === client_id`**. The **Node.js API gateway** resolves the effective user to the OAuth **app creator**: first using the JWT **`createdBy`** claim when present, otherwise by loading the OAuth app by **`client_id`** from the registry. After verification it sets the authenticated session to that creator.
+Access tokens may encode **`userId === client_id`**. The **Node.js API gateway** resolves the effective user to the application's **token identity**: the service account it is pointed at (**`tokenIdentityUserId`**), or its creator for an application registered before a service account was required and never bound. It loads the application by **`client_id`** on every such token and takes the identity from that record.
 
-**Python services:** Validate `Authorization: Bearer` as today and use the JWT payload’s **`userId`** as-is for scopes and user-scoped logic (which may still equal **`client_id`** for machine tokens).
+The JWT's **`createdBy`** claim is a cross-check rather than a source: despite its name it carries the identity, not who registered the application, and a token whose claim disagrees with the record is refused with **401**. Pointing an application at a different service account also revokes the tokens it has already issued, so a stale claim should not arrive in the first place.
 
-**Operational note:** Prefer tokens whose JWT already carries the creator as **`userId`**; use **`POST /oauth-clients/{appId}/revoke-all-tokens`** and obtain new tokens from **`POST /oauth2/token`** when rotating integrations.
+**Python services:** Validate `Authorization: Bearer` as today and use the JWT payload’s **`userId`** as-is for scopes and user-scoped logic. Where a machine token carries **`userId === client_id`** and a **`createdBy`** claim, Python copies that claim onto **`userId`** first, so both halves of the product agree on the identity.
+
+**Operational note:** Prefer tokens whose JWT already carries the identity as **`userId`**; use **`POST /oauth-clients/{appId}/revoke-all-tokens`** and obtain new tokens from **`POST /oauth2/token`** when rotating integrations.
 
 
 ### Available Operations
@@ -38,14 +40,26 @@ Access tokens may encode **`userId === client_id`**. The **Node.js API gateway**
 
 OAuth 2.0 Token Endpoint (RFC 6749 Section 4.1.3).
 
-Exchanges an authorization code, client credentials, or refresh token for access tokens.
+Exchanges an authorization code, client credentials, refresh token, or
+service token for access tokens.
 
 **Grant Types:**
 - `authorization_code`: Exchange auth code for tokens (user-based)
 - `client_credentials`: Get tokens for machine-to-machine auth
-- `refresh_token`: Get new access token using refresh token
+- `refresh_token`: Get new access token using refresh token. The refresh token must have been issued to the presenting `client_id`; one issued to another client is rejected with `400 invalid_grant` and is left untouched (not rotated, not revoked).
+- `urn:ietf:params:oauth:grant-type:token-exchange`: Service-account
+  delegation (RFC 8693). A service account exchanges its own token for
+  a five-minute token that acts as one named person from its
+  allow-list. **Enterprise edition.** The Community build answers this
+  grant with `unsupported_grant_type` and leaves it out of discovery,
+  so check `grant_types_supported` rather than assuming it is there. **This grant sends no `client_id` or `client_secret`** —
+  the `subject_token` is the authentication, since it already carries
+  a verified identity and the scopes that bound it. Refusals about the
+  person asked for all return `400 invalid_target` with one wording;
+  the cause is recorded in the delegation log, which only an
+  administrator can read.
 
-For **`client_credentials`**, access tokens represent the **OAuth app creator** (the user who registered the client). The JWT may encode **`userId === client_id`**; the **Node API gateway** resolves the creator (**`createdBy`** claim or OAuth app lookup) — see **OAuth Provider** tag.
+For **`client_credentials`**, access tokens represent the **service account the app is pointed at** (`tokenIdentityUserId`), or the **OAuth app creator** for an app registered before that was required and never bound. The JWT may encode **`userId === client_id`**; the **Node API gateway** loads the application record and resolves the identity from it, treating the **`createdBy`** claim as a cross-check — see **OAuth Provider** tag.
 
 **Client Authentication:**
 Can be provided via:
@@ -120,8 +134,7 @@ run();
 
 | Error Type                                 | Status Code                                | Content Type                               |
 | ------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
-| errors.ErrorResponse                       | 400                                        | application/json                           |
-| errors.OAuthErrorResponse                  | 401                                        | application/json                           |
+| errors.OAuthErrorResponse                  | 400, 401                                   | application/json                           |
 | errors.OAuthClientManagementRateLimitError | 429                                        | application/json                           |
 | errors.PipeshubDefaultError                | 4XX, 5XX                                   | \*/\*                                      |
 

@@ -5,7 +5,7 @@
 ```typescript
 import { AllowedMethod } from "@pipeshub-ai/sdk/models";
 
-let value: AllowedMethod = "microsoft";
+let value: AllowedMethod = "google";
 
 // Open enum: unrecognized values are captured as Unrecognized<string>
 ```
@@ -13,5 +13,5 @@ let value: AllowedMethod = "microsoft";
 ## Values
 
 ```typescript
-"samlSso" | "otp" | "password" | "google" | "microsoft" | "azureAd" | "oauth" | Unrecognized<string>
+"otp" | "password" | "google" | "microsoft" | Unrecognized<string>
 ```

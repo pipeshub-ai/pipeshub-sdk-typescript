@@ -96,6 +96,13 @@ export type ConversationListItemProjectVisibility = OpenEnum<
  * Fetch a single conversation to retrieve its messages.
  */
 export type ConversationListItem = {
+  /**
+   * Only on agent conversations (returned by `GET /conversations?source=shared`). Open
+   *
+   * @remarks
+   * them with `GET /agents/{agentKey}/conversations/{conversationId}`.
+   */
+  agentKey?: string | undefined;
   id?: string | undefined;
   userId?: string | undefined;
   orgId?: string | undefined;
@@ -125,6 +132,15 @@ export type ConversationListItem = {
   updatedAt?: Date | undefined;
   isOwner?: boolean | undefined;
   accessLevel?: ConversationListItemAccessLevel | undefined;
+  /**
+   * `true` when the owner pinned this conversation. Absent on
+   *
+   * @remarks
+   * conversations that are not pinned (never `false`). Set via
+   * `PATCH /conversations/{conversationId}/pin`. Only returned to the
+   * owner: lists with `source=shared` omit it.
+   */
+  isPinned?: boolean | undefined;
   /**
    * The project this conversation is linked to, if any. Set via
    *
@@ -247,6 +263,7 @@ export const ConversationListItem$inboundSchema: z.ZodMiniType<
   unknown
 > = z.pipe(
   z.object({
+    agentKey: types.optional(types.string()),
     _id: types.optional(types.string()),
     userId: types.optional(types.string()),
     orgId: types.optional(types.string()),
@@ -277,6 +294,7 @@ export const ConversationListItem$inboundSchema: z.ZodMiniType<
     updatedAt: types.optional(types.date()),
     isOwner: types.optional(types.boolean()),
     accessLevel: types.optional(ConversationListItemAccessLevel$inboundSchema),
+    isPinned: types.optional(types.boolean()),
     projectId: z.optional(z.nullable(types.string())),
     projectVisibility: z.optional(
       z.nullable(ConversationListItemProjectVisibility$inboundSchema),

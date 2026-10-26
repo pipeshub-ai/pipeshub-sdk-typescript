@@ -10,10 +10,20 @@ import {
   AgentCapabilities$outboundSchema,
 } from "./agent-capabilities.js";
 import {
+  ChatAttachmentRef,
+  ChatAttachmentRef$Outbound,
+  ChatAttachmentRef$outboundSchema,
+} from "./chat-attachment-ref.js";
+import {
   Filters,
   Filters$Outbound,
   Filters$outboundSchema,
 } from "./filters.js";
+import {
+  ToolApprovalAnswer,
+  ToolApprovalAnswer$Outbound,
+  ToolApprovalAnswer$outboundSchema,
+} from "./tool-approval-answer.js";
 
 export const AgentRegenerateRequestChatMode = {
   Quick: "quick",
@@ -54,16 +64,71 @@ export type AgentRegenerateRequestProtocol = ClosedEnum<
  */
 export type AgentRegenerateRequest = {
   /**
-   * App connector instance ids and knowledge-base / record-group ids that narrow retrieval
+   * The edited question to answer in place of the stored one. Only the
    *
    * @remarks
-   * for a turn. For **org assistant** chat streams, send explicit `apps` / `kb` lists.
-   * For **agent** chat streams, send explicit id lists, or **omit** `filters` (and `tools`)
-   * to let the service use the agent’s stored knowledge and tool configuration. Sending
-   * `{ "apps": [], "kb": [] }` on an agent stream means **no** knowledge sources for that
-   * turn (it is not “full org default”).
+   * last question of a conversation can be edited, and not one that ran
+   * an approved action or is itself a tool-approval or question-card
+   * answer. A turn that went through an answered question card can be
+   * edited: the question is rewritten and the whole turn, including its
+   * card and the card's answers, is replaced by the new answer. A card
+   * turn that spans more than 50 saved rows cannot be edited; the
+   * request is refused and the stored answer is left as it was. So is
+   * an edit of an older question while a newer question has no answer.
+   * A run that ends in an error answer, or whose answer cannot be
+   * saved, leaves the stored question, its files and the rows of its
+   * card turn as they were.
+   */
+  query?: string | undefined;
+  /**
+   * The files of the edited question, replacing the stored ones. An
+   *
+   * @remarks
+   * empty list removes them all; omitted keeps the stored files. A
+   * change of files alone, with the same `query`, also counts as an
+   * edit. Files are not deleted when removed from a question: a fork
+   * of the chat may still refer to them.
+   */
+  attachments?: Array<ChatAttachmentRef> | undefined;
+  /**
+   * What retrieval is narrowed to for a turn: whole apps, and selections below app
+   *
+   * @remarks
+   * level (record groups, folders, records). The keys are a union. For **org assistant**
+   * chat streams, send explicit lists. For **agent** chat streams, send explicit id lists,
+   * or **omit** `filters` (and `tools`) to let the service use the agent’s stored knowledge
+   * and tool configuration. Sending `{ "apps": [], "kb": [] }` on an agent stream means
+   * **no** knowledge sources for that turn (it is not “full org default”).
+   *
+   * A selection below app level is the whole scope of the turn: with `recordGroups`,
+   * `records` or `recordsExact` present, an absent or empty `apps` / `kb` means none of
+   * them. A selected node that does not exist or that the caller cannot read contributes
+   * nothing; when nothing valid remains the turn searches nothing. `/search` answers 404
+   * for that; a chat turn is not failed, its search simply finds nothing.
+   * At most 200 ids may be sent in one request, counted across all keys, and every id must
+   * be a valid UUID. A key this schema does not list is refused with 400; the message names
+   * the key and lists the allowed ones. A value of the wrong type is refused with 400 too.
+   *
+   * A selection that covers more than the configured number of nodes (50,000 by default),
+   * or that touches a source still being prepared for folder-level search, is refused:
+   * `/search` and the non-streaming chat routes answer 422 with the message, and a chat
+   * stream ends with an error frame (`RUN_ERROR`, or `error` on the legacy protocol)
+   * whose `code` is `selection_too_large` or `selection_not_ready` and whose `message`
+   * says what to change. No model call is made for such a turn.
    */
   filters?: Filters | undefined;
+  /**
+   * The answers to the question card this reply followed, in the form
+   *
+   * @remarks
+   * the app sends them (`User selections:` followed by one
+   * `N. "question" → answer` line each). When present, the turn is
+   * re-run with these answers instead of the saved ones, and they are
+   * saved in their place. Rejected with 400 when the reply being
+   * regenerated did not follow a question card, or when the request
+   * also edits the question (`query` or `attachments`).
+   */
+  answers?: string | undefined;
   /**
    * Identifier of the AI model configuration to use for regeneration.
    *
@@ -100,7 +165,13 @@ export type AgentRegenerateRequest = {
    *
    * @remarks
    * such as `jira.create_issue`) the agent may invoke when
-   * regenerating. Applicable only in agent chat modes.
+   * regenerating. Applicable only in agent chat modes. Regenerating
+   * in the assistant's agent mode, web search is not governed by this
+   * list; `agentCapabilities.webSearch` turns it on or off.
+   * Regenerating a named agent's message (`AgentRegenerateRequest`),
+   * a list that leaves out `web_search` turns off the agent's web
+   * search for the turn, even when `agentCapabilities.webSearch` is
+   * true.
    */
   tools?: Array<string> | undefined;
   /**
@@ -121,6 +192,18 @@ export type AgentRegenerateRequest = {
    * `true`. Omitting the whole object applies every default.
    */
   agentCapabilities?: AgentCapabilities | undefined;
+  /**
+   * The person's answer to a tool approval card. The web app sends it with the query
+   *
+   * @remarks
+   * `Tool approval: allow` or `Tool approval: deny`, and the request carries on the turn that
+   * stopped on the card: the saved call runs (when allowed) and its result answers the call
+   * the model made, in the same reply. The call is the one saved server-side when the card was
+   * shown (answerable for 15 minutes, settled once, bound to the asking user and
+   * conversation); only its id and the answer travel here. A reply that answered a card
+   * can't be regenerated.
+   */
+  toolApproval?: ToolApprovalAnswer | undefined;
   /**
    * Client-generated identifier for this regeneration run. Send it
    *
@@ -143,7 +226,10 @@ export const AgentRegenerateRequestProtocol$outboundSchema: z.ZodMiniEnum<
 
 /** @internal */
 export type AgentRegenerateRequest$Outbound = {
+  query?: string | undefined;
+  attachments?: Array<ChatAttachmentRef$Outbound> | undefined;
   filters?: Filters$Outbound | undefined;
+  answers?: string | undefined;
   modelKey?: string | undefined;
   modelName?: string | undefined;
   modelFriendlyName?: string | undefined;
@@ -153,6 +239,7 @@ export type AgentRegenerateRequest$Outbound = {
   tools?: Array<string> | undefined;
   protocol?: string | undefined;
   agentCapabilities?: AgentCapabilities$Outbound | undefined;
+  toolApproval?: ToolApprovalAnswer$Outbound | undefined;
   runId?: string | undefined;
 };
 
@@ -161,7 +248,10 @@ export const AgentRegenerateRequest$outboundSchema: z.ZodMiniType<
   AgentRegenerateRequest$Outbound,
   AgentRegenerateRequest
 > = z.object({
+  query: z.optional(z.string()),
+  attachments: z.optional(z.array(ChatAttachmentRef$outboundSchema)),
   filters: z.optional(Filters$outboundSchema),
+  answers: z.optional(z.string()),
   modelKey: z.optional(z.string()),
   modelName: z.optional(z.string()),
   modelFriendlyName: z.optional(z.string()),
@@ -171,6 +261,7 @@ export const AgentRegenerateRequest$outboundSchema: z.ZodMiniType<
   tools: z.optional(z.array(z.string())),
   protocol: z.optional(AgentRegenerateRequestProtocol$outboundSchema),
   agentCapabilities: z.optional(AgentCapabilities$outboundSchema),
+  toolApproval: z.optional(ToolApprovalAnswer$outboundSchema),
   runId: z.optional(z.string()),
 });
 

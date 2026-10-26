@@ -7,6 +7,10 @@ import { safeParse } from "../lib/schemas.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
+import {
+  KnowledgeLimit,
+  KnowledgeLimit$inboundSchema,
+} from "./knowledge-limit.js";
 
 /**
  * A personal access token as seen by an org admin — extends
@@ -46,6 +50,17 @@ export type AdminPatListItem = {
    */
   lastUsedAt?: Date | undefined;
   /**
+   * What a connected app may see: an OAuth app's limit is picked by its
+   *
+   * @remarks
+   * creator and holds for every user who connects it; a personal access
+   * token's by its owner. Search, chat, agent chat and every record read by
+   * id stay inside it, and inside the connecting user's own permissions.
+   * Omit it for everything the user can see. Sent, it must name at least one id and at
+   * most 50 in all, since it is signed into every token the app gets.
+   */
+  knowledgeLimit?: KnowledgeLimit | undefined;
+  /**
    * ID of the user who created this token
    */
   userId: string;
@@ -82,6 +97,7 @@ export const AdminPatListItem$inboundSchema: z.ZodMiniType<
   createdAt: types.date(),
   expiresAt: types.date(),
   lastUsedAt: types.optional(types.date()),
+  knowledgeLimit: types.optional(KnowledgeLimit$inboundSchema),
   userId: types.string(),
   ownerEmail: types.optional(types.string()),
   ownerFullName: types.optional(types.string()),

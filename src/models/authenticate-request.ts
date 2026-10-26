@@ -26,13 +26,10 @@ import {
  * Authentication method to use
  */
 export const Method = {
-  SamlSso: "samlSso",
   Otp: "otp",
   Password: "password",
   Google: "google",
   Microsoft: "microsoft",
-  AzureAd: "azureAd",
-  Oauth: "oauth",
 } as const;
 /**
  * Authentication method to use
@@ -57,9 +54,6 @@ export type Credentials =
  * - `otp`: `{ otp: "123456" }` (6-digit code)
  * - `google`: `"google-id-token-string"`
  * - `microsoft`: `{ accessToken: "...", idToken: "..." }`
- * - `azureAd`: `{ accessToken: "...", idToken: "..." }`
- * - `oauth`: `{ accessToken: "...", idToken: "..." }`
- * - `samlSso`: not accepted by `/userAccount/authenticate`, which answers `400`. SAML sign-in runs as a browser redirect: send the browser to `/saml/signIn` instead
  */
 export type AuthenticateRequest = {
   /**

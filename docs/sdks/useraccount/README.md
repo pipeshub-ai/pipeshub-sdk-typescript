@@ -103,11 +103,12 @@ run();
 
 ### Errors
 
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 400                         | application/json            |
-| errors.ErrorResponse        | 500                         | application/json            |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+| Error Type                    | Status Code                   | Content Type                  |
+| ----------------------------- | ----------------------------- | ----------------------------- |
+| errors.ErrorResponse          | 400                           | application/json              |
+| errors.RateLimitErrorResponse | 429                           | application/json              |
+| errors.ErrorResponse          | 500                           | application/json              |
+| errors.PipeshubDefaultError   | 4XX, 5XX                      | \*/\*                         |
 
 ## authenticate
 
@@ -120,10 +121,9 @@ Requires a valid session token from `/initAuth`.
 - `otp`: `{ "credentials": { "otp": "123456" } }` (6-digit code, valid for 10 minutes)
 - `google`: `{ "credentials": "google-id-token-string" }`
 - `microsoft`: `{ "credentials": { "accessToken": "...", "idToken": "..." } }`
-- `azureAd`: `{ "credentials": { "accessToken": "...", "idToken": "..." } }`
-- `oauth`: `{ "credentials": { "accessToken": "...", "idToken": "..." } }`
-- `samlSso`: not accepted here; this endpoint answers `400`. SAML sign-in runs as a browser
-  redirect: send the browser to `/saml/signIn` instead
+
+SAML (`samlSso`), generic OAuth (`oauth`) and Azure AD (`azureAd`) sign-in were removed in 1.0;
+this endpoint answers `400` for them. Azure AD accounts sign in with `microsoft`.
 
 **Multi-Step Response:**
 
@@ -157,7 +157,7 @@ async function run() {
   const result = await pipeshub.userAccount.authenticate({
     xSessionToken: "<value>",
     body: {
-      method: "oauth",
+      method: "microsoft",
       credentials: {
         password: "o_5N_tt72qMx3WV",
       },
@@ -186,7 +186,7 @@ async function run() {
   const res = await userAccountAuthenticate(pipeshub, {
     xSessionToken: "<value>",
     body: {
-      method: "oauth",
+      method: "microsoft",
       credentials: {
         password: "o_5N_tt72qMx3WV",
       },
@@ -218,11 +218,12 @@ run();
 
 ### Errors
 
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 400, 401, 404               | application/json            |
-| errors.ErrorResponse        | 500                         | application/json            |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+| Error Type                    | Status Code                   | Content Type                  |
+| ----------------------------- | ----------------------------- | ----------------------------- |
+| errors.ErrorResponse          | 400, 401, 404                 | application/json              |
+| errors.RateLimitErrorResponse | 429                           | application/json              |
+| errors.ErrorResponse          | 500                           | application/json              |
+| errors.PipeshubDefaultError   | 4XX, 5XX                      | \*/\*                         |
 
 ## refreshToken
 
@@ -392,8 +393,9 @@ run();
 
 ### Errors
 
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 400, 401, 404               | application/json            |
-| errors.ErrorResponse        | 500                         | application/json            |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+| Error Type                    | Status Code                   | Content Type                  |
+| ----------------------------- | ----------------------------- | ----------------------------- |
+| errors.ErrorResponse          | 400, 401, 404                 | application/json              |
+| errors.RateLimitErrorResponse | 429                           | application/json              |
+| errors.ErrorResponse          | 500                           | application/json              |
+| errors.PipeshubDefaultError   | 4XX, 5XX                      | \*/\*                         |

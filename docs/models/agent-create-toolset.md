@@ -6,7 +6,7 @@
 import { AgentCreateToolset } from "@pipeshub-ai/sdk/models";
 
 let value: AgentCreateToolset = {
-  name: "slack",
+  name: "sheets",
 };
 ```
 

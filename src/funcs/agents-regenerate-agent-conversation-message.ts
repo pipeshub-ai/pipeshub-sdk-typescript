@@ -44,6 +44,7 @@ import { Result } from "../types/fp.js";
  *
  * `chatMode: quick` is required. Other fields are optional and reuse
  * the original model/context when omitted. The body supports:
+ * - `query` and `attachments` (an edited question and its files, as on the assistant endpoint)
  * - `filters`
  * - `chatMode`
  * - `modelKey`

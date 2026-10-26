@@ -2,6 +2,16 @@
 
 Response returned by GET /knowledgeBase/record/{recordId}.
 
+For a connected app with a limit, a collection or folder the limit
+leaves out is not named: `knowledgeBase` and `folder` are `null` for
+it, as are the record's own `recordGroupId` (with `externalGroupId`),
+`rootRecordGroupId` and `parentNodeId` (with `externalParentId`).
+`externalParentId` is also `null` when there is no `parentNodeId` to
+check it by, unless the limit covers the record's whole app.
+`fileRecord.path` is `null` unless the limit covers the whole app or
+collection; `webUrl` is kept.
+
+
 ## Example Usage
 
 ```typescript
@@ -29,6 +39,7 @@ let value: GetRecordByIdResponseSchema = {
     isVLMOcrProcessed: true,
     mimeType: "<value>",
     sizeInBytes: null,
+    contentRev: "78f3f276290c9f81",
     webUrl: null,
     fileRecord: {
       id: "<id>",
@@ -40,6 +51,17 @@ let value: GetRecordByIdResponseSchema = {
     mailRecord: {},
     ticketRecord: {},
   },
+  stageStates: [
+    {
+      stage: "classify",
+      status: "COMPLETED",
+      reason: "<value>",
+      attempt: 290128,
+      startedAtMs: 174147,
+      finishedAtMs: 764239,
+      updatedAtMs: 939490,
+    },
+  ],
   knowledgeBase: {
     id: "<id>",
     name: "<value>",
@@ -50,20 +72,25 @@ let value: GetRecordByIdResponseSchema = {
     name: "<value>",
   },
   metadata: {
-    languages: [],
-    topics: [],
+    languages: [
+      {
+        id: "<id>",
+        name: "<value>",
+      },
+    ],
+    topics: [
+      {
+        id: "<id>",
+        name: "<value>",
+      },
+    ],
     subcategories1: [
       {
         id: "<id>",
         name: "<value>",
       },
     ],
-    subcategories2: [
-      {
-        id: "<id>",
-        name: "<value>",
-      },
-    ],
+    subcategories2: [],
     subcategories3: [],
     departments: [
       {
@@ -71,14 +98,19 @@ let value: GetRecordByIdResponseSchema = {
         name: "<value>",
       },
     ],
-    categories: [],
+    categories: [
+      {
+        id: "<id>",
+        name: "<value>",
+      },
+    ],
   },
   permissions: [
     {
       id: "<id>",
       name: "<value>",
       type: "<value>",
-      relationship: "READER",
+      relationship: "OWNER",
       accessType: "<value>",
     },
   ],
@@ -87,10 +119,11 @@ let value: GetRecordByIdResponseSchema = {
 
 ## Fields
 
-| Field                                                                                                           | Type                                                                                                            | Required                                                                                                        | Description                                                                                                     |
-| --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `record`                                                                                                        | [models.GetRecordByIdResponseSchemaRecord](../models/get-record-by-id-response-schema-record.md)                | :heavy_check_mark:                                                                                              | N/A                                                                                                             |
-| `knowledgeBase`                                                                                                 | [models.GetRecordByIdResponseSchemaKnowledgeBase](../models/get-record-by-id-response-schema-knowledge-base.md) | :heavy_check_mark:                                                                                              | N/A                                                                                                             |
-| `folder`                                                                                                        | [models.GetRecordByIdResponseSchemaFolder](../models/get-record-by-id-response-schema-folder.md)                | :heavy_check_mark:                                                                                              | N/A                                                                                                             |
-| `metadata`                                                                                                      | [models.GetRecordByIdResponseSchemaMetadata](../models/get-record-by-id-response-schema-metadata.md)            | :heavy_check_mark:                                                                                              | N/A                                                                                                             |
-| `permissions`                                                                                                   | [models.GetRecordByIdResponseSchemaPermission](../models/get-record-by-id-response-schema-permission.md)[]      | :heavy_check_mark:                                                                                              | N/A                                                                                                             |
+| Field                                                                                                                                                                                                   | Type                                                                                                                                                                                                    | Required                                                                                                                                                                                                | Description                                                                                                                                                                                             |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `record`                                                                                                                                                                                                | [models.GetRecordByIdResponseSchemaRecord](../models/get-record-by-id-response-schema-record.md)                                                                                                        | :heavy_check_mark:                                                                                                                                                                                      | N/A                                                                                                                                                                                                     |
+| `stageStates`                                                                                                                                                                                           | [models.StageStateSummary](../models/stage-state-summary.md)[]                                                                                                                                          | :heavy_minus_sign:                                                                                                                                                                                      | Per-stage pipeline status for the record's current content revision.<br/>Empty for records indexed before pipeline stages existed. The<br/>`classify` stage's status is mirrored on `record.extractionStatus`.<br/> |
+| `knowledgeBase`                                                                                                                                                                                         | [models.GetRecordByIdResponseSchemaKnowledgeBase](../models/get-record-by-id-response-schema-knowledge-base.md)                                                                                         | :heavy_check_mark:                                                                                                                                                                                      | N/A                                                                                                                                                                                                     |
+| `folder`                                                                                                                                                                                                | [models.GetRecordByIdResponseSchemaFolder](../models/get-record-by-id-response-schema-folder.md)                                                                                                        | :heavy_check_mark:                                                                                                                                                                                      | N/A                                                                                                                                                                                                     |
+| `metadata`                                                                                                                                                                                              | [models.GetRecordByIdResponseSchemaMetadata](../models/get-record-by-id-response-schema-metadata.md)                                                                                                    | :heavy_check_mark:                                                                                                                                                                                      | N/A                                                                                                                                                                                                     |
+| `permissions`                                                                                                                                                                                           | [models.GetRecordByIdResponseSchemaPermission](../models/get-record-by-id-response-schema-permission.md)[]                                                                                              | :heavy_check_mark:                                                                                                                                                                                      | N/A                                                                                                                                                                                                     |

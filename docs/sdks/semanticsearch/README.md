@@ -6,6 +6,7 @@ Enterprise semantic search across all indexed knowledge with relevance scoring
 
 ### Available Operations
 
+* [retrieve](#retrieve) - Retrieve chunks with citations
 * [search](#search) - Perform semantic search
 * [searchHistory](#searchhistory) - Get search history
 * [deleteSearchHistory](#deletesearchhistory) - Clear all search history
@@ -14,17 +15,127 @@ Enterprise semantic search across all indexed knowledge with relevance scoring
 * [archiveSearch](#archivesearch) - Archive a search
 * [unarchiveSearch](#unarchivesearch) - Unarchive a search
 
+## retrieve
+
+Ranked passages ("chunks") for a query, each with its record and a
+citation link, for building your own RAG pipeline or agent on
+PipesHub. Results are filtered by the caller's permissions exactly as
+`POST /search` is, and take the same `filters` and date bounds.
+
+Unlike `POST /search`, nothing is stored: no search history and no
+citation documents, so an application can call this on every request
+it serves. The query is searched as sent unless `rewriteQuery` is
+true.
+
+Nothing to find (no match, no accessible records, nothing indexed
+yet) is a `200` with an empty `chunks` list.
+
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="retrieve" method="post" path="/retrieve" example="simple" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.semanticSearch.retrieve({
+    query: "how do we roll back a canary?",
+    filters: {
+      kb: [
+        "3f2a9c1e-5b7d-4e8a-9c21-7d4e5f6a8b90",
+      ],
+    },
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { semanticSearchRetrieve } from "@pipeshub-ai/sdk/funcs/semantic-search-retrieve.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const res = await semanticSearchRetrieve(pipeshub, {
+    query: "how do we roll back a canary?",
+    filters: {
+      kb: [
+        "3f2a9c1e-5b7d-4e8a-9c21-7d4e5f6a8b90",
+      ],
+    },
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("semanticSearchRetrieve failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [models.RetrieveRequest](../../models/retrieve-request.md)                                                                                                                     | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[models.RetrieveResponse](../../models/retrieve-response.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 404, 422               | application/json            |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
 ## search
 
 Run a semantic search across your organization's knowledge base.
 Matching is meaning-based, so relevant results surface even when
 the wording differs from the query.
 
-Use optional `filters` to narrow the scope:
+Use optional `filters` to narrow the scope (see `Filters`):
 
-- `filters.apps` — restrict to specific connector apps (for
-  example Google Drive or Confluence).
-- `filters.kb` — restrict to specific knowledge bases.
+- `filters.apps` — restrict to whole apps: connector instances
+  (for example Google Drive or Confluence) and collections.
+  `filters.kb` is the older name for collections and means the
+  same.
+- `filters.recordGroups` — restrict to record groups (a drive, a
+  space, a project), each with the groups nested in it.
+- `filters.records` — restrict to folders or records, each with
+  everything under it.
+- `filters.recordsExact` — restrict to records alone, without
+  what is under them.
+
+The keys are a union. With any of the last three present, an
+absent or empty `apps` / `kb` means no whole app.
 
 The response returns a `searchId` for the persisted search along
 with ranked matches, each carrying a relevance score and the
@@ -112,6 +223,7 @@ const pipeshub = new Pipeshub({
 async function run() {
   const result = await pipeshub.semanticSearch.search({
     query: "company vacation policy",
+    rewriteQuery: false,
   });
 
   console.log(result);
@@ -139,6 +251,7 @@ const pipeshub = new PipeshubCore({
 async function run() {
   const res = await semanticSearchSearch(pipeshub, {
     query: "company vacation policy",
+    rewriteQuery: false,
   });
   if (res.ok) {
     const { value: result } = res;
@@ -168,6 +281,7 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 422                    | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## searchHistory

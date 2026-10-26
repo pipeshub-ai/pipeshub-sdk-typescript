@@ -27,6 +27,7 @@ let value: OAuthAppListResponse = {
       isConfidential: true,
       accessTokenLifetime: 386949,
       refreshTokenLifetime: 717594,
+      tokenIdentityUserId: "65f0c0ffee00000000000000",
       createdAt: new Date("2025-10-19T05:35:59.333Z"),
       updatedAt: new Date("2026-06-23T14:29:33.045Z"),
     },

@@ -12,7 +12,7 @@ import { ClosedEnum } from "../../types/enums.js";
  * branch before the route-level non-archived guard is enforced.
  * Accepted values are `true` and `false`.
  */
-export const ListAgentConversationsIsArchived = {
+export const IsArchived = {
   True: "true",
   False: "false",
 } as const;
@@ -23,9 +23,7 @@ export const ListAgentConversationsIsArchived = {
  * branch before the route-level non-archived guard is enforced.
  * Accepted values are `true` and `false`.
  */
-export type ListAgentConversationsIsArchived = ClosedEnum<
-  typeof ListAgentConversationsIsArchived
->;
+export type IsArchived = ClosedEnum<typeof IsArchived>;
 
 export type ListAgentConversationsRequest = {
   /**
@@ -98,7 +96,7 @@ export type ListAgentConversationsRequest = {
    * branch before the route-level non-archived guard is enforced.
    * Accepted values are `true` and `false`.
    */
-  isArchived?: ListAgentConversationsIsArchived | undefined;
+  isArchived?: IsArchived | undefined;
   /**
    * Restrict results to a single project. Pass a project's `id`, or
    *
@@ -110,9 +108,8 @@ export type ListAgentConversationsRequest = {
 };
 
 /** @internal */
-export const ListAgentConversationsIsArchived$outboundSchema: z.ZodMiniEnum<
-  typeof ListAgentConversationsIsArchived
-> = z.enum(ListAgentConversationsIsArchived);
+export const IsArchived$outboundSchema: z.ZodMiniEnum<typeof IsArchived> = z
+  .enum(IsArchived);
 
 /** @internal */
 export type ListAgentConversationsRequest$Outbound = {
@@ -143,7 +140,7 @@ export const ListAgentConversationsRequest$outboundSchema: z.ZodMiniType<
   startDate: z.optional(z.string()),
   endDate: z.optional(z.string()),
   status: z.optional(z.string()),
-  isArchived: z.optional(ListAgentConversationsIsArchived$outboundSchema),
+  isArchived: z.optional(IsArchived$outboundSchema),
   projectId: z.optional(z.string()),
 });
 

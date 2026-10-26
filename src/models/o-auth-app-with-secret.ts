@@ -9,6 +9,10 @@ import { OpenEnum } from "../types/enums.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
+import {
+  KnowledgeLimit,
+  KnowledgeLimit$inboundSchema,
+} from "./knowledge-limit.js";
 
 /**
  * App status
@@ -94,6 +98,28 @@ export type OAuthAppWithSecret = {
    */
   refreshTokenLifetime: number;
   /**
+   * What a connected app may see: an OAuth app's limit is picked by its
+   *
+   * @remarks
+   * creator and holds for every user who connects it; a personal access
+   * token's by its owner. Search, chat, agent chat and every record read by
+   * id stay inside it, and inside the connecting user's own permissions.
+   * Omit it for everything the user can see. Sent, it must name at least one id and at
+   * most 50 in all, since it is signed into every token the app gets.
+   */
+  knowledgeLimit?: KnowledgeLimit | undefined;
+  /**
+   * The service account this app's own `client_credentials` tokens act as.
+   *
+   * @remarks
+   *
+   * Absent means the app has no service account and its tokens act as whoever
+   * created it. Apps registered since a service account became required always
+   * have one; an older app may not, and those are the ones an administrator
+   * still has to move.
+   */
+  tokenIdentityUserId?: string | undefined;
+  /**
    * Creation timestamp
    */
   createdAt: Date;
@@ -136,6 +162,8 @@ export const OAuthAppWithSecret$inboundSchema: z.ZodMiniType<
   isConfidential: types.boolean(),
   accessTokenLifetime: types.number(),
   refreshTokenLifetime: types.number(),
+  knowledgeLimit: types.optional(KnowledgeLimit$inboundSchema),
+  tokenIdentityUserId: types.optional(types.string()),
   createdAt: types.date(),
   updatedAt: types.date(),
   clientSecret: types.string(),

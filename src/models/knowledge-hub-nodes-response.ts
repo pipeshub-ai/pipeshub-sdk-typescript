@@ -30,7 +30,12 @@ export type CurrentNode = {
 };
 
 /**
- * Parent of `currentNode` when present; `null` when not applicable.
+ * Parent of `currentNode` when present; `null` when not applicable,
+ *
+ * @remarks
+ * and for a connected app whose limit leaves that parent out. For
+ * such an app, `breadcrumbs` likewise names only the nodes inside
+ * its limit.
  */
 export type ParentNode = {
   id: string;
@@ -51,10 +56,37 @@ export type KnowledgeHubNodesResponsePagination = {
    * Page size.
    */
   limit: number;
+  /**
+   * Items in the whole result. For a search by a connected app
+   *
+   * @remarks
+   * limited to spaces, folders or files, the matches found so far: it can
+   * grow from page to page and is final once `hasNext` is false.
+   */
   totalItems: number;
   totalPages: number;
   hasNext: boolean;
   hasPrev: boolean;
+  /**
+   * Cursor for the next page; null on the last page.
+   */
+  nextCursor?: string | null | undefined;
+  /**
+   * Cursor for the previous page; null on the first page.
+   */
+  prevCursor?: string | null | undefined;
+  /**
+   * 1-based index of the first item on this page, when known.
+   */
+  startIndex?: number | null | undefined;
+  /**
+   * 1-based index of the last item on this page, when known.
+   */
+  endIndex?: number | null | undefined;
+  /**
+   * Number of items on this page.
+   */
+  currentPageItems?: number | null | undefined;
 };
 
 /**
@@ -129,6 +161,15 @@ export type KnowledgeHubNodesResponseAvailable = {
   nodeTypes: Array<FilterOption>;
   recordTypes: Array<FilterOption>;
   origins: Array<FilterOption>;
+  /**
+   * The apps and collections to filter by, each with its own name. For a
+   *
+   * @remarks
+   * connected app with a limit, only those the limit covers whole: an app
+   * or collection it covers only in part (some of its spaces, folders or
+   * files) is not offered. The other option lists are fixed and name no
+   * source.
+   */
   connectors: Array<FilterOption>;
   indexingStatus: Array<FilterOption>;
   sortBy: Array<FilterOption>;
@@ -179,6 +220,16 @@ export type Permissions = {
   canEdit: boolean;
   canDelete: boolean;
   canManagePermissions: boolean;
+  /**
+   * The caller's own role on the collection (knowledge base) this node is in, as
+   *
+   * @remarks
+   * restore and `GET /knowledgeBase/{kbId}/trash` check it: OWNER, WRITER,
+   * FILEORGANIZER, COMMENTER or READER. Unlike `role`, which ranks record
+   * permissions inside a folder, it is the same at every level of the collection.
+   * Null outside a collection.
+   */
+  collectionRole?: string | null | undefined;
 };
 
 /**
@@ -190,6 +241,10 @@ export type Permissions = {
  * omitted properties).
  */
 export type KnowledgeHubNodesResponse = {
+  /**
+   * Deepest a collection folder may be nested; a folder directly in the collection is depth 1.
+   */
+  maxFolderDepth: number;
   /**
    * Always `true` on HTTP 200. Failures use 4xx/5xx error envelopes, not this body shape.
    */
@@ -207,7 +262,12 @@ export type KnowledgeHubNodesResponse = {
    */
   currentNode: CurrentNode | null;
   /**
-   * Parent of `currentNode` when present; `null` when not applicable.
+   * Parent of `currentNode` when present; `null` when not applicable,
+   *
+   * @remarks
+   * and for a connected app whose limit leaves that parent out. For
+   * such an app, `breadcrumbs` likewise names only the nodes inside
+   * its limit.
    */
   parentNode: ParentNode | null;
   /**
@@ -279,6 +339,11 @@ export const KnowledgeHubNodesResponsePagination$inboundSchema: z.ZodMiniType<
   totalPages: types.number(),
   hasNext: types.boolean(),
   hasPrev: types.boolean(),
+  nextCursor: z.optional(z.nullable(types.string())),
+  prevCursor: z.optional(z.nullable(types.string())),
+  startIndex: z.optional(z.nullable(types.number())),
+  endIndex: z.optional(z.nullable(types.number())),
+  currentPageItems: z.optional(z.nullable(types.number())),
 });
 
 export function knowledgeHubNodesResponsePaginationFromJSON(
@@ -476,6 +541,7 @@ export const Permissions$inboundSchema: z.ZodMiniType<Permissions, unknown> = z
     canEdit: types.boolean(),
     canDelete: types.boolean(),
     canManagePermissions: types.boolean(),
+    collectionRole: z.optional(z.nullable(types.string())),
   });
 
 export function permissionsFromJSON(
@@ -493,6 +559,7 @@ export const KnowledgeHubNodesResponse$inboundSchema: z.ZodMiniType<
   KnowledgeHubNodesResponse,
   unknown
 > = z.object({
+  maxFolderDepth: types.number(),
   success: types.literal(true),
   error: types.nullable(types.string()),
   id: types.nullable(types.string()),

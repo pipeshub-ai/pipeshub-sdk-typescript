@@ -264,6 +264,13 @@ export type Conversation = {
    * conversation initiator (the only user who can share a chat).
    */
   sharedBy?: ConversationSharedBy | undefined;
+  /**
+   * Only on agent conversations (returned by `GET /conversations?source=shared`). Open
+   *
+   * @remarks
+   * them with `GET /agents/{agentKey}/conversations/{conversationId}`.
+   */
+  agentKey?: string | undefined;
 };
 
 /** @internal */
@@ -392,6 +399,7 @@ export const Conversation$inboundSchema: z.ZodMiniType<Conversation, unknown> =
         z.nullable(ConversationProjectVisibility$inboundSchema),
       ),
       sharedBy: types.optional(ConversationSharedBy$inboundSchema),
+      agentKey: types.optional(types.string()),
     }),
     z.transform((v) => {
       return remap$(v, {

@@ -32,6 +32,9 @@ export type AgentConversationDetailResponse = {
    * not the raw `AgentConversation` document shape: fields like `agentKey`,
    * `userId`, `orgId`, `conversationSource`, and root-level `messages`
    * metadata outside the selected slice are omitted.
+   *
+   * `sharedWith` is the owner's list of recipients, so it is present only for the
+   * owner. A recipient gets `sharedBy` (who shared the chat) instead.
    */
   conversation: AgentConversationDetail;
   filters: SemanticSearchHistoryFilters;

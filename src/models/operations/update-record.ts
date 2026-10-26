@@ -69,6 +69,15 @@ export type UpdateRecordResponse = {
   timestamp?: number | undefined;
   fileUpdated?: boolean | undefined;
   location?: Location | undefined;
+  /**
+   * The collection the record is in, with its folders. For a
+   *
+   * @remarks
+   * connected app whose limit does not cover the whole collection,
+   * an empty object; under a limit that does, `folders` lists only
+   * the folders inside it. The updated record names no parent, and
+   * no source path, outside the limit.
+   */
   kb?: { [k: string]: any } | undefined;
   userPermission?: string | undefined;
 };

@@ -14,6 +14,7 @@ const value: string = "<value>";
 ```typescript
 const value: models.Model = {
   modelType: "llm",
+  defaultReasoningEffort: "low",
 };
 ```
 

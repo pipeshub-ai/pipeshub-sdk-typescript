@@ -122,6 +122,10 @@ export type SearchArchivedConversationsSource = OpenEnum<
  * Fetch a single conversation to retrieve its messages.
  */
 export type SearchArchivedConversationsConversation = {
+  /**
+   * Agent identifier — present only when `source` is `agent`
+   */
+  agentKey?: string | undefined;
   id?: string | undefined;
   userId?: string | undefined;
   orgId?: string | undefined;
@@ -154,6 +158,15 @@ export type SearchArchivedConversationsConversation = {
   isOwner?: boolean | undefined;
   accessLevel?: SearchArchivedConversationsAccessLevel | undefined;
   /**
+   * `true` when the owner pinned this conversation. Absent on
+   *
+   * @remarks
+   * conversations that are not pinned (never `false`). Set via
+   * `PATCH /conversations/{conversationId}/pin`. Only returned to the
+   * owner: lists with `source=shared` omit it.
+   */
+  isPinned?: boolean | undefined;
+  /**
    * The project this conversation is linked to, if any. Set via
    *
    * @remarks
@@ -184,10 +197,6 @@ export type SearchArchivedConversationsConversation = {
    * Origin collection of the conversation
    */
   source?: SearchArchivedConversationsSource | undefined;
-  /**
-   * Agent identifier — present only when `source` is `agent`
-   */
-  agentKey?: string | undefined;
   /**
    * Timestamp when the conversation was archived
    */
@@ -399,6 +408,7 @@ export const SearchArchivedConversationsSource$inboundSchema: z.ZodMiniType<
 export const SearchArchivedConversationsConversation$inboundSchema:
   z.ZodMiniType<SearchArchivedConversationsConversation, unknown> = z.pipe(
     z.object({
+      agentKey: types.optional(types.string()),
       _id: types.optional(types.string()),
       userId: types.optional(types.string()),
       orgId: types.optional(types.string()),
@@ -429,13 +439,13 @@ export const SearchArchivedConversationsConversation$inboundSchema:
       accessLevel: types.optional(
         SearchArchivedConversationsAccessLevel$inboundSchema,
       ),
+      isPinned: types.optional(types.boolean()),
       projectId: z.optional(z.nullable(types.string())),
       projectVisibility: z.optional(
         z.nullable(SearchArchivedConversationsProjectVisibility$inboundSchema),
       ),
       sharedBy: types.optional(models.ConversationSharedBy$inboundSchema),
       source: types.optional(SearchArchivedConversationsSource$inboundSchema),
-      agentKey: types.optional(types.string()),
       archivedAt: types.optional(types.date()),
     }),
     z.transform((v) => {

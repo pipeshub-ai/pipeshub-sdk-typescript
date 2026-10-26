@@ -30,6 +30,7 @@ let value: UpdateOAuthAppResponse = {
     isConfidential: true,
     accessTokenLifetime: 859232,
     refreshTokenLifetime: 853157,
+    tokenIdentityUserId: "65f0c0ffee00000000000000",
     createdAt: new Date("2024-03-04T07:16:01.195Z"),
     updatedAt: new Date("2024-05-13T03:54:57.780Z"),
   },

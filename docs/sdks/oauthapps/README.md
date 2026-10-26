@@ -15,7 +15,7 @@ or organizations. Each app receives a client ID and secret for authentication.
 
 **Who authorizes vs. client credentials**
 - **Authorization code:** Any authenticated user in the workspace may complete consent for a valid `client_id`; issued tokens represent **that user**.
-- **Client credentials:** Access tokens represent the **OAuth app creator** (who registered the client), not the caller.
+- **Client credentials:** Access tokens represent the **service account the app is pointed at**, never the caller. An app that allows this grant must name one at creation, and only an administrator may choose it. Apps created before that rule, and never bound, still represent the **OAuth app creator** — the fallback this rule exists to remove.
 
 **Scopes**
 - `GET /oauth-clients/scopes` returns scopes grouped by category for the **signed-in user's role**.
@@ -152,6 +152,7 @@ const pipeshub = new Pipeshub({
 async function run() {
   const result = await pipeshub.oAuthApps.createOAuthApp({
     name: "My Integration App",
+    tokenIdentityUserId: "65f0c0ffee00000000000000",
     description: "Integrates PipesHub with our internal tools",
     redirectUris: [
       "https://myapp.com/callback",
@@ -194,6 +195,7 @@ const pipeshub = new PipeshubCore({
 async function run() {
   const res = await oAuthAppsCreateOAuthApp(pipeshub, {
     name: "My Integration App",
+    tokenIdentityUserId: "65f0c0ffee00000000000000",
     description: "Integrates PipesHub with our internal tools",
     redirectUris: [
       "https://myapp.com/callback",
@@ -238,7 +240,7 @@ run();
 
 | Error Type                                 | Status Code                                | Content Type                               |
 | ------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
-| errors.ApplicationJsonErrorResponse        | 400, 401, 403                              | application/json                           |
+| errors.ApplicationJsonErrorResponse        | 400, 401, 403, 404                         | application/json                           |
 | errors.OAuthClientManagementRateLimitError | 429                                        | application/json                           |
 | errors.PipeshubDefaultError                | 4XX, 5XX                                   | \*/\*                                      |
 
@@ -319,7 +321,7 @@ run();
 
 | Error Type                                 | Status Code                                | Content Type                               |
 | ------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
-| errors.ApplicationJsonErrorResponse        | 401                                        | application/json                           |
+| errors.ApplicationJsonErrorResponse        | 401, 403                                   | application/json                           |
 | errors.OAuthClientManagementRateLimitError | 429                                        | application/json                           |
 | errors.PipeshubDefaultError                | 4XX, 5XX                                   | \*/\*                                      |
 
@@ -408,6 +410,16 @@ run();
 ## updateOAuthApp
 
 Update an OAuth app's configuration. All body fields are optional — supply only what should change. URL fields (`homepageUrl`, `privacyPolicyUrl`, `termsOfServiceUrl`) accept `null` to clear them.
+
+**Adding `client_credentials`** to `allowedGrantTypes` requires an organisation administrator, because
+it settles whose documents the application's tokens reach. A non-administrator answers `403`, and that
+check runs first — so a member sees `403` whether or not a service account is bound.
+
+For an administrator, it answers `400` when no service account is bound or the bound account is
+disabled, and `404` when the bound identity no longer exists or is not a service account — distinct
+from the `404` for an application this caller cannot see. Point the application at one first with
+`PUT /oauth-clients/{appId}/token-identity`. An application that already allows the grant without a
+service account predates this rule and can still be edited.
 
 Creator-only: even org admins cannot edit apps owned by other users.
 

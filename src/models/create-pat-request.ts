@@ -5,6 +5,11 @@
 import * as z from "zod/v4-mini";
 import { ClosedEnum } from "../types/enums.js";
 import { smartUnion } from "../types/smart-union.js";
+import {
+  KnowledgeLimit,
+  KnowledgeLimit$Outbound,
+  KnowledgeLimit$outboundSchema,
+} from "./knowledge-limit.js";
 
 export const ExpiryDaysNever = {
   Never: "never",
@@ -57,6 +62,17 @@ export type CreatePatRequest = {
    * no literal null option).
    */
   expiryDays?: ExpiryDaysEnum | ExpiryDaysNever | undefined;
+  /**
+   * What a connected app may see: an OAuth app's limit is picked by its
+   *
+   * @remarks
+   * creator and holds for every user who connects it; a personal access
+   * token's by its owner. Search, chat, agent chat and every record read by
+   * id stay inside it, and inside the connecting user's own permissions.
+   * Omit it for everything the user can see. Sent, it must name at least one id and at
+   * most 50 in all, since it is signed into every token the app gets.
+   */
+  knowledgeLimit?: KnowledgeLimit | undefined;
 };
 
 /** @internal */
@@ -87,6 +103,7 @@ export type CreatePatRequest$Outbound = {
   name: string;
   scopes?: Array<string> | undefined;
   expiryDays?: number | string | undefined;
+  knowledgeLimit?: KnowledgeLimit$Outbound | undefined;
 };
 
 /** @internal */
@@ -99,6 +116,7 @@ export const CreatePatRequest$outboundSchema: z.ZodMiniType<
   expiryDays: z.optional(
     smartUnion([ExpiryDaysEnum$outboundSchema, ExpiryDaysNever$outboundSchema]),
   ),
+  knowledgeLimit: z.optional(KnowledgeLimit$outboundSchema),
 });
 
 export function createPatRequestToJSON(

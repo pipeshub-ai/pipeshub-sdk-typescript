@@ -171,7 +171,7 @@ async function $do(
   >(
     M.json(201, models.CreateOAuthAppResponse$inboundSchema),
     M.jsonErr(
-      [400, 401, 403],
+      [400, 401, 403, 404],
       errors.ApplicationJsonErrorResponse$inboundSchema,
     ),
     M.jsonErr(429, errors.OAuthClientManagementRateLimitError$inboundSchema),

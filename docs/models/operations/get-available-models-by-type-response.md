@@ -17,7 +17,7 @@ let value: GetAvailableModelsByTypeResponse = {
   message: "Found 2 llm models",
   models: [
     {
-      modelType: "reasoning",
+      modelType: "multiModal",
       provider: "azureOpenAI",
       modelName: "gpt-5.6-luna",
       modelKey: "f3a4b5b6-5b6c-4e85-9097-3202cfe696fc",
@@ -25,6 +25,7 @@ let value: GetAvailableModelsByTypeResponse = {
       isReasoning: true,
       isDefault: true,
       modelFriendlyName: "Reasoning model",
+      defaultReasoningEffort: "low",
     },
   ],
 };

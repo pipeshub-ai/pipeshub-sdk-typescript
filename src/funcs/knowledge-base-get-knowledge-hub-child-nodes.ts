@@ -23,7 +23,6 @@ import * as errors from "../models/errors/index.js";
 import { PipeshubError } from "../models/errors/pipeshub-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { SDKValidationError } from "../models/errors/sdk-validation-error.js";
-import * as models from "../models/index.js";
 import * as operations from "../models/operations/index.js";
 import { APICall, APIPromise } from "../types/async.js";
 import { Result } from "../types/fp.js";
@@ -59,8 +58,9 @@ import { Result } from "../types/fp.js";
  *
  * When `include=breadcrumbs` is set, the response contains a
  * `breadcrumbs` array tracing the path from the root to the current
- * node. The `currentNode` and `parentNode` objects are always populated
- * for non-root requests.
+ * node. The `currentNode` object is always populated for non-root
+ * requests. `parentNode` is too, except at the top of a source and for
+ * a connected app whose limit leaves that parent out: it is `null` then.
  *
  * **Access control**
  *
@@ -78,12 +78,14 @@ export function knowledgeBaseGetKnowledgeHubChildNodes(
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    models.KnowledgeHubNodesResponse,
+    operations.GetKnowledgeHubChildNodesResponse,
     | errors.GetKnowledgeHubChildNodesBadRequestError
     | errors.GetKnowledgeHubChildNodesUnauthorizedError
     | errors.GetKnowledgeHubChildNodesForbiddenError
     | errors.GetKnowledgeHubChildNodesNotFoundError
+    | errors.GetKnowledgeHubChildNodesUnprocessableEntityError
     | errors.GetKnowledgeHubChildNodesInternalServerError
+    | errors.GetKnowledgeHubChildNodesServiceUnavailableError
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -108,12 +110,14 @@ async function $do(
 ): Promise<
   [
     Result<
-      models.KnowledgeHubNodesResponse,
+      operations.GetKnowledgeHubChildNodesResponse,
       | errors.GetKnowledgeHubChildNodesBadRequestError
       | errors.GetKnowledgeHubChildNodesUnauthorizedError
       | errors.GetKnowledgeHubChildNodesForbiddenError
       | errors.GetKnowledgeHubChildNodesNotFoundError
+      | errors.GetKnowledgeHubChildNodesUnprocessableEntityError
       | errors.GetKnowledgeHubChildNodesInternalServerError
+      | errors.GetKnowledgeHubChildNodesServiceUnavailableError
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -158,6 +162,7 @@ async function $do(
   const query = encodeFormQuery({
     "connectorIds": payload.connectorIds,
     "createdAt": payload.createdAt,
+    "cursor": payload.cursor,
     "flattened": payload.flattened,
     "include": payload.include,
     "indexingStatus": payload.indexingStatus,
@@ -229,12 +234,14 @@ async function $do(
   };
 
   const [result] = await M.match<
-    models.KnowledgeHubNodesResponse,
+    operations.GetKnowledgeHubChildNodesResponse,
     | errors.GetKnowledgeHubChildNodesBadRequestError
     | errors.GetKnowledgeHubChildNodesUnauthorizedError
     | errors.GetKnowledgeHubChildNodesForbiddenError
     | errors.GetKnowledgeHubChildNodesNotFoundError
+    | errors.GetKnowledgeHubChildNodesUnprocessableEntityError
     | errors.GetKnowledgeHubChildNodesInternalServerError
+    | errors.GetKnowledgeHubChildNodesServiceUnavailableError
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -244,7 +251,9 @@ async function $do(
     | UnexpectedClientError
     | SDKValidationError
   >(
-    M.json(200, models.KnowledgeHubNodesResponse$inboundSchema),
+    M.json(200, operations.GetKnowledgeHubChildNodesResponse$inboundSchema, {
+      key: "Result",
+    }),
     M.jsonErr(
       400,
       errors.GetKnowledgeHubChildNodesBadRequestError$inboundSchema,
@@ -259,8 +268,17 @@ async function $do(
     ),
     M.jsonErr(404, errors.GetKnowledgeHubChildNodesNotFoundError$inboundSchema),
     M.jsonErr(
+      422,
+      errors.GetKnowledgeHubChildNodesUnprocessableEntityError$inboundSchema,
+    ),
+    M.jsonErr(
       500,
       errors.GetKnowledgeHubChildNodesInternalServerError$inboundSchema,
+    ),
+    M.jsonErr(
+      503,
+      errors.GetKnowledgeHubChildNodesServiceUnavailableError$inboundSchema,
+      { hdrs: true },
     ),
     M.fail("4XX"),
     M.fail("5XX"),

@@ -41,6 +41,13 @@ export type PersistedSemanticSearchCitationMetadata = {
    * share. Absent on citations saved before this field was stored.
    */
   connectorId?: string | null | undefined;
+  /**
+   * The name the connector instance had when the answer was written.
+   *
+   * @remarks
+   * Absent on citations saved before this field was stored.
+   */
+  connectorInstanceName?: string | null | undefined;
   recordType?: string | null | undefined;
   blockNum?: Array<number | null> | null | undefined;
   pageNum?: Array<number | null> | null | undefined;
@@ -58,6 +65,10 @@ export type PersistedSemanticSearchCitationMetadata = {
   departments?: Array<string> | null | undefined;
   languages?: Array<string> | null | undefined;
   topics?: Array<string> | null | undefined;
+  /**
+   * When the cited record was last updated at its source.
+   */
+  updatedAt?: Date | null | undefined;
 };
 
 /** @internal */
@@ -76,6 +87,7 @@ export const PersistedSemanticSearchCitationMetadata$inboundSchema:
       hideWeburl: z.optional(z.nullable(types.boolean())),
       connector: z.optional(z.nullable(types.string())),
       connectorId: z.optional(z.nullable(types.string())),
+      connectorInstanceName: z.optional(z.nullable(types.string())),
       recordType: z.optional(z.nullable(types.string())),
       blockNum: z.optional(z.nullable(z.array(types.nullable(types.number())))),
       pageNum: z.optional(z.nullable(z.array(types.nullable(types.number())))),
@@ -89,6 +101,7 @@ export const PersistedSemanticSearchCitationMetadata$inboundSchema:
       departments: z.optional(z.nullable(z.array(types.string()))),
       languages: z.optional(z.nullable(z.array(types.string()))),
       topics: z.optional(z.nullable(z.array(types.string()))),
+      updatedAt: z.optional(z.nullable(types.date())),
     }),
     z.transform((v) => {
       return remap$(v, {

@@ -41,16 +41,13 @@ import { Result } from "../types/fp.js";
  * - No duplicate methods within the same step
  * - No method can appear in multiple steps
  * - Each step must have at least one allowed method
- * - `samlSso` is only allowed in a single-step policy; it can't be combined with other steps
+ * - `samlSso` and `oauth` were removed in 1.0 and are refused; use `microsoft` in place of `azureAd`
  *
  * **Available Methods:**
  * - `password`: Email/password authentication
  * - `otp`: One-time password via email
  * - `google`: Google OAuth 2.0
  * - `microsoft`: Microsoft OAuth 2.0
- * - `azureAd`: Azure Active Directory
- * - `samlSso`: SAML 2.0 Single Sign-On
- * - `oauth`: Generic OAuth 2.0 provider
  *
  * **Example - Single Factor (Password or Google):**
  *
@@ -204,7 +201,7 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.UpdateAuthMethodResponse$inboundSchema),
-    M.jsonErr([400, 401, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
     M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

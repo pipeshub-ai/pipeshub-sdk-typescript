@@ -84,6 +84,15 @@ import { Result } from "../types/fp.js";
  * **Scope:** resolution searches every connector the caller can access,
  * regardless of any source filter used elsewhere.
  *
+ * **A connected app with a limit:** each match's `context_block` names nothing
+ * outside the limit beside the record. Its `External Parent ID` reads
+ * `N/A` for a parent the limit leaves out, and a code file's `Path:`
+ * line is left out unless the limit covers the whole app. Linked
+ * records, related tables, a deal's orgs and products, and live Jira
+ * parent, epic, sub-task and linked-issue lines appear only for
+ * records inside the limit. `Web URL` is kept, though it can contain
+ * folder names.
+ *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
 export function connectorLookupRecordByIdentifier(

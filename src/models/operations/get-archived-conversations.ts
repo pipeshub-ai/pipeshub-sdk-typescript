@@ -338,6 +338,13 @@ export type GetArchivedConversationsConversation = {
    */
   sharedBy?: models.ConversationSharedBy | undefined;
   /**
+   * Only on agent conversations (returned by `GET /conversations?source=shared`). Open
+   *
+   * @remarks
+   * them with `GET /agents/{agentKey}/conversations/{conversationId}`.
+   */
+  agentKey?: string | undefined;
+  /**
    * Timestamp when the conversation was archived
    */
   archivedAt?: Date | undefined;
@@ -817,6 +824,7 @@ export const GetArchivedConversationsConversation$inboundSchema: z.ZodMiniType<
       z.nullable(GetArchivedConversationsProjectVisibility$inboundSchema),
     ),
     sharedBy: types.optional(models.ConversationSharedBy$inboundSchema),
+    agentKey: types.optional(types.string()),
     archivedAt: types.optional(types.date()),
   }),
   z.transform((v) => {

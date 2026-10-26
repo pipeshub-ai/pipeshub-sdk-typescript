@@ -9,7 +9,7 @@
  * OAuth 2.0 authentication with fine-grained scopes.
  * Supports authorization_code (with PKCE) and client_credentials flows.
  * OAuth tokens are Bearer JWTs — use the same Authorization header as regular tokens.
- * For **client_credentials**, machine JWTs may use `userId === client_id`; the Node gateway resolves the OAuth app creator — see **OAuth Provider** tag.
+ * For **client_credentials**, machine JWTs may use `userId === client_id`; the Node gateway resolves the application's token identity — the service account it is pointed at, or its creator for an application registered before that was required — see **OAuth Provider** tag.
  */
 export type OAuth2Scope =
   /**
@@ -137,6 +137,18 @@ export type OAuth2Scope =
    */
   | "agent:execute"
   /**
+   * Read toolsets and their authentication status
+   */
+  | "toolset:read"
+  /**
+   * Add, configure and authenticate toolsets
+   */
+  | "toolset:write"
+  /**
+   * Remove toolsets and their credentials
+   */
+  | "toolset:delete"
+  /**
    * Read connector configurations
    */
   | "connector:read"
@@ -152,6 +164,10 @@ export type OAuth2Scope =
    * Delete connectors
    */
   | "connector:delete"
+  /**
+   * Read indexed code repositories and their code graph
+   */
+  | "code:read"
   /**
    * Read system configuration
    */

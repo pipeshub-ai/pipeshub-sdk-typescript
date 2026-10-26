@@ -3,6 +3,7 @@
  */
 
 import * as z from "zod/v4-mini";
+import { remap as remap$ } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
 import * as openEnums from "../types/enums.js";
 import { OpenEnum } from "../types/enums.js";
@@ -24,6 +25,10 @@ import {
   ConversationModelInfo,
   ConversationModelInfo$inboundSchema,
 } from "./conversation-model-info.js";
+import {
+  ConversationSharedBy,
+  ConversationSharedBy$inboundSchema,
+} from "./conversation-shared-by.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
 export const AgentConversationDetailAccessLevel = {
@@ -35,6 +40,7 @@ export type AgentConversationDetailAccessLevel = OpenEnum<
 >;
 
 export type AgentConversationDetailSharedWith = {
+  id?: string | undefined;
   userId?: string | undefined;
   accessLevel?: AgentConversationDetailAccessLevel | undefined;
 };
@@ -57,6 +63,9 @@ export type AgentConversationDetailStatus = OpenEnum<
  * not the raw `AgentConversation` document shape: fields like `agentKey`,
  * `userId`, `orgId`, `conversationSource`, and root-level `messages`
  * metadata outside the selected slice are omitted.
+ *
+ * `sharedWith` is the owner's list of recipients, so it is present only for the
+ * owner. A recipient gets `sharedBy` (who shared the chat) instead.
  */
 export type AgentConversationDetail = {
   id: string;
@@ -64,9 +73,16 @@ export type AgentConversationDetail = {
   initiator?: string | undefined;
   createdAt: Date;
   isShared: boolean;
-  sharedWith: Array<AgentConversationDetailSharedWith>;
+  sharedWith?: Array<AgentConversationDetailSharedWith> | undefined;
   status?: AgentConversationDetailStatus | undefined;
   failReason?: string | undefined;
+  /**
+   * Present on conversations the caller received via share. Identifies the
+   *
+   * @remarks
+   * conversation initiator (the only user who can share a chat).
+   */
+  sharedBy?: ConversationSharedBy | undefined;
   messages: Array<AgentConversationDetailMessage>;
   /**
    * AI model configuration recorded against a conversation or message.
@@ -93,10 +109,20 @@ export const AgentConversationDetailAccessLevel$inboundSchema: z.ZodMiniType<
 export const AgentConversationDetailSharedWith$inboundSchema: z.ZodMiniType<
   AgentConversationDetailSharedWith,
   unknown
-> = z.object({
-  userId: types.optional(types.string()),
-  accessLevel: types.optional(AgentConversationDetailAccessLevel$inboundSchema),
-});
+> = z.pipe(
+  z.object({
+    _id: types.optional(types.string()),
+    userId: types.optional(types.string()),
+    accessLevel: types.optional(
+      AgentConversationDetailAccessLevel$inboundSchema,
+    ),
+  }),
+  z.transform((v) => {
+    return remap$(v, {
+      "_id": "id",
+    });
+  }),
+);
 
 export function agentConversationDetailSharedWithFromJSON(
   jsonString: string,
@@ -124,11 +150,12 @@ export const AgentConversationDetail$inboundSchema: z.ZodMiniType<
   initiator: types.optional(types.string()),
   createdAt: types.date(),
   isShared: types.boolean(),
-  sharedWith: z.array(
-    z.lazy(() => AgentConversationDetailSharedWith$inboundSchema),
+  sharedWith: types.optional(
+    z.array(z.lazy(() => AgentConversationDetailSharedWith$inboundSchema)),
   ),
   status: types.optional(AgentConversationDetailStatus$inboundSchema),
   failReason: types.optional(types.string()),
+  sharedBy: types.optional(ConversationSharedBy$inboundSchema),
   messages: z.array(AgentConversationDetailMessage$inboundSchema),
   modelInfo: types.optional(ConversationModelInfo$inboundSchema),
   pagination: AgentConversationDetailPagination$inboundSchema,

@@ -15,13 +15,10 @@ import {
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
 export const AllowedMethod = {
-  SamlSso: "samlSso",
   Otp: "otp",
   Password: "password",
   Google: "google",
   Microsoft: "microsoft",
-  AzureAd: "azureAd",
-  Oauth: "oauth",
 } as const;
 export type AllowedMethod = OpenEnum<typeof AllowedMethod>;
 

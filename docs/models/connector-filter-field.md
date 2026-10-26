@@ -1,0 +1,27 @@
+# ConnectorFilterField
+
+## Example Usage
+
+```typescript
+import { ConnectorFilterField } from "@pipeshub-ai/sdk/models";
+
+let value: ConnectorFilterField = {};
+```
+
+## Fields
+
+| Field                                                                                 | Type                                                                                  | Required                                                                              | Description                                                                           |
+| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `name`                                                                                | *string*                                                                              | :heavy_minus_sign:                                                                    | Filter key: the key in `filters.<sync\|indexing>.values`                              |
+| `displayName`                                                                         | *string*                                                                              | :heavy_minus_sign:                                                                    | N/A                                                                                   |
+| `description`                                                                         | *string*                                                                              | :heavy_minus_sign:                                                                    | N/A                                                                                   |
+| `filterType`                                                                          | *string*                                                                              | :heavy_minus_sign:                                                                    | N/A                                                                                   |
+| `category`                                                                            | *string*                                                                              | :heavy_minus_sign:                                                                    | N/A                                                                                   |
+| `required`                                                                            | *boolean*                                                                             | :heavy_minus_sign:                                                                    | N/A                                                                                   |
+| `defaultValue`                                                                        | *any*                                                                                 | :heavy_minus_sign:                                                                    | N/A                                                                                   |
+| `defaultOperator`                                                                     | *string*                                                                              | :heavy_minus_sign:                                                                    | N/A                                                                                   |
+| `fallbackOperator`                                                                    | *string*                                                                              | :heavy_minus_sign:                                                                    | N/A                                                                                   |
+| `noImplicitOperatorDefault`                                                           | *boolean*                                                                             | :heavy_minus_sign:                                                                    | N/A                                                                                   |
+| `operators`                                                                           | *string*[]                                                                            | :heavy_minus_sign:                                                                    | N/A                                                                                   |
+| `optionSourceType`                                                                    | [models.OptionSourceType](../models/option-source-type.md)                            | :heavy_minus_sign:                                                                    | `dynamic` options come from GET /connectors/{connectorId}/filters/{filterKey}/options |
+| `options`                                                                             | *any*[]                                                                               | :heavy_minus_sign:                                                                    | N/A                                                                                   |

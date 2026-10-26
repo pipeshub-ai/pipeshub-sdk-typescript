@@ -39,9 +39,9 @@ import { Result } from "../types/fp.js";
  * compromised laptop, where only the token's own creator could
  * otherwise see or revoke it.
  *
- * Requires org-admin privileges (`userAdminCheck`) — note this returns
- * **`400`**, not `403`, for a non-admin caller (shared middleware
- * behavior across the codebase, not specific to this route).
+ * Requires org-admin privileges (`userAdminCheck`): a non-admin caller
+ * gets `403` (`ForbiddenError`, message
+ * "You need admin access to do this. Ask an admin in your organisation.").
  *
  * If set, this operation will use {@link Security.bearerAuth} from the global security.
  */
@@ -185,7 +185,10 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.AdminPatListResponse$inboundSchema),
-    M.jsonErr([400, 401], errors.ApplicationJsonErrorResponse$inboundSchema),
+    M.jsonErr(
+      [400, 401, 403],
+      errors.ApplicationJsonErrorResponse$inboundSchema,
+    ),
     M.jsonErr(429, errors.OAuthClientManagementRateLimitError$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

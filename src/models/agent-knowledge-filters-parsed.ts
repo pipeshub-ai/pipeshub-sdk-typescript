@@ -8,23 +8,90 @@ import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
+export type AgentKnowledgeFiltersParsedNode = {
+  id: string;
+  name: string;
+  /**
+   * `recordGroup`, `folder` or `record`.
+   */
+  nodeType: string;
+};
+
 /**
- * Indexed scope for a knowledge connector: record-group ids and
+ * What a knowledge source is limited to. With both lists empty the agent
  *
  * @remarks
- * individual record ids. On GET, `filtersParsed` is this shape parsed
- * from the stored `filters` JSON string.
+ * searches the whole source; otherwise it searches only the listed
+ * record groups, folders and records, each with everything under it, and
+ * a selection made in a chat must lie under them. On GET, `filtersParsed`
+ * is this shape parsed from the stored `filters` JSON string.
+ *
+ * On create and update, `filters` may be this object or its JSON text.
+ * The two lists must hold valid UUIDs, at most 200 across both; a value
+ * that cannot be read is refused with 400 rather than saved as "no
+ * limit", and so is a limit that covers more nodes than one search may
+ * (50,000 by default). A stored limit that cannot be read limits the
+ * source to nothing.
  */
 export type AgentKnowledgeFiltersParsed = {
   /**
-   * Deprecated/legacy: record-group ids for connector record-group scoping (e.g. Confluence spaces, Jira projects). No longer set for KB (Collection) entries — a KB is identified by its own `connectorId`, not by an id in this list.
+   * Record-group ids (e.g. Confluence spaces, Jira projects), each with the groups nested in it. Not set for KB (Collection) entries — a KB is identified by its own `connectorId`; an id equal to a source's `connectorId` is ignored.
    */
   recordGroups?: Array<string> | undefined;
   /**
-   * Individual record ids in scope.
+   * Folder or record ids, each with everything under it.
    */
   records?: Array<string> | undefined;
+  /**
+   * Names of the ids above, for display. Not used for search.
+   */
+  nodes?: Array<AgentKnowledgeFiltersParsedNode> | undefined;
 };
+
+/** @internal */
+export const AgentKnowledgeFiltersParsedNode$inboundSchema: z.ZodMiniType<
+  AgentKnowledgeFiltersParsedNode,
+  unknown
+> = z.object({
+  id: types.string(),
+  name: types.string(),
+  nodeType: types.string(),
+});
+/** @internal */
+export type AgentKnowledgeFiltersParsedNode$Outbound = {
+  id: string;
+  name: string;
+  nodeType: string;
+};
+
+/** @internal */
+export const AgentKnowledgeFiltersParsedNode$outboundSchema: z.ZodMiniType<
+  AgentKnowledgeFiltersParsedNode$Outbound,
+  AgentKnowledgeFiltersParsedNode
+> = z.object({
+  id: z.string(),
+  name: z.string(),
+  nodeType: z.string(),
+});
+
+export function agentKnowledgeFiltersParsedNodeToJSON(
+  agentKnowledgeFiltersParsedNode: AgentKnowledgeFiltersParsedNode,
+): string {
+  return JSON.stringify(
+    AgentKnowledgeFiltersParsedNode$outboundSchema.parse(
+      agentKnowledgeFiltersParsedNode,
+    ),
+  );
+}
+export function agentKnowledgeFiltersParsedNodeFromJSON(
+  jsonString: string,
+): SafeParseResult<AgentKnowledgeFiltersParsedNode, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => AgentKnowledgeFiltersParsedNode$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'AgentKnowledgeFiltersParsedNode' from JSON`,
+  );
+}
 
 /** @internal */
 export const AgentKnowledgeFiltersParsed$inboundSchema: z.ZodMiniType<
@@ -33,11 +100,15 @@ export const AgentKnowledgeFiltersParsed$inboundSchema: z.ZodMiniType<
 > = z.object({
   recordGroups: types.optional(z.array(types.string())),
   records: types.optional(z.array(types.string())),
+  nodes: types.optional(
+    z.array(z.lazy(() => AgentKnowledgeFiltersParsedNode$inboundSchema)),
+  ),
 });
 /** @internal */
 export type AgentKnowledgeFiltersParsed$Outbound = {
   recordGroups?: Array<string> | undefined;
   records?: Array<string> | undefined;
+  nodes?: Array<AgentKnowledgeFiltersParsedNode$Outbound> | undefined;
 };
 
 /** @internal */
@@ -47,6 +118,9 @@ export const AgentKnowledgeFiltersParsed$outboundSchema: z.ZodMiniType<
 > = z.object({
   recordGroups: z.optional(z.array(z.string())),
   records: z.optional(z.array(z.string())),
+  nodes: z.optional(
+    z.array(z.lazy(() => AgentKnowledgeFiltersParsedNode$outboundSchema)),
+  ),
 });
 
 export function agentKnowledgeFiltersParsedToJSON(

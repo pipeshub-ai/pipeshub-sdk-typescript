@@ -7,6 +7,46 @@ import * as operations from "../operations/index.js";
 import { PipeshubError } from "./pipeshub-error.js";
 
 /**
+ * The database could not give this listing the memory it needs right now, because other requests were using
+ *
+ * @remarks
+ * it (nothing is wrong with the request). Retry after `Retry-After` seconds; the web app retries by itself.
+ * The body is the gateway's own busy message, not the service's wording.
+ */
+export type GetKnowledgeHubRootNodesServiceUnavailableErrorData = {
+  error: operations.GetKnowledgeHubRootNodesServiceUnavailableError;
+};
+
+/**
+ * The database could not give this listing the memory it needs right now, because other requests were using
+ *
+ * @remarks
+ * it (nothing is wrong with the request). Retry after `Retry-After` seconds; the web app retries by itself.
+ * The body is the gateway's own busy message, not the service's wording.
+ */
+export class GetKnowledgeHubRootNodesServiceUnavailableError
+  extends PipeshubError
+{
+  error: operations.GetKnowledgeHubRootNodesServiceUnavailableError;
+
+  /** The original data that was passed to this error instance. */
+  data$: GetKnowledgeHubRootNodesServiceUnavailableErrorData;
+
+  constructor(
+    err: GetKnowledgeHubRootNodesServiceUnavailableErrorData,
+    httpMeta: { response: Response; request: Request; body: string },
+  ) {
+    const message = err.error?.message
+      || `API error occurred: ${JSON.stringify(err)}`;
+    super(message, httpMeta);
+    this.data$ = err;
+    this.error = err.error;
+
+    this.name = "GetKnowledgeHubRootNodesServiceUnavailableError";
+  }
+}
+
+/**
  * An unexpected error occurred on the server.
  */
 export type GetKnowledgeHubRootNodesInternalServerErrorData = {
@@ -33,6 +73,52 @@ export class GetKnowledgeHubRootNodesInternalServerError extends PipeshubError {
     this.error = err.error;
 
     this.name = "GetKnowledgeHubRootNodesInternalServerError";
+  }
+}
+
+/**
+ * A listing that spans a whole connector (a flattened listing, a search or a filter) was too large for the
+ *
+ * @remarks
+ * database to hold in memory, so it was refused instead of cut short. No page is returned. Open a folder
+ * (`GET /knowledgeBase/knowledge-hub/nodes/{parentType}/{parentId}`) to see its records, or add a search (`q`),
+ * which keeps only matching records in memory. Choosing a connector, or a filter that keeps most records (such as
+ * `nodeTypes`), does not help. Sorting by name with no filters is served from stored visibility where the
+ * connector allows it and is not affected.
+ */
+export type GetKnowledgeHubRootNodesUnprocessableEntityErrorData = {
+  error: operations.GetKnowledgeHubRootNodesUnprocessableEntityError;
+};
+
+/**
+ * A listing that spans a whole connector (a flattened listing, a search or a filter) was too large for the
+ *
+ * @remarks
+ * database to hold in memory, so it was refused instead of cut short. No page is returned. Open a folder
+ * (`GET /knowledgeBase/knowledge-hub/nodes/{parentType}/{parentId}`) to see its records, or add a search (`q`),
+ * which keeps only matching records in memory. Choosing a connector, or a filter that keeps most records (such as
+ * `nodeTypes`), does not help. Sorting by name with no filters is served from stored visibility where the
+ * connector allows it and is not affected.
+ */
+export class GetKnowledgeHubRootNodesUnprocessableEntityError
+  extends PipeshubError
+{
+  error: operations.GetKnowledgeHubRootNodesUnprocessableEntityError;
+
+  /** The original data that was passed to this error instance. */
+  data$: GetKnowledgeHubRootNodesUnprocessableEntityErrorData;
+
+  constructor(
+    err: GetKnowledgeHubRootNodesUnprocessableEntityErrorData,
+    httpMeta: { response: Response; request: Request; body: string },
+  ) {
+    const message = err.error?.message
+      || `API error occurred: ${JSON.stringify(err)}`;
+    super(message, httpMeta);
+    this.data$ = err;
+    this.error = err.error;
+
+    this.name = "GetKnowledgeHubRootNodesUnprocessableEntityError";
   }
 }
 
@@ -159,6 +245,28 @@ export class GetKnowledgeHubRootNodesBadRequestError extends PipeshubError {
 }
 
 /** @internal */
+export const GetKnowledgeHubRootNodesServiceUnavailableError$inboundSchema:
+  z.ZodMiniType<GetKnowledgeHubRootNodesServiceUnavailableError, unknown> = z
+    .pipe(
+      z.object({
+        error: z.lazy(() =>
+          operations
+            .GetKnowledgeHubRootNodesServiceUnavailableError$inboundSchema
+        ),
+        request$: z.custom<Request>(x => x instanceof Request),
+        response$: z.custom<Response>(x => x instanceof Response),
+        body$: z.string(),
+      }),
+      z.transform((v) => {
+        return new GetKnowledgeHubRootNodesServiceUnavailableError(v, {
+          request: v.request$,
+          response: v.response$,
+          body: v.body$,
+        });
+      }),
+    );
+
+/** @internal */
 export const GetKnowledgeHubRootNodesInternalServerError$inboundSchema:
   z.ZodMiniType<GetKnowledgeHubRootNodesInternalServerError, unknown> = z.pipe(
     z.object({
@@ -178,6 +286,28 @@ export const GetKnowledgeHubRootNodesInternalServerError$inboundSchema:
       });
     }),
   );
+
+/** @internal */
+export const GetKnowledgeHubRootNodesUnprocessableEntityError$inboundSchema:
+  z.ZodMiniType<GetKnowledgeHubRootNodesUnprocessableEntityError, unknown> = z
+    .pipe(
+      z.object({
+        error: z.lazy(() =>
+          operations
+            .GetKnowledgeHubRootNodesUnprocessableEntityError$inboundSchema
+        ),
+        request$: z.custom<Request>(x => x instanceof Request),
+        response$: z.custom<Response>(x => x instanceof Response),
+        body$: z.string(),
+      }),
+      z.transform((v) => {
+        return new GetKnowledgeHubRootNodesUnprocessableEntityError(v, {
+          request: v.request$,
+          response: v.response$,
+          body: v.body$,
+        });
+      }),
+    );
 
 /** @internal */
 export const GetKnowledgeHubRootNodesForbiddenError$inboundSchema:

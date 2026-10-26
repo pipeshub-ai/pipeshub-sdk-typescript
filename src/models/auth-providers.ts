@@ -7,10 +7,6 @@ import { safeParse } from "../lib/schemas.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import {
-  AuthProviderAzureAdPublicConfig,
-  AuthProviderAzureAdPublicConfig$inboundSchema,
-} from "./auth-provider-azure-ad-public-config.js";
-import {
   AuthProviderGooglePublicConfig,
   AuthProviderGooglePublicConfig$inboundSchema,
 } from "./auth-provider-google-public-config.js";
@@ -18,10 +14,6 @@ import {
   AuthProviderMicrosoftPublicConfig,
   AuthProviderMicrosoftPublicConfig$inboundSchema,
 } from "./auth-provider-microsoft-public-config.js";
-import {
-  AuthProviderOAuthPublicConfig,
-  AuthProviderOAuthPublicConfig$inboundSchema,
-} from "./auth-provider-o-auth-public-config.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
 /**
@@ -36,18 +28,6 @@ export type AuthProviders = {
    * Public Microsoft OAuth settings returned to clients
    */
   microsoft?: AuthProviderMicrosoftPublicConfig | undefined;
-  /**
-   * Public Azure AD OAuth settings returned to clients
-   */
-  azuread?: AuthProviderAzureAdPublicConfig | undefined;
-  /**
-   * Public generic OAuth provider settings returned to clients
-   */
-  oauth?: AuthProviderOAuthPublicConfig | undefined;
-  /**
-   * Present when SAML SSO is an allowed method; may be an empty object
-   */
-  saml?: { [k: string]: any } | undefined;
 };
 
 /** @internal */
@@ -57,9 +37,6 @@ export const AuthProviders$inboundSchema: z.ZodMiniType<
 > = z.object({
   google: types.optional(AuthProviderGooglePublicConfig$inboundSchema),
   microsoft: types.optional(AuthProviderMicrosoftPublicConfig$inboundSchema),
-  azuread: types.optional(AuthProviderAzureAdPublicConfig$inboundSchema),
-  oauth: types.optional(AuthProviderOAuthPublicConfig$inboundSchema),
-  saml: types.optional(z.record(z.string(), z.any())),
 });
 
 export function authProvidersFromJSON(

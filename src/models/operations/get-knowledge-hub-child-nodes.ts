@@ -3,11 +3,13 @@
  */
 
 import * as z from "zod/v4-mini";
+import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { ClosedEnum } from "../../types/enums.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
+import * as models from "../index.js";
 
 /**
  * Type of the parent node whose children to retrieve.
@@ -103,11 +105,22 @@ export type GetKnowledgeHubChildNodesRequest = {
    */
   onlyContainers?: boolean | undefined;
   /**
-   * Page number (1-indexed). Combined with `limit` to paginate results.
+   * Page number (1-indexed, at most 50). Combined with `limit` to paginate results.
    *
    * @remarks
+   * Prefer `cursor`: a page number is reached by reading the pages before it.
    */
   page?: number | undefined;
+  /**
+   * Opaque cursor from `pagination.nextCursor` or `pagination.prevCursor` of a previous
+   *
+   * @remarks
+   * response. It decides the listing mode, parent, filters and sort. `include` and
+   * `limit` come from this request. A next cursor returns the following page, and a previous
+   * cursor returns the page before. A cursor whose parent disagrees with the URL, or
+   * that was issued for another user, is refused with 400.
+   */
+  cursor?: string | undefined;
   /**
    * Maximum number of items to return per page.
    *
@@ -234,6 +247,19 @@ export type GetKnowledgeHubChildNodesRequest = {
   include?: string | undefined;
 };
 
+export const GetKnowledgeHubChildNodesServiceUnavailableCode = {
+  HttpServiceUnavailable: "HTTP_SERVICE_UNAVAILABLE",
+} as const;
+export type GetKnowledgeHubChildNodesServiceUnavailableCode = ClosedEnum<
+  typeof GetKnowledgeHubChildNodesServiceUnavailableCode
+>;
+
+export type GetKnowledgeHubChildNodesServiceUnavailableError = {
+  code: GetKnowledgeHubChildNodesServiceUnavailableCode;
+  message: string;
+  requestId?: string | undefined;
+};
+
 export const GetKnowledgeHubChildNodesCodeHTTPInternalServerError = {
   HttpInternalServerError: "HTTP_INTERNAL_SERVER_ERROR",
 } as const;
@@ -244,6 +270,19 @@ export type GetKnowledgeHubChildNodesCodeHTTPInternalServerError = ClosedEnum<
 export type GetKnowledgeHubChildNodesErrorHTTPInternalServerError = {
   code: GetKnowledgeHubChildNodesCodeHTTPInternalServerError;
   message: string;
+};
+
+export const GetKnowledgeHubChildNodesUnprocessableEntityCode = {
+  HttpUnprocessableEntity: "HTTP_UNPROCESSABLE_ENTITY",
+} as const;
+export type GetKnowledgeHubChildNodesUnprocessableEntityCode = ClosedEnum<
+  typeof GetKnowledgeHubChildNodesUnprocessableEntityCode
+>;
+
+export type GetKnowledgeHubChildNodesUnprocessableEntityError = {
+  code: GetKnowledgeHubChildNodesUnprocessableEntityCode;
+  message: string;
+  requestId?: string | undefined;
 };
 
 export const GetKnowledgeHubChildNodesNotFoundCode = {
@@ -294,6 +333,11 @@ export type GetKnowledgeHubChildNodesErrorHTTPBadRequest = {
   message: string;
 };
 
+export type GetKnowledgeHubChildNodesResponse = {
+  headers: { [k: string]: Array<string> };
+  result: models.KnowledgeHubNodesResponse;
+};
+
 /** @internal */
 export const ParentType$outboundSchema: z.ZodMiniEnum<typeof ParentType> = z
   .enum(ParentType);
@@ -314,6 +358,7 @@ export type GetKnowledgeHubChildNodesRequest$Outbound = {
   parentId: string;
   onlyContainers: boolean;
   page: number;
+  cursor?: string | undefined;
   limit: number;
   sortBy: string;
   sortOrder: string;
@@ -339,6 +384,7 @@ export const GetKnowledgeHubChildNodesRequest$outboundSchema: z.ZodMiniType<
   parentId: z.string(),
   onlyContainers: z._default(z.boolean(), false),
   page: z._default(z.int(), 1),
+  cursor: z.optional(z.string()),
   limit: z._default(z.int(), 50),
   sortBy: z._default(
     GetKnowledgeHubChildNodesSortBy$outboundSchema,
@@ -372,6 +418,36 @@ export function getKnowledgeHubChildNodesRequestToJSON(
 }
 
 /** @internal */
+export const GetKnowledgeHubChildNodesServiceUnavailableCode$inboundSchema:
+  z.ZodMiniEnum<typeof GetKnowledgeHubChildNodesServiceUnavailableCode> = z
+    .enum(GetKnowledgeHubChildNodesServiceUnavailableCode);
+
+/** @internal */
+export const GetKnowledgeHubChildNodesServiceUnavailableError$inboundSchema:
+  z.ZodMiniType<GetKnowledgeHubChildNodesServiceUnavailableError, unknown> = z
+    .object({
+      code: GetKnowledgeHubChildNodesServiceUnavailableCode$inboundSchema,
+      message: types.string(),
+      requestId: types.optional(types.string()),
+    });
+
+export function getKnowledgeHubChildNodesServiceUnavailableErrorFromJSON(
+  jsonString: string,
+): SafeParseResult<
+  GetKnowledgeHubChildNodesServiceUnavailableError,
+  SDKValidationError
+> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetKnowledgeHubChildNodesServiceUnavailableError$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'GetKnowledgeHubChildNodesServiceUnavailableError' from JSON`,
+  );
+}
+
+/** @internal */
 export const GetKnowledgeHubChildNodesCodeHTTPInternalServerError$inboundSchema:
   z.ZodMiniEnum<typeof GetKnowledgeHubChildNodesCodeHTTPInternalServerError> = z
     .enum(GetKnowledgeHubChildNodesCodeHTTPInternalServerError);
@@ -399,6 +475,36 @@ export function getKnowledgeHubChildNodesErrorHTTPInternalServerErrorFromJSON(
         JSON.parse(x),
       ),
     `Failed to parse 'GetKnowledgeHubChildNodesErrorHTTPInternalServerError' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetKnowledgeHubChildNodesUnprocessableEntityCode$inboundSchema:
+  z.ZodMiniEnum<typeof GetKnowledgeHubChildNodesUnprocessableEntityCode> = z
+    .enum(GetKnowledgeHubChildNodesUnprocessableEntityCode);
+
+/** @internal */
+export const GetKnowledgeHubChildNodesUnprocessableEntityError$inboundSchema:
+  z.ZodMiniType<GetKnowledgeHubChildNodesUnprocessableEntityError, unknown> = z
+    .object({
+      code: GetKnowledgeHubChildNodesUnprocessableEntityCode$inboundSchema,
+      message: types.string(),
+      requestId: types.optional(types.string()),
+    });
+
+export function getKnowledgeHubChildNodesUnprocessableEntityErrorFromJSON(
+  jsonString: string,
+): SafeParseResult<
+  GetKnowledgeHubChildNodesUnprocessableEntityError,
+  SDKValidationError
+> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      GetKnowledgeHubChildNodesUnprocessableEntityError$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'GetKnowledgeHubChildNodesUnprocessableEntityError' from JSON`,
   );
 }
 
@@ -512,5 +618,32 @@ export function getKnowledgeHubChildNodesErrorHTTPBadRequestFromJSON(
         JSON.parse(x),
       ),
     `Failed to parse 'GetKnowledgeHubChildNodesErrorHTTPBadRequest' from JSON`,
+  );
+}
+
+/** @internal */
+export const GetKnowledgeHubChildNodesResponse$inboundSchema: z.ZodMiniType<
+  GetKnowledgeHubChildNodesResponse,
+  unknown
+> = z.pipe(
+  z.object({
+    Headers: z._default(z.record(z.string(), z.array(z.string())), {}),
+    Result: models.KnowledgeHubNodesResponse$inboundSchema,
+  }),
+  z.transform((v) => {
+    return remap$(v, {
+      "Headers": "headers",
+      "Result": "result",
+    });
+  }),
+);
+
+export function getKnowledgeHubChildNodesResponseFromJSON(
+  jsonString: string,
+): SafeParseResult<GetKnowledgeHubChildNodesResponse, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => GetKnowledgeHubChildNodesResponse$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetKnowledgeHubChildNodesResponse' from JSON`,
   );
 }

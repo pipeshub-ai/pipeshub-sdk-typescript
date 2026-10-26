@@ -23,6 +23,25 @@ let value: SemanticSearchExecuteResponse = {
     status: "<value>",
     statusCode: 530457,
     message: "<value>",
+    timeline: {
+      dateField: "modified",
+      start: new Date("2026-10-14"),
+      end: new Date("2026-06-11"),
+      periods: [
+        {
+          label: "March 2026 (2026-03-01 to 2026-03-31)",
+          start: new Date("2025-05-04"),
+          end: new Date("2026-09-07"),
+          records: 351206,
+          matches: 271168,
+        },
+      ],
+      notes: [
+        "<value 1>",
+        "<value 2>",
+        "<value 3>",
+      ],
+    },
   },
 };
 ```

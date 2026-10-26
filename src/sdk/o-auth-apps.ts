@@ -109,6 +109,16 @@ export class OAuthApps extends ClientSDK {
    * @remarks
    * Update an OAuth app's configuration. All body fields are optional — supply only what should change. URL fields (`homepageUrl`, `privacyPolicyUrl`, `termsOfServiceUrl`) accept `null` to clear them.
    *
+   * **Adding `client_credentials`** to `allowedGrantTypes` requires an organisation administrator, because
+   * it settles whose documents the application's tokens reach. A non-administrator answers `403`, and that
+   * check runs first — so a member sees `403` whether or not a service account is bound.
+   *
+   * For an administrator, it answers `400` when no service account is bound or the bound account is
+   * disabled, and `404` when the bound identity no longer exists or is not a service account — distinct
+   * from the `404` for an application this caller cannot see. Point the application at one first with
+   * `PUT /oauth-clients/{appId}/token-identity`. An application that already allows the grant without a
+   * service account predates this rule and can still be edited.
+   *
    * Creator-only: even org admins cannot edit apps owned by other users.
    *
    * When modifying `allowedScopes`, the new set must remain a subset of the caller's role-aware scope list (same rule as `GET /oauth-clients/scopes`). When adding `authorization_code` to `allowedGrantTypes`, `redirectUris` becomes required and must contain at least one URI; otherwise the request is rejected with `400` by the Zod refine on `updateAppSchema`.

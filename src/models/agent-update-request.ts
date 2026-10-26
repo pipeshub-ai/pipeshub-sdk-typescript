@@ -100,6 +100,17 @@ export type AgentUpdateRequest = {
    */
   isServiceAccount?: boolean | undefined;
   /**
+   * The `userId` of the service account this agent should search
+   *
+   * @remarks
+   * knowledge as. Only valid on a service-account agent, checked
+   * against what the agent will be once the request is applied, so one
+   * request may convert an agent and bind it. Null is accepted on any
+   * agent and clears the binding, going back to searching as the
+   * agent's creator.
+   */
+  serviceAccountUserId?: string | null | undefined;
+  /**
    * Toolsets attached to the agent (instance-aware)
    */
   toolsets?: Array<AgentCreateToolset> | undefined;
@@ -129,6 +140,14 @@ export type AgentUpdateRequest = {
     | null
     | undefined;
   /**
+   * API toolset operations the agent may call, each `<toolsetId>:<operation>`
+   *
+   * @remarks
+   * (see `/api-toolsets`). A service-account agent may only use toolsets with a
+   * shared credential.
+   */
+  apiToolsetTools?: Array<string> | undefined;
+  /**
    * When true (default), include the current user's name, email, and
    *
    * @remarks
@@ -155,11 +174,13 @@ export type AgentUpdateRequest$Outbound = {
   tags?: Array<string> | undefined;
   shareWithOrg: boolean;
   isServiceAccount: boolean;
+  serviceAccountUserId?: string | null | undefined;
   toolsets?: Array<AgentCreateToolset$Outbound> | undefined;
   knowledge?: Array<AgentCreateKnowledge$Outbound> | undefined;
   skills?: Array<AgentSkillAssignment$Outbound> | undefined;
   webSearch?: AgentCreateWebSearchUnion$Outbound | null | undefined;
   defaultReasoningEffort?: string | null | undefined;
+  apiToolsetTools?: Array<string> | undefined;
   sendUserContext?: boolean | undefined;
 };
 
@@ -177,6 +198,7 @@ export const AgentUpdateRequest$outboundSchema: z.ZodMiniType<
   tags: z.optional(z.array(z.string())),
   shareWithOrg: z._default(z.boolean(), false),
   isServiceAccount: z._default(z.boolean(), false),
+  serviceAccountUserId: z.optional(z.nullable(z.string())),
   toolsets: z.optional(z.array(AgentCreateToolset$outboundSchema)),
   knowledge: z.optional(z.array(AgentCreateKnowledge$outboundSchema)),
   skills: z.optional(z.array(AgentSkillAssignment$outboundSchema)),
@@ -184,6 +206,7 @@ export const AgentUpdateRequest$outboundSchema: z.ZodMiniType<
   defaultReasoningEffort: z.optional(
     z.nullable(AgentUpdateRequestDefaultReasoningEffort$outboundSchema),
   ),
+  apiToolsetTools: z.optional(z.array(z.string())),
   sendUserContext: z.optional(z.boolean()),
 });
 

@@ -13,5 +13,5 @@ let value: Method = "password";
 ## Values
 
 ```typescript
-"samlSso" | "otp" | "password" | "google" | "microsoft" | "azureAd" | "oauth"
+"otp" | "password" | "google" | "microsoft"
 ```

@@ -11,7 +11,7 @@ let value: AuthStep = {
   order: 267349,
   allowedMethods: [
     {
-      type: "azureAd",
+      type: "microsoft",
     },
   ],
 };

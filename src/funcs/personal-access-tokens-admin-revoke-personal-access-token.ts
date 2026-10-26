@@ -35,8 +35,8 @@ import { Result } from "../types/fp.js";
  * Revokes a token by id, scoped to the org's PAT client but **not** to
  * a specific owning user — the admin counterpart to
  * `DELETE /personal-access-tokens/{tokenId}`. Requires org-admin
- * privileges (`userAdminCheck`); returns `400` (not `403`) for a
- * non-admin caller, same as `GET /personal-access-tokens/admin`.
+ * privileges (`userAdminCheck`); a non-admin caller gets `403`
+ * (`ForbiddenError`), same as `GET /personal-access-tokens/admin`.
  *
  * If set, this operation will use {@link Security.bearerAuth} from the global security.
  */
@@ -182,7 +182,7 @@ async function $do(
   >(
     M.json(200, models.RevokePatResponse$inboundSchema),
     M.jsonErr(
-      [400, 401, 404],
+      [400, 401, 403, 404],
       errors.ApplicationJsonErrorResponse$inboundSchema,
     ),
     M.jsonErr(429, errors.OAuthClientManagementRateLimitError$inboundSchema),

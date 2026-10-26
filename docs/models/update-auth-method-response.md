@@ -14,7 +14,7 @@ let value: UpdateAuthMethodResponse = {
       order: 19378,
       allowedMethods: [
         {
-          type: "azureAd",
+          type: "microsoft",
         },
       ],
     },

@@ -10,6 +10,7 @@ let value: RegenerateAgentConversationMessageRequest = {
   conversationId: "<value>",
   messageId: "<value>",
   body: {
+    answers: "User selections:\n1. \"Which region?\" → EU",
     modelKey: "05438a37-68f2-4641-a8dc-6c47e63278ca",
     modelName: "gpt-5.6-luna",
     modelFriendlyName: "mini",

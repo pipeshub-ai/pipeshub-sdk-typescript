@@ -40,6 +40,14 @@ export type OAuthTokenResponse = {
    * OpenID Connect ID token (JWT) if openid scope was requested
    */
   idToken?: string | undefined;
+  /**
+   * The type of the issued token (RFC 8693 Section 2.2.1). Returned by
+   *
+   * @remarks
+   * the token-exchange grant, where it is always
+   * `urn:ietf:params:oauth:token-type:access_token`.
+   */
+  issuedTokenType?: string | undefined;
 };
 
 /** @internal */
@@ -54,6 +62,7 @@ export const OAuthTokenResponse$inboundSchema: z.ZodMiniType<
     refresh_token: types.optional(types.string()),
     scope: types.optional(types.string()),
     id_token: types.optional(types.string()),
+    issued_token_type: types.optional(types.string()),
   }),
   z.transform((v) => {
     return remap$(v, {
@@ -62,6 +71,7 @@ export const OAuthTokenResponse$inboundSchema: z.ZodMiniType<
       "expires_in": "expiresIn",
       "refresh_token": "refreshToken",
       "id_token": "idToken",
+      "issued_token_type": "issuedTokenType",
     });
   }),
 );

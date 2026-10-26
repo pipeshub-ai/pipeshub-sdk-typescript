@@ -23,7 +23,6 @@ import * as errors from "../models/errors/index.js";
 import { PipeshubError } from "../models/errors/pipeshub-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { SDKValidationError } from "../models/errors/sdk-validation-error.js";
-import * as models from "../models/index.js";
 import * as operations from "../models/operations/index.js";
 import { APICall, APIPromise } from "../types/async.js";
 import { Result } from "../types/fp.js";
@@ -68,6 +67,29 @@ import { Result } from "../types/fp.js";
  * - `breadcrumbs` — adds the breadcrumb trail (empty at root level)
  * - `permissions` — adds the caller's permission flags
  *
+ * **A connected app with a limit**
+ *
+ * A token that may see only some sources pages and counts only what
+ * its limit lets it see:
+ * - Limited to whole sources (apps or collections) only: the listing
+ *   and the search cover those, with exact totals and counts.
+ * - Limited to any spaces, folders or files, alone or beside whole
+ *   sources: the listing returns each whole source, space (record
+ *   group), folder and file the limit names, one item each, to open
+ *   by its `id`. `totalItems` counts those items, not what is inside
+ *   them. A search reads
+ *   forward only (`prevCursor` is always null), and takes a `page`
+ *   number up to 5; for later pages, send `nextCursor`. Its `totalItems` counts
+ *   the matches found so far and can grow from page to page; it is
+ *   final once `hasNext` is false. `counts` is returned only when the
+ *   whole result fits in the first page read, and is `null` otherwise.
+ * - An item can sit in a folder the limit leaves out, as a file the
+ *   limit names does. Its `parentId` and `parent` are then `null`: the
+ *   item is returned, and the folder above it is not named.
+ * - A `nextCursor` or `prevCursor` belongs to the limit it was read
+ *   under. A token with a different limit that sends it gets a `400`;
+ *   start that listing again without a cursor.
+ *
  * **Access control**
  *
  * Requires a valid bearer token. For OAuth tokens the `kb:read` scope
@@ -84,11 +106,13 @@ export function knowledgeBaseGetKnowledgeHubRootNodes(
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    models.KnowledgeHubNodesResponse,
+    operations.GetKnowledgeHubRootNodesResponse,
     | errors.GetKnowledgeHubRootNodesBadRequestError
     | errors.GetKnowledgeHubRootNodesUnauthorizedError
     | errors.GetKnowledgeHubRootNodesForbiddenError
+    | errors.GetKnowledgeHubRootNodesUnprocessableEntityError
     | errors.GetKnowledgeHubRootNodesInternalServerError
+    | errors.GetKnowledgeHubRootNodesServiceUnavailableError
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -113,11 +137,13 @@ async function $do(
 ): Promise<
   [
     Result<
-      models.KnowledgeHubNodesResponse,
+      operations.GetKnowledgeHubRootNodesResponse,
       | errors.GetKnowledgeHubRootNodesBadRequestError
       | errors.GetKnowledgeHubRootNodesUnauthorizedError
       | errors.GetKnowledgeHubRootNodesForbiddenError
+      | errors.GetKnowledgeHubRootNodesUnprocessableEntityError
       | errors.GetKnowledgeHubRootNodesInternalServerError
+      | errors.GetKnowledgeHubRootNodesServiceUnavailableError
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -150,6 +176,7 @@ async function $do(
   const query = encodeFormQuery({
     "connectorIds": payload?.connectorIds,
     "createdAt": payload?.createdAt,
+    "cursor": payload?.cursor,
     "flattened": payload?.flattened,
     "include": payload?.include,
     "indexingStatus": payload?.indexingStatus,
@@ -221,11 +248,13 @@ async function $do(
   };
 
   const [result] = await M.match<
-    models.KnowledgeHubNodesResponse,
+    operations.GetKnowledgeHubRootNodesResponse,
     | errors.GetKnowledgeHubRootNodesBadRequestError
     | errors.GetKnowledgeHubRootNodesUnauthorizedError
     | errors.GetKnowledgeHubRootNodesForbiddenError
+    | errors.GetKnowledgeHubRootNodesUnprocessableEntityError
     | errors.GetKnowledgeHubRootNodesInternalServerError
+    | errors.GetKnowledgeHubRootNodesServiceUnavailableError
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -235,7 +264,9 @@ async function $do(
     | UnexpectedClientError
     | SDKValidationError
   >(
-    M.json(200, models.KnowledgeHubNodesResponse$inboundSchema),
+    M.json(200, operations.GetKnowledgeHubRootNodesResponse$inboundSchema, {
+      key: "Result",
+    }),
     M.jsonErr(
       400,
       errors.GetKnowledgeHubRootNodesBadRequestError$inboundSchema,
@@ -246,8 +277,17 @@ async function $do(
     ),
     M.jsonErr(403, errors.GetKnowledgeHubRootNodesForbiddenError$inboundSchema),
     M.jsonErr(
+      422,
+      errors.GetKnowledgeHubRootNodesUnprocessableEntityError$inboundSchema,
+    ),
+    M.jsonErr(
       500,
       errors.GetKnowledgeHubRootNodesInternalServerError$inboundSchema,
+    ),
+    M.jsonErr(
+      503,
+      errors.GetKnowledgeHubRootNodesServiceUnavailableError$inboundSchema,
+      { hdrs: true },
     ),
     M.fail("4XX"),
     M.fail("5XX"),

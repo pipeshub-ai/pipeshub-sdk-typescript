@@ -70,11 +70,27 @@ export type AgentCreateResponseAgent = {
     | null
     | undefined;
   /**
+   * API toolset operations the agent may call, each `<toolsetId>:<operation>`
+   *
+   * @remarks
+   * (see `/api-toolsets`). A service-account agent may only use toolsets with a
+   * shared credential.
+   */
+  apiToolsetTools?: Array<string> | undefined;
+  /**
    * When false, this agent omits user name/email/org from its system prompt.
    */
   sendUserContext?: boolean | undefined;
   isActive: boolean;
   isServiceAccount: boolean;
+  /**
+   * The `userId` of the service account this agent searches knowledge
+   *
+   * @remarks
+   * as, or null when it searches as its creator. Only set on a
+   * service-account agent.
+   */
+  serviceAccountUserId?: string | null | undefined;
   createdBy: string;
   updatedBy: string | null;
   createdAtTimestamp: number;
@@ -145,9 +161,11 @@ export const AgentCreateResponseAgent$inboundSchema: z.ZodMiniType<
     defaultReasoningEffort: z.optional(
       z.nullable(AgentCreateResponseAgentDefaultReasoningEffort$inboundSchema),
     ),
+    apiToolsetTools: types.optional(z.array(types.string())),
     sendUserContext: types.optional(types.boolean()),
     isActive: types.boolean(),
     isServiceAccount: types.boolean(),
+    serviceAccountUserId: z.optional(z.nullable(types.string())),
     createdBy: types.string(),
     updatedBy: types.nullable(types.string()),
     createdAtTimestamp: types.number(),

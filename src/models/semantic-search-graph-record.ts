@@ -8,6 +8,10 @@ import { safeParse } from "../lib/schemas.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
+import {
+  SemanticSearchLinkedRecord,
+  SemanticSearchLinkedRecord$inboundSchema,
+} from "./semantic-search-linked-record.js";
 
 /**
  * Graph record vertex returned in `records` and as values of `virtual_to_record_map`.
@@ -16,6 +20,12 @@ import { SDKValidationError } from "./errors/sdk-validation-error.js";
  * All listed fields are optional in the schema so partial or evolving documents validate; typical Arango documents
  * usually include `_key`, `_id`, `_rev`, `orgId`, `recordName`, `externalRecordId`, `recordType`, `origin`,
  * `createdAtTimestamp`, and `connectorId`. Extend this schema when new stable fields appear on Record vertices.
+ *
+ * For a connected app with a limit, a parent the limit leaves out is not named: `recordGroupId`
+ * (with `externalGroupId`), `rootRecordGroupId` and `parentNodeId` (with `externalParentId`) are `null`
+ * for it, and `location` keeps only the part of the trail inside the limit, or is left out.
+ * `connectorInstanceName`, the source's or collection's own name, is left out unless the limit
+ * covers that app whole; this applies to each hit's `metadata` too.
  */
 export type SemanticSearchGraphRecord = {
   key?: string | null | undefined;
@@ -45,8 +55,19 @@ export type SemanticSearchGraphRecord = {
   isArchived?: boolean | null | undefined;
   isVLMOcrProcessed?: boolean | null | undefined;
   deletedByUserId?: string | null | undefined;
+  /**
+   * When a restore last brought the file back from the trash (epoch milliseconds); see `restoredAtTimestamp` on GET /knowledgeBase/record/{recordId}.
+   */
+  restoredAtTimestamp?: number | null | undefined;
   processingStartedAt?: number | null | undefined;
   queuedAtTimestamp?: number | null | undefined;
+  /**
+   * Earliest time (epoch milliseconds) indexing reads a record its source
+   *
+   * @remarks
+   * rate-limited; see `retryNotBefore` on GET /knowledgeBase/record/{recordId}.
+   */
+  retryNotBefore?: number | null | undefined;
   parsingStatus?: string | null | undefined;
   indexingStatus?: string | null | undefined;
   extractionStatus?: string | null | undefined;
@@ -55,9 +76,27 @@ export type SemanticSearchGraphRecord = {
   reason?: string | null | undefined;
   lastIndexTimestamp?: number | null | undefined;
   lastExtractionTimestamp?: number | null | undefined;
+  /**
+   * Where named-entity extraction stands for the record; see
+   *
+   * @remarks
+   * `entityExtractionStatus` on GET /knowledgeBase/record/{recordId}.
+   */
+  entityExtractionStatus?: string | null | undefined;
+  lastEntityExtractionTimestamp?: number | null | undefined;
+  entityExtractionStrategy?: string | null | undefined;
+  entityExtractorVersion?: string | null | undefined;
   summaryDocumentId?: string | null | undefined;
   storageDocumentId?: string | null | undefined;
   virtualRecordId?: string | null | undefined;
+  /**
+   * Revision of the record's content (16 lowercase hex characters); see
+   *
+   * @remarks
+   * `contentRev` on GET /knowledgeBase/record/{recordId}. Absent on
+   * records not indexed since pipeline stages were introduced.
+   */
+  contentRev?: string | null | undefined;
   previewRenderable?: boolean | null | undefined;
   isShared?: boolean | null | undefined;
   isDependentNode?: boolean | null | undefined;
@@ -69,6 +108,34 @@ export type SemanticSearchGraphRecord = {
   definition?: string | null | undefined;
   sourceTables?: Array<string> | null | undefined;
   rowCount?: number | null | undefined;
+  /**
+   * Where a ticket, pull request or project stands, in one short phrase, on
+   *
+   * @remarks
+   * `records` entries only: for example `Merged 2026-09-25 by alice`,
+   * `Closed without merging 2026-09-26`, or
+   * `DONE (Jira: Done), resolved 2026-06-06, assignee Bo, priority HIGH`.
+   * Dates are days in UTC. Absent for record types with no state of their own.
+   */
+  statusSummary?: string | undefined;
+  /**
+   * On `records` entries only: the records that name this one (`mentionedIn`) and
+   *
+   * @remarks
+   * that it names (`linksTo`) by web address or issue key, across connectors,
+   * limited to records the caller may read, at most 10 per relation. For a
+   * connected app with a limit, only records inside it. Absent when there are none.
+   */
+  linkedRecords?: Array<SemanticSearchLinkedRecord> | undefined;
+  /**
+   * Where the record sits, from its source down to its parent, as
+   *
+   * @remarks
+   * `Name (App ID: id) -> Name (Record Group ID: id) -> Name (Record ID: id)`.
+   * It names only the ancestors the caller can open; for a connected app
+   * with a limit, only those inside the limit. Absent when none is left.
+   */
+  location?: string | undefined;
 };
 
 /** @internal */
@@ -104,8 +171,10 @@ export const SemanticSearchGraphRecord$inboundSchema: z.ZodMiniType<
     isArchived: z.optional(z.nullable(types.boolean())),
     isVLMOcrProcessed: z.optional(z.nullable(types.boolean())),
     deletedByUserId: z.optional(z.nullable(types.string())),
+    restoredAtTimestamp: z.optional(z.nullable(types.number())),
     processingStartedAt: z.optional(z.nullable(types.number())),
     queuedAtTimestamp: z.optional(z.nullable(types.number())),
+    retryNotBefore: z.optional(z.nullable(types.number())),
     parsingStatus: z.optional(z.nullable(types.string())),
     indexingStatus: z.optional(z.nullable(types.string())),
     extractionStatus: z.optional(z.nullable(types.string())),
@@ -114,9 +183,14 @@ export const SemanticSearchGraphRecord$inboundSchema: z.ZodMiniType<
     reason: z.optional(z.nullable(types.string())),
     lastIndexTimestamp: z.optional(z.nullable(types.number())),
     lastExtractionTimestamp: z.optional(z.nullable(types.number())),
+    entityExtractionStatus: z.optional(z.nullable(types.string())),
+    lastEntityExtractionTimestamp: z.optional(z.nullable(types.number())),
+    entityExtractionStrategy: z.optional(z.nullable(types.string())),
+    entityExtractorVersion: z.optional(z.nullable(types.string())),
     summaryDocumentId: z.optional(z.nullable(types.string())),
     storageDocumentId: z.optional(z.nullable(types.string())),
     virtualRecordId: z.optional(z.nullable(types.string())),
+    contentRev: z.optional(z.nullable(types.string())),
     previewRenderable: z.optional(z.nullable(types.boolean())),
     isShared: z.optional(z.nullable(types.boolean())),
     isDependentNode: z.optional(z.nullable(types.boolean())),
@@ -128,6 +202,11 @@ export const SemanticSearchGraphRecord$inboundSchema: z.ZodMiniType<
     definition: z.optional(z.nullable(types.string())),
     sourceTables: z.optional(z.nullable(z.array(types.string()))),
     rowCount: z.optional(z.nullable(types.number())),
+    statusSummary: types.optional(types.string()),
+    linkedRecords: types.optional(
+      z.array(SemanticSearchLinkedRecord$inboundSchema),
+    ),
+    location: types.optional(types.string()),
   }),
   z.transform((v) => {
     return remap$(v, {

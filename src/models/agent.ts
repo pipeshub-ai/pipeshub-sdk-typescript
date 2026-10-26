@@ -16,6 +16,23 @@ import { Knowledge, Knowledge$inboundSchema } from "./knowledge.js";
 import { McpServer, McpServer$inboundSchema } from "./mcp-server.js";
 import { Toolset, Toolset$inboundSchema } from "./toolset.js";
 
+/**
+ * The model's own reasoning effort, read from its stored configuration. It applies only when the chat request sets no `reasoningEffort` and the agent has no `defaultReasoningEffort`. Omitted when nothing valid is stored; `none` is a legacy value that runs as `low`.
+ */
+export const ModelDefaultReasoningEffort = {
+  None: "none",
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Max: "max",
+} as const;
+/**
+ * The model's own reasoning effort, read from its stored configuration. It applies only when the chat request sets no `reasoningEffort` and the agent has no `defaultReasoningEffort`. Omitted when nothing valid is stored; `none` is a legacy value that runs as `low`.
+ */
+export type ModelDefaultReasoningEffort = OpenEnum<
+  typeof ModelDefaultReasoningEffort
+>;
+
 export type Model = {
   modelKey?: string | undefined;
   modelName?: string | undefined;
@@ -31,6 +48,10 @@ export type Model = {
    */
   modelType?: string | undefined;
   modelFriendlyName?: string | undefined;
+  /**
+   * The model's own reasoning effort, read from its stored configuration. It applies only when the chat request sets no `reasoningEffort` and the agent has no `defaultReasoningEffort`. Omitted when nothing valid is stored; `none` is a legacy value that runs as `low`.
+   */
+  defaultReasoningEffort?: ModelDefaultReasoningEffort | undefined;
 };
 
 export type ModelUnion = string | Model;
@@ -158,6 +179,14 @@ export type Agent = {
    */
   defaultReasoningEffort?: AgentDefaultReasoningEffort | null | undefined;
   /**
+   * API toolset operations the agent may call, each `<toolsetId>:<operation>`
+   *
+   * @remarks
+   * (see `/api-toolsets`). A service-account agent may only use toolsets with a
+   * shared credential.
+   */
+  apiToolsetTools?: Array<string> | undefined;
+  /**
    * When true (default), the agent's system prompt includes the current
    *
    * @remarks
@@ -194,6 +223,14 @@ export type Agent = {
    */
   isServiceAccount: boolean;
   /**
+   * The `userId` of the service account this agent searches knowledge
+   *
+   * @remarks
+   * as, or null when it searches as its creator. Only set on a
+   * service-account agent.
+   */
+  serviceAccountUserId?: string | null | undefined;
+  /**
    * How the user can access this agent.
    */
   accessType: string;
@@ -220,6 +257,12 @@ export type Agent = {
 };
 
 /** @internal */
+export const ModelDefaultReasoningEffort$inboundSchema: z.ZodMiniType<
+  ModelDefaultReasoningEffort,
+  unknown
+> = openEnums.inboundSchema(ModelDefaultReasoningEffort);
+
+/** @internal */
 export const Model$inboundSchema: z.ZodMiniType<Model, unknown> = z.object({
   modelKey: types.optional(types.string()),
   modelName: types.optional(types.string()),
@@ -229,6 +272,9 @@ export const Model$inboundSchema: z.ZodMiniType<Model, unknown> = z.object({
   isDefault: types.optional(types.boolean()),
   modelType: types.optional(types.string()),
   modelFriendlyName: types.optional(types.string()),
+  defaultReasoningEffort: types.optional(
+    ModelDefaultReasoningEffort$inboundSchema,
+  ),
 });
 
 export function modelFromJSON(
@@ -309,6 +355,7 @@ export const Agent$inboundSchema: z.ZodMiniType<Agent, unknown> = z.pipe(
     defaultReasoningEffort: z.optional(
       z.nullable(AgentDefaultReasoningEffort$inboundSchema),
     ),
+    apiToolsetTools: types.optional(z.array(types.string())),
     sendUserContext: types.optional(types.boolean()),
     tags: z.array(types.string()),
     createdAtTimestamp: types.number(),
@@ -317,6 +364,7 @@ export const Agent$inboundSchema: z.ZodMiniType<Agent, unknown> = z.pipe(
     isActive: types.boolean(),
     isDeleted: types.boolean(),
     isServiceAccount: types.boolean(),
+    serviceAccountUserId: z.optional(z.nullable(types.string())),
     access_type: types.string(),
     user_role: types.string(),
     can_view: types.boolean(),

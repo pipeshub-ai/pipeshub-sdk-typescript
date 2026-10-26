@@ -6,6 +6,7 @@ import { semanticSearchArchiveSearch } from "../funcs/semantic-search-archive-se
 import { semanticSearchDeleteSearchById } from "../funcs/semantic-search-delete-search-by-id.js";
 import { semanticSearchDeleteSearchHistory } from "../funcs/semantic-search-delete-search-history.js";
 import { semanticSearchGetSearchById } from "../funcs/semantic-search-get-search-by-id.js";
+import { semanticSearchRetrieve } from "../funcs/semantic-search-retrieve.js";
 import { semanticSearchSearchHistory } from "../funcs/semantic-search-search-history.js";
 import { semanticSearchSearch } from "../funcs/semantic-search-search.js";
 import { semanticSearchUnarchiveSearch } from "../funcs/semantic-search-unarchive-search.js";
@@ -16,6 +17,34 @@ import { unwrapAsync } from "../types/fp.js";
 
 export class SemanticSearch extends ClientSDK {
   /**
+   * Retrieve chunks with citations
+   *
+   * @remarks
+   * Ranked passages ("chunks") for a query, each with its record and a
+   * citation link, for building your own RAG pipeline or agent on
+   * PipesHub. Results are filtered by the caller's permissions exactly as
+   * `POST /search` is, and take the same `filters` and date bounds.
+   *
+   * Unlike `POST /search`, nothing is stored: no search history and no
+   * citation documents, so an application can call this on every request
+   * it serves. The query is searched as sent unless `rewriteQuery` is
+   * true.
+   *
+   * Nothing to find (no match, no accessible records, nothing indexed
+   * yet) is a `200` with an empty `chunks` list.
+   */
+  async retrieve(
+    request: models.RetrieveRequest,
+    options?: RequestOptions,
+  ): Promise<models.RetrieveResponse> {
+    return unwrapAsync(semanticSearchRetrieve(
+      this,
+      request,
+      options,
+    ));
+  }
+
+  /**
    * Perform semantic search
    *
    * @remarks
@@ -23,11 +52,21 @@ export class SemanticSearch extends ClientSDK {
    * Matching is meaning-based, so relevant results surface even when
    * the wording differs from the query.
    *
-   * Use optional `filters` to narrow the scope:
+   * Use optional `filters` to narrow the scope (see `Filters`):
    *
-   * - `filters.apps` — restrict to specific connector apps (for
-   *   example Google Drive or Confluence).
-   * - `filters.kb` — restrict to specific knowledge bases.
+   * - `filters.apps` — restrict to whole apps: connector instances
+   *   (for example Google Drive or Confluence) and collections.
+   *   `filters.kb` is the older name for collections and means the
+   *   same.
+   * - `filters.recordGroups` — restrict to record groups (a drive, a
+   *   space, a project), each with the groups nested in it.
+   * - `filters.records` — restrict to folders or records, each with
+   *   everything under it.
+   * - `filters.recordsExact` — restrict to records alone, without
+   *   what is under them.
+   *
+   * The keys are a union. With any of the last three present, an
+   * absent or empty `apps` / `kb` means no whole app.
    *
    * The response returns a `searchId` for the persisted search along
    * with ranked matches, each carrying a relevance score and the

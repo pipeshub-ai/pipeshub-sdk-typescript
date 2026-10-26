@@ -1,0 +1,23 @@
+# ConnectorSchemaAuth
+
+## Example Usage
+
+```typescript
+import { ConnectorSchemaAuth } from "@pipeshub-ai/sdk/models";
+
+let value: ConnectorSchemaAuth = {};
+```
+
+## Fields
+
+| Field                                                                                            | Type                                                                                             | Required                                                                                         | Description                                                                                      |
+| ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| `supportedAuthTypes`                                                                             | [models.ConnectorAuthType](../models/connector-auth-type.md)[]                                   | :heavy_minus_sign:                                                                               | N/A                                                                                              |
+| `schemas`                                                                                        | Record<string, [models.ConnectorAuthSchemaForType](../models/connector-auth-schema-for-type.md)> | :heavy_minus_sign:                                                                               | Auth form per auth type, keyed by ConnectorAuthType                                              |
+| `values`                                                                                         | Record<string, *any*>                                                                            | :heavy_minus_sign:                                                                               | N/A                                                                                              |
+| `customFields`                                                                                   | *any*[]                                                                                          | :heavy_minus_sign:                                                                               | N/A                                                                                              |
+| `customValues`                                                                                   | Record<string, *any*>                                                                            | :heavy_minus_sign:                                                                               | N/A                                                                                              |
+| `conditionalDisplay`                                                                             | Record<string, *any*>                                                                            | :heavy_minus_sign:                                                                               | N/A                                                                                              |
+| `authorizeUrl`                                                                                   | *string*                                                                                         | :heavy_minus_sign:                                                                               | Instance reads only                                                                              |
+| `tokenUrl`                                                                                       | *string*                                                                                         | :heavy_minus_sign:                                                                               | Instance reads only                                                                              |
+| `oauthConfigs`                                                                                   | Record<string, [models.OauthConfigs](../models/oauth-configs.md)>                                | :heavy_minus_sign:                                                                               | Instance reads only: provider endpoints per auth type                                            |

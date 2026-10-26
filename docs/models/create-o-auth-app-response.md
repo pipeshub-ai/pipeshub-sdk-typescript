@@ -28,6 +28,7 @@ let value: CreateOAuthAppResponse = {
     isConfidential: true,
     accessTokenLifetime: 349478,
     refreshTokenLifetime: 551940,
+    tokenIdentityUserId: "65f0c0ffee00000000000000",
     createdAt: new Date("2026-02-22T13:44:52.377Z"),
     updatedAt: new Date("2025-08-30T13:50:36.375Z"),
     clientSecret: "<value>",

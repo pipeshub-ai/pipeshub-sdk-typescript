@@ -4,7 +4,7 @@
 
 import * as z from "zod/v4-mini";
 import { PipeshubCore } from "../core.js";
-import { encodeSimple } from "../lib/encodings.js";
+import { encodeFormQuery, encodeSimple } from "../lib/encodings.js";
 import { matchStatusCode } from "../lib/http.js";
 import * as M from "../lib/matchers.js";
 import { compactMap } from "../lib/primitives.js";
@@ -52,12 +52,37 @@ import { Result } from "../types/fp.js";
  * full content when the search snippet or citation excerpt isn't
  * enough to answer the question.
  *
+ * **Reading part of a long record, or a whole Slack thread:**
+ *
+ * With no query parameters the record is returned up to 140,000
+ * characters (a longer one is cut and marked `truncated`), which for a
+ * pull request with its diffs or a long document is a large response. Pass any of `maxChars`, `startBlock`, `query`
+ * or `mode` for a budgeted read instead: the response stays within
+ * `maxChars` and says how to continue (`nextStartBlock`, or
+ * `nextStartRecord` for a thread). `query` makes a record too large for
+ * the budget show its most relevant blocks first, with the skipped
+ * ranges marked. `mode=thread` returns every message of the Slack
+ * thread the record belongs to, oldest first, as far as the caller may
+ * see them. A Slack record in no single thread (several channel
+ * messages in one record, or a message without replies) returns itself,
+ * then the replies of each thread its messages started; the first page
+ * opens with a bracketed note saying which.
+ *
  * **Permission scoping:**
  *
  * The requesting user/token must have access to the record; access is
  * verified via the knowledge graph before content is returned — a
  * caller with a valid scope but no access to this specific record gets
  * a `403`.
+ *
+ * **A connected app with a limit:** the rendered text names nothing
+ * outside the limit beside the record. Its `External Parent ID` reads
+ * `N/A` for a parent the limit leaves out, and a code file's `Path:`
+ * line is left out unless the limit covers the whole app. Linked
+ * records, related tables, a deal's orgs and products, and live Jira
+ * parent, epic, sub-task and linked-issue lines appear only for
+ * records inside the limit. `Web URL` is kept, though it can contain
+ * folder names.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -127,6 +152,14 @@ async function $do(
   };
   const path = pathToFunc("/connectors/record/{recordId}/content")(pathParams);
 
+  const query = encodeFormQuery({
+    "maxChars": payload.maxChars,
+    "mode": payload.mode,
+    "query": payload.query,
+    "startBlock": payload.startBlock,
+    "startRecord": payload.startRecord,
+  });
+
   const headers = new Headers(compactMap({
     Accept: "application/json",
   }));
@@ -155,6 +188,7 @@ async function $do(
     baseURL: options?.serverURL,
     path: path,
     headers: headers,
+    query: query,
     body: body,
     userAgent: client._options.userAgent,
     timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1,
@@ -193,7 +227,7 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.GetRecordContentResponseSchema$inboundSchema),
-    M.jsonErr([401, 403], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([401, 403, 422], errors.ErrorResponse$inboundSchema),
     M.jsonErr([500, 503], errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

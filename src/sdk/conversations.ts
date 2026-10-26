@@ -8,16 +8,16 @@ import { conversationsArchiveConversation } from "../funcs/conversations-archive
 import { conversationsCancelConversationStream } from "../funcs/conversations-cancel-conversation-stream.js";
 import { conversationsCreateConversation } from "../funcs/conversations-create-conversation.js";
 import { conversationsDeleteConversationById } from "../funcs/conversations-delete-conversation-by-id.js";
+import { conversationsForkConversation } from "../funcs/conversations-fork-conversation.js";
 import { conversationsGetAllConversations } from "../funcs/conversations-get-all-conversations.js";
 import { conversationsGetArchivedConversations } from "../funcs/conversations-get-archived-conversations.js";
 import { conversationsGetConversationById } from "../funcs/conversations-get-conversation-by-id.js";
-import { conversationsGetProjectConversations } from "../funcs/conversations-get-project-conversations.js";
+import { conversationsPinConversation } from "../funcs/conversations-pin-conversation.js";
 import { conversationsRegenerateAnswer } from "../funcs/conversations-regenerate-answer.js";
 import { conversationsSearchArchivedConversations } from "../funcs/conversations-search-archived-conversations.js";
-import { conversationsSetConversationProjectVisibility } from "../funcs/conversations-set-conversation-project-visibility.js";
-import { conversationsSetConversationProject } from "../funcs/conversations-set-conversation-project.js";
 import { conversationsStreamChat } from "../funcs/conversations-stream-chat.js";
 import { conversationsUnarchiveConversation } from "../funcs/conversations-unarchive-conversation.js";
+import { conversationsUnpinConversation } from "../funcs/conversations-unpin-conversation.js";
 import { conversationsUpdateConversationTitle } from "../funcs/conversations-update-conversation-title.js";
 import { conversationsUpdateMessageFeedback } from "../funcs/conversations-update-message-feedback.js";
 import { EventStream } from "../lib/event-streams.js";
@@ -147,6 +147,9 @@ export class Conversations extends ClientSDK {
    * **Sorting:**
    *
    * Conversations are sorted by last activity timestamp (most recent first) by default.
+   * With `source=owned`, conversations the caller pinned
+   * (`PATCH /conversations/{conversationId}/pin`) come first, in the same order,
+   * whatever `sortBy` is. `source=shared` is never pinned-first.
    */
   async getAllConversations(
     request?: operations.GetAllConversationsRequest | undefined,
@@ -284,6 +287,12 @@ export class Conversations extends ClientSDK {
    * The conversation initiator can always delete. Users the conversation has
    * been shared with may delete it only when their `sharedWith.accessLevel`
    * is `write`.
+   *
+   * **Artifacts:** before the conversation is marked deleted, every artifact
+   * the caller created in it is deleted for good (every version and stored
+   * file), and so are older stored outputs of the conversation. If that cannot
+   * be done the conversation is left in place and the error is returned
+   * (for example 503); repeating the request finishes the cleanup.
    */
   async deleteConversationById(
     request: operations.DeleteConversationByIdRequest,
@@ -452,6 +461,69 @@ export class Conversations extends ClientSDK {
   }
 
   /**
+   * Pin conversation
+   *
+   * @remarks
+   * Pin a conversation so it is listed first in the caller's own conversation list.
+   *
+   * **Access:**
+   *
+   * Owner only: the caller must be the conversation's `initiator`. People the
+   * conversation is shared with, even with `write` access, cannot pin it, and
+   * their own lists are not affected by the owner's pin.
+   *
+   * **Behaviour:**
+   *
+   * Idempotent: pinning an already pinned conversation succeeds and changes nothing.
+   * Archived and deleted conversations cannot be pinned. Archiving a pinned
+   * conversation removes its pin. Pinning does not change `lastActivityAt` or
+   * `updatedAt`, so the conversation keeps its place among the other pinned chats.
+   *
+   * - Path params: `conversationId`
+   * - Query params: none
+   * - Body: none
+   */
+  async pinConversation(
+    request: operations.PinConversationRequest,
+    options?: RequestOptions,
+  ): Promise<models.ConversationPinResponse> {
+    return unwrapAsync(conversationsPinConversation(
+      this,
+      request,
+      options,
+    ));
+  }
+
+  /**
+   * Unpin conversation
+   *
+   * @remarks
+   * Remove a conversation's pin so it is listed by recent activity again.
+   *
+   * **Access:**
+   *
+   * Owner only, as for `PATCH /conversations/{conversationId}/pin`.
+   *
+   * **Behaviour:**
+   *
+   * Idempotent: unpinning a conversation that is not pinned succeeds and changes nothing.
+   *
+   * - Path params: `conversationId`
+   * - Query params: none
+   * - Body: none
+   */
+  async unpinConversation(
+    request: operations.UnpinConversationRequest,
+    options?: RequestOptions,
+  ): Promise<models.ConversationPinResponse> {
+    return unwrapAsync(conversationsUnpinConversation(
+      this,
+      request,
+      options,
+    ));
+  }
+
+  /**
    * Regenerate AI response
    *
    * @remarks
@@ -468,6 +540,12 @@ export class Conversations extends ClientSDK {
    *
    * - Only the *last* message of the conversation can be regenerated.
    * - The target message must be of type `bot_response`.
+   *
+   * **Editing the question:**
+   *
+   * Send `query` to re-ask the last question with new wording. The answer
+   * is regenerated for the edited question, which replaces the stored one
+   * once the new answer is saved.
    *
    * **Use Cases:**
    *
@@ -491,6 +569,32 @@ export class Conversations extends ClientSDK {
     options?: RequestOptions,
   ): Promise<EventStream<models.SSEEvent>> {
     return unwrapAsync(conversationsRegenerateAnswer(
+      this,
+      request,
+      options,
+    ));
+  }
+
+  /**
+   * Fork conversation from a message
+   *
+   * @remarks
+   * Copy this conversation into a new private chat owned by the caller,
+   * including every message up to and including `messageId`. The original
+   * conversation is left unchanged.
+   *
+   * Only the owner of the conversation can fork it. A shared recipient or a
+   * project member gets 404, because their access to the original's
+   * attachments and artifacts is revoked on unshare. The fork does not
+   * inherit share settings. If the source is linked to a project the caller
+   * can still see, the fork stays in that project but is private to the
+   * caller; otherwise it is created outside the project.
+   */
+  async forkConversation(
+    request: operations.ForkConversationRequest,
+    options?: RequestOptions,
+  ): Promise<models.ForkConversationResponse> {
+    return unwrapAsync(conversationsForkConversation(
       this,
       request,
       options,
@@ -559,84 +663,6 @@ export class Conversations extends ClientSDK {
     options?: RequestOptions,
   ): Promise<models.MessageFeedbackUpdateResponse> {
     return unwrapAsync(conversationsUpdateMessageFeedback(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
-   * Link or unlink a conversation to a project
-   *
-   * @remarks
-   * Set (`projectId: <id>`) or clear (`projectId: null`) the project this
-   * conversation belongs to. Initiator-only.
-   *
-   * **Access:**
-   *
-   * The caller must be the conversation's initiator. Linking to a
-   * non-null `projectId` also requires at least viewer access to that
-   * project (`404` if not visible to the caller — never `403`, to avoid
-   * leaking project existence across an org boundary).
-   *
-   * **Visibility on link:**
-   *
-   * When linking, `projectVisibility` defaults from the project's
-   * `chatSharing` setting (`members` → `project`, otherwise `private`)
-   * unless the conversation was already `project`-visible, in which case
-   * that is preserved. Use
-   * `PATCH /conversations/{conversationId}/project-visibility` to
-   * override it explicitly. Unlinking (`projectId: null`) always clears
-   * both `projectId` and `projectVisibility`.
-   */
-  async setConversationProject(
-    request: operations.SetConversationProjectRequest,
-    options?: RequestOptions,
-  ): Promise<operations.SetConversationProjectResponse> {
-    return unwrapAsync(conversationsSetConversationProject(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
-   * Override a conversation's project visibility
-   *
-   * @remarks
-   * Explicitly set whether a project-linked conversation is visible to
-   * other members of that project (`project`) or only to its owner
-   * (`private`). Initiator-only. Requires the conversation to already be
-   * linked to a project via
-   * `PUT /conversations/{conversationId}/project`.
-   */
-  async setConversationProjectVisibility(
-    request: operations.SetConversationProjectVisibilityRequest,
-    options?: RequestOptions,
-  ): Promise<operations.SetConversationProjectVisibilityResponse> {
-    return unwrapAsync(conversationsSetConversationProjectVisibility(
-      this,
-      request,
-      options,
-    ));
-  }
-
-  /**
-   * List a project's conversations
-   *
-   * @remarks
-   * Requires viewer access to the project. Returns both chat and agent
-   * sessions (`chatSessions`, discriminated by `sessionType`/`agentKey`)
-   * that the caller may see: rows they own, plus rows with
-   * `projectVisibility: project`. Access to the project is asserted
-   * first, so a private conversation belonging to a *different* project
-   * member never leaks through this endpoint.
-   */
-  async getProjectConversations(
-    request: operations.GetProjectConversationsRequest,
-    options?: RequestOptions,
-  ): Promise<operations.GetProjectConversationsResponse> {
-    return unwrapAsync(conversationsGetProjectConversations(
       this,
       request,
       options,

@@ -17,18 +17,12 @@ import { SDKValidationError } from "./errors/sdk-validation-error.js";
  * - `otp`: One-time password via email (6-digit, expires in 10 minutes)
  * - `google`: Google OAuth 2.0
  * - `microsoft`: Microsoft OAuth 2.0
- * - `azureAd`: Azure Active Directory
- * - `samlSso`: SAML 2.0 Single Sign-On
- * - `oauth`: Generic OAuth 2.0 provider
  */
 export const AuthMethodType = {
-  SamlSso: "samlSso",
   Otp: "otp",
   Password: "password",
   Google: "google",
   Microsoft: "microsoft",
-  AzureAd: "azureAd",
-  Oauth: "oauth",
 } as const;
 /**
  * Type of authentication method:
@@ -38,9 +32,6 @@ export const AuthMethodType = {
  * - `otp`: One-time password via email (6-digit, expires in 10 minutes)
  * - `google`: Google OAuth 2.0
  * - `microsoft`: Microsoft OAuth 2.0
- * - `azureAd`: Azure Active Directory
- * - `samlSso`: SAML 2.0 Single Sign-On
- * - `oauth`: Generic OAuth 2.0 provider
  */
 export type AuthMethodType = OpenEnum<typeof AuthMethodType>;
 
@@ -56,9 +47,6 @@ export type AuthMethod = {
    * - `otp`: One-time password via email (6-digit, expires in 10 minutes)
    * - `google`: Google OAuth 2.0
    * - `microsoft`: Microsoft OAuth 2.0
-   * - `azureAd`: Azure Active Directory
-   * - `samlSso`: SAML 2.0 Single Sign-On
-   * - `oauth`: Generic OAuth 2.0 provider
    */
   type: AuthMethodType;
 };

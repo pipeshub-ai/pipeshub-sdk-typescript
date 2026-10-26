@@ -18,14 +18,13 @@ Custom AI agents with specialized capabilities and tool integrations
 * [streamAgentConversation](#streamagentconversation) - Create agent conversation with streaming response
 * [streamAgentConversationMessage](#streamagentconversationmessage) - Add message to agent conversation with streaming response
 * [regenerateAgentConversationMessage](#regenerateagentconversationmessage) - Regenerate agent conversation message
+* [forkAgentConversation](#forkagentconversation) - Fork agent conversation from a message
 * [cancelAgentConversationStream](#cancelagentconversationstream) - Cancel an in-flight agent chat stream
 * [updateAgentConversationMessageFeedback](#updateagentconversationmessagefeedback) - Submit feedback for an agent message
 * [addAgentConversationMessage](#addagentconversationmessage) - Add message to agent conversation (non-streaming)
 * [archiveAgentConversation](#archiveagentconversation) - Archive an agent conversation
 * [unarchiveAgentConversation](#unarchiveagentconversation) - Unarchive an agent conversation
 * [updateAgentConversationTitle](#updateagentconversationtitle) - Update agent conversation title
-* [setAgentConversationProject](#setagentconversationproject) - Link or unlink an agent conversation to a project
-* [setAgentConversationProjectVisibility](#setagentconversationprojectvisibility) - Override an agent conversation's project visibility
 * [deleteAgentConversationById](#deleteagentconversationbyid) - Delete an agent conversation
 * [getAgentConversationById](#getagentconversationbyid) - Get agent conversation by ID
 * [listAgentConversations](#listagentconversations) - List agent conversations
@@ -1213,6 +1212,7 @@ conversation and stream the new answer over Server-Sent Events.
 
 `chatMode: quick` is required. Other fields are optional and reuse
 the original model/context when omitted. The body supports:
+- `query` and `attachments` (an edited question and its files, as on the assistant endpoint)
 - `filters`
 - `chatMode`
 - `modelKey`
@@ -1257,6 +1257,7 @@ async function run() {
     conversationId: "<value>",
     messageId: "<value>",
     body: {
+      answers: "User selections:\n1. \"Which region?\" → EU",
       modelKey: "05438a37-68f2-4641-a8dc-6c47e63278ca",
       modelName: "gpt-5.4-mini",
       modelFriendlyName: "mini",
@@ -1300,6 +1301,7 @@ async function run() {
     conversationId: "<value>",
     messageId: "<value>",
     body: {
+      answers: "User selections:\n1. \"Which region?\" → EU",
       modelKey: "05438a37-68f2-4641-a8dc-6c47e63278ca",
       modelName: "gpt-5.4-mini",
       modelFriendlyName: "mini",
@@ -1337,6 +1339,92 @@ run();
 ### Response
 
 **Promise\<[EventStream<models.AgentRegenerateSSEEvent>](../../models/.md)\>**
+
+### Errors
+
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+
+## forkAgentConversation
+
+Copy this agent conversation into a new private chat owned by the
+caller, including every message up to and including `messageId`. The
+original conversation is left unchanged.
+
+Only the owner of the conversation can fork it; anyone else gets 404.
+
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="forkAgentConversation" method="post" path="/agents/{agentKey}/conversations/{conversationId}/message/{messageId}/fork" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.agents.forkAgentConversation({
+    agentKey: "<value>",
+    conversationId: "<value>",
+    messageId: "<value>",
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { agentsForkAgentConversation } from "@pipeshub-ai/sdk/funcs/agents-fork-agent-conversation.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const res = await agentsForkAgentConversation(pipeshub, {
+    agentKey: "<value>",
+    conversationId: "<value>",
+    messageId: "<value>",
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("agentsForkAgentConversation failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.ForkAgentConversationRequest](../../models/operations/fork-agent-conversation-request.md)                                                                          | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[models.ForkConversationResponse](../../models/fork-conversation-response.md)\>**
 
 ### Errors
 
@@ -1978,185 +2066,6 @@ run();
 | errors.ErrorResponse        | 400, 401, 404               | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
-## setAgentConversationProject
-
-Agent-conversation equivalent of
-`PUT /conversations/{conversationId}/project`. Set
-(`projectId: <id>`) or clear (`projectId: null`) the project this
-agent conversation belongs to. Initiator-only; linking requires at
-least viewer access to the target project.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="setAgentConversationProject" method="put" path="/agents/{agentKey}/conversations/{conversationId}/project" -->
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-
-const pipeshub = new Pipeshub({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const result = await pipeshub.agents.setAgentConversationProject({
-    agentKey: "<value>",
-    conversationId: "<value>",
-    body: {
-      projectId: "<value>",
-    },
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
-import { projectsSetAgentConversationProject } from "@pipeshub-ai/sdk/funcs/projects-set-agent-conversation-project.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const res = await projectsSetAgentConversationProject(pipeshub, {
-    agentKey: "<value>",
-    conversationId: "<value>",
-    body: {
-      projectId: "<value>",
-    },
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("projectsSetAgentConversationProject failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.SetAgentConversationProjectRequest](../../models/operations/set-agent-conversation-project-request.md)                                                             | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.SetAgentConversationProjectResponse](../../models/operations/set-agent-conversation-project-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
-## setAgentConversationProjectVisibility
-
-Agent-conversation equivalent of
-`PATCH /conversations/{conversationId}/project-visibility`.
-Initiator-only; requires the conversation to already be linked to a
-project.
-
-
-### Example Usage
-
-<!-- UsageSnippet language="typescript" operationID="setAgentConversationProjectVisibility" method="patch" path="/agents/{agentKey}/conversations/{conversationId}/project-visibility" -->
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-
-const pipeshub = new Pipeshub({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const result = await pipeshub.agents.setAgentConversationProjectVisibility({
-    agentKey: "<value>",
-    conversationId: "<value>",
-    body: {
-      visibility: "private",
-    },
-  });
-
-  console.log(result);
-}
-
-run();
-```
-
-### Standalone function
-
-The standalone function version of this method:
-
-```typescript
-import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
-import { projectsSetAgentConversationProjectVisibility } from "@pipeshub-ai/sdk/funcs/projects-set-agent-conversation-project-visibility.js";
-
-// Use `PipeshubCore` for best tree-shaking performance.
-// You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const res = await projectsSetAgentConversationProjectVisibility(pipeshub, {
-    agentKey: "<value>",
-    conversationId: "<value>",
-    body: {
-      visibility: "private",
-    },
-  });
-  if (res.ok) {
-    const { value: result } = res;
-    console.log(result);
-  } else {
-    console.log("projectsSetAgentConversationProjectVisibility failed:", res.error);
-  }
-}
-
-run();
-```
-
-### Parameters
-
-| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                                                      | [operations.SetAgentConversationProjectVisibilityRequest](../../models/operations/set-agent-conversation-project-visibility-request.md)                                        | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
-| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
-| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
-| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
-
-### Response
-
-**Promise\<[operations.SetAgentConversationProjectVisibilityResponse](../../models/operations/set-agent-conversation-project-visibility-response.md)\>**
-
-### Errors
-
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
-
 ## deleteAgentConversationById
 
 Soft-deletes an agent conversation owned by the authenticated user.
@@ -2170,6 +2079,12 @@ This makes the operation idempotent:
 - deleting a nonexistent conversation returns success with `null`
 - deleting through a different `agentKey` returns success with `null`
 - deleting an already deleted conversation returns success with `null`
+
+**Artifacts:** before the conversation is marked deleted, every artifact
+the caller created in it is deleted for good (every version and stored
+file). Artifacts another participant created stay theirs. If the cleanup
+cannot be done the conversation is left in place and the error is
+returned (for example 503); repeating the request finishes it.
 
 
 ### Example Usage

@@ -15,6 +15,27 @@ export type UpdateOAuthAppRequestAllowedGrantType = ClosedEnum<
 >;
 
 /**
+ * `null` lifts the limit. Any change, a lift included, revokes the
+ *
+ * @remarks
+ * app's outstanding tokens, so users connect again.
+ */
+export type UpdateOAuthAppRequestKnowledgeLimit = {
+  /**
+   * Whole connectors and collections.
+   */
+  apps?: Array<string> | undefined;
+  /**
+   * Record groups (a drive, space or project), with the groups nested in them.
+   */
+  recordGroups?: Array<string> | undefined;
+  /**
+   * Folders or records, with everything under them.
+   */
+  records?: Array<string> | undefined;
+};
+
+/**
  * Request to update an OAuth app (`updateAppSchema` in `oauth.validators.ts`).
  *
  * @remarks
@@ -46,6 +67,13 @@ export type UpdateOAuthAppRequest = {
   termsOfServiceUrl?: string | null | undefined;
   accessTokenLifetime?: number | undefined;
   refreshTokenLifetime?: number | undefined;
+  /**
+   * `null` lifts the limit. Any change, a lift included, revokes the
+   *
+   * @remarks
+   * app's outstanding tokens, so users connect again.
+   */
+  knowledgeLimit?: UpdateOAuthAppRequestKnowledgeLimit | null | undefined;
 };
 
 /** @internal */
@@ -53,6 +81,33 @@ export const UpdateOAuthAppRequestAllowedGrantType$outboundSchema:
   z.ZodMiniEnum<typeof UpdateOAuthAppRequestAllowedGrantType> = z.enum(
     UpdateOAuthAppRequestAllowedGrantType,
   );
+
+/** @internal */
+export type UpdateOAuthAppRequestKnowledgeLimit$Outbound = {
+  apps?: Array<string> | undefined;
+  recordGroups?: Array<string> | undefined;
+  records?: Array<string> | undefined;
+};
+
+/** @internal */
+export const UpdateOAuthAppRequestKnowledgeLimit$outboundSchema: z.ZodMiniType<
+  UpdateOAuthAppRequestKnowledgeLimit$Outbound,
+  UpdateOAuthAppRequestKnowledgeLimit
+> = z.object({
+  apps: z.optional(z.array(z.string())),
+  recordGroups: z.optional(z.array(z.string())),
+  records: z.optional(z.array(z.string())),
+});
+
+export function updateOAuthAppRequestKnowledgeLimitToJSON(
+  updateOAuthAppRequestKnowledgeLimit: UpdateOAuthAppRequestKnowledgeLimit,
+): string {
+  return JSON.stringify(
+    UpdateOAuthAppRequestKnowledgeLimit$outboundSchema.parse(
+      updateOAuthAppRequestKnowledgeLimit,
+    ),
+  );
+}
 
 /** @internal */
 export type UpdateOAuthAppRequest$Outbound = {
@@ -66,6 +121,10 @@ export type UpdateOAuthAppRequest$Outbound = {
   termsOfServiceUrl?: string | null | undefined;
   accessTokenLifetime?: number | undefined;
   refreshTokenLifetime?: number | undefined;
+  knowledgeLimit?:
+    | UpdateOAuthAppRequestKnowledgeLimit$Outbound
+    | null
+    | undefined;
 };
 
 /** @internal */
@@ -85,6 +144,11 @@ export const UpdateOAuthAppRequest$outboundSchema: z.ZodMiniType<
   termsOfServiceUrl: z.optional(z.nullable(z.string())),
   accessTokenLifetime: z.optional(z.int()),
   refreshTokenLifetime: z.optional(z.int()),
+  knowledgeLimit: z.optional(
+    z.nullable(
+      z.lazy(() => UpdateOAuthAppRequestKnowledgeLimit$outboundSchema),
+    ),
+  ),
 });
 
 export function updateOAuthAppRequestToJSON(

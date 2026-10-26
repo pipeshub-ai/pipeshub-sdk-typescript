@@ -13,6 +13,10 @@ import {
   ConversationModelInfo,
   ConversationModelInfo$inboundSchema,
 } from "./conversation-model-info.js";
+import {
+  ConversationSharedBy,
+  ConversationSharedBy$inboundSchema,
+} from "./conversation-shared-by.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
 export const AgentConversationListItemStatus = {
@@ -35,6 +39,7 @@ export type AgentConversationListItemSharedWithAccessLevel = OpenEnum<
 >;
 
 export type AgentConversationListItemSharedWith = {
+  id?: string | undefined;
   userId?: string | undefined;
   accessLevel?: AgentConversationListItemSharedWithAccessLevel | undefined;
 };
@@ -158,6 +163,13 @@ export type AgentConversationListItem = {
    */
   accessLevel?: AgentConversationListItemAccessLevel | undefined;
   /**
+   * Present on conversations the caller received via share. Identifies the
+   *
+   * @remarks
+   * conversation initiator (the only user who can share a chat).
+   */
+  sharedBy?: ConversationSharedBy | undefined;
+  /**
    * The project this agent conversation is linked to, if any.
    */
   projectId?: string | null | undefined;
@@ -188,12 +200,20 @@ export const AgentConversationListItemSharedWithAccessLevel$inboundSchema:
 export const AgentConversationListItemSharedWith$inboundSchema: z.ZodMiniType<
   AgentConversationListItemSharedWith,
   unknown
-> = z.object({
-  userId: types.optional(types.string()),
-  accessLevel: types.optional(
-    AgentConversationListItemSharedWithAccessLevel$inboundSchema,
-  ),
-});
+> = z.pipe(
+  z.object({
+    _id: types.optional(types.string()),
+    userId: types.optional(types.string()),
+    accessLevel: types.optional(
+      AgentConversationListItemSharedWithAccessLevel$inboundSchema,
+    ),
+  }),
+  z.transform((v) => {
+    return remap$(v, {
+      "_id": "id",
+    });
+  }),
+);
 
 export function agentConversationListItemSharedWithFromJSON(
   jsonString: string,
@@ -290,6 +310,7 @@ export const AgentConversationListItem$inboundSchema: z.ZodMiniType<
     accessLevel: types.optional(
       AgentConversationListItemAccessLevel$inboundSchema,
     ),
+    sharedBy: types.optional(ConversationSharedBy$inboundSchema),
     projectId: z.optional(z.nullable(types.string())),
     projectVisibility: z.optional(
       z.nullable(AgentConversationListItemProjectVisibility$inboundSchema),

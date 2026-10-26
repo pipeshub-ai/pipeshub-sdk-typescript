@@ -4,6 +4,11 @@
 
 import * as z from "zod/v4-mini";
 import { ClosedEnum } from "../types/enums.js";
+import {
+  KnowledgeLimit,
+  KnowledgeLimit$Outbound,
+  KnowledgeLimit$outboundSchema,
+} from "./knowledge-limit.js";
 
 export const CreateOAuthAppRequestAllowedGrantType = {
   AuthorizationCode: "authorization_code",
@@ -20,17 +25,33 @@ export type CreateOAuthAppRequestAllowedGrantType = ClosedEnum<
  * @remarks
  *
  * **Required:** `name`, `allowedScopes`. **Optional:** `description`, `redirectUris`, `allowedGrantTypes`,
- * `homepageUrl`, `privacyPolicyUrl`, `termsOfServiceUrl`, `isConfidential`, `accessTokenLifetime`, `refreshTokenLifetime`.
+ * `homepageUrl`, `privacyPolicyUrl`, `termsOfServiceUrl`, `isConfidential`, `accessTokenLifetime`,
+ * `refreshTokenLifetime`, `tokenIdentityUserId`.
  *
  * **Redirect rule (Zod refine):** If the effective grant list includes `authorization_code`
  * (including when `allowedGrantTypes` is omitted — defaults to `authorization_code` + `refresh_token`),
  * at least one redirect URI is required. If grants exclude `authorization_code`, `redirectUris` may be omitted.
+ *
+ * **Service account rule:** If the effective grant list includes `client_credentials`,
+ * `tokenIdentityUserId` is **required** and the caller must be an organisation administrator.
+ * That grant issues tokens with no person in them, so without a service account the app would act
+ * as whoever created it. Omitting it answers `400`; a non-administrator answers `403`.
  */
 export type CreateOAuthAppRequest = {
   /**
    * App name (displayed to users during authorization)
    */
   name: string;
+  /**
+   * The service account this app's own tokens act as. Required when
+   *
+   * @remarks
+   * `allowedGrantTypes` includes `client_credentials`, ignored otherwise.
+   *
+   * Must name a service account in the same organisation that is not disabled;
+   * an ordinary user's id is refused. Administrators only.
+   */
+  tokenIdentityUserId?: string | undefined;
   /**
    * App description
    */
@@ -80,6 +101,17 @@ export type CreateOAuthAppRequest = {
    * Refresh token lifetime in seconds (3600–31536000)
    */
   refreshTokenLifetime?: number | undefined;
+  /**
+   * What a connected app may see: an OAuth app's limit is picked by its
+   *
+   * @remarks
+   * creator and holds for every user who connects it; a personal access
+   * token's by its owner. Search, chat, agent chat and every record read by
+   * id stay inside it, and inside the connecting user's own permissions.
+   * Omit it for everything the user can see. Sent, it must name at least one id and at
+   * most 50 in all, since it is signed into every token the app gets.
+   */
+  knowledgeLimit?: KnowledgeLimit | undefined;
 };
 
 /** @internal */
@@ -91,6 +123,7 @@ export const CreateOAuthAppRequestAllowedGrantType$outboundSchema:
 /** @internal */
 export type CreateOAuthAppRequest$Outbound = {
   name: string;
+  tokenIdentityUserId?: string | undefined;
   description?: string | undefined;
   redirectUris?: Array<string> | undefined;
   allowedGrantTypes?: Array<string> | undefined;
@@ -101,6 +134,7 @@ export type CreateOAuthAppRequest$Outbound = {
   isConfidential: boolean;
   accessTokenLifetime: number;
   refreshTokenLifetime: number;
+  knowledgeLimit?: KnowledgeLimit$Outbound | undefined;
 };
 
 /** @internal */
@@ -109,6 +143,7 @@ export const CreateOAuthAppRequest$outboundSchema: z.ZodMiniType<
   CreateOAuthAppRequest
 > = z.object({
   name: z.string(),
+  tokenIdentityUserId: z.optional(z.string()),
   description: z.optional(z.string()),
   redirectUris: z.optional(z.array(z.string())),
   allowedGrantTypes: z.optional(
@@ -121,6 +156,7 @@ export const CreateOAuthAppRequest$outboundSchema: z.ZodMiniType<
   isConfidential: z._default(z.boolean(), true),
   accessTokenLifetime: z._default(z.int(), 3600),
   refreshTokenLifetime: z._default(z.int(), 2592000),
+  knowledgeLimit: z.optional(KnowledgeLimit$outboundSchema),
 });
 
 export function createOAuthAppRequestToJSON(

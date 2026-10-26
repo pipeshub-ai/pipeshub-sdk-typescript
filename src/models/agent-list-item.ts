@@ -98,6 +98,14 @@ export type AgentListItem = {
    */
   isServiceAccount: boolean;
   /**
+   * The `userId` of the service account this agent searches knowledge
+   *
+   * @remarks
+   * as, or null when it searches as its creator. Only set on a
+   * service-account agent.
+   */
+  serviceAccountUserId?: string | null | undefined;
+  /**
    * Model entries configured on the agent.
    *
    * @remarks
@@ -157,6 +165,14 @@ export type AgentListItem = {
     | AgentListItemDefaultReasoningEffort
     | null
     | undefined;
+  /**
+   * API toolset operations the agent may call, each `<toolsetId>:<operation>`
+   *
+   * @remarks
+   * (see `/api-toolsets`). A service-account agent may only use toolsets with a
+   * shared credential.
+   */
+  apiToolsetTools?: Array<string> | undefined;
   /**
    * When false, this agent omits user name/email/org from its system prompt.
    */
@@ -257,6 +273,7 @@ export const AgentListItem$inboundSchema: z.ZodMiniType<
     isActive: types.boolean(),
     isDeleted: types.boolean(),
     isServiceAccount: types.boolean(),
+    serviceAccountUserId: z.optional(z.nullable(types.string())),
     models: z.array(types.string()),
     name: types.string(),
     startMessage: z.optional(z.nullable(types.string())),
@@ -271,6 +288,7 @@ export const AgentListItem$inboundSchema: z.ZodMiniType<
     defaultReasoningEffort: z.optional(
       z.nullable(AgentListItemDefaultReasoningEffort$inboundSchema),
     ),
+    apiToolsetTools: types.optional(z.array(types.string())),
     sendUserContext: types.optional(types.boolean()),
     shareWithOrg: types.boolean(),
     toolsets: z.array(Toolset$inboundSchema),

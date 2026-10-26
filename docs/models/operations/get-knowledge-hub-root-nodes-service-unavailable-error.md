@@ -1,0 +1,21 @@
+# GetKnowledgeHubRootNodesServiceUnavailableError
+
+## Example Usage
+
+```typescript
+import { GetKnowledgeHubRootNodesServiceUnavailableError } from "@pipeshub-ai/sdk/models/operations";
+
+let value: GetKnowledgeHubRootNodesServiceUnavailableError = {
+  code: "HTTP_SERVICE_UNAVAILABLE",
+  message:
+    "This part of PipesHub is briefly unavailable. Please try again in 5 seconds.",
+};
+```
+
+## Fields
+
+| Field                                                                                                                                         | Type                                                                                                                                          | Required                                                                                                                                      | Description                                                                                                                                   | Example                                                                                                                                       |
+| --------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `code`                                                                                                                                        | [operations.GetKnowledgeHubRootNodesServiceUnavailableCode](../../models/operations/get-knowledge-hub-root-nodes-service-unavailable-code.md) | :heavy_check_mark:                                                                                                                            | N/A                                                                                                                                           | HTTP_SERVICE_UNAVAILABLE                                                                                                                      |
+| `message`                                                                                                                                     | *string*                                                                                                                                      | :heavy_check_mark:                                                                                                                            | N/A                                                                                                                                           | This part of PipesHub is briefly unavailable. Please try again in 5 seconds.                                                                  |
+| `requestId`                                                                                                                                   | *string*                                                                                                                                      | :heavy_minus_sign:                                                                                                                            | N/A                                                                                                                                           |                                                                                                                                               |

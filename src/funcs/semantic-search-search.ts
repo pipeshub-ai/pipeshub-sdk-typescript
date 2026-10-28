@@ -54,7 +54,12 @@ import { Result } from "../types/fp.js";
  * The response returns a `searchId` for the persisted search along
  * with ranked matches, each carrying a relevance score and the
  * source document's metadata. Past searches can be retrieved via
- * `GET /search`.
+ * `GET /search`. With `saveHistory: false` nothing is saved and
+ * there is no `searchId`.
+ *
+ * **Scopes:** an OAuth token needs `semantic:write`. The gateway also lets a token holding
+ * only `semantic:read` through, but the search service then refuses it with the same `403`
+ * ("Insufficient scope. Required: semantic:write"). Known defect.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -184,9 +189,10 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.SemanticSearchExecuteResponse$inboundSchema),
-    M.jsonErr([400, 422], errors.ErrorResponse$inboundSchema),
-    M.fail([401, 403, 404, "4XX"]),
-    M.fail([500, 502, 503, 504, "5XX"]),
+    M.jsonErr([400, 401, 403, 404, 422], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([500, 503, 504], errors.ErrorResponse$inboundSchema),
+    M.fail("4XX"),
+    M.fail([502, "5XX"]),
   )(response, req, { extraFields: responseFields });
   if (!result.ok) {
     return [result, { status: "complete", request: req, response }];

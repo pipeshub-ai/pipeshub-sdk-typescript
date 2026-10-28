@@ -19,6 +19,7 @@ import {
   RequestTimeoutError,
   UnexpectedClientError,
 } from "../models/errors/http-client-errors.js";
+import * as errors from "../models/errors/index.js";
 import { PipeshubError } from "../models/errors/pipeshub-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { SDKValidationError } from "../models/errors/sdk-validation-error.js";
@@ -40,8 +41,13 @@ import { Result } from "../types/fp.js";
  *
  * **Search parameter:**
  *
- * The `search` query parameter is required, must be a non-empty string, and is capped at
- * 1000 characters. Requests that omit it or exceed the cap return `400`.
+ * The `search` query parameter is required, must contain a non-space character, and is
+ * capped at 1000 characters; it is trimmed before use. Requests that omit it, send only
+ * spaces or exceed the cap return `400 VALIDATION_ERROR`. A value holding markup or a
+ * printf-style format specifier (such as `%s`) is refused by the controller with
+ * `400 HTTP_BAD_REQUEST`.
+ *
+ * Query parameters not listed here are dropped by the validator and ignored.
  *
  * **Pagination:**
  *
@@ -63,6 +69,7 @@ export function conversationsSearchArchivedConversations(
 ): APIPromise<
   Result<
     operations.SearchArchivedConversationsResponse,
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -88,6 +95,7 @@ async function $do(
   [
     Result<
       operations.SearchArchivedConversationsResponse,
+      | errors.ErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -173,8 +181,13 @@ async function $do(
   }
   const response = doResult.value;
 
+  const responseFields = {
+    HttpMeta: { Response: response, Request: req },
+  };
+
   const [result] = await M.match<
     operations.SearchArchivedConversationsResponse,
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -185,9 +198,11 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, operations.SearchArchivedConversationsResponse$inboundSchema),
-    M.fail([400, 401, "4XX"]),
+    M.jsonErr([400, 401, 403], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
+    M.fail("4XX"),
     M.fail("5XX"),
-  )(response, req);
+  )(response, req, { extraFields: responseFields });
   if (!result.ok) {
     return [result, { status: "complete", request: req, response }];
   }

@@ -23,16 +23,54 @@ export const Mode = {
 export type Mode = OpenEnum<typeof Mode>;
 
 /**
- * Budgeted record reads only. `relevance` when `query` chose which blocks to show; the blocks are then not contiguous.
+ * Budgeted record reads only. `relevance` when `query` chose which blocks to show; the blocks are then not contiguous. `extract` when `extract=true` was asked and the reader model answered: `content` is the passages it copied out (told to copy word for word; see `extract.unverifiedLines`), not a page of the record. An extract is one response, so `complete` is true and `nextStartBlock` null; whether the reader saw the whole record is `extract.sourceComplete`.
  */
 export const Order = {
   InOrder: "in_order",
   Relevance: "relevance",
+  Extract: "extract",
 } as const;
 /**
- * Budgeted record reads only. `relevance` when `query` chose which blocks to show; the blocks are then not contiguous.
+ * Budgeted record reads only. `relevance` when `query` chose which blocks to show; the blocks are then not contiguous. `extract` when `extract=true` was asked and the reader model answered: `content` is the passages it copied out (told to copy word for word; see `extract.unverifiedLines`), not a page of the record. An extract is one response, so `complete` is true and `nextStartBlock` null; whether the reader saw the whole record is `extract.sourceComplete`.
  */
 export type Order = OpenEnum<typeof Order>;
+
+/**
+ * Reads with `extract=true` only. With `order: extract`, the reader model's call. On a plain read returned because the reader could not answer, `error` alone.
+ */
+export type ExtractT = {
+  /**
+   * The model that read the record.
+   */
+  model?: string | null | undefined;
+  provider?: string | null | undefined;
+  /**
+   * True when the reader found nothing that answers `query`; `content` is then `NOTHING RELEVANT`.
+   */
+  nothingRelevant?: boolean | undefined;
+  /**
+   * True when the reader's reply was cut to fit `maxChars` (or 12,000 characters, whichever is smaller).
+   */
+  truncated?: boolean | undefined;
+  /**
+   * Lines of `content` with words not found in the text the reader was given, as written: a paraphrase, or a misreading. Check them with a plain read. Every fragment with a letter or digit is checked, and a match may not run into a longer word or number (`$1,250` is not found in `$1,250,000`, nor `$1,250.` in `$1,250.99`). A note the reader adds in square brackets beside a quote (where a passage sits) is not checked; a markdown link's label, and a line that is only a bracketed note, are. 0 means every quoted fragment was found, not that `content` is complete or that it quotes the right passage.
+   */
+  unverifiedLines?: number | undefined;
+  /**
+   * Characters of the record the reader was given.
+   */
+  sourceChars?: number | undefined;
+  /**
+   * True when the reader was given the whole record. False when the record was longer than the reader's 120,000 characters, or had more than 5,000 blocks, and it was given part of it: the blocks most relevant to `query`, or the start of the record when the relevance search found nothing or failed.
+   */
+  sourceComplete?: boolean | undefined;
+  inputTokens?: number | undefined;
+  outputTokens?: number | undefined;
+  /**
+   * Why there is no extract (the failure's type, or `EmptyReply`); `content` is then the plain read at `maxChars`.
+   */
+  error?: string | undefined;
+};
 
 export type GivenUpBlock = {
   recordId?: string | undefined;
@@ -113,9 +151,13 @@ export type GetRecordContentResponseSchema = {
    */
   recordId?: string | undefined;
   /**
-   * Budgeted record reads only. `relevance` when `query` chose which blocks to show; the blocks are then not contiguous.
+   * Budgeted record reads only. `relevance` when `query` chose which blocks to show; the blocks are then not contiguous. `extract` when `extract=true` was asked and the reader model answered: `content` is the passages it copied out (told to copy word for word; see `extract.unverifiedLines`), not a page of the record. An extract is one response, so `complete` is true and `nextStartBlock` null; whether the reader saw the whole record is `extract.sourceComplete`.
    */
   order?: Order | undefined;
+  /**
+   * Reads with `extract=true` only. With `order: extract`, the reader model's call. On a plain read returned because the reader could not answer, `error` alone.
+   */
+  extract?: ExtractT | undefined;
   /**
    * Budgeted reads only. Where this read started (in a thread read, within the record at `startRecord`).
    */
@@ -195,6 +237,31 @@ export const Order$inboundSchema: z.ZodMiniType<Order, unknown> = openEnums
   .inboundSchema(Order);
 
 /** @internal */
+export const ExtractT$inboundSchema: z.ZodMiniType<ExtractT, unknown> = z
+  .object({
+    model: z.optional(z.nullable(types.string())),
+    provider: z.optional(z.nullable(types.string())),
+    nothingRelevant: types.optional(types.boolean()),
+    truncated: types.optional(types.boolean()),
+    unverifiedLines: types.optional(types.number()),
+    sourceChars: types.optional(types.number()),
+    sourceComplete: types.optional(types.boolean()),
+    inputTokens: types.optional(types.number()),
+    outputTokens: types.optional(types.number()),
+    error: types.optional(types.string()),
+  });
+
+export function extractFromJSON(
+  jsonString: string,
+): SafeParseResult<ExtractT, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => ExtractT$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ExtractT' from JSON`,
+  );
+}
+
+/** @internal */
 export const GivenUpBlock$inboundSchema: z.ZodMiniType<GivenUpBlock, unknown> =
   z.object({
     recordId: types.optional(types.string()),
@@ -263,6 +330,7 @@ export const GetRecordContentResponseSchema$inboundSchema: z.ZodMiniType<
   mode: types.optional(Mode$inboundSchema),
   recordId: types.optional(types.string()),
   order: types.optional(Order$inboundSchema),
+  extract: types.optional(z.lazy(() => ExtractT$inboundSchema)),
   startBlock: types.optional(types.number()),
   totalBlocks: types.optional(types.number()),
   shownBlocks: types.optional(z.array(z.array(types.number()))),

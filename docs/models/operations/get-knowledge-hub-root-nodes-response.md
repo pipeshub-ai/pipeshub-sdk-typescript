@@ -24,12 +24,12 @@ let value: GetKnowledgeHubRootNodesResponse = {
     },
     items: [],
     pagination: {
-      page: 714167,
-      limit: 834106,
-      totalItems: 649371,
-      totalPages: 34717,
-      hasNext: false,
-      hasPrev: true,
+      page: 834106,
+      limit: 649371,
+      totalItems: 34717,
+      totalPages: 7526,
+      hasNext: true,
+      hasPrev: false,
     },
     filters: {
       applied: {
@@ -100,14 +100,14 @@ let value: GetKnowledgeHubRootNodesResponse = {
     ],
     counts: {
       items: [],
-      total: 777139,
+      total: 12362,
     },
     permissions: {
       role: "<value>",
-      canUpload: true,
-      canCreateFolders: false,
+      canUpload: false,
+      canCreateFolders: true,
       canEdit: false,
-      canDelete: true,
+      canDelete: false,
       canManagePermissions: false,
     },
   },

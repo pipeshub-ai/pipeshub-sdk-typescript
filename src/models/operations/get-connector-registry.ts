@@ -48,9 +48,34 @@ export type GetConnectorRegistryRequest = {
    */
   limit?: number | undefined;
   /**
-   * Search term for connector names
+   * Case-insensitive search across name, type, app group, description,
+   *
+   * @remarks
+   * auth types and categories. Every whitespace-separated word must match.
    */
   search?: string | undefined;
+  /**
+   * Validated (must be <code>true</code> or <code>false</code>) but
+   *
+   * @remarks
+   * ignored by this endpoint: it filters nothing. The parameter exists
+   * because the query validator is shared with <code>GET /connectors</code>.
+   */
+  isAuthenticated?: boolean | undefined;
+  /**
+   * Validated (must be <code>true</code> or <code>false</code>) but
+   *
+   * @remarks
+   * ignored by this endpoint: it filters nothing.
+   */
+  isActive?: boolean | undefined;
+  /**
+   * Validated (must not be empty or blank: the value is trimmed before
+   *
+   * @remarks
+   * it is checked) but ignored by this endpoint: it filters nothing.
+   */
+  connectorType?: string | undefined;
 };
 
 /**
@@ -85,6 +110,9 @@ export type GetConnectorRegistryRequest$Outbound = {
   page: number;
   limit: number;
   search?: string | undefined;
+  isAuthenticated?: boolean | undefined;
+  isActive?: boolean | undefined;
+  connectorType?: string | undefined;
 };
 
 /** @internal */
@@ -96,6 +124,9 @@ export const GetConnectorRegistryRequest$outboundSchema: z.ZodMiniType<
   page: z._default(z.int(), 1),
   limit: z._default(z.int(), 20),
   search: z.optional(z.string()),
+  isAuthenticated: z.optional(z.boolean()),
+  isActive: z.optional(z.boolean()),
+  connectorType: z.optional(z.string()),
 });
 
 export function getConnectorRegistryRequestToJSON(

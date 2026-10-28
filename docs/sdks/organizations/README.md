@@ -96,6 +96,6 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 401, 404                    | application/json            |
+| errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
 | errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |

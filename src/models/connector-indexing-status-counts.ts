@@ -26,6 +26,8 @@ export type ConnectorIndexingStatusCounts = {
   empty?: number | undefined;
   enableMultimodalModels?: number | undefined;
   queued?: number | undefined;
+  skipped?: number | undefined;
+  passwordProtected?: number | undefined;
   additionalProperties?: { [k: string]: number } | undefined;
 };
 
@@ -47,6 +49,8 @@ export const ConnectorIndexingStatusCounts$inboundSchema: z.ZodMiniType<
         EMPTY: types.optional(types.number()),
         ENABLE_MULTIMODAL_MODELS: types.optional(types.number()),
         QUEUED: types.optional(types.number()),
+        SKIPPED: types.optional(types.number()),
+        PASSWORD_PROTECTED: types.optional(types.number()),
       }),
       types.number(),
     ),
@@ -65,6 +69,8 @@ export const ConnectorIndexingStatusCounts$inboundSchema: z.ZodMiniType<
       "EMPTY": "empty",
       "ENABLE_MULTIMODAL_MODELS": "enableMultimodalModels",
       "QUEUED": "queued",
+      "SKIPPED": "skipped",
+      "PASSWORD_PROTECTED": "passwordProtected",
     });
   }),
 );

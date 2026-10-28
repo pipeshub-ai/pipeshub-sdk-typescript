@@ -4,7 +4,7 @@
 
 import * as z from "zod/v4-mini";
 import { PipeshubCore } from "../core.js";
-import { encodeSimple } from "../lib/encodings.js";
+import { encodeFormQuery, encodeSimple } from "../lib/encodings.js";
 import { matchStatusCode } from "../lib/http.js";
 import * as M from "../lib/matchers.js";
 import { compactMap } from "../lib/primitives.js";
@@ -112,6 +112,10 @@ async function $do(
     pathParams,
   );
 
+  const query = encodeFormQuery({
+    "desktop": payload.desktop,
+  });
+
   const headers = new Headers(compactMap({
     Accept: "application/json",
   }));
@@ -140,6 +144,7 @@ async function $do(
     baseURL: options?.serverURL,
     path: path,
     headers: headers,
+    query: query,
     body: body,
     userAgent: client._options.userAgent,
     timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1,

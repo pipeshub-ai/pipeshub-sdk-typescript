@@ -1,7 +1,8 @@
 # DeleteSearchByIdShared
 
-Additional `isShared` filter (`'true'` / `'false'`). The row is
-only deleted if it also matches this value.
+Additional `isShared` filter. `'true'` / `'1'` and `'false'` / `'0'`,
+case-insensitive; anything else is refused with `400`. The row is only deleted if
+it matches.
 
 
 ## Example Usage
@@ -9,11 +10,11 @@ only deleted if it also matches this value.
 ```typescript
 import { DeleteSearchByIdShared } from "@pipeshub-ai/sdk/models/operations";
 
-let value: DeleteSearchByIdShared = "false";
+let value: DeleteSearchByIdShared = "0";
 ```
 
 ## Values
 
 ```typescript
-"true" | "false"
+"true" | "false" | "1" | "0"
 ```

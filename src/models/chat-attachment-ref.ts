@@ -4,9 +4,29 @@
 
 import * as z from "zod/v4-mini";
 import { safeParse } from "../lib/schemas.js";
+import * as openEnums from "../types/enums.js";
+import { OpenEnum } from "../types/enums.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
+
+/**
+ * How the attachment was produced: a file upload, or text pasted into the
+ *
+ * @remarks
+ * composer and sent as a file. Stored on the saved message as sent.
+ */
+export const ChatAttachmentRefSource = {
+  Upload: "upload",
+  PasteText: "paste-text",
+} as const;
+/**
+ * How the attachment was produced: a file upload, or text pasted into the
+ *
+ * @remarks
+ * composer and sent as a file. Stored on the saved message as sent.
+ */
+export type ChatAttachmentRefSource = OpenEnum<typeof ChatAttachmentRefSource>;
 
 /**
  * Reference to an attachment produced by `POST /conversations/attachments/upload`
@@ -36,7 +56,25 @@ export type ChatAttachmentRef = {
    * Optional synthetic record id used by the graph layer.
    */
   virtualRecordId?: string | undefined;
+  /**
+   * How the attachment was produced: a file upload, or text pasted into the
+   *
+   * @remarks
+   * composer and sent as a file. Stored on the saved message as sent.
+   */
+  source?: ChatAttachmentRefSource | undefined;
 };
+
+/** @internal */
+export const ChatAttachmentRefSource$inboundSchema: z.ZodMiniType<
+  ChatAttachmentRefSource,
+  unknown
+> = openEnums.inboundSchema(ChatAttachmentRefSource);
+/** @internal */
+export const ChatAttachmentRefSource$outboundSchema: z.ZodMiniType<
+  string,
+  ChatAttachmentRefSource
+> = openEnums.outboundSchema(ChatAttachmentRefSource);
 
 /** @internal */
 export const ChatAttachmentRef$inboundSchema: z.ZodMiniType<
@@ -48,6 +86,7 @@ export const ChatAttachmentRef$inboundSchema: z.ZodMiniType<
   mimeType: types.optional(types.string()),
   extension: types.optional(types.string()),
   virtualRecordId: types.optional(types.string()),
+  source: types.optional(ChatAttachmentRefSource$inboundSchema),
 });
 /** @internal */
 export type ChatAttachmentRef$Outbound = {
@@ -56,6 +95,7 @@ export type ChatAttachmentRef$Outbound = {
   mimeType?: string | undefined;
   extension?: string | undefined;
   virtualRecordId?: string | undefined;
+  source?: string | undefined;
 };
 
 /** @internal */
@@ -68,6 +108,7 @@ export const ChatAttachmentRef$outboundSchema: z.ZodMiniType<
   mimeType: z.optional(z.string()),
   extension: z.optional(z.string()),
   virtualRecordId: z.optional(z.string()),
+  source: z.optional(ChatAttachmentRefSource$outboundSchema),
 });
 
 export function chatAttachmentRefToJSON(

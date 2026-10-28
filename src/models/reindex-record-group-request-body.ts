@@ -3,35 +3,33 @@
  */
 
 import * as z from "zod/v4-mini";
-import {
-  IndexingStatusFilter,
-  IndexingStatusFilter$outboundSchema,
-} from "./indexing-status-filter.js";
 
 /**
- * Optional body for record-group (folder/KB container) reindex.
+ * Optional body for record-group reindex. Only `depth` and `statusFilters` are read;
+ *
+ * @remarks
+ * any other field is dropped by the validator before the handler runs (there is no
+ * `force` option: the handler always sends `force: false`).
  */
 export type ReindexRecordGroupRequestBody = {
   /**
-   * Depth of records under the record group to include.
+   * Depth of records under the record group to include. `-1` (everything) is applied,
+   *
+   * @remarks
+   * and answered, as `100`.
    */
   depth?: number | undefined;
-  /**
-   * Force reindex for all matched records in the group.
-   */
-  force?: boolean | undefined;
   /**
    * When set, only records matching these indexing statuses are reindexed.
    *
    * @remarks
    */
-  statusFilters?: Array<IndexingStatusFilter> | undefined;
+  statusFilters?: Array<string> | undefined;
 };
 
 /** @internal */
 export type ReindexRecordGroupRequestBody$Outbound = {
   depth: number;
-  force: boolean;
   statusFilters?: Array<string> | undefined;
 };
 
@@ -41,8 +39,7 @@ export const ReindexRecordGroupRequestBody$outboundSchema: z.ZodMiniType<
   ReindexRecordGroupRequestBody
 > = z.object({
   depth: z._default(z.int(), 0),
-  force: z._default(z.boolean(), false),
-  statusFilters: z.optional(z.array(IndexingStatusFilter$outboundSchema)),
+  statusFilters: z.optional(z.array(z.string())),
 });
 
 export function reindexRecordGroupRequestBodyToJSON(

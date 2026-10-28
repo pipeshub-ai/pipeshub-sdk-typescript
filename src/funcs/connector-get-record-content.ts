@@ -153,6 +153,7 @@ async function $do(
   const path = pathToFunc("/connectors/record/{recordId}/content")(pathParams);
 
   const query = encodeFormQuery({
+    "extract": payload.extract,
     "maxChars": payload.maxChars,
     "mode": payload.mode,
     "query": payload.query,
@@ -227,7 +228,7 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.GetRecordContentResponseSchema$inboundSchema),
-    M.jsonErr([401, 403, 422], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([400, 401, 403, 404, 422], errors.ErrorResponse$inboundSchema),
     M.jsonErr([500, 503], errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

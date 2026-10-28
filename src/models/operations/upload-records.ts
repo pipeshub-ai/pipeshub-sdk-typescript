@@ -4,11 +4,40 @@
 
 import * as z from "zod/v4-mini";
 import { remap as remap$ } from "../../lib/primitives.js";
+import { ClosedEnum } from "../../types/enums.js";
 
 export type UploadRecordsFile = {
   fileName: string;
   content: ReadableStream<Uint8Array> | Blob | ArrayBuffer | Uint8Array;
 };
+
+export type FilesMetadatum = {
+  filePath: string;
+  lastModified: number;
+};
+
+/**
+ * Enable version tracking. `true`/`1` and `false`/`0`/empty are read as
+ *
+ * @remarks
+ * booleans; any other text is answered `500` (the validator throws a plain
+ * error).
+ */
+export const IsVersioned = {
+  True: "true",
+  False: "false",
+  One: "1",
+  Zero: "0",
+  Unknown: "",
+} as const;
+/**
+ * Enable version tracking. `true`/`1` and `false`/`0`/empty are read as
+ *
+ * @remarks
+ * booleans; any other text is answered `500` (the validator throws a plain
+ * error).
+ */
+export type IsVersioned = ClosedEnum<typeof IsVersioned>;
 
 /**
  * Request payload
@@ -19,26 +48,49 @@ export type UploadRecordsRequestBody = {
    */
   files: Array<UploadRecordsFile>;
   /**
-   * JSON array with file_path and last_modified for each file
+   * JSON text: an array with one entry per file, in the order of the `files`
+   *
+   * @remarks
+   * parts, each `{file_path, last_modified}` with `last_modified` in epoch
+   * milliseconds (a number, not a date string). A file without an entry is
+   * named after its part and timed at the upload. Text that is not JSON, or an
+   * array whose length differs from the number of files, is refused with `400`
+   * (`HTTP_BAD_REQUEST`); an entry without a string `file_path` or a numeric
+   * `last_modified` is refused with `400` (`VALIDATION_ERROR`).
    */
-  filesMetadata?: string | undefined;
+  filesMetadata?: Array<FilesMetadatum> | undefined;
   /**
-   * Enable version tracking
+   * Enable version tracking. `true`/`1` and `false`/`0`/empty are read as
+   *
+   * @remarks
+   * booleans; any other text is answered `500` (the validator throws a plain
+   * error).
    */
-  isVersioned?: boolean | undefined;
+  isVersioned?: IsVersioned | undefined;
   /**
-   * Type of records to create
+   * Validated, then ignored (records are named after their files).
+   */
+  recordName?: string | undefined;
+  /**
+   * Validated, then ignored (records get origin `UPLOAD`).
+   */
+  origin?: string | undefined;
+  /**
+   * Validated, then ignored (records get type `FILE`).
    */
   recordType?: string | undefined;
 };
 
 export type UploadRecordsRequest = {
   /**
-   * Knowledge base ID
+   * Knowledge base ID (UUID)
    */
   kbId: string;
   /**
-   * Target folder ID. Omit to upload to the KB root.
+   * Target folder ID. Omit to upload to the KB root. A folder that is not in this
+   *
+   * @remarks
+   * knowledge base is answered `404`.
    */
   folderId?: string | undefined;
   /**
@@ -76,10 +128,43 @@ export function uploadRecordsFileToJSON(
 }
 
 /** @internal */
+export type FilesMetadatum$Outbound = {
+  file_path: string;
+  last_modified: number;
+};
+
+/** @internal */
+export const FilesMetadatum$outboundSchema: z.ZodMiniType<
+  FilesMetadatum$Outbound,
+  FilesMetadatum
+> = z.pipe(
+  z.object({
+    filePath: z.string(),
+    lastModified: z.number(),
+  }),
+  z.transform((v) => {
+    return remap$(v, {
+      filePath: "file_path",
+      lastModified: "last_modified",
+    });
+  }),
+);
+
+export function filesMetadatumToJSON(filesMetadatum: FilesMetadatum): string {
+  return JSON.stringify(FilesMetadatum$outboundSchema.parse(filesMetadatum));
+}
+
+/** @internal */
+export const IsVersioned$outboundSchema: z.ZodMiniEnum<typeof IsVersioned> = z
+  .enum(IsVersioned);
+
+/** @internal */
 export type UploadRecordsRequestBody$Outbound = {
   files: Array<UploadRecordsFile$Outbound>;
-  files_metadata?: string | undefined;
-  isVersioned: boolean;
+  files_metadata?: Array<FilesMetadatum$Outbound> | undefined;
+  isVersioned: string;
+  recordName?: string | undefined;
+  origin?: string | undefined;
   recordType: string;
 };
 
@@ -90,8 +175,12 @@ export const UploadRecordsRequestBody$outboundSchema: z.ZodMiniType<
 > = z.pipe(
   z.object({
     files: z.array(z.lazy(() => UploadRecordsFile$outboundSchema)),
-    filesMetadata: z.optional(z.string()),
-    isVersioned: z._default(z.boolean(), true),
+    filesMetadata: z.optional(
+      z.array(z.lazy(() => FilesMetadatum$outboundSchema)),
+    ),
+    isVersioned: z._default(IsVersioned$outboundSchema, "true"),
+    recordName: z.optional(z.string()),
+    origin: z.optional(z.string()),
     recordType: z._default(z.string(), "FILE"),
   }),
   z.transform((v) => {

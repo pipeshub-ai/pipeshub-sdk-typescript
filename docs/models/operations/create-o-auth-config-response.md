@@ -9,7 +9,11 @@ import { CreateOAuthConfigResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: CreateOAuthConfigResponse = {
   success: false,
-  oauthConfig: {},
+  oauthConfig: {
+    connectorType: "Confluence",
+    iconPath: "/icons/connectors/confluence.svg",
+    appGroup: "Atlassian",
+  },
   message: "OAuth configuration created successfully",
 };
 ```

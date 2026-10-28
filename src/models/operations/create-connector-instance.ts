@@ -14,6 +14,9 @@ import * as models from "../index.js";
  */
 export type CreateConnectorInstanceResponse = {
   success: boolean;
+  /**
+   * Summary of a connector instance that was just created
+   */
   connector: models.ConnectorCreated;
   message?: string | undefined;
 };

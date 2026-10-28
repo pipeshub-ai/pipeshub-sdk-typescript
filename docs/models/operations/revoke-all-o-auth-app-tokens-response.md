@@ -16,5 +16,4 @@ let value: RevokeAllOAuthAppTokensResponse = {
 
 | Field                           | Type                            | Required                        | Description                     | Example                         |
 | ------------------------------- | ------------------------------- | ------------------------------- | ------------------------------- | ------------------------------- |
-| `message`                       | *string*                        | :heavy_minus_sign:              | N/A                             | All tokens revoked successfully |
-| `count`                         | *number*                        | :heavy_minus_sign:              | Number of tokens revoked        |                                 |
+| `message`                       | *string*                        | :heavy_check_mark:              | N/A                             | All tokens revoked successfully |

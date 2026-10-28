@@ -47,7 +47,7 @@ export const AccessRule = {
  */
 export type AccessRule = OpenEnum<typeof AccessRule>;
 
-export type GetRecordByIdResponseSchemaFileRecord = {
+export type FileRecord = {
   id: string;
   orgId: string;
   name: string;
@@ -84,7 +84,7 @@ export type GetRecordByIdResponseSchemaFileRecord = {
   localFsRelativePath?: string | null | undefined;
 };
 
-export type GetRecordByIdResponseSchemaMailRecord = {};
+export type MailRecord = {};
 
 export type TicketRecord = {};
 
@@ -322,8 +322,8 @@ export type GetRecordByIdResponseSchemaRecord = {
    * True for placeholder/stub records standing in for an out-of-scope ancestor (rendered read-only, no content actions; excluded from search and indexing).
    */
   isPlaceholder?: boolean | null | undefined;
-  fileRecord: GetRecordByIdResponseSchemaFileRecord | null;
-  mailRecord: GetRecordByIdResponseSchemaMailRecord | null;
+  fileRecord: FileRecord | null;
+  mailRecord: MailRecord | null;
   ticketRecord: TicketRecord | null;
 };
 
@@ -433,54 +433,48 @@ export const AccessRule$inboundSchema: z.ZodMiniType<AccessRule, unknown> =
   openEnums.inboundSchema(AccessRule);
 
 /** @internal */
-export const GetRecordByIdResponseSchemaFileRecord$inboundSchema: z.ZodMiniType<
-  GetRecordByIdResponseSchemaFileRecord,
-  unknown
-> = z.object({
-  id: types.string(),
-  orgId: types.string(),
-  name: types.string(),
-  extension: types.string(),
-  etag: z.optional(z.nullable(types.string())),
-  ctag: z.optional(z.nullable(types.string())),
-  md5Checksum: z.optional(z.nullable(types.string())),
-  quickXorHash: z.optional(z.nullable(types.string())),
-  crc32Hash: z.optional(z.nullable(types.string())),
-  sha1Hash: z.optional(z.nullable(types.string())),
-  sha256Hash: z.optional(z.nullable(types.string())),
-  mimeType: z.optional(z.nullable(types.string())),
-  sizeInBytes: z.optional(z.nullable(types.number())),
-  isFile: types.boolean(),
-  webUrl: z.optional(z.nullable(types.string())),
-  path: z.optional(z.nullable(types.string())),
-  localFsRelativePath: z.optional(z.nullable(types.string())),
-});
+export const FileRecord$inboundSchema: z.ZodMiniType<FileRecord, unknown> = z
+  .object({
+    id: types.string(),
+    orgId: types.string(),
+    name: types.string(),
+    extension: types.string(),
+    etag: z.optional(z.nullable(types.string())),
+    ctag: z.optional(z.nullable(types.string())),
+    md5Checksum: z.optional(z.nullable(types.string())),
+    quickXorHash: z.optional(z.nullable(types.string())),
+    crc32Hash: z.optional(z.nullable(types.string())),
+    sha1Hash: z.optional(z.nullable(types.string())),
+    sha256Hash: z.optional(z.nullable(types.string())),
+    mimeType: z.optional(z.nullable(types.string())),
+    sizeInBytes: z.optional(z.nullable(types.number())),
+    isFile: types.boolean(),
+    webUrl: z.optional(z.nullable(types.string())),
+    path: z.optional(z.nullable(types.string())),
+    localFsRelativePath: z.optional(z.nullable(types.string())),
+  });
 
-export function getRecordByIdResponseSchemaFileRecordFromJSON(
+export function fileRecordFromJSON(
   jsonString: string,
-): SafeParseResult<GetRecordByIdResponseSchemaFileRecord, SDKValidationError> {
+): SafeParseResult<FileRecord, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) =>
-      GetRecordByIdResponseSchemaFileRecord$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetRecordByIdResponseSchemaFileRecord' from JSON`,
+    (x) => FileRecord$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'FileRecord' from JSON`,
   );
 }
 
 /** @internal */
-export const GetRecordByIdResponseSchemaMailRecord$inboundSchema: z.ZodMiniType<
-  GetRecordByIdResponseSchemaMailRecord,
-  unknown
-> = z.object({});
+export const MailRecord$inboundSchema: z.ZodMiniType<MailRecord, unknown> = z
+  .object({});
 
-export function getRecordByIdResponseSchemaMailRecordFromJSON(
+export function mailRecordFromJSON(
   jsonString: string,
-): SafeParseResult<GetRecordByIdResponseSchemaMailRecord, SDKValidationError> {
+): SafeParseResult<MailRecord, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) =>
-      GetRecordByIdResponseSchemaMailRecord$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetRecordByIdResponseSchemaMailRecord' from JSON`,
+    (x) => MailRecord$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'MailRecord' from JSON`,
   );
 }
 
@@ -566,12 +560,8 @@ export const GetRecordByIdResponseSchemaRecord$inboundSchema: z.ZodMiniType<
   hideWeburl: z.optional(z.nullable(types.boolean())),
   isInternal: z.optional(z.nullable(types.boolean())),
   isPlaceholder: z.optional(z.nullable(types.boolean())),
-  fileRecord: types.nullable(
-    z.lazy(() => GetRecordByIdResponseSchemaFileRecord$inboundSchema),
-  ),
-  mailRecord: types.nullable(
-    z.lazy(() => GetRecordByIdResponseSchemaMailRecord$inboundSchema),
-  ),
+  fileRecord: types.nullable(z.lazy(() => FileRecord$inboundSchema)),
+  mailRecord: types.nullable(z.lazy(() => MailRecord$inboundSchema)),
   ticketRecord: types.nullable(z.lazy(() => TicketRecord$inboundSchema)),
 });
 

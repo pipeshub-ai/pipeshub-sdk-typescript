@@ -6,6 +6,9 @@ import * as z from "zod/v4-mini";
 import { smartUnion } from "../types/smart-union.js";
 
 export type AgentCreateModelEntry = {
+  /**
+   * Surrounding whitespace is trimmed; a blank key is refused with `400`.
+   */
   modelKey: string;
   modelName?: string | undefined;
   provider?: string | undefined;

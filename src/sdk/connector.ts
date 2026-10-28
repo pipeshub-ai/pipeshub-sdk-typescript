@@ -163,6 +163,14 @@ export class Connector extends ClientSDK {
    * parent, epic, sub-task and linked-issue lines appear only for
    * records inside the limit. `Web URL` is kept, though it can contain
    * folder names.
+   *
+   * **Connector and knowledge base nodes:** opening the `id` of a
+   * connector instance the caller has no permission on in the graph (for
+   * example one that has never synced, even for its creator) returns the
+   * same empty view as a missing node. Opening a knowledge base at
+   * `depth` 1 lists nothing; its records appear from `depth` 2.
+   *
+   * An OAuth token holding `connector:read` instead of `kb:read` is accepted too.
    */
   async navigateKnowledgeGraph(
     request?: operations.NavigateKnowledgeGraphRequest | undefined,
@@ -239,6 +247,8 @@ export class Connector extends ClientSDK {
    * parent, epic, sub-task and linked-issue lines appear only for
    * records inside the limit. `Web URL` is kept, though it can contain
    * folder names.
+   *
+   * An OAuth token holding `connector:read` instead of `kb:read` is accepted too.
    */
   async lookupRecordByIdentifier(
     request: operations.LookupRecordByIdentifierRequest,

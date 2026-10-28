@@ -31,19 +31,21 @@ import { Result } from "../types/fp.js";
  * Delete connector instance
  *
  * @remarks
- * Delete a connector instance and everything synced from it. The request
- * answers `202` as soon as the deletion has started; the deletion itself
- * runs in the background.<br><br>
- * <b>Warning:</b><br>
- * Deletion is permanent. The connector's records, record groups,
- * permissions and relations are removed from the graph database, its
- * embeddings are removed from the vector store, its stored configuration
- * and credentials are deleted, and its stored files are deleted (content
- * another connector still uses is kept). The records don't go to the
- * trash and can't be restored. Its sync schedule is removed too.<br><br>
+ * Start the deletion of a connector instance and all associated data.<br><br>
+ * <b>Asynchronous:</b><br>
+ * The request is answered with <code>202</code> as soon as the instance is
+ * marked <code>DELETING</code>; its sync is stopped and its records,
+ * vectors and configuration are removed in the background.<br><br>
  * <b>Permissions:</b><br>
- * The connector's creator or an admin, for either scope. An admin can
- * delete a member's personal connector.
+ * <ul>
+ * <li>The creator can delete their own instance</li>
+ * <li>An org admin can delete any instance, including another user's
+ * personal one (which the admin cannot read)</li>
+ * <li>Anyone else gets <code>404</code></li>
+ * </ul>
+ * <b>In use:</b><br>
+ * Refused with <code>409</code> while an agent uses the instance as a
+ * knowledge source.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -179,7 +181,8 @@ async function $do(
     | SDKValidationError
   >(
     M.json(202, operations.DeleteConnectorInstanceResponse$inboundSchema),
-    M.jsonErr([401, 403, 404, 409], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([400, 401, 403, 404, 409], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

@@ -46,6 +46,7 @@ export function oAuthAppsDeleteOAuthApp(
     operations.DeleteOAuthAppResponse,
     | errors.ApplicationJsonErrorResponse
     | errors.OAuthClientManagementRateLimitError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -73,6 +74,7 @@ async function $do(
       operations.DeleteOAuthAppResponse,
       | errors.ApplicationJsonErrorResponse
       | errors.OAuthClientManagementRateLimitError
+      | errors.ErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -161,6 +163,7 @@ async function $do(
     operations.DeleteOAuthAppResponse,
     | errors.ApplicationJsonErrorResponse
     | errors.OAuthClientManagementRateLimitError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -172,10 +175,11 @@ async function $do(
   >(
     M.json(200, operations.DeleteOAuthAppResponse$inboundSchema),
     M.jsonErr(
-      [401, 403, 404],
+      [400, 401, 403, 404],
       errors.ApplicationJsonErrorResponse$inboundSchema,
     ),
     M.jsonErr(429, errors.OAuthClientManagementRateLimitError$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

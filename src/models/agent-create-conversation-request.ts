@@ -111,6 +111,29 @@ export type AgentCreateConversationRequestKeywordSearchBudget = ClosedEnum<
 >;
 
 /**
+ * Reasoning effort for this turn, for models that support it. Stored on
+ *
+ * @remarks
+ * the conversation's model info and forwarded to the AI backend.
+ */
+export const AgentCreateConversationRequestReasoningEffort = {
+  None: "none",
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Max: "max",
+} as const;
+/**
+ * Reasoning effort for this turn, for models that support it. Stored on
+ *
+ * @remarks
+ * the conversation's model info and forwarded to the AI backend.
+ */
+export type AgentCreateConversationRequestReasoningEffort = ClosedEnum<
+  typeof AgentCreateConversationRequestReasoningEffort
+>;
+
+/**
  * First turn of an agent conversation. Used as-is by the non-streaming
  *
  * @remarks
@@ -118,8 +141,9 @@ export type AgentCreateConversationRequestKeywordSearchBudget = ClosedEnum<
  * omitted; `AgentStreamCreateConversationRequest` additionally requires
  * it. Unknown fields are stripped during validation, except
  * `previousConversations`: history is never accepted from the caller,
- * so a non-empty `previousConversations` is rejected with 400 (an
- * empty list is ignored). Follow-up turns go to
+ * so `previousConversations` with any value but an empty list (`null`,
+ * a string or an object included) is rejected with 400; an empty list
+ * is dropped. Follow-up turns go to
  * `POST /agents/{agentKey}/conversations/{conversationId}/messages`,
  * where the server replays the stored conversation.
  */
@@ -167,6 +191,9 @@ export type AgentCreateConversationRequest = {
    * least viewer access to. Same fallback/merge semantics as
    * `POST /conversations/create`. Ignored on follow-up turns — the
    * session row is the source of truth once the conversation exists.
+   * An OAuth token or PAT also needs `project:read`. An archived
+   * project answers `409`; a project the caller cannot see, `404`,
+   * before any stream opens.
    */
   projectId?: string | undefined;
   /**
@@ -190,7 +217,9 @@ export type AgentCreateConversationRequest = {
    * AI model configuration id for this turn. Omit to use the agent's
    *
    * @remarks
-   * default model.
+   * default model. A key that names no configured model is not refused:
+   * the turn runs on the organization's default model and the unknown
+   * key is still stored in the conversation's `modelInfo`.
    */
   modelKey?: string | undefined;
   /**
@@ -273,6 +302,13 @@ export type AgentCreateConversationRequest = {
    * {runId}` while the stream is still generating.
    */
   runId?: string | undefined;
+  /**
+   * Reasoning effort for this turn, for models that support it. Stored on
+   *
+   * @remarks
+   * the conversation's model info and forwarded to the AI backend.
+   */
+  reasoningEffort?: AgentCreateConversationRequestReasoningEffort | undefined;
 };
 
 /** @internal */
@@ -298,6 +334,12 @@ export const AgentCreateConversationRequestKeywordSearchBudget$outboundSchema:
     .enum(AgentCreateConversationRequestKeywordSearchBudget);
 
 /** @internal */
+export const AgentCreateConversationRequestReasoningEffort$outboundSchema:
+  z.ZodMiniEnum<typeof AgentCreateConversationRequestReasoningEffort> = z.enum(
+    AgentCreateConversationRequestReasoningEffort,
+  );
+
+/** @internal */
 export type AgentCreateConversationRequest$Outbound = {
   query: string;
   recordIds?: Array<string> | undefined;
@@ -319,6 +361,7 @@ export type AgentCreateConversationRequest$Outbound = {
   keywordSearchBudget?: string | undefined;
   toolApproval?: ToolApprovalAnswer$Outbound | undefined;
   runId?: string | undefined;
+  reasoningEffort?: string | undefined;
 };
 
 /** @internal */
@@ -350,6 +393,9 @@ export const AgentCreateConversationRequest$outboundSchema: z.ZodMiniType<
   ),
   toolApproval: z.optional(ToolApprovalAnswer$outboundSchema),
   runId: z.optional(z.string()),
+  reasoningEffort: z.optional(
+    AgentCreateConversationRequestReasoningEffort$outboundSchema,
+  ),
 });
 
 export function agentCreateConversationRequestToJSON(

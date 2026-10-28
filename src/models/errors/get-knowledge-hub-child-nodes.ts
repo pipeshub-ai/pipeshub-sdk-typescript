@@ -47,60 +47,38 @@ export class GetKnowledgeHubChildNodesServiceUnavailableError
 }
 
 /**
- * An unexpected error occurred on the server.
- */
-export type GetKnowledgeHubChildNodesInternalServerErrorData = {
-  error: operations.GetKnowledgeHubChildNodesErrorHTTPInternalServerError;
-};
-
-/**
- * An unexpected error occurred on the server.
- */
-export class GetKnowledgeHubChildNodesInternalServerError
-  extends PipeshubError
-{
-  error: operations.GetKnowledgeHubChildNodesErrorHTTPInternalServerError;
-
-  /** The original data that was passed to this error instance. */
-  data$: GetKnowledgeHubChildNodesInternalServerErrorData;
-
-  constructor(
-    err: GetKnowledgeHubChildNodesInternalServerErrorData,
-    httpMeta: { response: Response; request: Request; body: string },
-  ) {
-    const message = err.error?.message
-      || `API error occurred: ${JSON.stringify(err)}`;
-    super(message, httpMeta);
-    this.data$ = err;
-    this.error = err.error;
-
-    this.name = "GetKnowledgeHubChildNodesInternalServerError";
-  }
-}
-
-/**
- * A listing that spans a whole connector (a flattened listing, a search or a filter) was too large for the
+ * Either of:
  *
  * @remarks
- * database to hold in memory, so it was refused instead of cut short. No page is returned. Open a folder
- * (`GET /knowledgeBase/knowledge-hub/nodes/{parentType}/{parentId}`) to see its records, or add a search (`q`),
- * which keeps only matching records in memory. Choosing a connector, or a filter that keeps most records (such as
- * `nodeTypes`), does not help. Sorting by name with no filters is served from stored visibility where the
- * connector allows it and is not affected.
+ * - A typed query parameter could not be read: `page` or `limit` is not an
+ *   integer or is out of range (`page` below 1, `limit` outside 1-200), or
+ *   `onlyContainers` or `flattened` is not a boolean. `error.message` is the
+ *   connector service's own validation text.
+ * - A listing that spans a whole connector (a flattened listing, a search or a filter) was too large for the
+ *   database to hold in memory, so it was refused instead of cut short. No page is returned. Open a folder
+ *   (`GET /knowledgeBase/knowledge-hub/nodes/{parentType}/{parentId}`) to see its records, or add a search (`q`),
+ *   which keeps only matching records in memory. Choosing a connector, or a filter that keeps most records (such as
+ *   `nodeTypes`), does not help. Sorting by name with no filters is served from stored visibility where the
+ *   connector allows it and is not affected.
  */
 export type GetKnowledgeHubChildNodesUnprocessableEntityErrorData = {
   error: operations.GetKnowledgeHubChildNodesUnprocessableEntityError;
 };
 
 /**
- * A listing that spans a whole connector (a flattened listing, a search or a filter) was too large for the
+ * Either of:
  *
  * @remarks
- * database to hold in memory, so it was refused instead of cut short. No page is returned. Open a folder
- * (`GET /knowledgeBase/knowledge-hub/nodes/{parentType}/{parentId}`) to see its records, or add a search (`q`),
- * which keeps only matching records in memory. Choosing a connector, or a filter that keeps most records (such as
- * `nodeTypes`), does not help. Sorting by name with no filters is served from stored visibility where the
- * connector allows it and is not affected.
+ * - A typed query parameter could not be read: `page` or `limit` is not an
+ *   integer or is out of range (`page` below 1, `limit` outside 1-200), or
+ *   `onlyContainers` or `flattened` is not a boolean. `error.message` is the
+ *   connector service's own validation text.
+ * - A listing that spans a whole connector (a flattened listing, a search or a filter) was too large for the
+ *   database to hold in memory, so it was refused instead of cut short. No page is returned. Open a folder
+ *   (`GET /knowledgeBase/knowledge-hub/nodes/{parentType}/{parentId}`) to see its records, or add a search (`q`),
+ *   which keeps only matching records in memory. Choosing a connector, or a filter that keeps most records (such as
+ *   `nodeTypes`), does not help. Sorting by name with no filters is served from stored visibility where the
+ *   connector allows it and is not affected.
  */
 export class GetKnowledgeHubChildNodesUnprocessableEntityError
   extends PipeshubError
@@ -121,168 +99,6 @@ export class GetKnowledgeHubChildNodesUnprocessableEntityError
     this.error = err.error;
 
     this.name = "GetKnowledgeHubChildNodesUnprocessableEntityError";
-  }
-}
-
-/**
- * Parent node not found.
- *
- * @remarks
- *
- * The `parentId` does not correspond to an existing node of the
- * specified `parentType`, or the node has been deleted.
- */
-export type GetKnowledgeHubChildNodesNotFoundErrorData = {
-  error: operations.GetKnowledgeHubChildNodesNotFoundError;
-};
-
-/**
- * Parent node not found.
- *
- * @remarks
- *
- * The `parentId` does not correspond to an existing node of the
- * specified `parentType`, or the node has been deleted.
- */
-export class GetKnowledgeHubChildNodesNotFoundError extends PipeshubError {
-  error: operations.GetKnowledgeHubChildNodesNotFoundError;
-
-  /** The original data that was passed to this error instance. */
-  data$: GetKnowledgeHubChildNodesNotFoundErrorData;
-
-  constructor(
-    err: GetKnowledgeHubChildNodesNotFoundErrorData,
-    httpMeta: { response: Response; request: Request; body: string },
-  ) {
-    const message = err.error?.message
-      || `API error occurred: ${JSON.stringify(err)}`;
-    super(message, httpMeta);
-    this.data$ = err;
-    this.error = err.error;
-
-    this.name = "GetKnowledgeHubChildNodesNotFoundError";
-  }
-}
-
-/**
- * Insufficient OAuth scope.
- *
- * @remarks
- *
- * Only applies to OAuth tokens. The token did not carry the `kb:read`
- * scope required by this endpoint. Regular (non-OAuth) JWT bearer
- * tokens are not subject to scope enforcement and will not receive
- * this error.
- */
-export type GetKnowledgeHubChildNodesForbiddenErrorData = {
-  error: operations.GetKnowledgeHubChildNodesErrorHTTPForbidden;
-};
-
-/**
- * Insufficient OAuth scope.
- *
- * @remarks
- *
- * Only applies to OAuth tokens. The token did not carry the `kb:read`
- * scope required by this endpoint. Regular (non-OAuth) JWT bearer
- * tokens are not subject to scope enforcement and will not receive
- * this error.
- */
-export class GetKnowledgeHubChildNodesForbiddenError extends PipeshubError {
-  error: operations.GetKnowledgeHubChildNodesErrorHTTPForbidden;
-
-  /** The original data that was passed to this error instance. */
-  data$: GetKnowledgeHubChildNodesForbiddenErrorData;
-
-  constructor(
-    err: GetKnowledgeHubChildNodesForbiddenErrorData,
-    httpMeta: { response: Response; request: Request; body: string },
-  ) {
-    const message = err.error?.message
-      || `API error occurred: ${JSON.stringify(err)}`;
-    super(message, httpMeta);
-    this.data$ = err;
-    this.error = err.error;
-
-    this.name = "GetKnowledgeHubChildNodesForbiddenError";
-  }
-}
-
-/**
- * Missing or invalid authentication token.
- *
- * @remarks
- *
- * The bearer token was absent, expired, malformed, or could not be
- * verified by the auth middleware.
- */
-export type GetKnowledgeHubChildNodesUnauthorizedErrorData = {
-  error: operations.GetKnowledgeHubChildNodesErrorHTTPUnauthorized;
-};
-
-/**
- * Missing or invalid authentication token.
- *
- * @remarks
- *
- * The bearer token was absent, expired, malformed, or could not be
- * verified by the auth middleware.
- */
-export class GetKnowledgeHubChildNodesUnauthorizedError extends PipeshubError {
-  error: operations.GetKnowledgeHubChildNodesErrorHTTPUnauthorized;
-
-  /** The original data that was passed to this error instance. */
-  data$: GetKnowledgeHubChildNodesUnauthorizedErrorData;
-
-  constructor(
-    err: GetKnowledgeHubChildNodesUnauthorizedErrorData,
-    httpMeta: { response: Response; request: Request; body: string },
-  ) {
-    const message = err.error?.message
-      || `API error occurred: ${JSON.stringify(err)}`;
-    super(message, httpMeta);
-    this.data$ = err;
-    this.error = err.error;
-
-    this.name = "GetKnowledgeHubChildNodesUnauthorizedError";
-  }
-}
-
-/**
- * Invalid request parameters or path values. The backend's validation
- *
- * @remarks
- * message is returned verbatim in `error.message`. See the examples
- * below for the common triggers.
- */
-export type GetKnowledgeHubChildNodesBadRequestErrorData = {
-  error: operations.GetKnowledgeHubChildNodesErrorHTTPBadRequest;
-};
-
-/**
- * Invalid request parameters or path values. The backend's validation
- *
- * @remarks
- * message is returned verbatim in `error.message`. See the examples
- * below for the common triggers.
- */
-export class GetKnowledgeHubChildNodesBadRequestError extends PipeshubError {
-  error: operations.GetKnowledgeHubChildNodesErrorHTTPBadRequest;
-
-  /** The original data that was passed to this error instance. */
-  data$: GetKnowledgeHubChildNodesBadRequestErrorData;
-
-  constructor(
-    err: GetKnowledgeHubChildNodesBadRequestErrorData,
-    httpMeta: { response: Response; request: Request; body: string },
-  ) {
-    const message = err.error?.message
-      || `API error occurred: ${JSON.stringify(err)}`;
-    super(message, httpMeta);
-    this.data$ = err;
-    this.error = err.error;
-
-    this.name = "GetKnowledgeHubChildNodesBadRequestError";
   }
 }
 
@@ -309,27 +125,6 @@ export const GetKnowledgeHubChildNodesServiceUnavailableError$inboundSchema:
     );
 
 /** @internal */
-export const GetKnowledgeHubChildNodesInternalServerError$inboundSchema:
-  z.ZodMiniType<GetKnowledgeHubChildNodesInternalServerError, unknown> = z.pipe(
-    z.object({
-      error: z.lazy(() =>
-        operations
-          .GetKnowledgeHubChildNodesErrorHTTPInternalServerError$inboundSchema
-      ),
-      request$: z.custom<Request>(x => x instanceof Request),
-      response$: z.custom<Response>(x => x instanceof Response),
-      body$: z.string(),
-    }),
-    z.transform((v) => {
-      return new GetKnowledgeHubChildNodesInternalServerError(v, {
-        request: v.request$,
-        response: v.response$,
-        body: v.body$,
-      });
-    }),
-  );
-
-/** @internal */
 export const GetKnowledgeHubChildNodesUnprocessableEntityError$inboundSchema:
   z.ZodMiniType<GetKnowledgeHubChildNodesUnprocessableEntityError, unknown> = z
     .pipe(
@@ -350,83 +145,3 @@ export const GetKnowledgeHubChildNodesUnprocessableEntityError$inboundSchema:
         });
       }),
     );
-
-/** @internal */
-export const GetKnowledgeHubChildNodesNotFoundError$inboundSchema:
-  z.ZodMiniType<GetKnowledgeHubChildNodesNotFoundError, unknown> = z.pipe(
-    z.object({
-      error: z.lazy(() =>
-        operations.GetKnowledgeHubChildNodesNotFoundError$inboundSchema
-      ),
-      request$: z.custom<Request>(x => x instanceof Request),
-      response$: z.custom<Response>(x => x instanceof Response),
-      body$: z.string(),
-    }),
-    z.transform((v) => {
-      return new GetKnowledgeHubChildNodesNotFoundError(v, {
-        request: v.request$,
-        response: v.response$,
-        body: v.body$,
-      });
-    }),
-  );
-
-/** @internal */
-export const GetKnowledgeHubChildNodesForbiddenError$inboundSchema:
-  z.ZodMiniType<GetKnowledgeHubChildNodesForbiddenError, unknown> = z.pipe(
-    z.object({
-      error: z.lazy(() =>
-        operations.GetKnowledgeHubChildNodesErrorHTTPForbidden$inboundSchema
-      ),
-      request$: z.custom<Request>(x => x instanceof Request),
-      response$: z.custom<Response>(x => x instanceof Response),
-      body$: z.string(),
-    }),
-    z.transform((v) => {
-      return new GetKnowledgeHubChildNodesForbiddenError(v, {
-        request: v.request$,
-        response: v.response$,
-        body: v.body$,
-      });
-    }),
-  );
-
-/** @internal */
-export const GetKnowledgeHubChildNodesUnauthorizedError$inboundSchema:
-  z.ZodMiniType<GetKnowledgeHubChildNodesUnauthorizedError, unknown> = z.pipe(
-    z.object({
-      error: z.lazy(() =>
-        operations.GetKnowledgeHubChildNodesErrorHTTPUnauthorized$inboundSchema
-      ),
-      request$: z.custom<Request>(x => x instanceof Request),
-      response$: z.custom<Response>(x => x instanceof Response),
-      body$: z.string(),
-    }),
-    z.transform((v) => {
-      return new GetKnowledgeHubChildNodesUnauthorizedError(v, {
-        request: v.request$,
-        response: v.response$,
-        body: v.body$,
-      });
-    }),
-  );
-
-/** @internal */
-export const GetKnowledgeHubChildNodesBadRequestError$inboundSchema:
-  z.ZodMiniType<GetKnowledgeHubChildNodesBadRequestError, unknown> = z.pipe(
-    z.object({
-      error: z.lazy(() =>
-        operations.GetKnowledgeHubChildNodesErrorHTTPBadRequest$inboundSchema
-      ),
-      request$: z.custom<Request>(x => x instanceof Request),
-      response$: z.custom<Response>(x => x instanceof Response),
-      body$: z.string(),
-    }),
-    z.transform((v) => {
-      return new GetKnowledgeHubChildNodesBadRequestError(v, {
-        request: v.request$,
-        response: v.response$,
-        body: v.body$,
-      });
-    }),
-  );

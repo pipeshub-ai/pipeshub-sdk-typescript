@@ -13,13 +13,13 @@ export type UpdateAgentRequest = {
   /**
    * Partial agent configuration fields to update
    */
-  body: models.AgentUpdateRequest;
+  body?: models.AgentUpdateRequest | undefined;
 };
 
 /** @internal */
 export type UpdateAgentRequest$Outbound = {
   agentKey: string;
-  body: models.AgentUpdateRequest$Outbound;
+  body?: models.AgentUpdateRequest$Outbound | undefined;
 };
 
 /** @internal */
@@ -28,7 +28,7 @@ export const UpdateAgentRequest$outboundSchema: z.ZodMiniType<
   UpdateAgentRequest
 > = z.object({
   agentKey: z.string(),
-  body: models.AgentUpdateRequest$outboundSchema,
+  body: z.optional(models.AgentUpdateRequest$outboundSchema),
 });
 
 export function updateAgentRequestToJSON(

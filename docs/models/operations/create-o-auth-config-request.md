@@ -6,7 +6,7 @@
 import { CreateOAuthConfigRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: CreateOAuthConfigRequest = {
-  connectorType: "<value>",
+  connectorType: "Confluence",
   body: {
     oauthInstanceName: "Production Google OAuth Credentials",
     config: {
@@ -21,7 +21,7 @@ let value: CreateOAuthConfigRequest = {
 
 ## Fields
 
-| Field                                                                           | Type                                                                            | Required                                                                        | Description                                                                     |
-| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `connectorType`                                                                 | *string*                                                                        | :heavy_check_mark:                                                              | N/A                                                                             |
-| `body`                                                                          | [models.CreateOAuthConfigRequest](../../models/create-o-auth-config-request.md) | :heavy_check_mark:                                                              | Request payload                                                                 |
+| Field                                                                           | Type                                                                            | Required                                                                        | Description                                                                     | Example                                                                         |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `connectorType`                                                                 | *string*                                                                        | :heavy_check_mark:                                                              | N/A                                                                             | Confluence                                                                      |
+| `body`                                                                          | [models.CreateOAuthConfigRequest](../../models/create-o-auth-config-request.md) | :heavy_check_mark:                                                              | Request payload                                                                 |                                                                                 |

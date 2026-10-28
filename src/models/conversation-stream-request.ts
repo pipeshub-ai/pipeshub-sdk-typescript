@@ -56,27 +56,11 @@ export type ConversationStreamRequestProjectVisibility = ClosedEnum<
   typeof ConversationStreamRequestProjectVisibility
 >;
 
-/**
- * Optional execution mode for non-stream consumers of this shared
- *
- * @remarks
- * request schema.
- * `agent` uses the universal agent loop, while `internal_search`
- * and `web_search` use their corresponding assistant search paths.
- */
 export const ConversationStreamRequestChatMode = {
   Agent: "agent",
   InternalSearch: "internal_search",
   WebSearch: "web_search",
 } as const;
-/**
- * Optional execution mode for non-stream consumers of this shared
- *
- * @remarks
- * request schema.
- * `agent` uses the universal agent loop, while `internal_search`
- * and `web_search` use their corresponding assistant search paths.
- */
 export type ConversationStreamRequestChatMode = ClosedEnum<
   typeof ConversationStreamRequestChatMode
 >;
@@ -121,10 +105,36 @@ export type ConversationStreamRequestKeywordSearchBudget = ClosedEnum<
 >;
 
 /**
+ * How hard a reasoning model should think for this turn. Saved in
+ *
+ * @remarks
+ * the conversation's `modelInfo`.
+ */
+export const ConversationStreamRequestReasoningEffort = {
+  None: "none",
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Max: "max",
+} as const;
+/**
+ * How hard a reasoning model should think for this turn. Saved in
+ *
+ * @remarks
+ * the conversation's `modelInfo`.
+ */
+export type ConversationStreamRequestReasoningEffort = ClosedEnum<
+  typeof ConversationStreamRequestReasoningEffort
+>;
+
+/**
  * Request body for `POST /conversations/stream`. The public stream
  *
  * @remarks
- * requires an explicit universal execution mode.
+ * requires an explicit universal execution mode; the legacy modes
+ * the non-streaming route accepts are refused here. Unlike
+ * `POST /conversations/create`, a `query` of only whitespace is not
+ * refused: the turn runs and the conversation is titled with it.
  */
 export type ConversationStreamRequest = {
   /**
@@ -192,6 +202,9 @@ export type ConversationStreamRequest = {
    * `filters`/`attachments`, they are merged in as a fallback (the
    * request always wins). Ignored on follow-up turns — only
    * meaningful when creating a conversation.
+   * An OAuth token or PAT also needs `project:read`. An archived
+   * project answers `409`; a project the caller cannot see, `404`,
+   * before any stream opens.
    */
   projectId?: string | undefined;
   /**
@@ -211,6 +224,9 @@ export type ConversationStreamRequest = {
    * Available models depend on organization settings. When neither
    * `modelKey` nor `modelName` is sent, the organization's default
    * model answers and is saved in the conversation's `modelInfo`.
+   * A key that matches no configured model is not refused: the
+   * default model answers, and the unknown key is still saved in
+   * `modelInfo`.
    */
   modelKey?: string | undefined;
   /**
@@ -221,14 +237,6 @@ export type ConversationStreamRequest = {
    * Friendly display name of the selected model
    */
   modelFriendlyName?: string | undefined;
-  /**
-   * Optional execution mode for non-stream consumers of this shared
-   *
-   * @remarks
-   * request schema.
-   * `agent` uses the universal agent loop, while `internal_search`
-   * and `web_search` use their corresponding assistant search paths.
-   */
   chatMode: ConversationStreamRequestChatMode;
   /**
    * IANA timezone identifier from the client (top-level field).
@@ -303,6 +311,13 @@ export type ConversationStreamRequest = {
    * one just can't cooperatively cancel the run.
    */
   runId?: string | undefined;
+  /**
+   * How hard a reasoning model should think for this turn. Saved in
+   *
+   * @remarks
+   * the conversation's `modelInfo`.
+   */
+  reasoningEffort?: ConversationStreamRequestReasoningEffort | undefined;
 };
 
 /** @internal */
@@ -328,6 +343,12 @@ export const ConversationStreamRequestKeywordSearchBudget$outboundSchema:
   );
 
 /** @internal */
+export const ConversationStreamRequestReasoningEffort$outboundSchema:
+  z.ZodMiniEnum<typeof ConversationStreamRequestReasoningEffort> = z.enum(
+    ConversationStreamRequestReasoningEffort,
+  );
+
+/** @internal */
 export type ConversationStreamRequest$Outbound = {
   query: string;
   recordIds?: Array<string> | undefined;
@@ -349,6 +370,7 @@ export type ConversationStreamRequest$Outbound = {
   keywordSearchBudget?: string | undefined;
   toolApproval?: ToolApprovalAnswer$Outbound | undefined;
   runId?: string | undefined;
+  reasoningEffort?: string | undefined;
 };
 
 /** @internal */
@@ -380,6 +402,9 @@ export const ConversationStreamRequest$outboundSchema: z.ZodMiniType<
   ),
   toolApproval: z.optional(ToolApprovalAnswer$outboundSchema),
   runId: z.optional(z.string()),
+  reasoningEffort: z.optional(
+    ConversationStreamRequestReasoningEffort$outboundSchema,
+  ),
 });
 
 export function conversationStreamRequestToJSON(

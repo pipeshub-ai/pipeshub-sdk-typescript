@@ -38,8 +38,10 @@ import { Result } from "../types/fp.js";
  *
  * - `password`: `{ "credentials": { "password": "your-password" } }`
  * - `otp`: `{ "credentials": { "otp": "123456" } }` (6-digit code, valid for 10 minutes)
- * - `google`: `{ "credentials": "google-id-token-string" }`
- * - `microsoft`: `{ "credentials": { "accessToken": "...", "idToken": "..." } }`
+ * - `google`: `{ "credentials": "google-id-token-string" }`. The object form
+ *   `{ "credentials": { "credential": "..." } }` passes the first token check, but by code
+ *   reading the second check is handed the whole object, so it ends in `500`
+ * - `microsoft`: `{ "credentials": { "idToken": "..." } }` (only `idToken` is read)
  *
  * SAML (`samlSso`), generic OAuth (`oauth`) and Azure AD (`azureAd`) sign-in were removed in 1.0;
  * this endpoint answers `400` for them. Azure AD accounts sign in with `microsoft`.
@@ -56,12 +58,17 @@ import { Result } from "../types/fp.js";
  *
  * **Security:**
  *
- * - Account locks for 24 hours after 5 consecutive failed attempts, and the owner is
+ * - Account locks for 24 hours after 10 consecutive failed attempts, and the owner is
  *   sent an email saying so. While it is locked, sign-in is refused with the same answer
  *   as a wrong password or code, even when the password or code is right
  * - CAPTCHA may be required if enabled (pass `cf-turnstile-response`)
  * - An email with no account gets the same status and message as a real account given
  *   a wrong password (`400`) or a wrong, missing or expired sign-in code (`401`)
+ * - The session token is single-use for the final step: once tokens are returned the
+ *   session is gone, and sending it again answers `401`
+ *
+ * **Order of checks:** the session token is checked before the body, so a request
+ * without a valid `x-session-token` answers `401` whatever its body holds.
  */
 export function userAccountAuthenticate(
   client: PipeshubCore,
@@ -193,7 +200,7 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.AuthenticateResponse$inboundSchema),
-    M.jsonErr([400, 401, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([400, 401], errors.ErrorResponse$inboundSchema),
     M.jsonErr(429, errors.RateLimitErrorResponse$inboundSchema),
     M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),

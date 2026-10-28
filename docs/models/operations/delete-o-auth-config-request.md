@@ -6,14 +6,14 @@
 import { DeleteOAuthConfigRequest } from "@pipeshub-ai/sdk/models/operations";
 
 let value: DeleteOAuthConfigRequest = {
-  connectorType: "<value>",
+  connectorType: "Confluence",
   configId: "<id>",
 };
 ```
 
 ## Fields
 
-| Field              | Type               | Required           | Description        |
-| ------------------ | ------------------ | ------------------ | ------------------ |
-| `connectorType`    | *string*           | :heavy_check_mark: | N/A                |
-| `configId`         | *string*           | :heavy_check_mark: | N/A                |
+| Field              | Type               | Required           | Description        | Example            |
+| ------------------ | ------------------ | ------------------ | ------------------ | ------------------ |
+| `connectorType`    | *string*           | :heavy_check_mark: | N/A                | Confluence         |
+| `configId`         | *string*           | :heavy_check_mark: | N/A                |                    |

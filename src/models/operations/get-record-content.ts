@@ -6,6 +6,18 @@ import * as z from "zod/v4-mini";
 import { ClosedEnum } from "../../types/enums.js";
 
 /**
+ * With `query`, in record mode and without `startBlock`: return only the passages that answer `query`, as the model assigned to the `reader` role (else the default model) copies them out, instead of the record's text. The model is told to copy word for word, and `extract.unverifiedLines` counts the lines it did not. The response's `order` is `extract`, and its `extract` object names the model and the tokens it used. When the model cannot be reached, the usual read is returned with `extract.error` set.
+ */
+export const ExtractT = {
+  True: "true",
+  False: "false",
+} as const;
+/**
+ * With `query`, in record mode and without `startBlock`: return only the passages that answer `query`, as the model assigned to the `reader` role (else the default model) copies them out, instead of the record's text. The model is told to copy word for word, and `extract.unverifiedLines` counts the lines it did not. The response's `order` is `extract`, and its `extract` object names the model and the tokens it used. When the model cannot be reached, the usual read is returned with `extract.error` set.
+ */
+export type ExtractT = ClosedEnum<typeof ExtractT>;
+
+/**
  * `record` (default) reads this record. `thread` reads every record of the Slack thread this message belongs to, oldest first. A Slack record in no single thread reads as itself, then the threads its messages started (at most 10). A record that is not from Slack answers `422`.
  */
 export const Mode = {
@@ -27,6 +39,10 @@ export type GetRecordContentRequest = {
    */
   maxChars?: number | undefined;
   /**
+   * With `query`, in record mode and without `startBlock`: return only the passages that answer `query`, as the model assigned to the `reader` role (else the default model) copies them out, instead of the record's text. The model is told to copy word for word, and `extract.unverifiedLines` counts the lines it did not. The response's `order` is `extract`, and its `extract` object names the model and the tokens it used. When the model cannot be reached, the usual read is returned with `extract.error` set.
+   */
+  extract?: ExtractT | undefined;
+  /**
    * Read in order from this block: the `nextStartBlock` of a previous read, or 0 for the top. Takes precedence over `query`. In thread mode it applies to the record at `startRecord`; later records are read from their start.
    */
   startBlock?: number | undefined;
@@ -45,12 +61,18 @@ export type GetRecordContentRequest = {
 };
 
 /** @internal */
+export const ExtractT$outboundSchema: z.ZodMiniEnum<typeof ExtractT> = z.enum(
+  ExtractT,
+);
+
+/** @internal */
 export const Mode$outboundSchema: z.ZodMiniEnum<typeof Mode> = z.enum(Mode);
 
 /** @internal */
 export type GetRecordContentRequest$Outbound = {
   recordId: string;
   maxChars?: number | undefined;
+  extract?: string | undefined;
   startBlock?: number | undefined;
   query?: string | undefined;
   mode?: string | undefined;
@@ -64,6 +86,7 @@ export const GetRecordContentRequest$outboundSchema: z.ZodMiniType<
 > = z.object({
   recordId: z.string(),
   maxChars: z.optional(z.int()),
+  extract: z.optional(ExtractT$outboundSchema),
   startBlock: z.optional(z.int()),
   query: z.optional(z.string()),
   mode: z.optional(Mode$outboundSchema),

@@ -25,6 +25,31 @@ export type GetKnowledgeBaseByIdUserRole = OpenEnum<
   typeof GetKnowledgeBaseByIdUserRole
 >;
 
+/**
+ * `DELETING` while the knowledge base is being deleted: reads work, every write is refused with 409
+ *
+ * @remarks
+ * (`error.code` `HTTP_KB_BEING_DELETED`), and deleting it again finishes the job. Otherwise its
+ * processing state (`IDLE`, `QUEUED`, `SYNCING`, `FULL_SYNCING`), or null before it is first processed.
+ */
+export const GetKnowledgeBaseByIdStatus = {
+  Idle: "IDLE",
+  Queued: "QUEUED",
+  Syncing: "SYNCING",
+  FullSyncing: "FULL_SYNCING",
+  Deleting: "DELETING",
+} as const;
+/**
+ * `DELETING` while the knowledge base is being deleted: reads work, every write is refused with 409
+ *
+ * @remarks
+ * (`error.code` `HTTP_KB_BEING_DELETED`), and deleting it again finishes the job. Otherwise its
+ * processing state (`IDLE`, `QUEUED`, `SYNCING`, `FULL_SYNCING`), or null before it is first processed.
+ */
+export type GetKnowledgeBaseByIdStatus = OpenEnum<
+  typeof GetKnowledgeBaseByIdStatus
+>;
+
 export type GetKnowledgeBaseByIdFolder = {
   /**
    * Folder ID
@@ -73,7 +98,19 @@ export type GetKnowledgeBaseById = {
    */
   userRole: GetKnowledgeBaseByIdUserRole;
   /**
-   * Root-level folders in this knowledge base
+   * `DELETING` while the knowledge base is being deleted: reads work, every write is refused with 409
+   *
+   * @remarks
+   * (`error.code` `HTTP_KB_BEING_DELETED`), and deleting it again finishes the job. Otherwise its
+   * processing state (`IDLE`, `QUEUED`, `SYNCING`, `FULL_SYNCING`), or null before it is first processed.
+   */
+  status?: GetKnowledgeBaseByIdStatus | null | undefined;
+  /**
+   * Every folder in this knowledge base, nested ones included, with nothing that tells
+   *
+   * @remarks
+   * a nested folder from a root-level one (no parent id). Files are not listed. A
+   * folder moved to the trash is still listed.
    */
   folders: Array<GetKnowledgeBaseByIdFolder>;
 };
@@ -83,6 +120,12 @@ export const GetKnowledgeBaseByIdUserRole$inboundSchema: z.ZodMiniType<
   GetKnowledgeBaseByIdUserRole,
   unknown
 > = openEnums.inboundSchema(GetKnowledgeBaseByIdUserRole);
+
+/** @internal */
+export const GetKnowledgeBaseByIdStatus$inboundSchema: z.ZodMiniType<
+  GetKnowledgeBaseByIdStatus,
+  unknown
+> = openEnums.inboundSchema(GetKnowledgeBaseByIdStatus);
 
 /** @internal */
 export const GetKnowledgeBaseByIdFolder$inboundSchema: z.ZodMiniType<
@@ -116,6 +159,7 @@ export const GetKnowledgeBaseById$inboundSchema: z.ZodMiniType<
   updatedAtTimestamp: types.number(),
   createdBy: types.string(),
   userRole: GetKnowledgeBaseByIdUserRole$inboundSchema,
+  status: z.optional(z.nullable(GetKnowledgeBaseByIdStatus$inboundSchema)),
   folders: z.array(z.lazy(() => GetKnowledgeBaseByIdFolder$inboundSchema)),
 });
 

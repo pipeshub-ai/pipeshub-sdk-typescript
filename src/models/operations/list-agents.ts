@@ -28,11 +28,21 @@ export type ListAgentsRequest = {
    */
   limit?: number | undefined;
   /**
-   * Case-insensitive search across agent name, description, and tags. Leading/trailing whitespace is trimmed; blank-after-trim values are rejected.
+   * Case-insensitive search across agent name, description, and tags.
+   *
+   * @remarks
+   * Leading/trailing whitespace is trimmed; a blank value is refused with
+   * `VALIDATION_ERROR`, and so is a printf-style format specifier (`%s`,
+   * `%x`, ...). Markup (HTML tags, `javascript:`, event handlers) is
+   * refused with `HTTP_BAD_REQUEST` by the sanitizer every route runs.
    */
   search?: string | undefined;
   /**
-   * Backend sort field. Leading/trailing whitespace is trimmed. Common value is `updatedAtTimestamp`.
+   * Backend sort field. Leading/trailing whitespace is trimmed and a blank
+   *
+   * @remarks
+   * value is refused. Any other value is accepted. Common value is
+   * `updatedAtTimestamp`.
    */
   sortBy?: string | undefined;
   /**

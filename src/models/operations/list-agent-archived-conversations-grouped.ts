@@ -5,7 +5,20 @@
 import * as z from "zod/v4-mini";
 
 export type ListAgentArchivedConversationsGroupedRequest = {
+  /**
+   * 1-based page over agent groups. Values below 1 are read as 1 and a
+   *
+   * @remarks
+   * non-numeric value as the default; neither is refused.
+   */
   agentPage?: number | undefined;
+  /**
+   * Agent groups per page. Values are clamped to 1..100 and a non-numeric
+   *
+   * @remarks
+   * value is read as the default; neither is refused. Each group carries at
+   * most 5 conversations.
+   */
   agentLimit?: number | undefined;
 };
 

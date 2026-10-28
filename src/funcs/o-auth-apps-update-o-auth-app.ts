@@ -46,7 +46,7 @@ import { Result } from "../types/fp.js";
  *
  * Creator-only: even org admins cannot edit apps owned by other users.
  *
- * When modifying `allowedScopes`, the new set must remain a subset of the caller's role-aware scope list (same rule as `GET /oauth-clients/scopes`). When adding `authorization_code` to `allowedGrantTypes`, `redirectUris` becomes required and must contain at least one URI; otherwise the request is rejected with `400` by the Zod refine on `updateAppSchema`.
+ * When modifying `allowedScopes`, the new set must remain a subset of the caller's role-aware scope list (same rule as `GET /oauth-clients/scopes`). The Zod refine on `updateAppSchema` only looks at the body: it refuses `allowedGrantTypes` containing `authorization_code` together with an empty `redirectUris` (`400 VALIDATION_ERROR`), but sending `authorization_code` without `redirectUris` is accepted even when the stored app has no redirect URI.
  *
  * This endpoint never rotates the client secret — use `POST /oauth-clients/{appId}/regenerate-secret` for that.
  *
@@ -61,6 +61,7 @@ export function oAuthAppsUpdateOAuthApp(
     models.UpdateOAuthAppResponse,
     | errors.ApplicationJsonErrorResponse
     | errors.OAuthClientManagementRateLimitError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -88,6 +89,7 @@ async function $do(
       models.UpdateOAuthAppResponse,
       | errors.ApplicationJsonErrorResponse
       | errors.OAuthClientManagementRateLimitError
+      | errors.ErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -177,6 +179,7 @@ async function $do(
     models.UpdateOAuthAppResponse,
     | errors.ApplicationJsonErrorResponse
     | errors.OAuthClientManagementRateLimitError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -188,10 +191,11 @@ async function $do(
   >(
     M.json(200, models.UpdateOAuthAppResponse$inboundSchema),
     M.jsonErr(
-      [400, 401, 403, 404],
+      [400, 401, 403, 404, 409],
       errors.ApplicationJsonErrorResponse$inboundSchema,
     ),
     M.jsonErr(429, errors.OAuthClientManagementRateLimitError$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

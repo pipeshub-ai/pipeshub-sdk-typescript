@@ -14,17 +14,30 @@ export type GetFilterFieldOptionsRequest = {
    */
   connectorId: string;
   /**
-   * Filter field key
+   * Filter field key, the `name` of a field in the connector type's
+   *
+   * @remarks
+   * `config.filters` (`GET /connectors/registry/{connectorType}/schema`).
+   * An unsafe path segment is refused with `400` before the token is checked.
    */
   filterKey: string;
+  /**
+   * Page number. An empty value is refused.
+   */
   page?: number | undefined;
+  /**
+   * Page size, 1 to 100. A value above 100 or an empty value is refused
+   *
+   * @remarks
+   * by the gateway's validator ("Limit must be between 1 and 100.").
+   */
   limit?: number | undefined;
   /**
    * Search term for filtering options
    */
   search?: string | undefined;
   /**
-   * Cursor for cursor-based pagination
+   * Cursor for cursor-based pagination, passed on to connectors that page by cursor
    */
   cursor?: string | undefined;
   /**
@@ -34,7 +47,8 @@ export type GetFilterFieldOptionsRequest = {
    * When provided for the `project_ids` filter key, the returned
    * options are scoped to repositories that belong to those groups.
    * Repeat the parameter for multiple groups:
-   * `?contextGroupPath=groupA&contextGroupPath=groupB`
+   * `?contextGroupPath=groupA&contextGroupPath=groupB`. Blank values
+   * are dropped.
    */
   contextGroupPath?: Array<string> | undefined;
   /**
@@ -45,13 +59,20 @@ export type GetFilterFieldOptionsRequest = {
    * repositories that belong to those groups (used when the
    * `group_ids` sync filter is `not_in`). Repeat the parameter for
    * multiple groups:
-   * `?excludeContextGroupPath=groupA&excludeContextGroupPath=groupB`
+   * `?excludeContextGroupPath=groupA&excludeContextGroupPath=groupB`.
+   * Blank values are dropped.
    */
   excludeContextGroupPath?: Array<string> | undefined;
 };
 
 export type Option = {
+  /**
+   * Value to store in the filter selection
+   */
   id?: string | undefined;
+  /**
+   * Text shown for the option
+   */
   label?: string | undefined;
 };
 
@@ -68,6 +89,9 @@ export type GetFilterFieldOptionsResponse = {
    * Pass back to get the next page
    */
   cursor?: string | null | undefined;
+  /**
+   * Informational message, only when the connector sets one
+   */
   message?: string | null | undefined;
 };
 

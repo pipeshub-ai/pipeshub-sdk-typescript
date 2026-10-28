@@ -12,6 +12,9 @@ import * as models from "../index.js";
 export type ListOAuthConfigsRequest = {
   page?: number | undefined;
   limit?: number | undefined;
+  /**
+   * Case-insensitive substring matched against the name, connector type, group, description and categories
+   */
   search?: string | undefined;
 };
 

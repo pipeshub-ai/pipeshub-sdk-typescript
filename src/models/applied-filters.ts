@@ -6,6 +6,7 @@ import * as z from "zod/v4-mini";
 import { safeParse } from "../lib/schemas.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
+import { smartUnion } from "../types/smart-union.js";
 import {
   AppliedFilterNode,
   AppliedFilterNode$inboundSchema,
@@ -13,6 +14,22 @@ import {
   AppliedFilterNode$outboundSchema,
 } from "./applied-filter-node.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
+import {
+  RedactedSource,
+  RedactedSource$inboundSchema,
+  RedactedSource$Outbound,
+  RedactedSource$outboundSchema,
+} from "./redacted-source.js";
+
+export type App = AppliedFilterNode | RedactedSource;
+
+export type Kb = AppliedFilterNode | RedactedSource;
+
+export type RecordGroup = AppliedFilterNode | RedactedSource;
+
+export type RecordT = AppliedFilterNode | RedactedSource;
+
+export type RecordsExact = AppliedFilterNode | RedactedSource;
 
 /**
  * Rich filter state selected by the user, used for display and persistence only.
@@ -25,43 +42,225 @@ export type AppliedFilters = {
   /**
    * Applied app/connector filter nodes
    */
-  apps?: Array<AppliedFilterNode> | undefined;
+  apps?: Array<AppliedFilterNode | RedactedSource> | undefined;
   /**
    * Applied knowledge-base filter nodes
    */
-  kb?: Array<AppliedFilterNode> | undefined;
+  kb?: Array<AppliedFilterNode | RedactedSource> | undefined;
   /**
    * Applied record-group filter nodes
    */
-  recordGroups?: Array<AppliedFilterNode> | undefined;
+  recordGroups?: Array<AppliedFilterNode | RedactedSource> | undefined;
   /**
    * Applied folder and record filter nodes (each with everything under it)
    */
-  records?: Array<AppliedFilterNode> | undefined;
+  records?: Array<AppliedFilterNode | RedactedSource> | undefined;
   /**
    * Applied record filter nodes selected alone
    */
-  recordsExact?: Array<AppliedFilterNode> | undefined;
+  recordsExact?: Array<AppliedFilterNode | RedactedSource> | undefined;
 };
+
+/** @internal */
+export const App$inboundSchema: z.ZodMiniType<App, unknown> = smartUnion([
+  AppliedFilterNode$inboundSchema,
+  RedactedSource$inboundSchema,
+]);
+/** @internal */
+export type App$Outbound = AppliedFilterNode$Outbound | RedactedSource$Outbound;
+
+/** @internal */
+export const App$outboundSchema: z.ZodMiniType<App$Outbound, App> = smartUnion([
+  AppliedFilterNode$outboundSchema,
+  RedactedSource$outboundSchema,
+]);
+
+export function appToJSON(app: App): string {
+  return JSON.stringify(App$outboundSchema.parse(app));
+}
+export function appFromJSON(
+  jsonString: string,
+): SafeParseResult<App, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => App$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'App' from JSON`,
+  );
+}
+
+/** @internal */
+export const Kb$inboundSchema: z.ZodMiniType<Kb, unknown> = smartUnion([
+  AppliedFilterNode$inboundSchema,
+  RedactedSource$inboundSchema,
+]);
+/** @internal */
+export type Kb$Outbound = AppliedFilterNode$Outbound | RedactedSource$Outbound;
+
+/** @internal */
+export const Kb$outboundSchema: z.ZodMiniType<Kb$Outbound, Kb> = smartUnion([
+  AppliedFilterNode$outboundSchema,
+  RedactedSource$outboundSchema,
+]);
+
+export function kbToJSON(kb: Kb): string {
+  return JSON.stringify(Kb$outboundSchema.parse(kb));
+}
+export function kbFromJSON(
+  jsonString: string,
+): SafeParseResult<Kb, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => Kb$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Kb' from JSON`,
+  );
+}
+
+/** @internal */
+export const RecordGroup$inboundSchema: z.ZodMiniType<RecordGroup, unknown> =
+  smartUnion([AppliedFilterNode$inboundSchema, RedactedSource$inboundSchema]);
+/** @internal */
+export type RecordGroup$Outbound =
+  | AppliedFilterNode$Outbound
+  | RedactedSource$Outbound;
+
+/** @internal */
+export const RecordGroup$outboundSchema: z.ZodMiniType<
+  RecordGroup$Outbound,
+  RecordGroup
+> = smartUnion([
+  AppliedFilterNode$outboundSchema,
+  RedactedSource$outboundSchema,
+]);
+
+export function recordGroupToJSON(recordGroup: RecordGroup): string {
+  return JSON.stringify(RecordGroup$outboundSchema.parse(recordGroup));
+}
+export function recordGroupFromJSON(
+  jsonString: string,
+): SafeParseResult<RecordGroup, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => RecordGroup$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'RecordGroup' from JSON`,
+  );
+}
+
+/** @internal */
+export const RecordT$inboundSchema: z.ZodMiniType<RecordT, unknown> =
+  smartUnion([AppliedFilterNode$inboundSchema, RedactedSource$inboundSchema]);
+/** @internal */
+export type RecordT$Outbound =
+  | AppliedFilterNode$Outbound
+  | RedactedSource$Outbound;
+
+/** @internal */
+export const RecordT$outboundSchema: z.ZodMiniType<RecordT$Outbound, RecordT> =
+  smartUnion([AppliedFilterNode$outboundSchema, RedactedSource$outboundSchema]);
+
+export function recordToJSON(recordT: RecordT): string {
+  return JSON.stringify(RecordT$outboundSchema.parse(recordT));
+}
+export function recordFromJSON(
+  jsonString: string,
+): SafeParseResult<RecordT, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => RecordT$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'RecordT' from JSON`,
+  );
+}
+
+/** @internal */
+export const RecordsExact$inboundSchema: z.ZodMiniType<RecordsExact, unknown> =
+  smartUnion([AppliedFilterNode$inboundSchema, RedactedSource$inboundSchema]);
+/** @internal */
+export type RecordsExact$Outbound =
+  | AppliedFilterNode$Outbound
+  | RedactedSource$Outbound;
+
+/** @internal */
+export const RecordsExact$outboundSchema: z.ZodMiniType<
+  RecordsExact$Outbound,
+  RecordsExact
+> = smartUnion([
+  AppliedFilterNode$outboundSchema,
+  RedactedSource$outboundSchema,
+]);
+
+export function recordsExactToJSON(recordsExact: RecordsExact): string {
+  return JSON.stringify(RecordsExact$outboundSchema.parse(recordsExact));
+}
+export function recordsExactFromJSON(
+  jsonString: string,
+): SafeParseResult<RecordsExact, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => RecordsExact$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'RecordsExact' from JSON`,
+  );
+}
 
 /** @internal */
 export const AppliedFilters$inboundSchema: z.ZodMiniType<
   AppliedFilters,
   unknown
 > = z.object({
-  apps: types.optional(z.array(AppliedFilterNode$inboundSchema)),
-  kb: types.optional(z.array(AppliedFilterNode$inboundSchema)),
-  recordGroups: types.optional(z.array(AppliedFilterNode$inboundSchema)),
-  records: types.optional(z.array(AppliedFilterNode$inboundSchema)),
-  recordsExact: types.optional(z.array(AppliedFilterNode$inboundSchema)),
+  apps: types.optional(
+    z.array(
+      smartUnion([
+        AppliedFilterNode$inboundSchema,
+        RedactedSource$inboundSchema,
+      ]),
+    ),
+  ),
+  kb: types.optional(
+    z.array(
+      smartUnion([
+        AppliedFilterNode$inboundSchema,
+        RedactedSource$inboundSchema,
+      ]),
+    ),
+  ),
+  recordGroups: types.optional(
+    z.array(
+      smartUnion([
+        AppliedFilterNode$inboundSchema,
+        RedactedSource$inboundSchema,
+      ]),
+    ),
+  ),
+  records: types.optional(
+    z.array(
+      smartUnion([
+        AppliedFilterNode$inboundSchema,
+        RedactedSource$inboundSchema,
+      ]),
+    ),
+  ),
+  recordsExact: types.optional(
+    z.array(
+      smartUnion([
+        AppliedFilterNode$inboundSchema,
+        RedactedSource$inboundSchema,
+      ]),
+    ),
+  ),
 });
 /** @internal */
 export type AppliedFilters$Outbound = {
-  apps?: Array<AppliedFilterNode$Outbound> | undefined;
-  kb?: Array<AppliedFilterNode$Outbound> | undefined;
-  recordGroups?: Array<AppliedFilterNode$Outbound> | undefined;
-  records?: Array<AppliedFilterNode$Outbound> | undefined;
-  recordsExact?: Array<AppliedFilterNode$Outbound> | undefined;
+  apps?:
+    | Array<AppliedFilterNode$Outbound | RedactedSource$Outbound>
+    | undefined;
+  kb?: Array<AppliedFilterNode$Outbound | RedactedSource$Outbound> | undefined;
+  recordGroups?:
+    | Array<AppliedFilterNode$Outbound | RedactedSource$Outbound>
+    | undefined;
+  records?:
+    | Array<AppliedFilterNode$Outbound | RedactedSource$Outbound>
+    | undefined;
+  recordsExact?:
+    | Array<AppliedFilterNode$Outbound | RedactedSource$Outbound>
+    | undefined;
 };
 
 /** @internal */
@@ -69,11 +268,46 @@ export const AppliedFilters$outboundSchema: z.ZodMiniType<
   AppliedFilters$Outbound,
   AppliedFilters
 > = z.object({
-  apps: z.optional(z.array(AppliedFilterNode$outboundSchema)),
-  kb: z.optional(z.array(AppliedFilterNode$outboundSchema)),
-  recordGroups: z.optional(z.array(AppliedFilterNode$outboundSchema)),
-  records: z.optional(z.array(AppliedFilterNode$outboundSchema)),
-  recordsExact: z.optional(z.array(AppliedFilterNode$outboundSchema)),
+  apps: z.optional(
+    z.array(
+      smartUnion([
+        AppliedFilterNode$outboundSchema,
+        RedactedSource$outboundSchema,
+      ]),
+    ),
+  ),
+  kb: z.optional(
+    z.array(
+      smartUnion([
+        AppliedFilterNode$outboundSchema,
+        RedactedSource$outboundSchema,
+      ]),
+    ),
+  ),
+  recordGroups: z.optional(
+    z.array(
+      smartUnion([
+        AppliedFilterNode$outboundSchema,
+        RedactedSource$outboundSchema,
+      ]),
+    ),
+  ),
+  records: z.optional(
+    z.array(
+      smartUnion([
+        AppliedFilterNode$outboundSchema,
+        RedactedSource$outboundSchema,
+      ]),
+    ),
+  ),
+  recordsExact: z.optional(
+    z.array(
+      smartUnion([
+        AppliedFilterNode$outboundSchema,
+        RedactedSource$outboundSchema,
+      ]),
+    ),
+  ),
 });
 
 export function appliedFiltersToJSON(appliedFilters: AppliedFilters): string {

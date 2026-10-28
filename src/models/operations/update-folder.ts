@@ -8,6 +8,13 @@ import * as z from "zod/v4-mini";
  * Request payload
  */
 export type UpdateFolderRequestBody = {
+  /**
+   * New name of the folder. Whitespace around it is removed first, so a name
+   *
+   * @remarks
+   * made only of whitespace is refused as empty.
+   * It cannot contain `/` or `\`, which folder paths use as separators.
+   */
   folderName: string;
 };
 

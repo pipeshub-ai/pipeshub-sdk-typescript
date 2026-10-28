@@ -46,8 +46,11 @@ import { Result } from "../types/fp.js";
  * All conversations with this agent will become inaccessible.
  *
  * **Gateway not-found behavior:**
- * Unknown `agentKey`, deleting an already-deleted agent, and `GET /agents/{agentKey}`
+ * Unknown `agentKey`, deleting an already-deleted agent, deleting another
+ * user's agent that is not shared with the caller, and `GET /agents/{agentKey}`
  * after delete return **HTTP 404** with an `ErrorResponse` body.
+ *
+ * The route reads neither a query nor a body; anything sent is ignored.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -182,7 +185,7 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.AgentDeleteResponse$inboundSchema),
-    M.jsonErr([401, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
     M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

@@ -19,11 +19,7 @@ export type RevokeAllOAuthAppTokensRequest = {
  * All tokens revoked
  */
 export type RevokeAllOAuthAppTokensResponse = {
-  message?: string | undefined;
-  /**
-   * Number of tokens revoked
-   */
-  count?: number | undefined;
+  message: string;
 };
 
 /** @internal */
@@ -54,8 +50,7 @@ export const RevokeAllOAuthAppTokensResponse$inboundSchema: z.ZodMiniType<
   RevokeAllOAuthAppTokensResponse,
   unknown
 > = z.object({
-  message: types.optional(types.string()),
-  count: types.optional(types.number()),
+  message: types.string(),
 });
 
 export function revokeAllOAuthAppTokensResponseFromJSON(

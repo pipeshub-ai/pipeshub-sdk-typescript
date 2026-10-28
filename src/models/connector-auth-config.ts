@@ -16,6 +16,17 @@ export type ConnectorAuthConfig = {
    * Name for the OAuth app saved from inline credentials
    */
   oauthInstanceName?: string | undefined;
+  /**
+   * Scope of the instance, as the frontend sends it; the server fills it in when absent
+   */
+  connectorScope?: string | undefined;
+  /**
+   * On `PUT /connectors/{connectorId}/config` only: must equal the
+   *
+   * @remarks
+   * instance's `authType`, which cannot be changed (`400` otherwise).
+   */
+  authType?: string | undefined;
   [additionalProperties: string]: unknown;
 };
 
@@ -23,6 +34,8 @@ export type ConnectorAuthConfig = {
 export type ConnectorAuthConfig$Outbound = {
   oauthConfigId?: string | undefined;
   oauthInstanceName?: string | undefined;
+  connectorScope?: string | undefined;
+  authType?: string | undefined;
   [additionalProperties: string]: unknown;
 };
 
@@ -34,6 +47,8 @@ export const ConnectorAuthConfig$outboundSchema: z.ZodMiniType<
   z.object({
     oauthConfigId: z.optional(z.string()),
     oauthInstanceName: z.optional(z.string()),
+    connectorScope: z.optional(z.string()),
+    authType: z.optional(z.string()),
   }),
   z.any(),
 );

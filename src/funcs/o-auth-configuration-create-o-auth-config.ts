@@ -38,7 +38,16 @@ import { Result } from "../types/fp.js";
  * <b>Use Case:</b><br>
  * Before users can create Google Drive connectors with OAuth,
  * an admin must create an OAuth configuration with the Google
- * OAuth client ID and secret.
+ * OAuth client ID and secret.<br><br>
+ * The response carries the credential-free view of the new configuration; the
+ * credentials are never echoed back. Success is reported as `200`, not `201`.<br><br>
+ * <b>The connector type is not checked.</b> `connectorType` is not compared with the OAuth
+ * registry, so a misspelled or wrongly-cased name (`confluence` for `Confluence`) does not
+ * fail: the configuration is stored under that name with the default icon and an empty
+ * group, description and category list. It is then returned by
+ * `GET /oauth/{connectorType}` for that same name but never by `GET /oauth`, which only
+ * walks the registered types.<br><br>
+ * Body fields other than `oauthInstanceName`, `config` and `baseUrl` are ignored.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */

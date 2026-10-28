@@ -12,7 +12,7 @@ import { PersistedSemanticSearchCitation } from "@pipeshub-ai/sdk/models";
 let value: PersistedSemanticSearchCitation = {
   id: "<value>",
   content: "<value>",
-  chunkIndex: 153298,
+  chunkIndex: 887326,
   citationType: "<value>",
   metadata: {
     orgId: "<id>",
@@ -21,8 +21,8 @@ let value: PersistedSemanticSearchCitation = {
     recordName: "<value>",
     origin: "<value>",
   },
-  createdAt: new Date("2024-07-18T15:25:34.738Z"),
-  updatedAt: new Date("2024-12-18T20:26:13.397Z"),
+  createdAt: new Date("2025-09-17T00:13:34.665Z"),
+  updatedAt: new Date("2024-04-23T22:05:30.121Z"),
 };
 ```
 

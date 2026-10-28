@@ -11,16 +11,20 @@ import { SDKValidationError } from "./errors/sdk-validation-error.js";
 export type FilterOptions = {
   value?: string | undefined;
   label?: string | undefined;
+  [additionalProperties: string]: unknown;
 };
 
 /** @internal */
 export const FilterOptions$inboundSchema: z.ZodMiniType<
   FilterOptions,
   unknown
-> = z.object({
-  value: types.optional(types.string()),
-  label: types.optional(types.string()),
-});
+> = z.catchall(
+  z.object({
+    value: types.optional(types.string()),
+    label: types.optional(types.string()),
+  }),
+  z.any(),
+);
 
 export function filterOptionsFromJSON(
   jsonString: string,

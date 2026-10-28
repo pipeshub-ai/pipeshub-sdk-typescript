@@ -28,9 +28,12 @@ export type GetOAuthConfigRequest = {
 export type GetOAuthConfigResponse = {
   success: boolean;
   /**
-   * A saved OAuth app for a connector type. Admins also get `config` (secrets masked when HIDE_SECRET_CONFIG is on) and, in lists, the provider endpoints.
+   * An OAuth configuration as `GET /oauth/{connectorType}/{configId}` returns it. An admin
+   *
+   * @remarks
+   * gets `config` with the stored credentials; any other caller gets the same object without `config`.
    */
-  oauthConfig: models.OAuthConfig;
+  oauthConfig: models.OAuthConfigWithCredentials;
 };
 
 /** @internal */
@@ -64,7 +67,7 @@ export const GetOAuthConfigResponse$inboundSchema: z.ZodMiniType<
   unknown
 > = z.object({
   success: types.boolean(),
-  oauthConfig: models.OAuthConfig$inboundSchema,
+  oauthConfig: models.OAuthConfigWithCredentials$inboundSchema,
 });
 
 export function getOAuthConfigResponseFromJSON(

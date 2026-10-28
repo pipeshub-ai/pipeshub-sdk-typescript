@@ -17,7 +17,7 @@ export type UpdateConnectorFiltersSyncConfigRequest = {
   /**
    * Request payload
    */
-  body: models.UpdateConnectorFiltersSyncRequest;
+  body: models.UpdateConnectorFiltersSyncRequestUnion;
 };
 
 /**
@@ -39,7 +39,7 @@ export type UpdateConnectorFiltersSyncConfigResponse = {
 /** @internal */
 export type UpdateConnectorFiltersSyncConfigRequest$Outbound = {
   connectorId: string;
-  body: models.UpdateConnectorFiltersSyncRequest$Outbound;
+  body: models.UpdateConnectorFiltersSyncRequestUnion$Outbound;
 };
 
 /** @internal */
@@ -49,7 +49,7 @@ export const UpdateConnectorFiltersSyncConfigRequest$outboundSchema:
     UpdateConnectorFiltersSyncConfigRequest
   > = z.object({
     connectorId: z.string(),
-    body: models.UpdateConnectorFiltersSyncRequest$outboundSchema,
+    body: models.UpdateConnectorFiltersSyncRequestUnion$outboundSchema,
   });
 
 export function updateConnectorFiltersSyncConfigRequestToJSON(

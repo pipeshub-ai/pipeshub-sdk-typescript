@@ -4,7 +4,7 @@
 
 import * as z from "zod/v4-mini";
 import { PipeshubCore } from "../core.js";
-import { encodeSimple } from "../lib/encodings.js";
+import { encodeFormQuery, encodeSimple } from "../lib/encodings.js";
 import { matchStatusCode } from "../lib/http.js";
 import * as M from "../lib/matchers.js";
 import { compactMap } from "../lib/primitives.js";
@@ -31,7 +31,8 @@ import { Result } from "../types/fp.js";
  * Get OAuth connector type details
  *
  * @remarks
- * Get details for a specific OAuth-capable connector type.
+ * Get the OAuth registry entry of one connector or toolset type.<br><br>
+ * `connectorType` is the registered name and is case-sensitive (e.g. `Confluence`).
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -101,6 +102,12 @@ async function $do(
   };
   const path = pathToFunc("/oauth/registry/{connectorType}")(pathParams);
 
+  const query = encodeFormQuery({
+    "limit": payload.limit,
+    "page": payload.page,
+    "search": payload.search,
+  });
+
   const headers = new Headers(compactMap({
     Accept: "application/json",
   }));
@@ -129,6 +136,7 @@ async function $do(
     baseURL: options?.serverURL,
     path: path,
     headers: headers,
+    query: query,
     body: body,
     userAgent: client._options.userAgent,
     timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1,
@@ -167,7 +175,8 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, operations.GetOAuthConnectorTypeResponse$inboundSchema),
-    M.jsonErr([401, 403, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

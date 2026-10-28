@@ -3,6 +3,7 @@
  */
 
 import * as z from "zod/v4-mini";
+import { remap as remap$ } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
@@ -12,6 +13,10 @@ import {
   KnowledgeHubNode,
   KnowledgeHubNode$inboundSchema,
 } from "./knowledge-hub-node.js";
+import {
+  SemanticSearchGraphRecord,
+  SemanticSearchGraphRecord$inboundSchema,
+} from "./semantic-search-graph-record.js";
 
 /**
  * Node being browsed when `parentId` is in the path; `null` at root.
@@ -49,9 +54,9 @@ export type ParentNode = {
 
 export type KnowledgeHubNodesResponsePagination = {
   /**
-   * Current page (1-indexed).
+   * Current page (1-indexed). `null` when the request pages by `cursor`.
    */
-  page: number;
+  page: number | null;
   /**
    * Page size.
    */
@@ -64,7 +69,10 @@ export type KnowledgeHubNodesResponsePagination = {
    * grow from page to page and is final once `hasNext` is false.
    */
   totalItems: number;
-  totalPages: number;
+  /**
+   * Number of pages. `null` when the request pages by `cursor`.
+   */
+  totalPages: number | null;
   hasNext: boolean;
   hasPrev: boolean;
   /**
@@ -254,6 +262,20 @@ export type KnowledgeHubNodesResponse = {
    */
   error: string | null;
   /**
+   * Status the connector service turns a failed lookup into. Always `null` on HTTP 200:
+   *
+   * @remarks
+   * a failure is answered with that status and the error envelope instead of this body.
+   */
+  errorCode?: number | null | undefined;
+  /**
+   * Full record documents keyed by record ID. Filled only for in-process callers
+   *
+   * @remarks
+   * (the agent's knowledge navigator); always `null` over HTTP.
+   */
+  typedRecords?: { [k: string]: SemanticSearchGraphRecord } | null | undefined;
+  /**
    * Current parent node ID when browsing children; `null` at root.
    */
   id: string | null;
@@ -333,10 +355,10 @@ export const KnowledgeHubNodesResponsePagination$inboundSchema: z.ZodMiniType<
   KnowledgeHubNodesResponsePagination,
   unknown
 > = z.object({
-  page: types.number(),
+  page: types.nullable(types.number()),
   limit: types.number(),
   totalItems: types.number(),
-  totalPages: types.number(),
+  totalPages: types.nullable(types.number()),
   hasNext: types.boolean(),
   hasPrev: types.boolean(),
   nextCursor: z.optional(z.nullable(types.string())),
@@ -558,20 +580,33 @@ export function permissionsFromJSON(
 export const KnowledgeHubNodesResponse$inboundSchema: z.ZodMiniType<
   KnowledgeHubNodesResponse,
   unknown
-> = z.object({
-  maxFolderDepth: types.number(),
-  success: types.literal(true),
-  error: types.nullable(types.string()),
-  id: types.nullable(types.string()),
-  currentNode: types.nullable(z.lazy(() => CurrentNode$inboundSchema)),
-  parentNode: types.nullable(z.lazy(() => ParentNode$inboundSchema)),
-  items: z.array(KnowledgeHubNode$inboundSchema),
-  pagination: z.lazy(() => KnowledgeHubNodesResponsePagination$inboundSchema),
-  filters: z.lazy(() => KnowledgeHubNodesResponseFilters$inboundSchema),
-  breadcrumbs: types.nullable(z.array(z.lazy(() => Breadcrumb$inboundSchema))),
-  counts: types.nullable(z.lazy(() => Counts$inboundSchema)),
-  permissions: types.nullable(z.lazy(() => Permissions$inboundSchema)),
-});
+> = z.pipe(
+  z.object({
+    maxFolderDepth: types.number(),
+    success: types.literal(true),
+    error: types.nullable(types.string()),
+    errorCode: z.optional(z.nullable(types.number())),
+    typed_records: z.optional(
+      z.nullable(z.record(z.string(), SemanticSearchGraphRecord$inboundSchema)),
+    ),
+    id: types.nullable(types.string()),
+    currentNode: types.nullable(z.lazy(() => CurrentNode$inboundSchema)),
+    parentNode: types.nullable(z.lazy(() => ParentNode$inboundSchema)),
+    items: z.array(KnowledgeHubNode$inboundSchema),
+    pagination: z.lazy(() => KnowledgeHubNodesResponsePagination$inboundSchema),
+    filters: z.lazy(() => KnowledgeHubNodesResponseFilters$inboundSchema),
+    breadcrumbs: types.nullable(
+      z.array(z.lazy(() => Breadcrumb$inboundSchema)),
+    ),
+    counts: types.nullable(z.lazy(() => Counts$inboundSchema)),
+    permissions: types.nullable(z.lazy(() => Permissions$inboundSchema)),
+  }),
+  z.transform((v) => {
+    return remap$(v, {
+      "typed_records": "typedRecords",
+    });
+  }),
+);
 
 export function knowledgeHubNodesResponseFromJSON(
   jsonString: string,

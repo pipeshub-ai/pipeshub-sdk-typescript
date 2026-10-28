@@ -19,6 +19,7 @@ import {
   RequestTimeoutError,
   UnexpectedClientError,
 } from "../models/errors/http-client-errors.js";
+import * as errors from "../models/errors/index.js";
 import { PipeshubError } from "../models/errors/pipeshub-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { SDKValidationError } from "../models/errors/sdk-validation-error.js";
@@ -37,8 +38,16 @@ import { Result } from "../types/fp.js";
  * Same synchronous JSON ack contract as the assistant
  * `POST /conversations/{conversationId}/cancel` — both forward to the
  * same backend cancellation endpoint, since the run registry is keyed
- * by `runId` alone. `{ cancelled: false }` covers a `runId` that
- * already finished or was never registered.
+ * by `runId` alone.
+ *
+ * `cancelled` reports whether a stop request was issued, not whether a
+ * run was actually stopped. With the default shared (key-value backed)
+ * run registry, a `runId` that the answering worker does not hold is
+ * published for whichever worker owns it, and the answer is
+ * `{ cancelled: true }` even when the run already finished or was
+ * never registered. `{ cancelled: false }` is returned for such a
+ * `runId` only when the registry is in-process, or when the stop
+ * request could not be published.
  *
  * `runId` must belong to a run started on THIS `conversationId` — a
  * `runId` that exists but was registered under a different
@@ -54,6 +63,7 @@ export function agentsCancelAgentConversationStream(
 ): APIPromise<
   Result<
     operations.CancelAgentConversationStreamResponse,
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -79,6 +89,7 @@ async function $do(
   [
     Result<
       operations.CancelAgentConversationStreamResponse,
+      | errors.ErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -170,8 +181,13 @@ async function $do(
   }
   const response = doResult.value;
 
+  const responseFields = {
+    HttpMeta: { Response: response, Request: req },
+  };
+
   const [result] = await M.match<
     operations.CancelAgentConversationStreamResponse,
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -182,9 +198,11 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, operations.CancelAgentConversationStreamResponse$inboundSchema),
-    M.fail([400, 401, 403, 404, "4XX"]),
+    M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
+    M.fail("4XX"),
     M.fail("5XX"),
-  )(response, req);
+  )(response, req, { extraFields: responseFields });
   if (!result.ok) {
     return [result, { status: "complete", request: req, response }];
   }

@@ -40,7 +40,11 @@ export type OAuthIntrospectRequest = {
    */
   clientId: string;
   /**
-   * Client secret
+   * Client secret. Not checked by the validator, but client authentication cannot succeed
+   *
+   * @remarks
+   * without it: when it is missing the route answers `{active: false}` even for a live token, for public and confidential clients
+   * alike. A wrong secret is `401 invalid_client`.
    */
   clientSecret?: string | undefined;
 };

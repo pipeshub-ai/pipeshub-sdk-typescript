@@ -14,6 +14,6 @@ let value: UpdateAuthMethodRequest = {
 
 ## Fields
 
-| Field                                                        | Type                                                         | Required                                                     | Description                                                  |
-| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| `authMethod`                                                 | [models.AuthStep](../../models/auth-step.md)[]               | :heavy_check_mark:                                           | Authentication steps to set for the organization (1-3 steps) |
+| Field                                                         | Type                                                          | Required                                                      | Description                                                   |
+| ------------------------------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------- |
+| `authMethod`                                                  | [models.AuthStep](../../models/auth-step.md)[]                | :heavy_check_mark:                                            | Authentication steps to set for the organization (1-3 steps). |

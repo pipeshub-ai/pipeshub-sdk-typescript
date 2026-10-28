@@ -11,7 +11,10 @@ export type MoveRecordRequest = {
    */
   kbId: string;
   /**
-   * Record identifier (file or folder)
+   * Record identifier (file or folder). A record that is not in this knowledge base
+   *
+   * @remarks
+   * (unknown, or in another one) is answered `404`.
    */
   recordId: string;
   /**

@@ -16,7 +16,11 @@ export type ReIndexRecordGroupResponseSchema = {
   message: string;
   recordGroupId: string;
   depth: number;
-  connector?: string | null | undefined;
+  /**
+   * Id of the connector instance the record group belongs to
+   */
+  connectorId: string;
+  connector: string | null;
   eventPublished: boolean;
 };
 
@@ -29,7 +33,8 @@ export const ReIndexRecordGroupResponseSchema$inboundSchema: z.ZodMiniType<
   message: types.string(),
   recordGroupId: types.string(),
   depth: types.number(),
-  connector: z.optional(z.nullable(types.string())),
+  connectorId: types.string(),
+  connector: types.nullable(types.string()),
   eventPublished: types.boolean(),
 });
 

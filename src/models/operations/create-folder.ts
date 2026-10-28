@@ -9,7 +9,11 @@ import * as z from "zod/v4-mini";
  */
 export type CreateFolderRequestBody = {
   /**
-   * Name of the folder
+   * Name of the folder. Whitespace around it is removed first, so a name made
+   *
+   * @remarks
+   * only of whitespace is refused as empty.
+   * It cannot contain `/` or `\`, which folder paths use as separators.
    */
   folderName: string;
 };
@@ -20,7 +24,10 @@ export type CreateFolderRequest = {
    */
   kbId: string;
   /**
-   * Parent folder ID. Omit to create at the knowledge base root.
+   * Parent folder ID. Omit to create at the knowledge base root. An id that is not a
+   *
+   * @remarks
+   * folder of this knowledge base (unknown, or a file) is answered `404`.
    */
   folderId?: string | undefined;
   /**

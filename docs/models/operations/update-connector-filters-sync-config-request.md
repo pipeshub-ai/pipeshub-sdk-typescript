@@ -7,13 +7,15 @@ import { UpdateConnectorFiltersSyncConfigRequest } from "@pipeshub-ai/sdk/models
 
 let value: UpdateConnectorFiltersSyncConfigRequest = {
   connectorId: "<id>",
-  body: {},
+  body: {
+    filters: {},
+  },
 };
 ```
 
 ## Fields
 
-| Field                                                                                             | Type                                                                                              | Required                                                                                          | Description                                                                                       |
-| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `connectorId`                                                                                     | *string*                                                                                          | :heavy_check_mark:                                                                                | Connector instance ID                                                                             |
-| `body`                                                                                            | [models.UpdateConnectorFiltersSyncRequest](../../models/update-connector-filters-sync-request.md) | :heavy_check_mark:                                                                                | Request payload                                                                                   |
+| Field                                           | Type                                            | Required                                        | Description                                     |
+| ----------------------------------------------- | ----------------------------------------------- | ----------------------------------------------- | ----------------------------------------------- |
+| `connectorId`                                   | *string*                                        | :heavy_check_mark:                              | Connector instance ID                           |
+| `body`                                          | *models.UpdateConnectorFiltersSyncRequestUnion* | :heavy_check_mark:                              | Request payload                                 |

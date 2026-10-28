@@ -17,10 +17,10 @@ Admin management of OAuth credentials for connector types
 
 ## getOAuthRegistry
 
-Get all connector types that support OAuth authentication.<br><br>
-<b>Admin Use:</b><br>
-Admins use this to see which connector types need OAuth credentials
-to be configured before users can authenticate.
+List the connector and toolset types that support OAuth, from the OAuth registry.<br><br>
+Each entry carries the provider URLs, the scopes requested, and the `authFields`
+to collect when creating an OAuth configuration for that type.<br><br>
+Any authenticated user can call this; it is not limited to admins.
 
 
 ### Example Usage
@@ -91,11 +91,14 @@ run();
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.ErrorResponse        | 400, 401, 403               | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## getOAuthConnectorType
 
-Get details for a specific OAuth-capable connector type.
+Get the OAuth registry entry of one connector or toolset type.<br><br>
+`connectorType` is the registered name and is case-sensitive (e.g. `Confluence`).
+
 
 ### Example Usage
 
@@ -111,7 +114,7 @@ const pipeshub = new Pipeshub({
 
 async function run() {
   const result = await pipeshub.oAuthConfiguration.getOAuthConnectorType({
-    connectorType: "<value>",
+    connectorType: "Confluence",
   });
 
   console.log(result);
@@ -138,7 +141,7 @@ const pipeshub = new PipeshubCore({
 
 async function run() {
   const res = await oAuthConfigurationGetOAuthConnectorType(pipeshub, {
-    connectorType: "<value>",
+    connectorType: "Confluence",
   });
   if (res.ok) {
     const { value: result } = res;
@@ -168,7 +171,8 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 401, 403, 404               | application/json            |
+| errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## listOAuthConfigs
@@ -247,11 +251,19 @@ run();
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.ErrorResponse        | 400, 401, 403               | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## listOAuthConfigsByType
 
-Get all OAuth configurations for a specific connector type.
+List the organization's OAuth configurations for one connector type.<br><br>
+<b>What comes back depends on the caller:</b><br>
+<ul>
+<li>An admin gets each stored record in full, including `config` with the client secret in clear text</li>
+<li>Any other caller gets only the credential-free fields</li>
+</ul>
+A connector type with no configurations, or one that does not exist, yields an empty list.
+
 
 ### Example Usage
 
@@ -267,7 +279,7 @@ const pipeshub = new Pipeshub({
 
 async function run() {
   const result = await pipeshub.oAuthConfiguration.listOAuthConfigsByType({
-    connectorType: "<value>",
+    connectorType: "Confluence",
     scope: "team",
   });
 
@@ -295,7 +307,7 @@ const pipeshub = new PipeshubCore({
 
 async function run() {
   const res = await oAuthConfigurationListOAuthConfigsByType(pipeshub, {
-    connectorType: "<value>",
+    connectorType: "Confluence",
     scope: "team",
   });
   if (res.ok) {
@@ -327,6 +339,7 @@ run();
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## createOAuthConfig
@@ -338,7 +351,16 @@ OAuth credentials needed for users to authenticate connectors.<br><br>
 <b>Use Case:</b><br>
 Before users can create Google Drive connectors with OAuth,
 an admin must create an OAuth configuration with the Google
-OAuth client ID and secret.
+OAuth client ID and secret.<br><br>
+The response carries the credential-free view of the new configuration; the
+credentials are never echoed back. Success is reported as `200`, not `201`.<br><br>
+<b>The connector type is not checked.</b> `connectorType` is not compared with the OAuth
+registry, so a misspelled or wrongly-cased name (`confluence` for `Confluence`) does not
+fail: the configuration is stored under that name with the default icon and an empty
+group, description and category list. It is then returned by
+`GET /oauth/{connectorType}` for that same name but never by `GET /oauth`, which only
+walks the registered types.<br><br>
+Body fields other than `oauthInstanceName`, `config` and `baseUrl` are ignored.
 
 
 ### Example Usage
@@ -355,7 +377,7 @@ const pipeshub = new Pipeshub({
 
 async function run() {
   const result = await pipeshub.oAuthConfiguration.createOAuthConfig({
-    connectorType: "<value>",
+    connectorType: "Confluence",
     body: {
       oauthInstanceName: "Production Google OAuth Credentials",
       config: {
@@ -391,7 +413,7 @@ const pipeshub = new PipeshubCore({
 
 async function run() {
   const res = await oAuthConfigurationCreateOAuthConfig(pipeshub, {
-    connectorType: "<value>",
+    connectorType: "Confluence",
     body: {
       oauthInstanceName: "Production Google OAuth Credentials",
       config: {
@@ -436,7 +458,10 @@ run();
 
 ## getOAuthConfig
 
-Get a specific OAuth configuration by ID.
+Get a specific OAuth configuration by ID.<br><br>
+An admin gets `config` with the stored credentials, client secret in clear text.
+Any other caller gets the same object without `config`.
+
 
 ### Example Usage
 
@@ -452,7 +477,7 @@ const pipeshub = new Pipeshub({
 
 async function run() {
   const result = await pipeshub.oAuthConfiguration.getOAuthConfig({
-    connectorType: "<value>",
+    connectorType: "Confluence",
     configId: "<id>",
   });
 
@@ -480,7 +505,7 @@ const pipeshub = new PipeshubCore({
 
 async function run() {
   const res = await oAuthConfigurationGetOAuthConfig(pipeshub, {
-    connectorType: "<value>",
+    connectorType: "Confluence",
     configId: "<id>",
   });
   if (res.ok) {
@@ -512,6 +537,7 @@ run();
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## updateOAuthConfig
@@ -535,7 +561,7 @@ const pipeshub = new Pipeshub({
 
 async function run() {
   const result = await pipeshub.oAuthConfiguration.updateOAuthConfig({
-    connectorType: "<value>",
+    connectorType: "Confluence",
     configId: "<id>",
     body: {
       oauthInstanceName: "<value>",
@@ -566,7 +592,7 @@ const pipeshub = new PipeshubCore({
 
 async function run() {
   const res = await oAuthConfigurationUpdateOAuthConfig(pipeshub, {
-    connectorType: "<value>",
+    connectorType: "Confluence",
     configId: "<id>",
     body: {
       oauthInstanceName: "<value>",
@@ -628,7 +654,7 @@ const pipeshub = new Pipeshub({
 
 async function run() {
   const result = await pipeshub.oAuthConfiguration.deleteOAuthConfig({
-    connectorType: "<value>",
+    connectorType: "Confluence",
     configId: "<id>",
   });
 
@@ -656,7 +682,7 @@ const pipeshub = new PipeshubCore({
 
 async function run() {
   const res = await oAuthConfigurationDeleteOAuthConfig(pipeshub, {
-    connectorType: "<value>",
+    connectorType: "Confluence",
     configId: "<id>",
   });
   if (res.ok) {
@@ -687,5 +713,6 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 401, 403, 404               | application/json            |
+| errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |

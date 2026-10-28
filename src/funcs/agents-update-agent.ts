@@ -39,7 +39,9 @@ import { Result } from "../types/fp.js";
  * The Node gateway validates the request body via Zod middleware before
  * forwarding to the Python agent service. The `agentKey` path param and
  * the request body are both validated. Query parameters are ignored by
- * the controller.
+ * the controller, and body fields the validator does not know are dropped
+ * rather than refused. The body may be omitted: an empty update succeeds
+ * and changes nothing.
  *
  * **Update semantics**
  *

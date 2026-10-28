@@ -4,7 +4,7 @@
 
 import { openIDConnectOauthUserInfo } from "../funcs/open-id-connect-oauth-user-info.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
-import * as models from "../models/index.js";
+import * as operations from "../models/operations/index.js";
 import { unwrapAsync } from "../types/fp.js";
 
 export class OpenIDConnect extends ClientSDK {
@@ -24,10 +24,12 @@ export class OpenIDConnect extends ClientSDK {
    *
    * **Authentication:**
    * Pass the access token as a Bearer token: `Authorization: Bearer {access_token}`
+   *
+   * The route takes no parameters; query parameters are ignored.
    */
   async oauthUserInfo(
     options?: RequestOptions,
-  ): Promise<models.OAuthUserInfoResponse> {
+  ): Promise<operations.OauthUserInfoResponse> {
     return unwrapAsync(openIDConnectOauthUserInfo(
       this,
       options,

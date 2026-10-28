@@ -45,6 +45,10 @@ export type AgentConversationListItemSharedWith = {
 };
 
 export type AgentConversationListItemConversationError = {
+  /**
+   * Sub-document identifier auto-assigned by MongoDB.
+   */
+  id?: string | undefined;
   message?: string | undefined;
   errorType?: string | undefined;
   timestamp?: Date | undefined;
@@ -228,15 +232,21 @@ export function agentConversationListItemSharedWithFromJSON(
 
 /** @internal */
 export const AgentConversationListItemConversationError$inboundSchema:
-  z.ZodMiniType<AgentConversationListItemConversationError, unknown> = z.object(
-    {
+  z.ZodMiniType<AgentConversationListItemConversationError, unknown> = z.pipe(
+    z.object({
+      _id: types.optional(types.string()),
       message: types.optional(types.string()),
       errorType: types.optional(types.string()),
       timestamp: types.optional(types.date()),
       messageId: types.optional(types.string()),
       stack: types.optional(types.string()),
       metadata: types.optional(z.record(z.string(), z.any())),
-    },
+    }),
+    z.transform((v) => {
+      return remap$(v, {
+        "_id": "id",
+      });
+    }),
   );
 
 export function agentConversationListItemConversationErrorFromJSON(

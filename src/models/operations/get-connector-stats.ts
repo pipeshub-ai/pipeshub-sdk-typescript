@@ -6,7 +6,11 @@ import * as z from "zod/v4-mini";
 
 export type GetConnectorStatsRequest = {
   /**
-   * Connector instance ID
+   * Connector instance ID (`_key` of the instance) or knowledge base ID.
+   *
+   * @remarks
+   * Unlike the other instance routes, the ID is not checked against a
+   * pattern: an ID no instance has is answered `404`.
    */
   connectorId: string;
 };

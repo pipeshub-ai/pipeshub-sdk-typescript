@@ -46,7 +46,7 @@ export const ConnectorToggleRequestType$outboundSchema: z.ZodMiniEnum<
 /** @internal */
 export type ConnectorToggleRequest$Outbound = {
   type: string;
-  fullSync?: boolean | undefined;
+  fullSync: boolean;
   deviceId?: string | undefined;
   deviceName?: string | undefined;
 };
@@ -57,7 +57,7 @@ export const ConnectorToggleRequest$outboundSchema: z.ZodMiniType<
   ConnectorToggleRequest
 > = z.object({
   type: ConnectorToggleRequestType$outboundSchema,
-  fullSync: z.optional(z.boolean()),
+  fullSync: z._default(z.boolean(), false),
   deviceId: z.optional(z.string()),
   deviceName: z.optional(z.string()),
 });

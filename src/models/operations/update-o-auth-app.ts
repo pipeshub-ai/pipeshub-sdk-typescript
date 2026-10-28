@@ -11,15 +11,15 @@ export type UpdateOAuthAppRequest = {
    */
   appId: string;
   /**
-   * Request payload
+   * Fields to change. A request with no body, or `{}`, is accepted and changes nothing (`200` with the app).
    */
-  body: models.UpdateOAuthAppRequest;
+  body?: models.UpdateOAuthAppRequest | undefined;
 };
 
 /** @internal */
 export type UpdateOAuthAppRequest$Outbound = {
   appId: string;
-  body: models.UpdateOAuthAppRequest$Outbound;
+  body?: models.UpdateOAuthAppRequest$Outbound | undefined;
 };
 
 /** @internal */
@@ -28,7 +28,7 @@ export const UpdateOAuthAppRequest$outboundSchema: z.ZodMiniType<
   UpdateOAuthAppRequest
 > = z.object({
   appId: z.string(),
-  body: models.UpdateOAuthAppRequest$outboundSchema,
+  body: z.optional(models.UpdateOAuthAppRequest$outboundSchema),
 });
 
 export function updateOAuthAppRequestToJSON(

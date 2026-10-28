@@ -20,7 +20,20 @@ PipesHub is an enterprise-grade platform providing:
 ## Authentication
 Most endpoints require JWT Bearer token authentication. Some internal endpoints use scoped tokens for service-to-service communication.
 
-**OAuth 2.0 Bearer tokens** from `POST /oauth2/token` use the same `Authorization: Bearer` header. For **`client_credentials`**, machine tokens may encode `userId === client_id` in the JWT; the **Node API gateway** resolves the application's **token identity** — the service account it is pointed at (`tokenIdentityUserId`), or its creator for an application registered before that was required and never bound, and sets the authenticated user accordingly. See the **OAuth Provider** tag for full behavior.
+**OAuth 2.0 Bearer tokens** from `POST /oauth2/token` use the same `Authorization: Bearer` header. For **`client_credentials`**, machine tokens may encode `userId === client_id` in the JWT; the **Node API gateway** resolves the application's **token identity** — the service account it is pointed at (`tokenIdentityUserId`), or its creator for an application registered before that was required and never bound, and sets the authenticated user accordingly. It reads the application record on every request, and a token minted for a different identity than the app's current one is refused with `401`. See the **OAuth Provider** tag for full behavior.
+
+## Behaviour common to every route
+App-level middleware runs before any router, so the following applies to every operation below, before authentication, unless an exception is named.
+
+**Markup filter.** A query value, or any string in a JSON or form-encoded body, that looks like markup is refused with `400 HTTP_BAD_REQUEST`. The message names where the value was, for example `HTML tags, scripts, and XSS content are not allowed in the field "name".` or `... in the query parameter "search".` (a field name that is not a plain identifier path reads `the request`), and says what counted: text in angle brackets such as `<id>` counts as an HTML tag, an encoded script tag counts, or script content such as `onclick=`, `javascript:` or `data:text/html` counts. A string over 100,000 characters is refused as too long to check instead: `The value of the field "name" is longer than 100,000 characters, which is too long to check for HTML tags and scripts. Please shorten it and try again.` It looks for an HTML tag, a script tag, `<iframe`, `<object`, `<embed` or `<svg` tag, a word starting with `on` followed by `=` (meant for inline event handlers such as `onerror=`, it also catches plain text such as `one=1`), a `javascript:` or `data:text/html` URL, an encoded script tag (`&lt;script`, `%3cscript`), and any string longer than 100,000 characters. A string the filter lets through is rewritten before the route sees it: the filter trims surrounding whitespace, drops a lone `<` together with everything after it (`a < b` arrives as `a`), and escapes `>` as `&gt;`. POST and PUT under `/agents/`, `/conversations/`, `/connectors` and `/api-toolsets`, and POST, PUT and PATCH under `/skills`, skip the filter. So does the question of a search: the `query` string of a JSON body sent to `POST /search` or `POST /retrieve` is neither checked nor rewritten, unless it is longer than 100,000 characters.
+
+**Body parsers.** `application/json` bodies (up to 10 MB, 5 MB on `/mcp`) and `application/x-www-form-urlencoded` bodies (up to 100 KB and 1000 fields) are parsed for every method. A JSON body that does not parse, or a body shorter or longer than its `Content-Length`, is answered `400 HTTP_BAD_REQUEST` (`The request body is not valid JSON.`, `The request body does not match its Content-Length.`), a body past these limits `413 HTTP_PAYLOAD_TOO_LARGE`, and an unsupported content encoding or character set `415 HTTP_UNSUPPORTED_MEDIA_TYPE`; a JSON body over 5 MB on `/mcp` gets its `413` as a JSON-RPC error (see `POST /mcp`). Form values arrive as text and the request validators do not convert them, so a number, a boolean or a free-form object sent form-encoded is refused (`400 VALIDATION_ERROR`) or read as a string. A list sent form-encoded is read as a list only when its key repeats, so a single value or an empty list cannot be sent. The form media type is therefore listed only on operations whose body is a flat object of text fields: every value a string (string enums included), with no lists or nested objects.
+
+**Request size.** On every route with a request validator, the body, query and path values are measured before the schema runs. An array over 10,000 items (`<path> can have at most 10000 items.`), an object over 10,000 keys (`<path> can have at most 10000 fields.`), more than 100,000 array items and object keys in the whole request (`The request holds too many items in total (the limit is 100000); the limit is reached at <path>.`) or nesting deeper than 64 levels (`<path> is nested more than 64 levels deep.`) is refused with `400 VALIDATION_ERROR` (detail code `TOO_BIG`, or `TOO_DEEP` for nesting; the path reads like `body.items`). The deployment can change the first three limits with `VALIDATION_MAX_ARRAY_LENGTH`, `VALIDATION_MAX_OBJECT_KEYS` and `VALIDATION_MAX_TOTAL_ITEMS`.
+
+**OAuth scopes.** On an operation whose `security` names `oauth2` scopes, an OAuth access token holding none of them gets `403 HTTP_FORBIDDEN` ("Insufficient scope. Required: ...") right after authentication. Session tokens are never scope-checked.
+
+**No such route.** A method and path that no route handles get Express's own `404` page, `text/html`, reading `Cannot <METHOD> <path>`. Such pairs are not listed as operations.
 
 ## Base URLs
 All endpoints use the `/api/v1` prefix unless otherwise noted.
@@ -34,11 +47,13 @@ On every `/api/v1` and `/mcp` endpoint, a query parameter whose name starts with
 <!-- $toc-max-depth=2 -->
 * [pipeshub-sdk-typescript](#pipeshub-sdk-typescript)
   * [Authentication](#authentication)
+  * [Behaviour common to every route](#behaviour-common-to-every-route)
   * [Base URLs](#base-urls)
   * [Query parameter names](#query-parameter-names)
   * [SDK Installation](#sdk-installation)
   * [Requirements](#requirements)
   * [SDK Example Usage](#sdk-example-usage)
+  * [Retrieval for RAG and the Vercel AI SDK](#retrieval-for-rag-and-the-vercel-ai-sdk)
   * [Authentication](#authentication-1)
   * [Available Resources and Operations](#available-resources-and-operations)
   * [Standalone functions](#standalone-functions)
@@ -304,7 +319,9 @@ run();
 * [updateKnowledgeBase](docs/sdks/knowledgebase/README.md#updateknowledgebase) - Update knowledge base
 * [deleteKnowledgeBase](docs/sdks/knowledgebase/README.md#deleteknowledgebase) - Delete knowledge base
 * [getRecordById](docs/sdks/knowledgebase/README.md#getrecordbyid) - Get record by ID
+* [updateRecordMultipart](docs/sdks/knowledgebase/README.md#updaterecordmultipart) - Update record
 * [updateRecord](docs/sdks/knowledgebase/README.md#updaterecord) - Update record
+* [updateRecordForm](docs/sdks/knowledgebase/README.md#updaterecordform) - Update record
 * [deleteRecord](docs/sdks/knowledgebase/README.md#deleterecord) - Delete record
 * [restoreRecord](docs/sdks/knowledgebase/README.md#restorerecord) - Restore a deleted record
 * [restoreRecords](docs/sdks/knowledgebase/README.md#restorerecords) - Restore several deleted records
@@ -397,6 +414,8 @@ run();
 * [initAuth](docs/sdks/useraccount/README.md#initauth) - Initialize authentication session
 * [authenticate](docs/sdks/useraccount/README.md#authenticate) - Authenticate user with credentials
 * [refreshToken](docs/sdks/useraccount/README.md#refreshtoken) - Refresh access token
+* [getPasswordStatus](docs/sdks/useraccount/README.md#getpasswordstatus) - Get password status
+* [sendPasswordSetupEmail](docs/sdks/useraccount/README.md#sendpasswordsetupemail) - Email a link to set a first password
 * [resetPassword](docs/sdks/useraccount/README.md#resetpassword) - Reset password
 
 ### [WebSearch](docs/sdks/websearch/README.md)
@@ -506,6 +525,8 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`knowledgeBaseUpdateFolder`](docs/sdks/knowledgebase/README.md#updatefolder) - Update folder
 - [`knowledgeBaseUpdateKnowledgeBase`](docs/sdks/knowledgebase/README.md#updateknowledgebase) - Update knowledge base
 - [`knowledgeBaseUpdateRecord`](docs/sdks/knowledgebase/README.md#updaterecord) - Update record
+- [`knowledgeBaseUpdateRecordForm`](docs/sdks/knowledgebase/README.md#updaterecordform) - Update record
+- [`knowledgeBaseUpdateRecordMultipart`](docs/sdks/knowledgebase/README.md#updaterecordmultipart) - Update record
 - [`knowledgeBaseUploadRecords`](docs/sdks/knowledgebase/README.md#uploadrecords) - Upload files to knowledge base or folder
 - [`oAuthAppsActivateOAuthApp`](docs/sdks/oauthapps/README.md#activateoauthapp) - Activate suspended OAuth app
 - [`oAuthAppsCreateOAuthApp`](docs/sdks/oauthapps/README.md#createoauthapp) - Create OAuth app
@@ -549,9 +570,11 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 - [`semanticSearchSearchHistory`](docs/sdks/semanticsearch/README.md#searchhistory) - Get search history
 - [`semanticSearchUnarchiveSearch`](docs/sdks/semanticsearch/README.md#unarchivesearch) - Unarchive a search
 - [`userAccountAuthenticate`](docs/sdks/useraccount/README.md#authenticate) - Authenticate user with credentials
+- [`userAccountGetPasswordStatus`](docs/sdks/useraccount/README.md#getpasswordstatus) - Get password status
 - [`userAccountInitAuth`](docs/sdks/useraccount/README.md#initauth) - Initialize authentication session
 - [`userAccountRefreshToken`](docs/sdks/useraccount/README.md#refreshtoken) - Refresh access token
 - [`userAccountResetPassword`](docs/sdks/useraccount/README.md#resetpassword) - Reset password
+- [`userAccountSendPasswordSetupEmail`](docs/sdks/useraccount/README.md#sendpasswordsetupemail) - Email a link to set a first password
 - [`webSearchGetWebSearchProviders`](docs/sdks/websearch/README.md#getwebsearchproviders) - Get all web search providers
 - ~~[`connectorFiltersSaveConnectorFilters`](docs/sdks/connectorfilters/README.md#saveconnectorfilters)~~ - Save filter selections (deprecated) :warning: **Deprecated**
 - ~~[`knowledgeBaseGetKnowledgeHubChildNodes`](docs/sdks/knowledgebase/README.md#getknowledgehubchildnodes)~~ - Get knowledge hub child nodes :warning: **Deprecated**
@@ -585,8 +608,12 @@ async function run() {
     kbId: "<id>",
     body: {
       files: [],
-      filesMetadata:
-        "[{\"file_path\":\"/docs/report.pdf\",\"last_modified\":\"2024-01-15T10:30:00Z\"}]",
+      filesMetadata: [
+        {
+          filePath: "/docs/report.pdf",
+          lastModified: 2024,
+        },
+      ],
     },
   });
 
@@ -627,7 +654,7 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.knowledgeBase.updateRecord({
+  const result = await pipeshub.knowledgeBase.updateRecordMultipart({
     recordId: "<id>",
   });
 
@@ -740,11 +767,8 @@ async function run() {
       console.log(error.headers);
 
       // Depending on the method different errors may be thrown
-      if (error instanceof errors.OAuthErrorResponse) {
-        console.log(error.data$.error); // models.ErrorEnum
-        console.log(error.data$.errorDescription); // string
-        console.log(error.data$.errorUri); // string
-        console.log(error.data$.state); // string
+      if (error instanceof errors.ErrorResponse) {
+        console.log(error.data$.error); // models.ErrorResponseError
       }
     }
   }
@@ -755,10 +779,11 @@ run();
 ```
 
 ### Error Classes
-**Primary error:**
+**Primary errors:**
 * [`PipeshubError`](./src/models/errors/pipeshub-error.ts): The base class for HTTP error responses.
+  * [`ErrorResponse`](./src/models/errors/error-response.ts): Standard error envelope returned by all errors routed through `ErrorMiddleware`. Applies to all `BaseError` subclasses including `HttpError`, `ValidationError`, and others. The `code` field is a machine-readable string identifying the error type (e.g. `HTTP_UNAUTHORIZED`, `HTTP_NOT_FOUND`, `VALIDATION_ERROR`, `INTERNAL_ERROR`). *
 
-<details><summary>Less common errors (40)</summary>
+<details><summary>Less common errors (22)</summary>
 
 <br />
 
@@ -771,40 +796,22 @@ run();
 
 
 **Inherit from [`PipeshubError`](./src/models/errors/pipeshub-error.ts)**:
-* [`ErrorResponse`](./src/models/errors/error-response.ts): Standard error envelope returned by all errors routed through `ErrorMiddleware`. Applies to all `BaseError` subclasses including `HttpError`, `ValidationError`, and others. The `code` field is a machine-readable string identifying the error type (e.g. `HTTP_UNAUTHORIZED`, `HTTP_NOT_FOUND`, `VALIDATION_ERROR`, `INTERNAL_ERROR`). Applicable to 78 of 137 methods.*
-* [`OAuthClientManagementRateLimitError`](./src/models/errors/o-auth-client-management-rate-limit-error.ts): JSON body when OAuth client management routes exceed the per-minute rate limit (same limiter as other `/oauth-clients/*` routes). Status code `429`. Applicable to 20 of 137 methods.*
-* [`ApplicationJsonErrorResponse`](./src/models/errors/application-json-error-response.ts): Standard JSON error envelope from `ErrorMiddleware` for `BaseError` subclasses (`error.middleware.ts`). Returned for most API 4xx errors (unauthorized, forbidden, not found, validation failures, etc.). Applicable to 17 of 137 methods.*
-* [`OAuthErrorResponse`](./src/models/errors/o-auth-error-response.ts): OAuth 2.0 Error Response (RFC 6749 Section 5.2). Standard error format for OAuth endpoints. Applicable to 3 of 137 methods.*
-* [`RateLimitErrorResponse`](./src/models/errors/rate-limit-error-response.ts): Rate-limit error payload (shape differs from standard error responses). Status code `429`. Applicable to 3 of 137 methods.*
-* [`LocalFsDesktopRefusalError`](./src/models/errors/local-fs-desktop-refusal-error.ts): 409 body returned when a Local FS connector cannot sync because of its owner device. Status code `409`. Applicable to 2 of 137 methods.*
-* [`GetKnowledgeHubRootNodesBadRequestError`](./src/models/errors/get-knowledge-hub-root-nodes-bad-request-error.ts): Invalid request parameters. The backend's validation message is returned verbatim in `error.message`. See the examples below for the common triggers. Status code `400`. Applicable to 1 of 137 methods.*
-* [`GetKnowledgeHubChildNodesBadRequestError`](./src/models/errors/get-knowledge-hub-child-nodes-bad-request-error.ts): Invalid request parameters or path values. The backend's validation message is returned verbatim in `error.message`. See the examples below for the common triggers. Status code `400`. Applicable to 1 of 137 methods.*
-* [`SearchHistoryBadRequestError`](./src/models/errors/search-history-bad-request-error.ts): Error envelope for a failed request. Status code `400`. Applicable to 1 of 137 methods.*
-* [`GetSearchByIdBadRequestError`](./src/models/errors/get-search-by-id-bad-request-error.ts): Invalid request — `searchId` failed Zod validation (not a valid ObjectId). Status code `400`. Applicable to 1 of 137 methods.*
-* [`DeleteAgentConversationChatAttachmentBadRequestError`](./src/models/errors/delete-agent-conversation-chat-attachment-bad-request-error.ts): Invalid or blank path params (`agentKey` or `recordId`). Status code `400`. Applicable to 1 of 137 methods.*
-* [`GetAvailableModelsByTypeBadRequestError`](./src/models/errors/get-available-models-by-type-bad-request-error.ts): Invalid `modelType` path parameter.  The `modelType` value was not one of the supported enum categories. This response is produced by the Zod validation middleware **before** the handler runs. The `error.metadata.errors` array contains per-field detail about exactly which constraint failed. Status code `400`. Applicable to 1 of 137 methods.*
-* [`GetKnowledgeHubRootNodesUnauthorizedError`](./src/models/errors/get-knowledge-hub-root-nodes-unauthorized-error.ts): Missing or invalid authentication token.  The bearer token was absent, expired, malformed, or could not be verified by the auth middleware. Status code `401`. Applicable to 1 of 137 methods.*
-* [`GetKnowledgeHubChildNodesUnauthorizedError`](./src/models/errors/get-knowledge-hub-child-nodes-unauthorized-error.ts): Missing or invalid authentication token.  The bearer token was absent, expired, malformed, or could not be verified by the auth middleware. Status code `401`. Applicable to 1 of 137 methods.*
-* [`SearchHistoryUnauthorizedError`](./src/models/errors/search-history-unauthorized-error.ts): Error envelope for a failed request. Status code `401`. Applicable to 1 of 137 methods.*
-* [`GetSearchByIdUnauthorizedError`](./src/models/errors/get-search-by-id-unauthorized-error.ts): Missing or invalid bearer token. Status code `401`. Applicable to 1 of 137 methods.*
-* [`GetAvailableModelsByTypeUnauthorizedError`](./src/models/errors/get-available-models-by-type-unauthorized-error.ts): Missing or invalid authentication token.  The bearer token was absent, expired, malformed, or could not be verified by the auth middleware. Status code `401`. Applicable to 1 of 137 methods.*
-* [`GetKnowledgeHubRootNodesForbiddenError`](./src/models/errors/get-knowledge-hub-root-nodes-forbidden-error.ts): Insufficient OAuth scope.  Only applies to OAuth tokens. The token did not carry the `kb:read` scope required by this endpoint. Regular (non-OAuth) JWT bearer tokens are not subject to scope enforcement and will not receive this error. Status code `403`. Applicable to 1 of 137 methods.*
-* [`GetKnowledgeHubChildNodesForbiddenError`](./src/models/errors/get-knowledge-hub-child-nodes-forbidden-error.ts): Insufficient OAuth scope.  Only applies to OAuth tokens. The token did not carry the `kb:read` scope required by this endpoint. Regular (non-OAuth) JWT bearer tokens are not subject to scope enforcement and will not receive this error. Status code `403`. Applicable to 1 of 137 methods.*
-* [`SearchHistoryForbiddenError`](./src/models/errors/search-history-forbidden-error.ts): Error envelope for a failed request. Status code `403`. Applicable to 1 of 137 methods.*
-* [`GetSearchByIdForbiddenError`](./src/models/errors/get-search-by-id-forbidden-error.ts): Bearer token lacks the `semantic:read` scope. Status code `403`. Applicable to 1 of 137 methods.*
-* [`GetAvailableModelsByTypeForbiddenError`](./src/models/errors/get-available-models-by-type-forbidden-error.ts): Insufficient OAuth scope.  Only applies to OAuth tokens. The token did not carry the `config:read` scope required by this endpoint. Regular (non-OAuth) JWT bearer tokens are not subject to scope enforcement and will not receive this error. Status code `403`. Applicable to 1 of 137 methods.*
-* [`StreamRecordErrorResponse`](./src/models/errors/stream-record-error-response.ts): Error payload returned by the legacy record-stream proxy when the downstream streaming request fails after route middleware has passed. Applicable to 1 of 137 methods.*
-* [`GetKnowledgeHubChildNodesNotFoundError`](./src/models/errors/get-knowledge-hub-child-nodes-not-found-error.ts): Parent node not found.  The `parentId` does not correspond to an existing node of the specified `parentType`, or the node has been deleted. Status code `404`. Applicable to 1 of 137 methods.*
-* [`GetSearchByIdNotFoundError`](./src/models/errors/get-search-by-id-not-found-error.ts): Reserved for parity with sibling routes; this endpoint currently returns `200` with an empty array for an unknown id rather than emitting `404`. Status code `404`. Applicable to 1 of 137 methods.*
-* [`GetKnowledgeHubRootNodesUnprocessableEntityError`](./src/models/errors/get-knowledge-hub-root-nodes-unprocessable-entity-error.ts): A listing that spans a whole connector (a flattened listing, a search or a filter) was too large for the database to hold in memory, so it was refused instead of cut short. No page is returned. Open a folder (`GET /knowledgeBase/knowledge-hub/nodes/{parentType}/{parentId}`) to see its records, or add a search (`q`), which keeps only matching records in memory. Choosing a connector, or a filter that keeps most records (such as `nodeTypes`), does not help. Sorting by name with no filters is served from stored visibility where the connector allows it and is not affected. Status code `422`. Applicable to 1 of 137 methods.*
-* [`GetKnowledgeHubChildNodesUnprocessableEntityError`](./src/models/errors/get-knowledge-hub-child-nodes-unprocessable-entity-error.ts): A listing that spans a whole connector (a flattened listing, a search or a filter) was too large for the database to hold in memory, so it was refused instead of cut short. No page is returned. Open a folder (`GET /knowledgeBase/knowledge-hub/nodes/{parentType}/{parentId}`) to see its records, or add a search (`q`), which keeps only matching records in memory. Choosing a connector, or a filter that keeps most records (such as `nodeTypes`), does not help. Sorting by name with no filters is served from stored visibility where the connector allows it and is not affected. Status code `422`. Applicable to 1 of 137 methods.*
-* [`GetKnowledgeHubRootNodesInternalServerError`](./src/models/errors/get-knowledge-hub-root-nodes-internal-server-error.ts): An unexpected error occurred on the server. Status code `500`. Applicable to 1 of 137 methods.*
-* [`GetKnowledgeHubChildNodesInternalServerError`](./src/models/errors/get-knowledge-hub-child-nodes-internal-server-error.ts): An unexpected error occurred on the server. Status code `500`. Applicable to 1 of 137 methods.*
-* [`SearchHistoryInternalServerError`](./src/models/errors/search-history-internal-server-error.ts): Error envelope for a failed request. Status code `500`. Applicable to 1 of 137 methods.*
-* [`GetSearchByIdInternalServerError`](./src/models/errors/get-search-by-id-internal-server-error.ts): Server error. Possible causes:  - Explicit `InternalServerError`   or any other 500 `BaseError` thrown by the handler. - Non-`BaseError` exception caught by the   global error middleware. - Response serializer fallback. Status code `500`. Applicable to 1 of 137 methods.*
-* [`GetAvailableModelsByTypeInternalServerError`](./src/models/errors/get-available-models-by-type-internal-server-error.ts): An unexpected error occurred on the server. Status code `500`. Applicable to 1 of 137 methods.*
-* [`GetKnowledgeHubRootNodesServiceUnavailableError`](./src/models/errors/get-knowledge-hub-root-nodes-service-unavailable-error.ts): The database could not give this listing the memory it needs right now, because other requests were using it (nothing is wrong with the request). Retry after `Retry-After` seconds; the web app retries by itself. The body is the gateway's own busy message, not the service's wording. Status code `503`. Applicable to 1 of 137 methods.*
-* [`GetKnowledgeHubChildNodesServiceUnavailableError`](./src/models/errors/get-knowledge-hub-child-nodes-service-unavailable-error.ts): The database could not give this listing the memory it needs right now, because other requests were using it (nothing is wrong with the request). Retry after `Retry-After` seconds; the web app retries by itself. The body is the gateway's own busy message, not the service's wording. Status code `503`. Applicable to 1 of 137 methods.*
+* [`OAuthClientManagementRateLimitError`](./src/models/errors/o-auth-client-management-rate-limit-error.ts): JSON body when OAuth client management routes exceed the per-minute rate limit (same limiter as other `/oauth-clients/*` routes). Status code `429`. Applicable to 20 of 141 methods.*
+* [`ApplicationJsonErrorResponse`](./src/models/errors/application-json-error-response.ts): Standard JSON error envelope from `ErrorMiddleware` for `BaseError` subclasses (`error.middleware.ts`). Returned for most API 4xx errors (unauthorized, forbidden, not found, validation failures, etc.). Applicable to 17 of 141 methods.*
+* [`OAuthErrorResponse`](./src/models/errors/o-auth-error-response.ts): OAuth 2.0 Error Response (RFC 6749 Section 5.2). Standard error format for OAuth endpoints. Applicable to 3 of 141 methods.*
+* [`RateLimitErrorResponse`](./src/models/errors/rate-limit-error-response.ts): Rate-limit error payload (shape differs from standard error responses). Status code `429`. Applicable to 3 of 141 methods.*
+* [`LocalFsDesktopRefusalError`](./src/models/errors/local-fs-desktop-refusal-error.ts): 409 body returned when a Local FS connector cannot sync because of its owner device. Status code `409`. Applicable to 2 of 141 methods.*
+* [`BadRequestError`](./src/models/errors/bad-request-error.ts): Error envelope for a failed request. Status code `400`. Applicable to 1 of 141 methods.*
+* [`UnauthorizedError`](./src/models/errors/unauthorized-error.ts): Error envelope for a failed request. Status code `401`. Applicable to 1 of 141 methods.*
+* [`OAuthBearerTokenError`](./src/models/errors/o-auth-bearer-token-error.ts): Error body written by the OAuth bearer-token middleware (RFC 6750 Section 3.1) on routes that accept only an OAuth access token, such as `GET /oauth2/userinfo`. The same `error`, `error_description` and `scope` values are repeated in the `WWW-Authenticate` response header. This is not the standard `ErrorResponse` envelope: `error` is a string. Applicable to 1 of 141 methods.*
+* [`ForbiddenError`](./src/models/errors/forbidden-error.ts): Error envelope for a failed request. Status code `403`. Applicable to 1 of 141 methods.*
+* [`StreamRecordErrorResponse`](./src/models/errors/stream-record-error-response.ts): Error payload returned by the legacy record-stream proxy when the downstream streaming request fails after route middleware has passed. Applicable to 1 of 141 methods.*
+* [`GetKnowledgeHubRootNodesUnprocessableEntityError`](./src/models/errors/get-knowledge-hub-root-nodes-unprocessable-entity-error.ts): Either of: - A typed query parameter could not be read: `page` or `limit` is not an   integer or is out of range (`page` below 1, `limit` outside 1-200),   `onlyContainers` or `flattened` is not a boolean, or `page`/`limit` was   sent more than once. `error.message` is the connector service's own   validation text. - A listing that spans a whole connector (a flattened listing, a search or a filter) was too large for the   database to hold in memory, so it was refused instead of cut short. No page is returned. Open a folder   (`GET /knowledgeBase/knowledge-hub/nodes/{parentType}/{parentId}`) to see its records, or add a search (`q`),   which keeps only matching records in memory. Choosing a connector, or a filter that keeps most records (such as   `nodeTypes`), does not help. Sorting by name with no filters is served from stored visibility where the   connector allows it and is not affected. Status code `422`. Applicable to 1 of 141 methods.*
+* [`GetKnowledgeHubChildNodesUnprocessableEntityError`](./src/models/errors/get-knowledge-hub-child-nodes-unprocessable-entity-error.ts): Either of: - A typed query parameter could not be read: `page` or `limit` is not an   integer or is out of range (`page` below 1, `limit` outside 1-200), or   `onlyContainers` or `flattened` is not a boolean. `error.message` is the   connector service's own validation text. - A listing that spans a whole connector (a flattened listing, a search or a filter) was too large for the   database to hold in memory, so it was refused instead of cut short. No page is returned. Open a folder   (`GET /knowledgeBase/knowledge-hub/nodes/{parentType}/{parentId}`) to see its records, or add a search (`q`),   which keeps only matching records in memory. Choosing a connector, or a filter that keeps most records (such as   `nodeTypes`), does not help. Sorting by name with no filters is served from stored visibility where the   connector allows it and is not affected. Status code `422`. Applicable to 1 of 141 methods.*
+* [`UploadAgentConversationChatAttachmentsUnprocessableEntityError`](./src/models/errors/upload-agent-conversation-chat-attachments-unprocessable-entity-error.ts): A PDF that could not be read within the upload's 50-second budget, or whose parse ran out of memory, is not attached (`<name> is too large or complex to read right now, so it wasn't attached. ...`). Only that upload fails. Status code `422`. Applicable to 1 of 141 methods.*
+* [`SearchHistoryInternalServerError`](./src/models/errors/search-history-internal-server-error.ts): Error envelope for a failed request. Status code `500`. Applicable to 1 of 141 methods.*
+* [`GetKnowledgeHubRootNodesServiceUnavailableError`](./src/models/errors/get-knowledge-hub-root-nodes-service-unavailable-error.ts): The database could not give this listing the memory it needs right now, because other requests were using it (nothing is wrong with the request). Retry after `Retry-After` seconds; the web app retries by itself. The body is the gateway's own busy message, not the service's wording. Status code `503`. Applicable to 1 of 141 methods.*
+* [`GetKnowledgeHubChildNodesServiceUnavailableError`](./src/models/errors/get-knowledge-hub-child-nodes-service-unavailable-error.ts): The database could not give this listing the memory it needs right now, because other requests were using it (nothing is wrong with the request). Retry after `Retry-After` seconds; the web app retries by itself. The body is the gateway's own busy message, not the service's wording. Status code `503`. Applicable to 1 of 141 methods.*
 * [`ResponseValidationError`](./src/models/errors/response-validation-error.ts): Type mismatch between the data returned from the server and the structure expected by the SDK. See `error.rawValue` for the raw value and `error.pretty()` for a nicely formatted multi-line string.
 
 </details>

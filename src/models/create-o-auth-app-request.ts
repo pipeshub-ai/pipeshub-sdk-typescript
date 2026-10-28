@@ -61,6 +61,14 @@ export type CreateOAuthAppRequest = {
    *
    * @remarks
    * (including the default when `allowedGrantTypes` is omitted).
+   * Each URI must parse as a URL (`VALIDATION_ERROR` otherwise), and the service then refuses with
+   * `400 OAUTH_INVALID_REDIRECT_URI` any URI that is not `https:` and whose host is not `localhost` or
+   * `127.0.0.1` (any scheme is let through on those two hosts), or that carries a fragment.
+   * The one exception is the literal `cursor://anysphere.cursor-mcp/oauth/callback`.
+   * Both checks use WHATWG `new URL()`, so the scheme and a `localhost` host match in any case,
+   * `https:` may be followed by any number of `/` or `\` (or none), and surrounding whitespace is
+   * allowed and trimmed before the URI is stored; the URI is otherwise stored as sent. `https://`
+   * with no host does not parse. The pattern approximates these rules.
    */
   redirectUris?: Array<string> | undefined;
   /**
@@ -74,15 +82,15 @@ export type CreateOAuthAppRequest = {
    */
   allowedScopes: Array<string>;
   /**
-   * App homepage URL (shown during authorization)
+   * App homepage URL (shown during authorization). Must parse as a URL (`z.string().url()`); the pattern is the closest JSON Schema can say.
    */
   homepageUrl?: string | undefined;
   /**
-   * Privacy policy URL
+   * Privacy policy URL. Must parse as a URL (`z.string().url()`); the pattern is the closest JSON Schema can say.
    */
   privacyPolicyUrl?: string | undefined;
   /**
-   * Terms of service URL
+   * Terms of service URL. Must parse as a URL (`z.string().url()`); the pattern is the closest JSON Schema can say.
    */
   termsOfServiceUrl?: string | undefined;
   /**

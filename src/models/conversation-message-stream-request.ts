@@ -30,23 +30,11 @@ import {
   ToolApprovalAnswer$outboundSchema,
 } from "./tool-approval-answer.js";
 
-/**
- * Optional execution mode for non-stream consumers of this shared
- *
- * @remarks
- * request schema.
- */
 export const ConversationMessageStreamRequestChatMode = {
   Agent: "agent",
   InternalSearch: "internal_search",
   WebSearch: "web_search",
 } as const;
-/**
- * Optional execution mode for non-stream consumers of this shared
- *
- * @remarks
- * request schema.
- */
 export type ConversationMessageStreamRequestChatMode = ClosedEnum<
   typeof ConversationMessageStreamRequestChatMode
 >;
@@ -91,11 +79,37 @@ export type ConversationMessageStreamRequestKeywordSearchBudget = ClosedEnum<
 >;
 
 /**
+ * How hard a reasoning model should think for this turn. Saved in
+ *
+ * @remarks
+ * the conversation's `modelInfo`.
+ */
+export const ConversationMessageStreamRequestReasoningEffort = {
+  None: "none",
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Max: "max",
+} as const;
+/**
+ * How hard a reasoning model should think for this turn. Saved in
+ *
+ * @remarks
+ * the conversation's `modelInfo`.
+ */
+export type ConversationMessageStreamRequestReasoningEffort = ClosedEnum<
+  typeof ConversationMessageStreamRequestReasoningEffort
+>;
+
+/**
  * Request body for
  *
  * @remarks
  * `POST /conversations/{conversationId}/messages/stream`. The public
- * stream requires an explicit universal execution mode.
+ * stream requires an explicit universal execution mode; the legacy
+ * modes the non-streaming route accepts are refused here. Unlike the
+ * non-streaming route, a `query` of only whitespace is not refused:
+ * the turn runs with it.
  */
 export type ConversationMessageStreamRequest = {
   /**
@@ -163,12 +177,6 @@ export type ConversationMessageStreamRequest = {
    * Friendly display name of the model
    */
   modelFriendlyName?: string | undefined;
-  /**
-   * Optional execution mode for non-stream consumers of this shared
-   *
-   * @remarks
-   * request schema.
-   */
   chatMode: ConversationMessageStreamRequestChatMode;
   /**
    * IANA timezone identifier from the client (top-level field).
@@ -240,6 +248,13 @@ export type ConversationMessageStreamRequest = {
    * stream is still generating.
    */
   runId?: string | undefined;
+  /**
+   * How hard a reasoning model should think for this turn. Saved in
+   *
+   * @remarks
+   * the conversation's `modelInfo`.
+   */
+  reasoningEffort?: ConversationMessageStreamRequestReasoningEffort | undefined;
 };
 
 /** @internal */
@@ -260,6 +275,11 @@ export const ConversationMessageStreamRequestKeywordSearchBudget$outboundSchema:
     .enum(ConversationMessageStreamRequestKeywordSearchBudget);
 
 /** @internal */
+export const ConversationMessageStreamRequestReasoningEffort$outboundSchema:
+  z.ZodMiniEnum<typeof ConversationMessageStreamRequestReasoningEffort> = z
+    .enum(ConversationMessageStreamRequestReasoningEffort);
+
+/** @internal */
 export type ConversationMessageStreamRequest$Outbound = {
   query: string;
   filters?: Filters$Outbound | undefined;
@@ -278,6 +298,7 @@ export type ConversationMessageStreamRequest$Outbound = {
   keywordSearchBudget?: string | undefined;
   toolApproval?: ToolApprovalAnswer$Outbound | undefined;
   runId?: string | undefined;
+  reasoningEffort?: string | undefined;
 };
 
 /** @internal */
@@ -304,6 +325,9 @@ export const ConversationMessageStreamRequest$outboundSchema: z.ZodMiniType<
   ),
   toolApproval: z.optional(ToolApprovalAnswer$outboundSchema),
   runId: z.optional(z.string()),
+  reasoningEffort: z.optional(
+    ConversationMessageStreamRequestReasoningEffort$outboundSchema,
+  ),
 });
 
 export function conversationMessageStreamRequestToJSON(

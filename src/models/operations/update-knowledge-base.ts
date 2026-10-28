@@ -5,13 +5,16 @@
 import * as z from "zod/v4-mini";
 
 /**
- * Fields to update. `kbName` is optional; an empty object is valid.
+ * The new name. `kbName` is the only field and it is required.
  */
 export type UpdateKnowledgeBaseRequestBody = {
   /**
-   * New name for the knowledge base
+   * New name for the knowledge base. Whitespace around it is removed first, so
+   *
+   * @remarks
+   * a name made only of whitespace is refused as empty.
    */
-  kbName?: string | undefined;
+  kbName: string;
 };
 
 export type UpdateKnowledgeBaseRequest = {
@@ -20,14 +23,14 @@ export type UpdateKnowledgeBaseRequest = {
    */
   kbId: string;
   /**
-   * Fields to update. `kbName` is optional; an empty object is valid.
+   * The new name. `kbName` is the only field and it is required.
    */
   body: UpdateKnowledgeBaseRequestBody;
 };
 
 /** @internal */
 export type UpdateKnowledgeBaseRequestBody$Outbound = {
-  kbName?: string | undefined;
+  kbName: string;
 };
 
 /** @internal */
@@ -35,7 +38,7 @@ export const UpdateKnowledgeBaseRequestBody$outboundSchema: z.ZodMiniType<
   UpdateKnowledgeBaseRequestBody$Outbound,
   UpdateKnowledgeBaseRequestBody
 > = z.object({
-  kbName: z.optional(z.string()),
+  kbName: z.string(),
 });
 
 export function updateKnowledgeBaseRequestBodyToJSON(

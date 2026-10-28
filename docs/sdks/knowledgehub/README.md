@@ -77,7 +77,15 @@ its limit lets it see:
 
 Requires a valid bearer token. For OAuth tokens the `kb:read` scope
 must be present; regular JWT bearer tokens pass through without scope
-enforcement.
+enforcement. Only nodes the caller can access are listed.
+
+**Request checking**
+
+This route has no request validator of its own; the query is passed on and
+checked by the connector service. Query parameters not listed here are
+ignored. A wrong type for `page`, `limit`, `onlyContainers` or `flattened`
+(or `page` below 1 or `limit` outside 1-200, or either sent more than once) is answered
+`422`; a refused filter value is answered `400`.
 
 
 > :warning: **DEPRECATED**: Use the Knowledge Base API instead. This grouping will be removed in a future release.
@@ -171,11 +179,9 @@ run();
 
 | Error Type                                              | Status Code                                             | Content Type                                            |
 | ------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------- |
-| errors.GetKnowledgeHubRootNodesBadRequestError          | 400                                                     | application/json                                        |
-| errors.GetKnowledgeHubRootNodesUnauthorizedError        | 401                                                     | application/json                                        |
-| errors.GetKnowledgeHubRootNodesForbiddenError           | 403                                                     | application/json                                        |
+| errors.ErrorResponse                                    | 400, 401, 403                                           | application/json                                        |
 | errors.GetKnowledgeHubRootNodesUnprocessableEntityError | 422                                                     | application/json                                        |
-| errors.GetKnowledgeHubRootNodesInternalServerError      | 500                                                     | application/json                                        |
+| errors.ErrorResponse                                    | 500                                                     | application/json                                        |
 | errors.GetKnowledgeHubRootNodesServiceUnavailableError  | 503                                                     | application/json                                        |
 | errors.PipeshubDefaultError                             | 4XX, 5XX                                                | \*/\*                                                   |
 
@@ -217,6 +223,18 @@ a connected app whose limit leaves that parent out: it is `null` then.
 Requires a valid bearer token. For OAuth tokens the `kb:read` scope
 must be present; regular JWT bearer tokens pass through without scope
 enforcement.
+
+A parent the caller may not see, one in the trash, and one that does not
+exist are all answered `404` with the same body, so the route does not reveal
+whether the node exists.
+
+**Request checking**
+
+This route has no request validator of its own; the path values and the query
+are checked by the connector service. Query parameters not listed here are
+ignored. A wrong type for `page`, `limit`, `onlyContainers` or `flattened`
+(or `page` below 1 or `limit` outside 1-200) is answered `422`; other refusals,
+`page` above 50 and an unusable `cursor` included, are `400`.
 
 
 > :warning: **DEPRECATED**: Use the Knowledge Base API instead. This grouping will be removed in a future release.
@@ -314,11 +332,8 @@ run();
 
 | Error Type                                               | Status Code                                              | Content Type                                             |
 | -------------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------- |
-| errors.GetKnowledgeHubChildNodesBadRequestError          | 400                                                      | application/json                                         |
-| errors.GetKnowledgeHubChildNodesUnauthorizedError        | 401                                                      | application/json                                         |
-| errors.GetKnowledgeHubChildNodesForbiddenError           | 403                                                      | application/json                                         |
-| errors.GetKnowledgeHubChildNodesNotFoundError            | 404                                                      | application/json                                         |
+| errors.ErrorResponse                                     | 400, 401, 403, 404                                       | application/json                                         |
 | errors.GetKnowledgeHubChildNodesUnprocessableEntityError | 422                                                      | application/json                                         |
-| errors.GetKnowledgeHubChildNodesInternalServerError      | 500                                                      | application/json                                         |
+| errors.ErrorResponse                                     | 500                                                      | application/json                                         |
 | errors.GetKnowledgeHubChildNodesServiceUnavailableError  | 503                                                      | application/json                                         |
 | errors.PipeshubDefaultError                              | 4XX, 5XX                                                 | \*/\*                                                    |

@@ -4,9 +4,28 @@
 
 import * as z from "zod/v4-mini";
 import { safeParse } from "../lib/schemas.js";
+import * as openEnums from "../types/enums.js";
+import { OpenEnum } from "../types/enums.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
+
+/**
+ * Reasoning effort requested for the turn, when one was set.
+ */
+export const ConversationModelInfoReasoningEffort = {
+  None: "none",
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Max: "max",
+} as const;
+/**
+ * Reasoning effort requested for the turn, when one was set.
+ */
+export type ConversationModelInfoReasoningEffort = OpenEnum<
+  typeof ConversationModelInfoReasoningEffort
+>;
 
 /**
  * AI model configuration recorded against a conversation or message.
@@ -32,7 +51,17 @@ export type ConversationModelInfo = {
    * Chat mode used for this turn (e.g. `quick`, `internal_search`)
    */
   chatMode?: string | undefined;
+  /**
+   * Reasoning effort requested for the turn, when one was set.
+   */
+  reasoningEffort?: ConversationModelInfoReasoningEffort | undefined;
 };
+
+/** @internal */
+export const ConversationModelInfoReasoningEffort$inboundSchema: z.ZodMiniType<
+  ConversationModelInfoReasoningEffort,
+  unknown
+> = openEnums.inboundSchema(ConversationModelInfoReasoningEffort);
 
 /** @internal */
 export const ConversationModelInfo$inboundSchema: z.ZodMiniType<
@@ -44,6 +73,9 @@ export const ConversationModelInfo$inboundSchema: z.ZodMiniType<
   modelProvider: types.optional(types.string()),
   modelFriendlyName: types.optional(types.string()),
   chatMode: types.optional(types.string()),
+  reasoningEffort: types.optional(
+    ConversationModelInfoReasoningEffort$inboundSchema,
+  ),
 });
 
 export function conversationModelInfoFromJSON(

@@ -3,23 +3,40 @@
  */
 
 import * as z from "zod/v4-mini";
+import { remap as remap$ } from "../lib/primitives.js";
+import { smartUnion } from "../types/smart-union.js";
 
 /**
- * OAuth application credentials
+ * Value of any other auth field the connector type declares, keyed by the field's `name`
+ */
+export type Config = string | boolean | number | Array<string>;
+
+/**
+ * OAuth application credentials, keyed by the `name` of each entry in the connector type's
+ *
+ * @remarks
+ * `authFields` (see `GET /oauth/registry/{connectorType}`), so the keys differ from one
+ * connector type to the next. Must not be empty; neither the keys nor their values are
+ * validated when the configuration is created, so a value of another type (a number,
+ * `null`, a nested object, an array of other items) is stored as sent, also for
+ * `clientId` and `clientSecret`.
  */
 export type CreateOAuthConfigRequestConfig = {
   /**
    * OAuth client ID from your OAuth application
    */
-  clientId: string;
+  clientId?: string | undefined;
   /**
    * OAuth client secret; never in the create response, and returned by GET only to admins (masked when HIDE_SECRET_CONFIG is on)
    */
-  clientSecret: string;
+  clientSecret?: string | undefined;
   /**
    * Azure tenant ID (required only for Microsoft connectors)
    */
   tenantId?: string | undefined;
+  additionalProperties?: {
+    [k: string]: string | boolean | number | Array<string>;
+  } | undefined;
 };
 
 /**
@@ -27,35 +44,70 @@ export type CreateOAuthConfigRequestConfig = {
  */
 export type CreateOAuthConfigRequest = {
   /**
-   * Display name for this OAuth configuration (e.g., 'Production Google OAuth')
+   * Display name for this OAuth configuration (e.g., 'Production Google OAuth'). Must be unique for the connector type within the organization. Leading and trailing whitespace is removed before validation, so a name of only whitespace is refused as empty.
    */
   oauthInstanceName: string;
   /**
-   * OAuth application credentials
+   * OAuth application credentials, keyed by the `name` of each entry in the connector type's
+   *
+   * @remarks
+   * `authFields` (see `GET /oauth/registry/{connectorType}`), so the keys differ from one
+   * connector type to the next. Must not be empty; neither the keys nor their values are
+   * validated when the configuration is created, so a value of another type (a number,
+   * `null`, a nested object, an array of other items) is stored as sent, also for
+   * `clientId` and `clientSecret`.
    */
   config: CreateOAuthConfigRequestConfig;
   /**
-   * PipesHub's public origin, prefixed to the connector's redirect path to build the stored redirectUri. When omitted, the frontend public endpoint is used. Not the provider's URL; a self-hosted provider's address goes in config.
+   * PipesHub's public origin, prefixed to the connector's redirect path to build the stored redirectUri. When omitted or empty, the frontend public endpoint is used. The value is not checked to be a URL: whatever text is sent is used as the prefix. Not the provider's URL; a self-hosted provider's address goes in config.
    */
   baseUrl?: string | undefined;
 };
 
 /** @internal */
+export type Config$Outbound = string | boolean | number | Array<string>;
+
+/** @internal */
+export const Config$outboundSchema: z.ZodMiniType<Config$Outbound, Config> =
+  smartUnion([z.string(), z.boolean(), z.number(), z.array(z.string())]);
+
+export function configToJSON(config: Config): string {
+  return JSON.stringify(Config$outboundSchema.parse(config));
+}
+
+/** @internal */
 export type CreateOAuthConfigRequestConfig$Outbound = {
-  clientId: string;
-  clientSecret: string;
+  clientId?: string | undefined;
+  clientSecret?: string | undefined;
   tenantId?: string | undefined;
+  [additionalProperties: string]: unknown;
 };
 
 /** @internal */
 export const CreateOAuthConfigRequestConfig$outboundSchema: z.ZodMiniType<
   CreateOAuthConfigRequestConfig$Outbound,
   CreateOAuthConfigRequestConfig
-> = z.object({
-  clientId: z.string(),
-  clientSecret: z.string(),
-  tenantId: z.optional(z.string()),
-});
+> = z.pipe(
+  z.object({
+    clientId: z.optional(z.string()),
+    clientSecret: z.optional(z.string()),
+    tenantId: z.optional(z.string()),
+    additionalProperties: z.optional(
+      z.record(
+        z.string(),
+        smartUnion([z.string(), z.boolean(), z.number(), z.array(z.string())]),
+      ),
+    ),
+  }),
+  z.transform((v) => {
+    return {
+      ...v.additionalProperties,
+      ...remap$(v, {
+        additionalProperties: null,
+      }),
+    };
+  }),
+);
 
 export function createOAuthConfigRequestConfigToJSON(
   createOAuthConfigRequestConfig: CreateOAuthConfigRequestConfig,

@@ -10,6 +10,13 @@ import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
 export type SaveConnectorFiltersRequest = {
+  /**
+   * Connector instance ID. Unlike `GET` on this path, not checked for
+   *
+   * @remarks
+   * shape: an ID that matches no instance is a `404`. An ID that decodes
+   * to an unsafe path segment is refused with `400` before the token is checked.
+   */
   connectorId: string;
   /**
    * Request payload

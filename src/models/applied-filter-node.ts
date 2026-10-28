@@ -9,25 +9,28 @@ import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
 /**
- * A single filter node selected by the user (used for display/persistence of active filters)
+ * A single filter node selected by the user (used for display/persistence of active
+ *
+ * @remarks
+ * filters). The gateway refuses a node that lacks any of the four fields.
  */
 export type AppliedFilterNode = {
   /**
    * Unique identifier of the filter node
    */
-  id?: string | undefined;
+  id: string;
   /**
    * Display name of the filter node
    */
-  name?: string | undefined;
+  name: string;
   /**
    * Type of the node (e.g. app, recordGroup, folder, record)
    */
-  nodeType?: string | undefined;
+  nodeType: string;
   /**
    * Connector identifier associated with this node
    */
-  connector?: string | undefined;
+  connector: string;
   /**
    * File extension of a record node, for its icon
    */
@@ -47,20 +50,20 @@ export const AppliedFilterNode$inboundSchema: z.ZodMiniType<
   AppliedFilterNode,
   unknown
 > = z.object({
-  id: types.optional(types.string()),
-  name: types.optional(types.string()),
-  nodeType: types.optional(types.string()),
-  connector: types.optional(types.string()),
+  id: types.string(),
+  name: types.string(),
+  nodeType: types.string(),
+  connector: types.string(),
   extension: types.optional(types.string()),
   mimeType: types.optional(types.string()),
   mentioned: types.optional(types.boolean()),
 });
 /** @internal */
 export type AppliedFilterNode$Outbound = {
-  id?: string | undefined;
-  name?: string | undefined;
-  nodeType?: string | undefined;
-  connector?: string | undefined;
+  id: string;
+  name: string;
+  nodeType: string;
+  connector: string;
   extension?: string | undefined;
   mimeType?: string | undefined;
   mentioned?: boolean | undefined;
@@ -71,10 +74,10 @@ export const AppliedFilterNode$outboundSchema: z.ZodMiniType<
   AppliedFilterNode$Outbound,
   AppliedFilterNode
 > = z.object({
-  id: z.optional(z.string()),
-  name: z.optional(z.string()),
-  nodeType: z.optional(z.string()),
-  connector: z.optional(z.string()),
+  id: z.string(),
+  name: z.string(),
+  nodeType: z.string(),
+  connector: z.string(),
   extension: z.optional(z.string()),
   mimeType: z.optional(z.string()),
   mentioned: z.optional(z.boolean()),

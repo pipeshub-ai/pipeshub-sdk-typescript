@@ -24,16 +24,25 @@ import {
 export type RestoreRecordsResultItemSchema = {
   recordId: string;
   success: boolean;
+  /**
+   * The status the single restore would have answered (200, 403, 404, 409)
+   */
   code?: number | undefined;
   /**
    * Why it was not restored, and what to do next
    */
   reason?: string | undefined;
+  /**
+   * Present on success
+   */
   message?: string | undefined;
   /**
-   * The delete batch that was restored
+   * The delete batch that was restored; `null` when the record was not in the trash
    */
   batchId?: string | null | undefined;
+  /**
+   * Present on success; empty when the record was not in the trash
+   */
   restoredRecords?: Array<RestoredRecordSchema> | undefined;
   /**
    * Some restored files could not be queued for indexing

@@ -11,7 +11,7 @@ let value: UpdateAuthMethodResponse = {
   message: "Auth method updated",
   authMethod: [
     {
-      order: 19378,
+      order: 193.78,
       allowedMethods: [
         {
           type: "microsoft",

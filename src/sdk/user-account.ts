@@ -3,9 +3,11 @@
  */
 
 import { userAccountAuthenticate } from "../funcs/user-account-authenticate.js";
+import { userAccountGetPasswordStatus } from "../funcs/user-account-get-password-status.js";
 import { userAccountInitAuth } from "../funcs/user-account-init-auth.js";
 import { userAccountRefreshToken } from "../funcs/user-account-refresh-token.js";
 import { userAccountResetPassword } from "../funcs/user-account-reset-password.js";
+import { userAccountSendPasswordSetupEmail } from "../funcs/user-account-send-password-setup-email.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
 import * as models from "../models/index.js";
 import * as operations from "../models/operations/index.js";
@@ -66,8 +68,10 @@ export class UserAccount extends ClientSDK {
    *
    * - `password`: `{ "credentials": { "password": "your-password" } }`
    * - `otp`: `{ "credentials": { "otp": "123456" } }` (6-digit code, valid for 10 minutes)
-   * - `google`: `{ "credentials": "google-id-token-string" }`
-   * - `microsoft`: `{ "credentials": { "accessToken": "...", "idToken": "..." } }`
+   * - `google`: `{ "credentials": "google-id-token-string" }`. The object form
+   *   `{ "credentials": { "credential": "..." } }` passes the first token check, but by code
+   *   reading the second check is handed the whole object, so it ends in `500`
+   * - `microsoft`: `{ "credentials": { "idToken": "..." } }` (only `idToken` is read)
    *
    * SAML (`samlSso`), generic OAuth (`oauth`) and Azure AD (`azureAd`) sign-in were removed in 1.0;
    * this endpoint answers `400` for them. Azure AD accounts sign in with `microsoft`.
@@ -84,12 +88,17 @@ export class UserAccount extends ClientSDK {
    *
    * **Security:**
    *
-   * - Account locks for 24 hours after 5 consecutive failed attempts, and the owner is
+   * - Account locks for 24 hours after 10 consecutive failed attempts, and the owner is
    *   sent an email saying so. While it is locked, sign-in is refused with the same answer
    *   as a wrong password or code, even when the password or code is right
    * - CAPTCHA may be required if enabled (pass `cf-turnstile-response`)
    * - An email with no account gets the same status and message as a real account given
    *   a wrong password (`400`) or a wrong, missing or expired sign-in code (`401`)
+   * - The session token is single-use for the final step: once tokens are returned the
+   *   session is gone, and sending it again answers `401`
+   *
+   * **Order of checks:** the session token is checked before the body, so a request
+   * without a valid `x-session-token` answers `401` whatever its body holds.
    */
   async authenticate(
     request: operations.AuthenticateRequest,
@@ -112,6 +121,7 @@ export class UserAccount extends ClientSDK {
    *
    * - Pass the refresh token as a Bearer token in the Authorization header
    * - Returns a new access token and basic user information
+   * - The request body and query string are not read
    *
    * **Token Lifetimes:**
    *
@@ -136,6 +146,37 @@ export class UserAccount extends ClientSDK {
   }
 
   /**
+   * Get password status
+   *
+   * @remarks
+   * Returns whether the authenticated user has a password set. Users who signed in only through SSO do not.
+   */
+  async getPasswordStatus(
+    options?: RequestOptions,
+  ): Promise<operations.GetPasswordStatusResponse> {
+    return unwrapAsync(userAccountGetPasswordStatus(
+      this,
+      options,
+    ));
+  }
+
+  /**
+   * Email a link to set a first password
+   *
+   * @remarks
+   * Sends the authenticated user a single-use link, to the email on their account, for setting a first password.
+   * For users who have no password yet, for example those who signed in with Google. Users who already have one change it with `POST /userAccount/password/reset`.
+   */
+  async sendPasswordSetupEmail(
+    options?: RequestOptions,
+  ): Promise<operations.SendPasswordSetupEmailResponse> {
+    return unwrapAsync(userAccountSendPasswordSetupEmail(
+      this,
+      options,
+    ));
+  }
+
+  /**
    * Reset password
    *
    * @remarks
@@ -144,6 +185,13 @@ export class UserAccount extends ClientSDK {
    * **Overview:**
    *
    * Allows a logged-in user to change their password by providing the current password and a new password.
+   *
+   * **Order of checks:** the access token is read before the body, so a request without
+   * an `Authorization` header answers `400` whatever its body holds. Body fields other
+   * than the three below are dropped by the validator, and the query string is not read.
+   *
+   * **Effect on sessions:** the change ends refresh tokens issued before it. The response
+   * carries a new access token.
    */
   async resetPassword(
     request: operations.ResetPasswordRequest,

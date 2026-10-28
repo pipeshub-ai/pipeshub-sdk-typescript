@@ -6,7 +6,10 @@ import * as z from "zod/v4-mini";
 
 export type ConversationTitleUpdateRequest = {
   /**
-   * New title for the conversation
+   * New title for the conversation. Surrounding whitespace is trimmed; a
+   *
+   * @remarks
+   * blank title is refused.
    */
   title: string;
 };

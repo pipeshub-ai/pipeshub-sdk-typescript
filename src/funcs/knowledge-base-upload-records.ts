@@ -7,6 +7,7 @@ import { PipeshubCore } from "../core.js";
 import {
   appendForm,
   encodeFormQuery,
+  encodeJSON,
   encodeSimple,
   normalizeBlob,
 } from "../lib/encodings.js";
@@ -65,6 +66,30 @@ import { isReadableStream } from "../types/streams.js";
  * **File Metadata**
  *
  * Use `files_metadata` to provide additional info like file paths and last modified timestamps.
+ * A path with folders (`docs/2026/a.txt`) creates those folders, as a folder upload does.
+ *
+ * **Rejected files**
+ *
+ * A file whose extension is not supported, or that is larger than the size limit, does
+ * not fail the request: it is reported as a `file:failed` event (`reason`
+ * `UNSUPPORTED_TYPE` or `EXCEEDS_SIZE_LIMIT`, `stage: upload`) and the other files go on.
+ * A file whose name is already used in the same place fails the same way with `reason`
+ * `DUPLICATE_NAME` and `stage: index`. The request still answers `200` when every file
+ * failed. There is no `413`.
+ *
+ * **Ignored fields**
+ *
+ * `recordName`, `recordType` and `origin` are validated (non-empty, and `recordName` is
+ * checked for HTML and format specifiers) but do not affect the records: each record is
+ * named after its file, with origin `UPLOAD` and type `FILE`. Other fields and unknown
+ * query parameters are ignored; `rejectedFiles` and `fileBuffers` are set by the gateway
+ * itself, so a value sent for them is replaced.
+ *
+ * **Access**
+ *
+ * `OWNER` and `WRITER` may upload. A `READER` gets `403`; a caller with no role on the
+ * knowledge base gets `404`. Only a multipart body is read: a JSON body has no files and
+ * is refused with `400`.
  *
  * **Versioning**
  *
@@ -166,10 +191,22 @@ async function $do(
     }
   }
   if (payload.body.files_metadata !== undefined) {
-    appendForm(body, "files_metadata", payload.body.files_metadata);
+    appendForm(
+      body,
+      "files_metadata",
+      encodeJSON("files_metadata", payload.body.files_metadata, {
+        explode: true,
+      }),
+    );
   }
   if (payload.body.isVersioned !== undefined) {
     appendForm(body, "isVersioned", payload.body.isVersioned);
+  }
+  if (payload.body.origin !== undefined) {
+    appendForm(body, "origin", payload.body.origin);
+  }
+  if (payload.body.recordName !== undefined) {
+    appendForm(body, "recordName", payload.body.recordName);
   }
   if (payload.body.recordType !== undefined) {
     appendForm(body, "recordType", payload.body.recordType);
@@ -268,7 +305,7 @@ async function $do(
       ),
     ),
     M.jsonErr(
-      [400, 401, 403, 404, 409, 413, 429],
+      [400, 401, 403, 404, 409, 429],
       errors.ErrorResponse$inboundSchema,
     ),
     M.jsonErr(500, errors.ErrorResponse$inboundSchema),

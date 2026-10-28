@@ -14,7 +14,7 @@ test("Organizations Get Current Organization", async () => {
       ?? "http://localhost:3000/api/v1",
     security: {
       oauth2: {
-        clientID: process.env["PIPESHUB_CLIENT_ID"] ?? "value",
+        clientID: "<YOUR_CLIENT_ID_HERE>",
         clientSecret: process.env["PIPESHUB_CLIENT_SECRET"] ?? "value",
         tokenURL: process.env["PIPESHUB_TOKEN_URL"]
           ?? "http://localhost:3000/api/v1/oauth2/token",

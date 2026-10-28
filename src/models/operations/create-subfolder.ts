@@ -9,7 +9,11 @@ import * as z from "zod/v4-mini";
  */
 export type CreateSubfolderRequestBody = {
   /**
-   * Name of the folder
+   * Name of the folder. Whitespace around it is removed first, so a name made
+   *
+   * @remarks
+   * only of whitespace is refused as empty.
+   * It cannot contain `/` or `\`, which folder paths use as separators.
    */
   folderName: string;
 };
@@ -20,9 +24,19 @@ export type CreateSubfolderRequest = {
    */
   kbId: string;
   /**
-   * Parent folder ID
+   * Parent folder ID. An id that is not a folder of this knowledge base (unknown, or a
+   *
+   * @remarks
+   * file) is answered `404`.
    */
-  folderId: string;
+  folderIdPathParameter: string;
+  /**
+   * Optional. When sent, it must equal the `folderId` path parameter (`Conflicting
+   *
+   * @remarks
+   * folderId in path and query parameters`).
+   */
+  folderIdQueryParameter?: string | undefined;
   /**
    * Request payload
    */
@@ -53,7 +67,8 @@ export function createSubfolderRequestBodyToJSON(
 /** @internal */
 export type CreateSubfolderRequest$Outbound = {
   kbId: string;
-  folderId: string;
+  folderIdPathParameter: string;
+  folderIdQueryParameter?: string | undefined;
   body: CreateSubfolderRequestBody$Outbound;
 };
 
@@ -63,7 +78,8 @@ export const CreateSubfolderRequest$outboundSchema: z.ZodMiniType<
   CreateSubfolderRequest
 > = z.object({
   kbId: z.string(),
-  folderId: z.string(),
+  folderIdPathParameter: z.string(),
+  folderIdQueryParameter: z.optional(z.string()),
   body: z.lazy(() => CreateSubfolderRequestBody$outboundSchema),
 });
 

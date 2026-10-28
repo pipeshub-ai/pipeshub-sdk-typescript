@@ -31,10 +31,10 @@ import { Result } from "../types/fp.js";
  * List OAuth-capable connector types
  *
  * @remarks
- * Get all connector types that support OAuth authentication.<br><br>
- * <b>Admin Use:</b><br>
- * Admins use this to see which connector types need OAuth credentials
- * to be configured before users can authenticate.
+ * List the connector and toolset types that support OAuth, from the OAuth registry.<br><br>
+ * Each entry carries the provider URLs, the scopes requested, and the `authFields`
+ * to collect when creating an OAuth configuration for that type.<br><br>
+ * Any authenticated user can call this; it is not limited to admins.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -175,6 +175,7 @@ async function $do(
   >(
     M.json(200, operations.GetOAuthRegistryResponse$inboundSchema),
     M.jsonErr([400, 401, 403], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

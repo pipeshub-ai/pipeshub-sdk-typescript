@@ -48,6 +48,10 @@ import {
   PopulatedCitationReference,
   PopulatedCitationReference$inboundSchema,
 } from "./populated-citation-reference.js";
+import {
+  RedactedSource,
+  RedactedSource$inboundSchema,
+} from "./redacted-source.js";
 
 /**
  * Type of message:
@@ -94,7 +98,10 @@ export const MessageContentFormat = {
  */
 export type MessageContentFormat = OpenEnum<typeof MessageContentFormat>;
 
-export type CitationUnion = CitationReference | PopulatedCitationReference;
+export type MessageCitation =
+  | RedactedSource
+  | CitationReference
+  | PopulatedCitationReference;
 
 export type MessageMetadata = {
   /**
@@ -148,6 +155,8 @@ export type MessageReferenceDatum = {
   metadata?: { [k: string]: string } | undefined;
 };
 
+export type MessageReferenceDatumUnion = RedactedSource | MessageReferenceDatum;
+
 /**
  * A single message within a conversation. Messages can be user queries,
  *
@@ -186,7 +195,9 @@ export type Message = {
    * return the saved conversation after a turn (create, add message)
    * populate each item to `{ citationId, citationData }`.
    */
-  citations?: Array<CitationReference | PopulatedCitationReference> | undefined;
+  citations?:
+    | Array<RedactedSource | CitationReference | PopulatedCitationReference>
+    | undefined;
   /**
    * AI confidence in the answer. Present only on `bot_response` messages,
    *
@@ -223,7 +234,7 @@ export type Message = {
    * @remarks
    * follow-up queries (for example Jira project keys or record IDs).
    */
-  referenceData?: Array<MessageReferenceDatum> | undefined;
+  referenceData?: Array<RedactedSource | MessageReferenceDatum> | undefined;
   /**
    * Files uploaded for this message turn (see
    *
@@ -260,21 +271,22 @@ export const MessageContentFormat$inboundSchema: z.ZodMiniType<
 > = openEnums.inboundSchema(MessageContentFormat);
 
 /** @internal */
-export const CitationUnion$inboundSchema: z.ZodMiniType<
-  CitationUnion,
+export const MessageCitation$inboundSchema: z.ZodMiniType<
+  MessageCitation,
   unknown
 > = smartUnion([
+  RedactedSource$inboundSchema,
   CitationReference$inboundSchema,
   PopulatedCitationReference$inboundSchema,
 ]);
 
-export function citationUnionFromJSON(
+export function messageCitationFromJSON(
   jsonString: string,
-): SafeParseResult<CitationUnion, SDKValidationError> {
+): SafeParseResult<MessageCitation, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => CitationUnion$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'CitationUnion' from JSON`,
+    (x) => MessageCitation$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'MessageCitation' from JSON`,
   );
 }
 
@@ -323,6 +335,25 @@ export function messageReferenceDatumFromJSON(
 }
 
 /** @internal */
+export const MessageReferenceDatumUnion$inboundSchema: z.ZodMiniType<
+  MessageReferenceDatumUnion,
+  unknown
+> = smartUnion([
+  RedactedSource$inboundSchema,
+  z.lazy(() => MessageReferenceDatum$inboundSchema),
+]);
+
+export function messageReferenceDatumUnionFromJSON(
+  jsonString: string,
+): SafeParseResult<MessageReferenceDatumUnion, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => MessageReferenceDatumUnion$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'MessageReferenceDatumUnion' from JSON`,
+  );
+}
+
+/** @internal */
 export const Message$inboundSchema: z.ZodMiniType<Message, unknown> = z.pipe(
   z.object({
     _id: types.optional(types.string()),
@@ -332,6 +363,7 @@ export const Message$inboundSchema: z.ZodMiniType<Message, unknown> = z.pipe(
     citations: types.optional(
       z.array(
         smartUnion([
+          RedactedSource$inboundSchema,
           CitationReference$inboundSchema,
           PopulatedCitationReference$inboundSchema,
         ]),
@@ -343,9 +375,12 @@ export const Message$inboundSchema: z.ZodMiniType<Message, unknown> = z.pipe(
     metadata: types.optional(z.lazy(() => MessageMetadata$inboundSchema)),
     modelInfo: types.optional(ConversationModelInfo$inboundSchema),
     appliedFilters: types.optional(AppliedFilters$inboundSchema),
-    referenceData: types.optional(z.array(z.lazy(() =>
-      MessageReferenceDatum$inboundSchema
-    ))),
+    referenceData: types.optional(
+      z.array(smartUnion([
+        RedactedSource$inboundSchema,
+        z.lazy(() => MessageReferenceDatum$inboundSchema),
+      ])),
+    ),
     attachments: types.optional(z.array(ChatAttachmentRef$inboundSchema)),
     tools: types.optional(z.array(MessageToolCall$inboundSchema)),
     reasoning: types.optional(z.array(MessageReasoningTurn$inboundSchema)),

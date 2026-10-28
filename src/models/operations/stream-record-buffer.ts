@@ -10,14 +10,19 @@ export type StreamRecordBufferRequest = {
    */
   recordId: string;
   /**
-   * Target format for conversion
+   * Target format for conversion. Only `application/pdf` has an effect, and only for
+   *
+   * @remarks
+   * documents that can be converted. Sending it more than once is refused with `400`.
    */
   convertTo?: string | undefined;
   /**
    * Registry version to pin ARTIFACT record content to. Omit to stream
    *
    * @remarks
-   * the latest version. Ignored for non-artifact records.
+   * the latest version. Ignored for non-artifact records. Must be written as digits
+   * only; anything else (`-1`, `1.5`, an empty value) or sending it more than once is
+   * refused with `400`.
    */
   version?: number | undefined;
 };

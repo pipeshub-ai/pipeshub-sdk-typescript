@@ -21,23 +21,10 @@ export type GetAgentConversationByIdSortBy = ClosedEnum<
 >;
 
 /**
- * Sort direction
- */
-export const GetAgentConversationByIdSortOrder = {
-  Asc: "asc",
-  Desc: "desc",
-} as const;
-/**
- * Sort direction
- */
-export type GetAgentConversationByIdSortOrder = ClosedEnum<
-  typeof GetAgentConversationByIdSortOrder
->;
-
-/**
- * Filter messages by type
+ * Filter messages by type. An empty value is read as not sent.
  */
 export const GetAgentConversationByIdMessageType = {
+  Unknown: "",
   UserQuery: "user_query",
   BotResponse: "bot_response",
   Error: "error",
@@ -45,7 +32,7 @@ export const GetAgentConversationByIdMessageType = {
   System: "system",
 } as const;
 /**
- * Filter messages by type
+ * Filter messages by type. An empty value is read as not sent.
  */
 export type GetAgentConversationByIdMessageType = ClosedEnum<
   typeof GetAgentConversationByIdMessageType
@@ -67,19 +54,32 @@ export type GetAgentConversationByIdRequest = {
    */
   sortBy?: GetAgentConversationByIdSortBy | undefined;
   /**
-   * Sort direction
+   * Sort direction. `asc` sorts ascending; any other value, including
+   *
+   * @remarks
+   * an unrecognised one, is read as `desc` and is not refused.
    */
-  sortOrder?: GetAgentConversationByIdSortOrder | undefined;
+  sortOrder?: string | undefined;
   /**
-   * Filter messages created on or after this date
+   * Filter messages created on or after this date, as an ISO 8601 date
+   *
+   * @remarks
+   * or date-time. The validator accepts any string JavaScript `Date` can
+   * parse (so also forms like `May 1 2020` or `2999/01/01`); one it
+   * cannot parse returns HTTP 400. An empty value is read as not sent.
    */
-  startDate?: Date | undefined;
+  startDate?: string | undefined;
   /**
-   * Filter messages created on or before this date
+   * Filter messages created on or before this date, as an ISO 8601 date
+   *
+   * @remarks
+   * or date-time. The validator accepts any string JavaScript `Date` can
+   * parse (so also forms like `May 1 2020` or `2999/01/01`); one it
+   * cannot parse returns HTTP 400. An empty value is read as not sent.
    */
-  endDate?: Date | undefined;
+  endDate?: string | undefined;
   /**
-   * Filter messages by type
+   * Filter messages by type. An empty value is read as not sent.
    */
   messageType?: GetAgentConversationByIdMessageType | undefined;
 };
@@ -88,11 +88,6 @@ export type GetAgentConversationByIdRequest = {
 export const GetAgentConversationByIdSortBy$outboundSchema: z.ZodMiniEnum<
   typeof GetAgentConversationByIdSortBy
 > = z.enum(GetAgentConversationByIdSortBy);
-
-/** @internal */
-export const GetAgentConversationByIdSortOrder$outboundSchema: z.ZodMiniEnum<
-  typeof GetAgentConversationByIdSortOrder
-> = z.enum(GetAgentConversationByIdSortOrder);
 
 /** @internal */
 export const GetAgentConversationByIdMessageType$outboundSchema: z.ZodMiniEnum<
@@ -125,12 +120,9 @@ export const GetAgentConversationByIdRequest$outboundSchema: z.ZodMiniType<
     GetAgentConversationByIdSortBy$outboundSchema,
     "createdAt",
   ),
-  sortOrder: z._default(
-    GetAgentConversationByIdSortOrder$outboundSchema,
-    "desc",
-  ),
-  startDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
-  endDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
+  sortOrder: z._default(z.string(), "desc"),
+  startDate: z.optional(z.string()),
+  endDate: z.optional(z.string()),
   messageType: z.optional(GetAgentConversationByIdMessageType$outboundSchema),
 });
 

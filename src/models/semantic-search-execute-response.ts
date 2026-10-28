@@ -16,12 +16,16 @@ import {
  * Immediate POST `/search` response: persisted search id plus the raw retrieval payload.
  *
  * @remarks
+ * `searchId` is absent when the request set `saveHistory` to `false`.
  * SDK-oriented modeling: named fields only at this level; dynamic-key maps inside `searchResponse` use
  * `additionalProperties` with a `$ref` (e.g. `virtual_to_record_map`) rather than boolean `additionalProperties: true`,
  * so generated clients retain typed values where possible.
  */
 export type SemanticSearchExecuteResponse = {
-  searchId: string;
+  /**
+   * The saved search, for `GET /search/{searchId}`. Absent when `saveHistory` is `false`.
+   */
+  searchId?: string | undefined;
   /**
    * Payload returned by the AI retrieval service for a semantic search (embedded in `searchResponse`).
    *
@@ -37,7 +41,7 @@ export const SemanticSearchExecuteResponse$inboundSchema: z.ZodMiniType<
   SemanticSearchExecuteResponse,
   unknown
 > = z.object({
-  searchId: types.string(),
+  searchId: types.optional(types.string()),
   searchResponse: SemanticSearchAiResponse$inboundSchema,
 });
 

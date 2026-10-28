@@ -11,7 +11,34 @@ let value: ListConnectorInstancesResponse = {
   success: false,
   connectors: [
     {
+      key: "7b387394-1248-4fb6-810d-e8ac9ac226eb",
+      name: "Company Google Drive",
+      type: "Drive Workspace",
+      documentationLinks: [
+        {
+          title: "Azure AD App Registration Setup",
+          type: "setup",
+        },
+      ],
+      authType: "OAUTH",
       scope: "team",
+      status: "IDLE",
+      config: {
+        documentationLinks: [
+          {
+            title: "Azure AD App Registration Setup",
+            type: "setup",
+          },
+        ],
+        sync: {
+          scheduledConfig: {
+            timezone: "UTC",
+          },
+          realtimeConfig: {
+            connectionType: "WEBSOCKET",
+          },
+        },
+      },
     },
   ],
   pagination: {

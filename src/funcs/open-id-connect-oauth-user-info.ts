@@ -16,10 +16,11 @@ import {
   RequestTimeoutError,
   UnexpectedClientError,
 } from "../models/errors/http-client-errors.js";
+import * as errors from "../models/errors/index.js";
 import { PipeshubError } from "../models/errors/pipeshub-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { SDKValidationError } from "../models/errors/sdk-validation-error.js";
-import * as models from "../models/index.js";
+import * as operations from "../models/operations/index.js";
 import { APICall, APIPromise } from "../types/async.js";
 import { Result } from "../types/fp.js";
 
@@ -40,6 +41,8 @@ import { Result } from "../types/fp.js";
  * **Authentication:**
  * Pass the access token as a Bearer token: `Authorization: Bearer {access_token}`
  *
+ * The route takes no parameters; query parameters are ignored.
+ *
  * If set, this operation will use {@link Security.bearerAuth} from the global security.
  */
 export function openIDConnectOauthUserInfo(
@@ -47,7 +50,10 @@ export function openIDConnectOauthUserInfo(
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    models.OAuthUserInfoResponse,
+    operations.OauthUserInfoResponse,
+    | errors.ErrorResponse
+    | errors.OAuthBearerTokenError
+    | errors.OauthUserInfoInternalServerError
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -70,7 +76,10 @@ async function $do(
 ): Promise<
   [
     Result<
-      models.OAuthUserInfoResponse,
+      operations.OauthUserInfoResponse,
+      | errors.ErrorResponse
+      | errors.OAuthBearerTokenError
+      | errors.OauthUserInfoInternalServerError
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -133,8 +142,15 @@ async function $do(
   }
   const response = doResult.value;
 
+  const responseFields = {
+    HttpMeta: { Response: response, Request: req },
+  };
+
   const [result] = await M.match<
-    models.OAuthUserInfoResponse,
+    operations.OauthUserInfoResponse,
+    | errors.ErrorResponse
+    | errors.OAuthBearerTokenError
+    | errors.OauthUserInfoInternalServerError
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -144,10 +160,17 @@ async function $do(
     | UnexpectedClientError
     | SDKValidationError
   >(
-    M.json(200, models.OAuthUserInfoResponse$inboundSchema),
-    M.fail([401, 403, "4XX"]),
+    M.json(200, operations.OauthUserInfoResponse$inboundSchema, {
+      key: "Result",
+    }),
+    M.jsonErr(400, errors.ErrorResponse$inboundSchema),
+    M.jsonErr([401, 403], errors.OAuthBearerTokenError$inboundSchema, {
+      hdrs: true,
+    }),
+    M.jsonErr(500, errors.OauthUserInfoInternalServerError$inboundSchema),
+    M.fail("4XX"),
     M.fail("5XX"),
-  )(response, req);
+  )(response, req, { extraFields: responseFields });
   if (!result.ok) {
     return [result, { status: "complete", request: req, response }];
   }

@@ -34,7 +34,14 @@ import { Result } from "../types/fp.js";
  * Update filter selections and sync settings without touching auth.<br><br>
  * <b>Use Case:</b><br>
  * Use this to change what data is synced or adjust sync schedule
- * without re-authenticating.
+ * without re-authenticating.<br><br>
+ * <b>Merging:</b><br>
+ * `sync` is merged key by key into the saved sync settings. Each of
+ * `filters.sync` and `filters.indexing` that is sent replaces the saved
+ * one. A `sync` or `filters` value that is not an object is skipped
+ * without an error. Fields other than `sync` and `filters`, `baseUrl`
+ * included, are dropped without an error.<br><br>
+ * The connector must be disabled (`400` otherwise).
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */

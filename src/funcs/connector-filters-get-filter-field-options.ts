@@ -34,13 +34,16 @@ import { Result } from "../types/fp.js";
  * Get options for a dynamic filter field with pagination.<br><br>
  * <b>Overview:</b><br>
  * For filters with <code>optionSourceType: dynamic</code>, options are loaded
- * from the connected service. This supports pagination and search.<br><br>
+ * from the connected service. This supports pagination and search. The
+ * connector is started on demand with its saved credentials, so the
+ * connected service must be reachable.<br><br>
  * <b>Scoped options (GitLab):</b><br>
  * When fetching options for the <code>project_ids</code> filter key, pass
  * one or more <code>contextGroupPath</code> query parameters to restrict
  * the returned repositories to those that belong to the specified GitLab
  * group namespace paths (e.g. <code>myorg/team</code>). This is used to
- * populate the project filter after the user has selected groups.<br><br>
+ * populate the project filter after the user has selected groups. Other
+ * connectors accept and ignore both group path parameters.<br><br>
  * <b>Examples:</b><br>
  * <ul>
  * <li>Google Drive folders list</li>
@@ -49,6 +52,7 @@ import { Result } from "../types/fp.js";
  * <li>GitLab groups list (<code>filterKey=group_ids</code>)</li>
  * <li>GitLab projects scoped to groups (<code>filterKey=project_ids&amp;contextGroupPath=myorg/team</code>)</li>
  * </ul>
+ * Query parameters other than the six below are dropped without an error.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -201,6 +205,7 @@ async function $do(
   >(
     M.json(200, operations.GetFilterFieldOptionsResponse$inboundSchema),
     M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

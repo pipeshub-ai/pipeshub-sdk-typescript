@@ -38,6 +38,13 @@ import { Result } from "../types/fp.js";
  *
  * Allows a logged-in user to change their password by providing the current password and a new password.
  *
+ * **Order of checks:** the access token is read before the body, so a request without
+ * an `Authorization` header answers `400` whatever its body holds. Body fields other
+ * than the three below are dropped by the validator, and the query string is not read.
+ *
+ * **Effect on sessions:** the change ends refresh tokens issued before it. The response
+ * carries a new access token.
+ *
  * If set, this operation will use {@link Security.bearerAuth} from the global security.
  */
 export function userAccountResetPassword(

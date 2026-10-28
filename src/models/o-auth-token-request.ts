@@ -13,6 +13,8 @@ import { ClosedEnum } from "../types/enums.js";
  * - `authorization_code`: Exchange auth code for tokens
  * - `client_credentials`: Machine-to-machine auth
  * - `refresh_token`: Get new access token using refresh token
+ * - `urn:ietf:params:oauth:grant-type:device_code`: Poll for the tokens of a device
+ *   authorization (RFC 8628) started with `POST /oauth2/device_authorization`
  * - `urn:ietf:params:oauth:grant-type:token-exchange`: Service-account
  *   delegation (RFC 8693). Exchanges a service token for a
  *   short-lived token that acts as one named person. Enterprise
@@ -23,6 +25,8 @@ export const GrantType = {
   AuthorizationCode: "authorization_code",
   ClientCredentials: "client_credentials",
   RefreshToken: "refresh_token",
+  UrnIetfParamsOauthGrantTypeDeviceCode:
+    "urn:ietf:params:oauth:grant-type:device_code",
   UrnIetfParamsOauthGrantTypeTokenExchange:
     "urn:ietf:params:oauth:grant-type:token-exchange",
 } as const;
@@ -33,6 +37,8 @@ export const GrantType = {
  * - `authorization_code`: Exchange auth code for tokens
  * - `client_credentials`: Machine-to-machine auth
  * - `refresh_token`: Get new access token using refresh token
+ * - `urn:ietf:params:oauth:grant-type:device_code`: Poll for the tokens of a device
+ *   authorization (RFC 8628) started with `POST /oauth2/device_authorization`
  * - `urn:ietf:params:oauth:grant-type:token-exchange`: Service-account
  *   delegation (RFC 8693). Exchanges a service token for a
  *   short-lived token that acts as one named person. Enterprise
@@ -55,6 +61,8 @@ export type OAuthTokenRequest = {
    * - `authorization_code`: Exchange auth code for tokens
    * - `client_credentials`: Machine-to-machine auth
    * - `refresh_token`: Get new access token using refresh token
+   * - `urn:ietf:params:oauth:grant-type:device_code`: Poll for the tokens of a device
+   *   authorization (RFC 8628) started with `POST /oauth2/device_authorization`
    * - `urn:ietf:params:oauth:grant-type:token-exchange`: Service-account
    *   delegation (RFC 8693). Exchanges a service token for a
    *   short-lived token that acts as one named person. Enterprise
@@ -71,7 +79,14 @@ export type OAuthTokenRequest = {
    */
   redirectUri?: string | undefined;
   /**
-   * Client ID (can also be sent via Basic auth header)
+   * The `device_code` from `POST /oauth2/device_authorization` (required for the device_code
+   *
+   * @remarks
+   * grant; without it the answer is `400 invalid_grant`)
+   */
+  deviceCode?: string | undefined;
+  /**
+   * Client ID (can also be sent via Basic auth header, which then takes precedence)
    */
   clientId?: string | undefined;
   /**
@@ -129,6 +144,7 @@ export type OAuthTokenRequest$Outbound = {
   grant_type: string;
   code?: string | undefined;
   redirect_uri?: string | undefined;
+  device_code?: string | undefined;
   client_id?: string | undefined;
   client_secret?: string | undefined;
   refresh_token?: string | undefined;
@@ -148,6 +164,7 @@ export const OAuthTokenRequest$outboundSchema: z.ZodMiniType<
     grantType: GrantType$outboundSchema,
     code: z.optional(z.string()),
     redirectUri: z.optional(z.string()),
+    deviceCode: z.optional(z.string()),
     clientId: z.optional(z.string()),
     clientSecret: z.optional(z.string()),
     refreshToken: z.optional(z.string()),
@@ -161,6 +178,7 @@ export const OAuthTokenRequest$outboundSchema: z.ZodMiniType<
     return remap$(v, {
       grantType: "grant_type",
       redirectUri: "redirect_uri",
+      deviceCode: "device_code",
       clientId: "client_id",
       clientSecret: "client_secret",
       refreshToken: "refresh_token",

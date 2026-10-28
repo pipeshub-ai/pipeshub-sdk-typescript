@@ -91,6 +91,29 @@ export type AgentAddMessageRequestKeywordSearchBudget = ClosedEnum<
 >;
 
 /**
+ * Reasoning effort for this turn, for models that support it. Stored on
+ *
+ * @remarks
+ * the conversation's model info and forwarded to the AI backend.
+ */
+export const AgentAddMessageRequestReasoningEffort = {
+  None: "none",
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Max: "max",
+} as const;
+/**
+ * Reasoning effort for this turn, for models that support it. Stored on
+ *
+ * @remarks
+ * the conversation's model info and forwarded to the AI backend.
+ */
+export type AgentAddMessageRequestReasoningEffort = ClosedEnum<
+  typeof AgentAddMessageRequestReasoningEffort
+>;
+
+/**
  * Follow-up turn on an agent conversation. Used as-is by the
  *
  * @remarks
@@ -141,7 +164,8 @@ export type AgentAddMessageRequest = {
    * AI model configuration id override for this turn. Omit to use the
    *
    * @remarks
-   * agent's default model.
+   * agent's default model. A key that names no configured model is not
+   * refused: the turn runs on the organization's default model.
    */
   modelKey?: string | undefined;
   /**
@@ -222,6 +246,13 @@ export type AgentAddMessageRequest = {
    * {runId}` while the stream is still generating.
    */
   runId?: string | undefined;
+  /**
+   * Reasoning effort for this turn, for models that support it. Stored on
+   *
+   * @remarks
+   * the conversation's model info and forwarded to the AI backend.
+   */
+  reasoningEffort?: AgentAddMessageRequestReasoningEffort | undefined;
 };
 
 /** @internal */
@@ -238,6 +269,12 @@ export const AgentAddMessageRequestProtocol$outboundSchema: z.ZodMiniEnum<
 export const AgentAddMessageRequestKeywordSearchBudget$outboundSchema:
   z.ZodMiniEnum<typeof AgentAddMessageRequestKeywordSearchBudget> = z.enum(
     AgentAddMessageRequestKeywordSearchBudget,
+  );
+
+/** @internal */
+export const AgentAddMessageRequestReasoningEffort$outboundSchema:
+  z.ZodMiniEnum<typeof AgentAddMessageRequestReasoningEffort> = z.enum(
+    AgentAddMessageRequestReasoningEffort,
   );
 
 /** @internal */
@@ -259,6 +296,7 @@ export type AgentAddMessageRequest$Outbound = {
   keywordSearchBudget?: string | undefined;
   toolApproval?: ToolApprovalAnswer$Outbound | undefined;
   runId?: string | undefined;
+  reasoningEffort?: string | undefined;
 };
 
 /** @internal */
@@ -285,6 +323,9 @@ export const AgentAddMessageRequest$outboundSchema: z.ZodMiniType<
   ),
   toolApproval: z.optional(ToolApprovalAnswer$outboundSchema),
   runId: z.optional(z.string()),
+  reasoningEffort: z.optional(
+    AgentAddMessageRequestReasoningEffort$outboundSchema,
+  ),
 });
 
 export function agentAddMessageRequestToJSON(

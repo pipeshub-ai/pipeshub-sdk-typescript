@@ -52,6 +52,7 @@ import { Result } from "../types/fp.js";
  * queues it on its own after about an hour.
  *
  * A record that is not in the trash answers 200 with nothing restored.
+ * The query string and any request body are ignored.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -188,7 +189,7 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.RestoreRecordResponseSchema$inboundSchema),
-    M.jsonErr([401, 403, 404, 409], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([400, 401, 403, 404, 409], errors.ErrorResponse$inboundSchema),
     M.jsonErr([500, 503], errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

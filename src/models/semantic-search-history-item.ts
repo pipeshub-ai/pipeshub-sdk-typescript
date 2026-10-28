@@ -34,6 +34,12 @@ export type SemanticSearchHistoryItem = {
   limit: number;
   orgId: string;
   userId: string;
+  /**
+   * Hit ids. For a search shared with the viewer the ids are not returned
+   *
+   * @remarks
+   * (they cannot be checked against the viewer's access), so the array is empty.
+   */
   citationIds: Array<string>;
   /**
    * Map of source-record id (or `_key`) to `JSON.stringify(<record>)`.

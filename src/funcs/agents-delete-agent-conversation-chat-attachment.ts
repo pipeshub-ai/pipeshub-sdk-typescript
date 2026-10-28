@@ -49,7 +49,7 @@ export function agentsDeleteAgentConversationChatAttachment(
 ): APIPromise<
   Result<
     void,
-    | errors.DeleteAgentConversationChatAttachmentBadRequestError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -75,7 +75,7 @@ async function $do(
   [
     Result<
       void,
-      | errors.DeleteAgentConversationChatAttachmentBadRequestError
+      | errors.ErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -172,7 +172,7 @@ async function $do(
 
   const [result] = await M.match<
     void,
-    | errors.DeleteAgentConversationChatAttachmentBadRequestError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -183,11 +183,9 @@ async function $do(
     | SDKValidationError
   >(
     M.nil(204, z.void()),
-    M.jsonErr(
-      400,
-      errors.DeleteAgentConversationChatAttachmentBadRequestError$inboundSchema,
-    ),
-    M.fail([401, 403, "4XX"]),
+    M.jsonErr([400, 401, 403], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
+    M.fail([404, "4XX"]),
     M.fail("5XX"),
     M.nil("default", z.void()),
   )(response, req, { extraFields: responseFields });

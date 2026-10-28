@@ -7,7 +7,7 @@ import * as models from "../index.js";
 
 export type ReindexRecordGroupRequest = {
   /**
-   * Folder ID or KB ID
+   * Record group ID (from a connector sync; not a knowledge base or folder id)
    */
   recordGroupId: string;
   /**

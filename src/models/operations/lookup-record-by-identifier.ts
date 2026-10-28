@@ -3,7 +3,6 @@
  */
 
 import * as z from "zod/v4-mini";
-import * as models from "../index.js";
 
 export type LookupRecordByIdentifierRequest = {
   /**
@@ -11,9 +10,9 @@ export type LookupRecordByIdentifierRequest = {
    */
   identifiers: Array<string>;
   /**
-   * Optional hint that prioritises resolution order, e.g. `JIRA`, `CONFLUENCE`, `DRIVE`, `SLACK`. Allowed values are the `ConnectorNameEnum` values. It cannot widen the search beyond the connectors the caller can already access. Useful on a retry when a lookup came back empty.
+   * Optional hint that prioritises resolution order, e.g. `JIRA`, `CONFLUENCE`, `DRIVE`, `SLACK` (the `ConnectorNameEnum` values). Any other non-empty string is accepted too and simply matches no connector, so it changes nothing. It cannot widen the search beyond the connectors the caller can already access. Useful on a retry when a lookup came back empty. An empty or blank value is refused with `400` (the value is trimmed before it is checked).
    */
-  connectorName?: models.ConnectorNameEnum | undefined;
+  connectorName?: string | undefined;
 };
 
 /** @internal */
@@ -28,7 +27,7 @@ export const LookupRecordByIdentifierRequest$outboundSchema: z.ZodMiniType<
   LookupRecordByIdentifierRequest
 > = z.object({
   identifiers: z.array(z.string()),
-  connectorName: z.optional(models.ConnectorNameEnum$outboundSchema),
+  connectorName: z.optional(z.string()),
 });
 
 export function lookupRecordByIdentifierRequestToJSON(

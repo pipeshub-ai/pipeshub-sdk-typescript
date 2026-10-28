@@ -9,6 +9,7 @@ import * as openEnums from "../types/enums.js";
 import { OpenEnum } from "../types/enums.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
+import { smartUnion } from "../types/smart-union.js";
 import {
   AgentConversationDetailMessageCitation,
   AgentConversationDetailMessageCitation$inboundSchema,
@@ -43,6 +44,10 @@ import {
   MessageToolCall,
   MessageToolCall$inboundSchema,
 } from "./message-tool-call.js";
+import {
+  RedactedSource,
+  RedactedSource$inboundSchema,
+} from "./redacted-source.js";
 
 export const AgentConversationDetailMessageMessageType = {
   UserQuery: "user_query",
@@ -64,6 +69,10 @@ export const AgentConversationDetailMessageContentFormat = {
 export type AgentConversationDetailMessageContentFormat = OpenEnum<
   typeof AgentConversationDetailMessageContentFormat
 >;
+
+export type AgentConversationDetailMessageCitationUnion =
+  | RedactedSource
+  | AgentConversationDetailMessageCitation;
 
 /**
  * AI confidence in the answer. Present only on `bot_response` messages,
@@ -123,6 +132,10 @@ export type AgentConversationDetailMessageReferenceDatum = {
   metadata?: { [k: string]: string } | undefined;
 };
 
+export type AgentConversationDetailMessageReferenceDatumUnion =
+  | RedactedSource
+  | AgentConversationDetailMessageReferenceDatum;
+
 export type AgentConversationDetailMessageMetadata = {
   processingTimeMs?: number | undefined;
   modelVersion?: string | undefined;
@@ -141,7 +154,9 @@ export type AgentConversationDetailMessage = {
   messageType?: AgentConversationDetailMessageMessageType | undefined;
   content?: string | undefined;
   contentFormat?: AgentConversationDetailMessageContentFormat | undefined;
-  citations?: Array<AgentConversationDetailMessageCitation> | undefined;
+  citations?:
+    | Array<RedactedSource | AgentConversationDetailMessageCitation>
+    | undefined;
   /**
    * AI confidence in the answer. Present only on `bot_response` messages,
    *
@@ -160,7 +175,7 @@ export type AgentConversationDetailMessage = {
    * follow-up queries.
    */
   referenceData?:
-    | Array<AgentConversationDetailMessageReferenceDatum>
+    | Array<RedactedSource | AgentConversationDetailMessageReferenceDatum>
     | undefined;
   /**
    * Files uploaded for this message turn (see
@@ -209,6 +224,30 @@ export const AgentConversationDetailMessageContentFormat$inboundSchema:
     openEnums.inboundSchema(AgentConversationDetailMessageContentFormat);
 
 /** @internal */
+export const AgentConversationDetailMessageCitationUnion$inboundSchema:
+  z.ZodMiniType<AgentConversationDetailMessageCitationUnion, unknown> =
+    smartUnion([
+      RedactedSource$inboundSchema,
+      AgentConversationDetailMessageCitation$inboundSchema,
+    ]);
+
+export function agentConversationDetailMessageCitationUnionFromJSON(
+  jsonString: string,
+): SafeParseResult<
+  AgentConversationDetailMessageCitationUnion,
+  SDKValidationError
+> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      AgentConversationDetailMessageCitationUnion$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'AgentConversationDetailMessageCitationUnion' from JSON`,
+  );
+}
+
+/** @internal */
 export const Confidence$inboundSchema: z.ZodMiniType<Confidence, unknown> =
   openEnums.inboundSchema(Confidence);
 
@@ -237,6 +276,30 @@ export function agentConversationDetailMessageReferenceDatumFromJSON(
         JSON.parse(x),
       ),
     `Failed to parse 'AgentConversationDetailMessageReferenceDatum' from JSON`,
+  );
+}
+
+/** @internal */
+export const AgentConversationDetailMessageReferenceDatumUnion$inboundSchema:
+  z.ZodMiniType<AgentConversationDetailMessageReferenceDatumUnion, unknown> =
+    smartUnion([
+      RedactedSource$inboundSchema,
+      z.lazy(() => AgentConversationDetailMessageReferenceDatum$inboundSchema),
+    ]);
+
+export function agentConversationDetailMessageReferenceDatumUnionFromJSON(
+  jsonString: string,
+): SafeParseResult<
+  AgentConversationDetailMessageReferenceDatumUnion,
+  SDKValidationError
+> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      AgentConversationDetailMessageReferenceDatumUnion$inboundSchema.parse(
+        JSON.parse(x),
+      ),
+    `Failed to parse 'AgentConversationDetailMessageReferenceDatumUnion' from JSON`,
   );
 }
 
@@ -274,23 +337,33 @@ export const AgentConversationDetailMessage$inboundSchema: z.ZodMiniType<
       AgentConversationDetailMessageContentFormat$inboundSchema,
     ),
     citations: types.optional(
-      z.array(AgentConversationDetailMessageCitation$inboundSchema),
+      z.array(
+        smartUnion([
+          RedactedSource$inboundSchema,
+          AgentConversationDetailMessageCitation$inboundSchema,
+        ]),
+      ),
     ),
     confidence: z.optional(z.nullable(Confidence$inboundSchema)),
     followUpQuestions: types.optional(z.array(FollowUpQuestion$inboundSchema)),
     feedback: types.optional(z.array(MessageFeedback$inboundSchema)),
-    referenceData: types.optional(z.array(z.lazy(() =>
-      AgentConversationDetailMessageReferenceDatum$inboundSchema
-    ))),
+    referenceData: types.optional(
+      z.array(smartUnion([
+        RedactedSource$inboundSchema,
+        z.lazy(() =>
+          AgentConversationDetailMessageReferenceDatum$inboundSchema
+        ),
+      ])),
+    ),
     attachments: types.optional(z.array(ChatAttachmentRef$inboundSchema)),
     tools: types.optional(z.array(MessageToolCall$inboundSchema)),
     reasoning: types.optional(z.array(MessageReasoningTurn$inboundSchema)),
     parts: types.optional(z.array(MessagePart$inboundSchema)),
     modelInfo: types.optional(ConversationModelInfo$inboundSchema),
     appliedFilters: types.optional(AppliedFilters$inboundSchema),
-    metadata: types.optional(z.lazy(() =>
-      AgentConversationDetailMessageMetadata$inboundSchema
-    )),
+    metadata: types.optional(
+      z.lazy(() => AgentConversationDetailMessageMetadata$inboundSchema),
+    ),
     createdAt: types.optional(types.date()),
     updatedAt: types.optional(types.date()),
   }),

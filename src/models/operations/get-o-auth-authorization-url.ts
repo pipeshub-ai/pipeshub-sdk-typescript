@@ -13,6 +13,14 @@ export type GetOAuthAuthorizationUrlRequest = {
    * Connector instance ID
    */
   connectorId: string;
+  /**
+   * `true` when the sign-in starts in the desktop app: the `state` sent to the provider is
+   *
+   * @remarks
+   * marked so the web callback page hands `code` and `state` to the app over a `pipeshub://`
+   * link instead of finishing the sign-in in the browser. Any other value is ignored.
+   */
+  desktop?: string | undefined;
 };
 
 /**
@@ -33,6 +41,7 @@ export type GetOAuthAuthorizationUrlResponse = {
 /** @internal */
 export type GetOAuthAuthorizationUrlRequest$Outbound = {
   connectorId: string;
+  desktop?: string | undefined;
 };
 
 /** @internal */
@@ -41,6 +50,7 @@ export const GetOAuthAuthorizationUrlRequest$outboundSchema: z.ZodMiniType<
   GetOAuthAuthorizationUrlRequest
 > = z.object({
   connectorId: z.string(),
+  desktop: z.optional(z.string()),
 });
 
 export function getOAuthAuthorizationUrlRequestToJSON(

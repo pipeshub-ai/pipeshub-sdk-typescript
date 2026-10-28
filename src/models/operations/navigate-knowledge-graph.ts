@@ -6,7 +6,7 @@ import * as z from "zod/v4-mini";
 
 export type NavigateKnowledgeGraphRequest = {
   /**
-   * The node to open. Take it from an `id` in a previous navigate or lookup response. Omit it entirely for the flat listing of everything reachable — the usual starting point. A URL or an issue key such as `PA-1787` also works: it is resolved to its record automatically.
+   * The node to open. Take it from an `id` in a previous navigate or lookup response. Omit it entirely for the flat listing of everything reachable — the usual starting point. A URL or an issue key such as `PA-1787` also works: it is resolved to its record automatically. The value is trimmed before it is checked, so a blank one is refused like an empty one.
    */
   nodeId?: string | undefined;
   /**
@@ -22,11 +22,11 @@ export type NavigateKnowledgeGraphRequest = {
    */
   depth?: number | undefined;
   /**
-   * Restrict children to these node types. Repeat the parameter for multiple types: `?nodeTypes=record&nodeTypes=folder`.
+   * Restrict children to these node types. Repeat the parameter for multiple types: `?nodeTypes=record&nodeTypes=folder`. A single value is read as a list of one. The types that filter are `app`, `recordGroup`, `record` and `folder`; any other value is accepted and ignored, so it does not narrow the listing.
    */
   nodeTypes?: Array<string> | undefined;
   /**
-   * Filter children by source creation time. ISO 8601 `YYYY-MM-DD`, or a full datetime that MUST carry a timezone offset — a naive datetime is rejected rather than assumed to be UTC.
+   * Filter children by source creation time. ISO 8601 `YYYY-MM-DD`, or a full datetime that MUST carry a timezone offset — a naive datetime is rejected rather than assumed to be UTC. Must not be in the future (5 minutes of clock skew are tolerated) and must not be after `createdBefore`. A `YYYY-MM-DD` day past the end of its month (`2024-02-31`) counts from the first day of the next month here, and as the month's last day in a `...Before` bound. A day above 31, a month above 12 or year 0 (`2024-02-32`) is refused with `400`.
    */
   createdAfter?: string | undefined;
   /**
@@ -34,11 +34,11 @@ export type NavigateKnowledgeGraphRequest = {
    */
   createdBefore?: string | undefined;
   /**
-   * Filter children by source modification time.
+   * Filter children by source modification time. Must not be after `modifiedBefore`.
    */
   modifiedAfter?: string | undefined;
   /**
-   * Filter children by source modification time.
+   * Filter children by source modification time. `YYYY-MM-DD` is inclusive of the whole day.
    */
   modifiedBefore?: string | undefined;
 };

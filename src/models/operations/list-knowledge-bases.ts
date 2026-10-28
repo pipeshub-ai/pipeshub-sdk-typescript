@@ -6,7 +6,7 @@ import * as z from "zod/v4-mini";
 import { ClosedEnum } from "../../types/enums.js";
 
 /**
- * Field to sort by.
+ * Field to sort by. An empty value is read as the default.
  */
 export const ListKnowledgeBasesSortBy = {
   Name: "name",
@@ -15,7 +15,7 @@ export const ListKnowledgeBasesSortBy = {
   UserRole: "userRole",
 } as const;
 /**
- * Field to sort by.
+ * Field to sort by. An empty value is read as the default.
  */
 export type ListKnowledgeBasesSortBy = ClosedEnum<
   typeof ListKnowledgeBasesSortBy
@@ -37,29 +37,41 @@ export type ListKnowledgeBasesSortOrder = ClosedEnum<
 
 export type ListKnowledgeBasesRequest = {
   /**
-   * Page number (1-indexed). Omitted values default to 1.
+   * Page number (1-indexed). Omitted or empty values default to 1. A page past the last
+   *
+   * @remarks
+   * one returns an empty list. The value is read with JavaScript `parseInt`, so text after
+   * leading digits is ignored (`1abc` is page 1); send a plain integer.
    */
   page?: number | undefined;
   /**
-   * Results per page (max 100). Omitted values default to 20.
+   * Results per page (max 100). Omitted or empty values default to 20. Read with
+   *
+   * @remarks
+   * JavaScript `parseInt` like `page`.
    */
   limit?: number | undefined;
   /**
-   * Search KB names (max 1000 chars). Rejected if it contains HTML/script tags,
+   * Search KB names (max 1000 chars after trimming). Rejected with `400` if it contains
    *
    * @remarks
-   * event handlers, `javascript:`, or format specifiers (validated in Zod + controller).
+   * HTML/script tags, event handlers or `javascript:` (`HTTP_BAD_REQUEST`), or a
+   * printf-style format specifier (`VALIDATION_ERROR`). The format-specifier check
+   * also catches ordinary text such as `50% discount` (`%`, a space, then a letter
+   * like `d`). A value longer than 1000 characters is answered `500`.
    */
   search?: string | undefined;
   /**
-   * Comma-separated permission roles to filter by. Each token must be one of:
+   * Comma-separated permission roles to filter by. Each token must be exactly one of
    *
    * @remarks
-   * OWNER, WRITER, READER.
+   * OWNER, WRITER, READER: upper case, with no space around the commas. Empty tokens
+   * (`OWNER,,WRITER,`) are dropped, but a value with no role at all (`,`) is rejected.
+   * An empty value is read as not sent.
    */
   permissions?: string | undefined;
   /**
-   * Field to sort by.
+   * Field to sort by. An empty value is read as the default.
    */
   sortBy?: ListKnowledgeBasesSortBy | undefined;
   /**

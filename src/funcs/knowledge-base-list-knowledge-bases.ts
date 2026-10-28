@@ -40,7 +40,7 @@ import { Result } from "../types/fp.js";
  *
  * **Filtering:**
  *
- * - **search:** Full-text search on KB names (max 1000 chars)
+ * - **search:** Full-text search on KB names (max 1000 chars). A longer value is answered `500`, not `400`.
  * - **permissions:** Filter by user's role (comma-separated: OWNER, WRITER, READER)
  *
  * **Sorting Options:**
@@ -56,7 +56,11 @@ import { Result } from "../types/fp.js";
  *
  * **Query parameters:**
  *
- * Only `page`, `limit`, `search`, `permissions`, `sortBy`, and `sortOrder` are allowed; unknown query keys are rejected.
+ * Only `page`, `limit`, `search`, `permissions`, `sortBy`, and `sortOrder` are allowed; any other
+ * query key is rejected with `400` (`VALIDATION_ERROR`: "These fields aren't accepted here: <key>.").
+ * A parameter sent more than once is rejected the same way. `page`, `limit`, `search`,
+ * `permissions` and `sortBy` sent with an empty value are read as not sent; an empty
+ * `sortOrder` is rejected.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */

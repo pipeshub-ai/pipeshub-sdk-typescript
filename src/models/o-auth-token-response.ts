@@ -29,17 +29,21 @@ export type OAuthTokenResponse = {
    */
   expiresIn?: number | undefined;
   /**
-   * Refresh token for obtaining new access tokens
+   * Refresh token for obtaining new access tokens. Issued only when the token acts as a user
+   *
+   * @remarks
+   * (`authorization_code`, `refresh_token` and `device_code` grants) and the granted scopes
+   * include `offline_access`; never for `client_credentials`.
    */
   refreshToken?: string | undefined;
   /**
-   * Granted scopes (may differ from requested)
+   * Granted scopes, space-separated (may differ from requested). Empty for a
+   *
+   * @remarks
+   * `client_credentials` token whose app holds only user-bound scopes (`openid`, `profile`,
+   * `email`, `offline_access`), which are dropped from that grant.
    */
   scope?: string | undefined;
-  /**
-   * OpenID Connect ID token (JWT) if openid scope was requested
-   */
-  idToken?: string | undefined;
   /**
    * The type of the issued token (RFC 8693 Section 2.2.1). Returned by
    *
@@ -61,7 +65,6 @@ export const OAuthTokenResponse$inboundSchema: z.ZodMiniType<
     expires_in: types.optional(types.number()),
     refresh_token: types.optional(types.string()),
     scope: types.optional(types.string()),
-    id_token: types.optional(types.string()),
     issued_token_type: types.optional(types.string()),
   }),
   z.transform((v) => {
@@ -70,7 +73,6 @@ export const OAuthTokenResponse$inboundSchema: z.ZodMiniType<
       "token_type": "tokenType",
       "expires_in": "expiresIn",
       "refresh_token": "refreshToken",
-      "id_token": "idToken",
       "issued_token_type": "issuedTokenType",
     });
   }),

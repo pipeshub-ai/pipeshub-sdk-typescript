@@ -13,14 +13,18 @@ export type AddAgentConversationMessageRequest = {
   agentKey: string;
   conversationId: string;
   /**
-   * The follow-up question, with optional scope, model and tool overrides.
+   * The follow-up question, with optional scope, model and tool overrides. A `query` that
+   *
+   * @remarks
+   * holds markup or a printf-style format specifier is refused with `400`
+   * `HTTP_BAD_REQUEST`, and so is one of only whitespace ("Query is required").
    */
   body: models.AgentAddMessageRequest;
 };
 
 export type AddAgentConversationMessageResponse = {
   headers: { [k: string]: Array<string> };
-  result: models.AddMessageResponse;
+  result: models.AgentAddMessageResponse;
 };
 
 /** @internal */
@@ -57,7 +61,7 @@ export const AddAgentConversationMessageResponse$inboundSchema: z.ZodMiniType<
 > = z.pipe(
   z.object({
     Headers: z._default(z.record(z.string(), z.array(z.string())), {}),
-    Result: models.AddMessageResponse$inboundSchema,
+    Result: models.AgentAddMessageResponse$inboundSchema,
   }),
   z.transform((v) => {
     return remap$(v, {

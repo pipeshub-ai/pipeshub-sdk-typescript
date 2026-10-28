@@ -33,6 +33,14 @@ import { Result } from "../types/fp.js";
  * **Use case:** Call this before uploads to validate file sizes on the client
  * side and display appropriate limits to users.
  *
+ * `maxFilesPerRequest` is a fixed 1000. `maxFileSizeBytes` is the organization's
+ * `fileUploadMaxSizeBytes` platform setting, read on every call (30 MB when the
+ * setting cannot be read). Any signed-in member gets the same values; no knowledge
+ * base role is needed.
+ *
+ * **Request:** there is no validator and nothing from the request is read; any query
+ * string is ignored.
+ *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
 export function knowledgeBaseGetUploadLimits(
@@ -145,7 +153,8 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.UploadLimitsResponseSchema$inboundSchema),
-    M.jsonErr(401, errors.ErrorResponse$inboundSchema),
+    M.jsonErr([400, 401, 403], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

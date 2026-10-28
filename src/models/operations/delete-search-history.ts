@@ -10,20 +10,22 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 
 /**
- * Restrict the deletion to rows with this `isShared` value
+ * Restrict the deletion to rows with this `isShared` value. `'true'` / `'1'` and
  *
  * @remarks
- * (`'true'` / `'false'`).
+ * `'false'` / `'0'`, case-insensitive; anything else is refused with `400`.
  */
 export const DeleteSearchHistoryShared = {
   True: "true",
   False: "false",
+  One: "1",
+  Zero: "0",
 } as const;
 /**
- * Restrict the deletion to rows with this `isShared` value
+ * Restrict the deletion to rows with this `isShared` value. `'true'` / `'1'` and
  *
  * @remarks
- * (`'true'` / `'false'`).
+ * `'false'` / `'0'`, case-insensitive; anything else is refused with `400`.
  */
 export type DeleteSearchHistoryShared = ClosedEnum<
   typeof DeleteSearchHistoryShared
@@ -31,32 +33,33 @@ export type DeleteSearchHistoryShared = ClosedEnum<
 
 export type DeleteSearchHistoryRequest = {
   /**
-   * Restrict the deletion to rows whose `title` or `messages.content`
+   * Validated, then dropped: a stored search has no title to match, so it never narrows
    *
    * @remarks
-   * matches this case-insensitive substring. Special regex characters
-   * are escaped before the lookup; values over 1000 chars are
-   * rejected with `400`.
+   * the deletion. More than 1000 characters, or HTML markup, is refused with `400`.
    */
   search?: string | undefined;
   /**
-   * Restrict the deletion to rows with this `isShared` value
+   * Restrict the deletion to rows with this `isShared` value. `'true'` / `'1'` and
    *
    * @remarks
-   * (`'true'` / `'false'`).
+   * `'false'` / `'0'`, case-insensitive; anything else is refused with `400`.
    */
   shared?: DeleteSearchHistoryShared | undefined;
   /**
-   * ISO 8601 lower bound for `createdAt`. Combined with `endDate`
+   * ISO 8601 date or date-time lower bound for `createdAt`. A value JavaScript's `Date`
    *
    * @remarks
-   * to scope which rows are deleted.
+   * cannot parse is refused with `400`.
    */
-  startDate?: Date | undefined;
+  startDate?: string | undefined;
   /**
-   * ISO 8601 upper bound for `createdAt`.
+   * ISO 8601 date or date-time upper bound for `createdAt`. A value JavaScript's `Date`
+   *
+   * @remarks
+   * cannot parse is refused with `400`.
    */
-  endDate?: Date | undefined;
+  endDate?: string | undefined;
 };
 
 /**
@@ -86,8 +89,8 @@ export const DeleteSearchHistoryRequest$outboundSchema: z.ZodMiniType<
 > = z.object({
   search: z.optional(z.string()),
   shared: z.optional(DeleteSearchHistoryShared$outboundSchema),
-  startDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
-  endDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
+  startDate: z.optional(z.string()),
+  endDate: z.optional(z.string()),
 });
 
 export function deleteSearchHistoryRequestToJSON(

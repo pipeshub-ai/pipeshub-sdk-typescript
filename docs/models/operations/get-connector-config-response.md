@@ -10,6 +10,7 @@ import { GetConnectorConfigResponse } from "@pipeshub-ai/sdk/models/operations";
 let value: GetConnectorConfigResponse = {
   success: true,
   config: {
+    authType: "OAUTH",
     scope: "team",
     config: {
       auth: {

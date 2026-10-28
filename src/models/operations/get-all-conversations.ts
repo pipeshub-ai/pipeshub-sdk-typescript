@@ -62,6 +62,28 @@ export type GetAllConversationsSortOrderEnum = ClosedEnum<
   typeof GetAllConversationsSortOrderEnum
 >;
 
+/**
+ * When set, filters by `isShared`. Accepts exactly `true`,
+ *
+ * @remarks
+ * `false`, `1` or `0`.
+ */
+export const GetAllConversationsSharedEnum = {
+  True: "true",
+  False: "false",
+  One: "1",
+  Zero: "0",
+} as const;
+/**
+ * When set, filters by `isShared`. Accepts exactly `true`,
+ *
+ * @remarks
+ * `false`, `1` or `0`.
+ */
+export type GetAllConversationsSharedEnum = ClosedEnum<
+  typeof GetAllConversationsSharedEnum
+>;
+
 export type GetAllConversationsRequest = {
   /**
    * `owned` — owner list (`userId` filter only).
@@ -73,11 +95,16 @@ export type GetAllConversationsRequest = {
    */
   source?: QueryParamSource | undefined;
   /**
-   * Page number (1-based). Defaults to 1.
+   * Page number (1-based). Defaults to 1. The validator accepts any number, so a
+   *
+   * @remarks
+   * fraction such as `1.5` is not refused; it is truncated (`1.5` reads as page 1).
    */
   page?: number | undefined;
   /**
-   * Page size. Defaults to 20; capped by the server (max 100).
+   * Page size. Defaults to 10; values above 100, and fractions, are refused (`400 VALIDATION_ERROR`).
+   *
+   * @remarks
    */
   limit?: number | undefined;
   /**
@@ -97,20 +124,26 @@ export type GetAllConversationsRequest = {
    */
   search?: string | undefined;
   /**
-   * Filter by `createdAt` ≥ this ISO date.
+   * Filter by `createdAt` ≥ this instant. Must be a full ISO 8601
+   *
+   * @remarks
+   * date-time with `Z` or a numeric offset; a bare date is refused.
    */
   startDate?: Date | undefined;
   /**
-   * Filter by `createdAt` ≤ this ISO date.
+   * Filter by `createdAt` ≤ this instant. Must be a full ISO 8601
+   *
+   * @remarks
+   * date-time with `Z` or a numeric offset; a bare date is refused.
    */
   endDate?: Date | undefined;
   /**
-   * When set, filters by `isShared`. Accepts case-insensitive
+   * When set, filters by `isShared`. Accepts exactly `true`,
    *
    * @remarks
-   * `true`/`false`, or `1`/`0`.
+   * `false`, `1` or `0`.
    */
-  shared?: string | undefined;
+  shared?: GetAllConversationsSharedEnum | undefined;
   /**
    * Restrict results to a single project. Pass a project's `id` to
    *
@@ -188,7 +221,7 @@ export type GetAllConversationsApplied = {
   values: Values;
 };
 
-export type GetAllConversationsShared = {
+export type GetAllConversationsSharedResponse = {
   /**
    * Accepted values for the `shared` query param.
    */
@@ -313,7 +346,7 @@ export type GetAllConversationsSortingMessages = {
 };
 
 export type GetAllConversationsAvailable = {
-  shared: GetAllConversationsShared;
+  shared: GetAllConversationsSharedResponse;
   tags: GetAllConversationsTags;
   minMessages: GetAllConversationsMinMessages;
   search: GetAllConversationsSearch;
@@ -381,10 +414,15 @@ export const GetAllConversationsSortOrderEnum$outboundSchema: z.ZodMiniEnum<
 > = z.enum(GetAllConversationsSortOrderEnum);
 
 /** @internal */
+export const GetAllConversationsSharedEnum$outboundSchema: z.ZodMiniEnum<
+  typeof GetAllConversationsSharedEnum
+> = z.enum(GetAllConversationsSharedEnum);
+
+/** @internal */
 export type GetAllConversationsRequest$Outbound = {
   source: string;
   page?: number | undefined;
-  limit?: number | undefined;
+  limit: number;
   sortBy?: string | undefined;
   sortOrder?: string | undefined;
   conversationId?: string | undefined;
@@ -401,15 +439,15 @@ export const GetAllConversationsRequest$outboundSchema: z.ZodMiniType<
   GetAllConversationsRequest
 > = z.object({
   source: z._default(QueryParamSource$outboundSchema, "owned"),
-  page: z.optional(z.int()),
-  limit: z.optional(z.int()),
+  page: z.optional(z.number()),
+  limit: z._default(z.int(), 10),
   sortBy: z.optional(GetAllConversationsSortByEnum$outboundSchema),
   sortOrder: z.optional(GetAllConversationsSortOrderEnum$outboundSchema),
   conversationId: z.optional(z.string()),
   search: z.optional(z.string()),
   startDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
   endDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
-  shared: z.optional(z.string()),
+  shared: z.optional(GetAllConversationsSharedEnum$outboundSchema),
   projectId: z.optional(z.string()),
 });
 
@@ -515,8 +553,8 @@ export function getAllConversationsAppliedFromJSON(
 }
 
 /** @internal */
-export const GetAllConversationsShared$inboundSchema: z.ZodMiniType<
-  GetAllConversationsShared,
+export const GetAllConversationsSharedResponse$inboundSchema: z.ZodMiniType<
+  GetAllConversationsSharedResponse,
   unknown
 > = z.object({
   values: types.optional(z.array(types.string())),
@@ -525,13 +563,13 @@ export const GetAllConversationsShared$inboundSchema: z.ZodMiniType<
   applied: types.optional(types.boolean()),
 });
 
-export function getAllConversationsSharedFromJSON(
+export function getAllConversationsSharedResponseFromJSON(
   jsonString: string,
-): SafeParseResult<GetAllConversationsShared, SDKValidationError> {
+): SafeParseResult<GetAllConversationsSharedResponse, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => GetAllConversationsShared$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetAllConversationsShared' from JSON`,
+    (x) => GetAllConversationsSharedResponse$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetAllConversationsSharedResponse' from JSON`,
   );
 }
 
@@ -920,7 +958,7 @@ export const GetAllConversationsAvailable$inboundSchema: z.ZodMiniType<
   GetAllConversationsAvailable,
   unknown
 > = z.object({
-  shared: z.lazy(() => GetAllConversationsShared$inboundSchema),
+  shared: z.lazy(() => GetAllConversationsSharedResponse$inboundSchema),
   tags: z.lazy(() => GetAllConversationsTags$inboundSchema),
   minMessages: z.lazy(() => GetAllConversationsMinMessages$inboundSchema),
   search: z.lazy(() => GetAllConversationsSearch$inboundSchema),

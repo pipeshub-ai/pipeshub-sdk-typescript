@@ -35,7 +35,9 @@ import { Result } from "../types/fp.js";
  * `POST /knowledgeBase/record/{recordId}/restore` restores it, with everything
  * deleted along with it; ids from one delete are restored once. Every id gets its
  * own outcome in `results`, so one refusal does not hold the others back, and the
- * answer is 200 whatever the outcomes.
+ * answer is 200 whatever the outcomes: with the trash turned off in Labs every id is
+ * refused with `code: 403` inside a 200. An id listed twice is answered once. Body
+ * fields other than `recordIds` are ignored.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -165,7 +167,7 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.RestoreRecordsResponseSchema$inboundSchema),
-    M.jsonErr([400, 401, 403], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([400, 401, 403, 409], errors.ErrorResponse$inboundSchema),
     M.jsonErr([500, 503], errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

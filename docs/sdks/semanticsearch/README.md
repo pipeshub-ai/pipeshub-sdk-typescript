@@ -24,8 +24,8 @@ PipesHub. Results are filtered by the caller's permissions exactly as
 
 Unlike `POST /search`, nothing is stored: no search history and no
 citation documents, so an application can call this on every request
-it serves. The query is searched as sent unless `rewriteQuery` is
-true.
+it serves. The query text is always searched; `rewriteQuery` adds the
+model's rewritten and expanded versions.
 
 Nothing to find (no match, no accessible records, nothing indexed
 yet) is a `200` with an empty `chunks` list.
@@ -112,7 +112,8 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 400, 404, 422               | application/json            |
+| errors.ErrorResponse        | 400, 401, 403, 404, 422     | application/json            |
+| errors.ErrorResponse        | 500, 503, 504               | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## search
@@ -140,7 +141,12 @@ absent or empty `apps` / `kb` means no whole app.
 The response returns a `searchId` for the persisted search along
 with ranked matches, each carrying a relevance score and the
 source document's metadata. Past searches can be retrieved via
-`GET /search`.
+`GET /search`. With `saveHistory: false` nothing is saved and
+there is no `searchId`.
+
+**Scopes:** an OAuth token needs `semantic:write`. The gateway also lets a token holding
+only `semantic:read` through, but the search service then refuses it with the same `403`
+("Insufficient scope. Required: semantic:write"). Known defect.
 
 
 ### Example Usage: filtered
@@ -281,7 +287,8 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 400, 422                    | application/json            |
+| errors.ErrorResponse        | 400, 401, 403, 404, 422     | application/json            |
+| errors.ErrorResponse        | 500, 503, 504               | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## searchHistory
@@ -296,6 +303,10 @@ search with its citations fully expanded.
 
 Pagination defaults to `page=1, limit=20` (maximum `limit` is 100).
 Results are sorted by most recent activity by default.
+
+`pagination.totalCount` (and with it `totalPages` and `hasNextPage`)
+counts the searches the listing itself holds: the caller's own and those
+shared with them in their organization.
 
 
 ### Example Usage
@@ -365,9 +376,9 @@ run();
 
 | Error Type                              | Status Code                             | Content Type                            |
 | --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| errors.SearchHistoryBadRequestError     | 400                                     | application/json                        |
-| errors.SearchHistoryUnauthorizedError   | 401                                     | application/json                        |
-| errors.SearchHistoryForbiddenError      | 403                                     | application/json                        |
+| errors.BadRequestError                  | 400                                     | application/json                        |
+| errors.UnauthorizedError                | 401                                     | application/json                        |
+| errors.ForbiddenError                   | 403                                     | application/json                        |
 | errors.SearchHistoryInternalServerError | 500                                     | application/json                        |
 | errors.PipeshubDefaultError             | 4XX, 5XX                                | \*/\*                                   |
 
@@ -375,12 +386,16 @@ run();
 
 Permanently delete every persisted search row owned by, or shared
 with, the authenticated user, along with the citation rows those
-searches reference. The action cannot be undone.
+searches reference. The action cannot be undone. Searches other
+users shared with the caller are deleted for their owners too, even
+when the caller only has `read` access.
 
 Scoped to the caller's org and limited to rows where
-`isDeleted: false` and `isArchived: false`. If nothing matches
-(including the case where every row is already archived), the
-endpoint returns `404` rather than a successful no-op.
+`isArchived: false`. The optional `shared`, `startDate` and
+`endDate` query filters narrow what is deleted; `search` is
+validated but has no effect. If nothing matches (including the case
+where every row is already archived), the endpoint returns `404`
+rather than a successful no-op.
 
 
 ### Example Usage
@@ -450,17 +465,24 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## getSearchById
 
 Retrieve a previously persisted search by its id, scoped to the
-caller's org.
+caller's org. The caller must own the search or have it shared with
+them; archived searches are not returned.
 
 The response body is always an **array** containing zero or one
-persisted search document. An unknown id returns an empty array
-with a `200` status — callers should check array length rather
-than relying on a `404`.
+persisted search document. An unknown id, a search the caller
+cannot see, an archived search, or one that fails a query filter
+all return an empty array with a `200` status — this route never
+answers `404`, so callers should check the array length.
+
+The optional `shared`, `startDate` and `endDate` query filters are
+applied to the one search; `search` is validated but has no effect.
 
 
 ### Example Usage
@@ -532,24 +554,24 @@ run();
 
 ### Errors
 
-| Error Type                              | Status Code                             | Content Type                            |
-| --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| errors.GetSearchByIdBadRequestError     | 400                                     | application/json                        |
-| errors.GetSearchByIdUnauthorizedError   | 401                                     | application/json                        |
-| errors.GetSearchByIdForbiddenError      | 403                                     | application/json                        |
-| errors.GetSearchByIdNotFoundError       | 404                                     | application/json                        |
-| errors.GetSearchByIdInternalServerError | 500                                     | application/json                        |
-| errors.PipeshubDefaultError             | 4XX, 5XX                                | \*/\*                                   |
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 401, 403               | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## deleteSearchById
 
 Permanently delete a single persisted search row, plus every
 citation row referenced by its `citationIds`. The caller must
-either own the row or have it shared with them.
+either own the row or have it shared with them: a user the search
+was shared with, even with `read` access only, deletes the owner's
+search for everyone.
 
 Scoped to the caller's org and limited to rows where
-`isDeleted: false` and `isArchived: false`; archived or
-already-deleted rows surface as `404`.
+`isArchived: false`; an archived or already-deleted row is `404`.
+The optional `shared`, `startDate` and `endDate` query filters must
+also match, otherwise `404`; `search` is validated but has no effect.
 
 
 ### Example Usage
@@ -623,13 +645,19 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## archiveSearch
 
 Archive a specific search result. Archived searches are hidden
-from the default search history view but remain retrievable via
-the archive-aware listing endpoints.
+from the search history and from `GET /search/{searchId}`, and
+cannot be shared, unshared or deleted until they are unarchived.
+
+The caller must own the search or have it shared with them: a user
+the search was shared with, even with `read` access only, can
+archive the owner's search for everyone.
 
 
 ### Example Usage
@@ -703,11 +731,14 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## unarchiveSearch
 
 Restore a previously archived search result back to the active search history.
+The owner or any user the search was shared with can unarchive it.
 
 
 ### Example Usage
@@ -781,4 +812,6 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |

@@ -9,6 +9,13 @@ let value: CreateConnectorRequest = {
   connectorType: "<value>",
   instanceName: "<value>",
   scope: "team",
+  config: {
+    auth: {
+      "baseUrl": "https://mycompany.atlassian.net",
+      "email": "admin@mycompany.com",
+      "apiToken": "ATATT3x...",
+    },
+  },
 };
 ```
 

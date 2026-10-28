@@ -19,6 +19,7 @@ import {
   RequestTimeoutError,
   UnexpectedClientError,
 } from "../models/errors/http-client-errors.js";
+import * as errors from "../models/errors/index.js";
 import { PipeshubError } from "../models/errors/pipeshub-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { SDKValidationError } from "../models/errors/sdk-validation-error.js";
@@ -52,6 +53,8 @@ import { Result } from "../types/fp.js";
  * (`PATCH /conversations/{conversationId}/pin`) come first, in the same order,
  * whatever `sortBy` is. `source=shared` is never pinned-first.
  *
+ * Query parameters not listed here are ignored, not refused.
+ *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
 export function conversationsGetAllConversations(
@@ -61,6 +64,7 @@ export function conversationsGetAllConversations(
 ): APIPromise<
   Result<
     operations.GetAllConversationsResponse,
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -86,6 +90,7 @@ async function $do(
   [
     Result<
       operations.GetAllConversationsResponse,
+      | errors.ErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -179,8 +184,13 @@ async function $do(
   }
   const response = doResult.value;
 
+  const responseFields = {
+    HttpMeta: { Response: response, Request: req },
+  };
+
   const [result] = await M.match<
     operations.GetAllConversationsResponse,
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -191,9 +201,11 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, operations.GetAllConversationsResponse$inboundSchema),
-    M.fail([400, 401, "4XX"]),
+    M.jsonErr([400, 401, 403], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
+    M.fail("4XX"),
     M.fail("5XX"),
-  )(response, req);
+  )(response, req, { extraFields: responseFields });
   if (!result.ok) {
     return [result, { status: "complete", request: req, response }];
   }

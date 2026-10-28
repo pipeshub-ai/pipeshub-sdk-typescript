@@ -12,7 +12,11 @@ import * as models from "../index.js";
 export type CreateAgentConversationRequest = {
   agentKey: string;
   /**
-   * The first question, with optional scope, model, project and tool overrides.
+   * The first question, with optional scope, model, project and tool overrides. A `query`
+   *
+   * @remarks
+   * that holds markup or a printf-style format specifier is refused with `400`
+   * `HTTP_BAD_REQUEST`, and so is one of only whitespace ("Query is required").
    */
   body: models.AgentCreateConversationRequest;
 };

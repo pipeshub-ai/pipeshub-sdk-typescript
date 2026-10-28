@@ -4,7 +4,7 @@
 
 import * as z from "zod/v4-mini";
 import { PipeshubCore } from "../core.js";
-import { encodeSimple } from "../lib/encodings.js";
+import { encodeFormQuery, encodeSimple } from "../lib/encodings.js";
 import { matchStatusCode } from "../lib/http.js";
 import * as M from "../lib/matchers.js";
 import { compactMap } from "../lib/primitives.js";
@@ -33,12 +33,17 @@ import { Result } from "../types/fp.js";
  *
  * @remarks
  * Retrieve a previously persisted search by its id, scoped to the
- * caller's org.
+ * caller's org. The caller must own the search or have it shared with
+ * them; archived searches are not returned.
  *
  * The response body is always an **array** containing zero or one
- * persisted search document. An unknown id returns an empty array
- * with a `200` status — callers should check array length rather
- * than relying on a `404`.
+ * persisted search document. An unknown id, a search the caller
+ * cannot see, an archived search, or one that fails a query filter
+ * all return an empty array with a `200` status — this route never
+ * answers `404`, so callers should check the array length.
+ *
+ * The optional `shared`, `startDate` and `endDate` query filters are
+ * applied to the one search; `search` is validated but has no effect.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -49,11 +54,7 @@ export function semanticSearchGetSearchById(
 ): APIPromise<
   Result<
     Array<models.PersistedSemanticSearch>,
-    | errors.GetSearchByIdBadRequestError
-    | errors.GetSearchByIdUnauthorizedError
-    | errors.GetSearchByIdForbiddenError
-    | errors.GetSearchByIdNotFoundError
-    | errors.GetSearchByIdInternalServerError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -79,11 +80,7 @@ async function $do(
   [
     Result<
       Array<models.PersistedSemanticSearch>,
-      | errors.GetSearchByIdBadRequestError
-      | errors.GetSearchByIdUnauthorizedError
-      | errors.GetSearchByIdForbiddenError
-      | errors.GetSearchByIdNotFoundError
-      | errors.GetSearchByIdInternalServerError
+      | errors.ErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -115,6 +112,13 @@ async function $do(
   };
   const path = pathToFunc("/search/{searchId}")(pathParams);
 
+  const query = encodeFormQuery({
+    "endDate": payload.endDate,
+    "search": payload.search,
+    "shared": payload.shared,
+    "startDate": payload.startDate,
+  });
+
   const headers = new Headers(compactMap({
     Accept: "application/json",
   }));
@@ -143,6 +147,7 @@ async function $do(
     baseURL: options?.serverURL,
     path: path,
     headers: headers,
+    query: query,
     body: body,
     userAgent: client._options.userAgent,
     timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1,
@@ -170,11 +175,7 @@ async function $do(
 
   const [result] = await M.match<
     Array<models.PersistedSemanticSearch>,
-    | errors.GetSearchByIdBadRequestError
-    | errors.GetSearchByIdUnauthorizedError
-    | errors.GetSearchByIdForbiddenError
-    | errors.GetSearchByIdNotFoundError
-    | errors.GetSearchByIdInternalServerError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -185,11 +186,8 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, z.array(models.PersistedSemanticSearch$inboundSchema)),
-    M.jsonErr(400, errors.GetSearchByIdBadRequestError$inboundSchema),
-    M.jsonErr(401, errors.GetSearchByIdUnauthorizedError$inboundSchema),
-    M.jsonErr(403, errors.GetSearchByIdForbiddenError$inboundSchema),
-    M.jsonErr(404, errors.GetSearchByIdNotFoundError$inboundSchema),
-    M.jsonErr(500, errors.GetSearchByIdInternalServerError$inboundSchema),
+    M.jsonErr([400, 401, 403], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

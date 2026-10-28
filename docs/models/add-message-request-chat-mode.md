@@ -1,7 +1,10 @@
 # AddMessageRequestChatMode
 
 Optional execution mode for non-stream consumers of this shared
-request schema.
+request schema. `deep`, `quick`, `verification` and `auto` are
+legacy values: still accepted, they run as `internal_search`.
+The streaming routes accept only `agent`, `internal_search` and
+`web_search`. `agent:<mode>` is refused.
 
 
 ## Example Usage
@@ -9,11 +12,11 @@ request schema.
 ```typescript
 import { AddMessageRequestChatMode } from "@pipeshub-ai/sdk/models";
 
-let value: AddMessageRequestChatMode = "agent";
+let value: AddMessageRequestChatMode = "internal_search";
 ```
 
 ## Values
 
 ```typescript
-"agent" | "internal_search" | "web_search"
+"agent" | "internal_search" | "web_search" | "deep" | "quick" | "verification" | "auto"
 ```

@@ -59,13 +59,19 @@ export type Toolset = {
   displayName?: string | undefined;
   type?: string | undefined;
   /**
-   * Admin-created toolset instance id
+   * Admin-created toolset instance id. `null` when the toolset was
+   *
+   * @remarks
+   * attached to the agent without an instance.
    */
-  instanceId?: string | undefined;
+  instanceId?: string | null | undefined;
   /**
-   * Human-readable instance label (e.g. sidebar instance name)
+   * Human-readable instance label (e.g. sidebar instance name). `null`
+   *
+   * @remarks
+   * when the toolset was attached without an instance.
    */
-  instanceName?: string | undefined;
+  instanceName?: string | null | undefined;
   /**
    * Tool names explicitly selected for this toolset instance, when the
    *
@@ -112,8 +118,8 @@ export const Toolset$inboundSchema: z.ZodMiniType<Toolset, unknown> = z.pipe(
     name: types.optional(AgentCreateToolsetName$inboundSchema),
     displayName: types.optional(types.string()),
     type: types.optional(types.string()),
-    instanceId: types.optional(types.string()),
-    instanceName: types.optional(types.string()),
+    instanceId: z.optional(z.nullable(types.string())),
+    instanceName: z.optional(z.nullable(types.string())),
     selectedTools: z.optional(z.nullable(z.array(types.string()))),
     tools: types.optional(z.array(z.lazy(() => ToolsetTool$inboundSchema))),
   }),

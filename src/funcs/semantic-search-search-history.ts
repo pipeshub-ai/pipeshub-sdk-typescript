@@ -43,6 +43,10 @@ import { Result } from "../types/fp.js";
  * Pagination defaults to `page=1, limit=20` (maximum `limit` is 100).
  * Results are sorted by most recent activity by default.
  *
+ * `pagination.totalCount` (and with it `totalPages` and `hasNextPage`)
+ * counts the searches the listing itself holds: the caller's own and those
+ * shared with them in their organization.
+ *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
 export function semanticSearchSearchHistory(
@@ -52,9 +56,9 @@ export function semanticSearchSearchHistory(
 ): APIPromise<
   Result<
     models.SemanticSearchHistoryResponse,
-    | errors.SearchHistoryBadRequestError
-    | errors.SearchHistoryUnauthorizedError
-    | errors.SearchHistoryForbiddenError
+    | errors.BadRequestError
+    | errors.UnauthorizedError
+    | errors.ForbiddenError
     | errors.SearchHistoryInternalServerError
     | PipeshubError
     | ResponseValidationError
@@ -81,9 +85,9 @@ async function $do(
   [
     Result<
       models.SemanticSearchHistoryResponse,
-      | errors.SearchHistoryBadRequestError
-      | errors.SearchHistoryUnauthorizedError
-      | errors.SearchHistoryForbiddenError
+      | errors.BadRequestError
+      | errors.UnauthorizedError
+      | errors.ForbiddenError
       | errors.SearchHistoryInternalServerError
       | PipeshubError
       | ResponseValidationError
@@ -181,9 +185,9 @@ async function $do(
 
   const [result] = await M.match<
     models.SemanticSearchHistoryResponse,
-    | errors.SearchHistoryBadRequestError
-    | errors.SearchHistoryUnauthorizedError
-    | errors.SearchHistoryForbiddenError
+    | errors.BadRequestError
+    | errors.UnauthorizedError
+    | errors.ForbiddenError
     | errors.SearchHistoryInternalServerError
     | PipeshubError
     | ResponseValidationError
@@ -195,9 +199,9 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.SemanticSearchHistoryResponse$inboundSchema),
-    M.jsonErr(400, errors.SearchHistoryBadRequestError$inboundSchema),
-    M.jsonErr(401, errors.SearchHistoryUnauthorizedError$inboundSchema),
-    M.jsonErr(403, errors.SearchHistoryForbiddenError$inboundSchema),
+    M.jsonErr(400, errors.BadRequestError$inboundSchema),
+    M.jsonErr(401, errors.UnauthorizedError$inboundSchema),
+    M.jsonErr(403, errors.ForbiddenError$inboundSchema),
     M.jsonErr(500, errors.SearchHistoryInternalServerError$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

@@ -29,7 +29,7 @@ export type WebSearchProviderItem = {
    *
    * @remarks
    * API providers include `apiKey` (masked for non-admins); searxng, firecrawl and crawl4ai
-   * include `baseUrl`. Additional keys may be present.
+   * include `baseUrl` (masked for non-admins too). Additional keys may be present.
    */
   configuration: { [k: string]: any };
   isDefault: boolean;

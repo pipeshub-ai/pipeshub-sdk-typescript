@@ -4,7 +4,7 @@
 
 import * as z from "zod/v4-mini";
 import { PipeshubCore } from "../core.js";
-import { encodeJSON, encodeSimple } from "../lib/encodings.js";
+import { encodeFormQuery, encodeJSON, encodeSimple } from "../lib/encodings.js";
 import { matchStatusCode } from "../lib/http.js";
 import * as M from "../lib/matchers.js";
 import { compactMap } from "../lib/primitives.js";
@@ -32,22 +32,37 @@ import { Result } from "../types/fp.js";
  * Create subfolder
  *
  * @remarks
- * Create a nested subfolder inside an existing parent folder.
+ * Create a nested subfolder inside an existing parent folder, named by the `folderId`
+ * path parameter. It runs the same validator and handler as
+ * `POST /knowledgeBase/{kbId}/folder`. A `folderId` query parameter is still read: one
+ * that names a different folder than the path is refused with `400`.
  *
  * **Required permission:** WRITER or higher
  *
  * **Folder features:**
  *
  * - Organize records hierarchically
- * - Support nested subfolders (unlimited depth)
+ * - Support nested subfolders, up to 20 levels deep
  * - Inherit parent KB permissions
  *
  * **Naming rules:**
  *
- * - 1–255 characters
- * - XSS protection applied
+ * - Whitespace around the name is removed first; then 1–255 characters
+ * - A name holding an HTML tag, a `javascript:` URL or an inline event handler is
+ *   refused with `400` before authentication; one holding a printf-style format
+ *   specifier (`%s`, `%x`, `%n`, `%p`) is refused with `400` by the gateway controller
  * - Spaces and special characters allowed
- * - Duplicate names rejected within the same parent (`409`)
+ * - A name already used by a folder in the same parent is refused with `409`, ignoring
+ *   case (`Reports` and `rEPORTS` clash). A file of the same name, or a folder of the
+ *   same name under another parent, does not clash.
+ *
+ * **Request:** only `folderName` and the `folderId` query parameter are read; other body
+ * fields and query parameters are ignored, except a `folderId`, `parentId` or
+ * `parent_id` in the body and a `parentId` or `parent_id` query parameter, which are
+ * refused with `400`.
+ *
+ * **Access:** a caller with no role on the knowledge base gets `404`
+ * (`Knowledge base <kbId> not found`), a `READER` gets `403`.
  *
  * **Response:** Returns `id` and `name` for the created folder.
  *
@@ -111,7 +126,7 @@ async function $do(
   const body = encodeJSON("body", payload.body, { explode: true });
 
   const pathParams = {
-    folderId: encodeSimple("folderId", payload.folderId, {
+    folderId: encodeSimple("folderId", payload.folderIdPathParameter, {
       explode: false,
       charEncoding: "percent",
     }),
@@ -123,6 +138,10 @@ async function $do(
   const path = pathToFunc("/knowledgeBase/{kbId}/folder/{folderId}/subfolder")(
     pathParams,
   );
+
+  const query = encodeFormQuery({
+    "folderId": payload.folderIdQueryParameter,
+  });
 
   const headers = new Headers(compactMap({
     "Content-Type": "application/json",
@@ -153,6 +172,7 @@ async function $do(
     baseURL: options?.serverURL,
     path: path,
     headers: headers,
+    query: query,
     body: body,
     userAgent: client._options.userAgent,
     timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1,

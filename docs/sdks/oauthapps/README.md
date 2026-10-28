@@ -122,8 +122,10 @@ run();
 
 | Error Type                                 | Status Code                                | Content Type                               |
 | ------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
+| errors.ErrorResponse                       | 400                                        | application/json                           |
 | errors.ApplicationJsonErrorResponse        | 401, 403                                   | application/json                           |
 | errors.OAuthClientManagementRateLimitError | 429                                        | application/json                           |
+| errors.ErrorResponse                       | 500                                        | application/json                           |
 | errors.PipeshubDefaultError                | 4XX, 5XX                                   | \*/\*                                      |
 
 ## createOAuthApp
@@ -242,6 +244,7 @@ run();
 | ------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
 | errors.ApplicationJsonErrorResponse        | 400, 401, 403, 404                         | application/json                           |
 | errors.OAuthClientManagementRateLimitError | 429                                        | application/json                           |
+| errors.ErrorResponse                       | 500                                        | application/json                           |
 | errors.PipeshubDefaultError                | 4XX, 5XX                                   | \*/\*                                      |
 
 ## listOAuthScopes
@@ -321,8 +324,10 @@ run();
 
 | Error Type                                 | Status Code                                | Content Type                               |
 | ------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
+| errors.ErrorResponse                       | 400                                        | application/json                           |
 | errors.ApplicationJsonErrorResponse        | 401, 403                                   | application/json                           |
 | errors.OAuthClientManagementRateLimitError | 429                                        | application/json                           |
+| errors.ErrorResponse                       | 500                                        | application/json                           |
 | errors.PipeshubDefaultError                | 4XX, 5XX                                   | \*/\*                                      |
 
 ## getOAuthApp
@@ -403,8 +408,9 @@ run();
 
 | Error Type                                 | Status Code                                | Content Type                               |
 | ------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
-| errors.ApplicationJsonErrorResponse        | 401, 403, 404                              | application/json                           |
+| errors.ApplicationJsonErrorResponse        | 400, 401, 403, 404                         | application/json                           |
 | errors.OAuthClientManagementRateLimitError | 429                                        | application/json                           |
+| errors.ErrorResponse                       | 500                                        | application/json                           |
 | errors.PipeshubDefaultError                | 4XX, 5XX                                   | \*/\*                                      |
 
 ## updateOAuthApp
@@ -423,7 +429,7 @@ service account predates this rule and can still be edited.
 
 Creator-only: even org admins cannot edit apps owned by other users.
 
-When modifying `allowedScopes`, the new set must remain a subset of the caller's role-aware scope list (same rule as `GET /oauth-clients/scopes`). When adding `authorization_code` to `allowedGrantTypes`, `redirectUris` becomes required and must contain at least one URI; otherwise the request is rejected with `400` by the Zod refine on `updateAppSchema`.
+When modifying `allowedScopes`, the new set must remain a subset of the caller's role-aware scope list (same rule as `GET /oauth-clients/scopes`). The Zod refine on `updateAppSchema` only looks at the body: it refuses `allowedGrantTypes` containing `authorization_code` together with an empty `redirectUris` (`400 VALIDATION_ERROR`), but sending `authorization_code` without `redirectUris` is accepted even when the stored app has no redirect URI.
 
 This endpoint never rotates the client secret — use `POST /oauth-clients/{appId}/regenerate-secret` for that.
 
@@ -501,8 +507,9 @@ run();
 
 | Error Type                                 | Status Code                                | Content Type                               |
 | ------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
-| errors.ApplicationJsonErrorResponse        | 400, 401, 403, 404                         | application/json                           |
+| errors.ApplicationJsonErrorResponse        | 400, 401, 403, 404, 409                    | application/json                           |
 | errors.OAuthClientManagementRateLimitError | 429                                        | application/json                           |
+| errors.ErrorResponse                       | 500                                        | application/json                           |
 | errors.PipeshubDefaultError                | 4XX, 5XX                                   | \*/\*                                      |
 
 ## deleteOAuthApp
@@ -583,8 +590,9 @@ run();
 
 | Error Type                                 | Status Code                                | Content Type                               |
 | ------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
-| errors.ApplicationJsonErrorResponse        | 401, 403, 404                              | application/json                           |
+| errors.ApplicationJsonErrorResponse        | 400, 401, 403, 404                         | application/json                           |
 | errors.OAuthClientManagementRateLimitError | 429                                        | application/json                           |
+| errors.ErrorResponse                       | 500                                        | application/json                           |
 | errors.PipeshubDefaultError                | 4XX, 5XX                                   | \*/\*                                      |
 
 ## regenerateOAuthAppSecret
@@ -667,8 +675,9 @@ run();
 
 | Error Type                                 | Status Code                                | Content Type                               |
 | ------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
-| errors.ApplicationJsonErrorResponse        | 401, 403, 404                              | application/json                           |
+| errors.ApplicationJsonErrorResponse        | 400, 401, 403, 404                         | application/json                           |
 | errors.OAuthClientManagementRateLimitError | 429                                        | application/json                           |
+| errors.ErrorResponse                       | 500                                        | application/json                           |
 | errors.PipeshubDefaultError                | 4XX, 5XX                                   | \*/\*                                      |
 
 ## suspendOAuthApp
@@ -753,13 +762,14 @@ run();
 | ------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
 | errors.ApplicationJsonErrorResponse        | 400, 401, 403, 404                         | application/json                           |
 | errors.OAuthClientManagementRateLimitError | 429                                        | application/json                           |
+| errors.ErrorResponse                       | 500                                        | application/json                           |
 | errors.PipeshubDefaultError                | 4XX, 5XX                                   | \*/\*                                      |
 
 ## activateOAuthApp
 
 Moves a suspended OAuth app back to `status: "active"`, restoring its ability to authenticate and obtain new tokens via `POST /oauth2/token`.
 
-A revoked app cannot be reactivated (returns `400`); the only path back is to register a new app. Activating an app that is already active also returns `400`.
+Activating an app that is already active returns `400`. A deleted app (the only way an app becomes `revoked`) is hidden from every lookup, so activating it returns `404`, not the service's "Cannot activate a revoked app" `400`; the only path back is to register a new app.
 
 Creator-only.
 
@@ -837,6 +847,7 @@ run();
 | ------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
 | errors.ApplicationJsonErrorResponse        | 400, 401, 403, 404                         | application/json                           |
 | errors.OAuthClientManagementRateLimitError | 429                                        | application/json                           |
+| errors.ErrorResponse                       | 500                                        | application/json                           |
 | errors.PipeshubDefaultError                | 4XX, 5XX                                   | \*/\*                                      |
 
 ## listOAuthAppTokens
@@ -919,15 +930,16 @@ run();
 
 | Error Type                                 | Status Code                                | Content Type                               |
 | ------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
-| errors.ApplicationJsonErrorResponse        | 401, 403, 404                              | application/json                           |
+| errors.ApplicationJsonErrorResponse        | 400, 401, 403, 404                         | application/json                           |
 | errors.OAuthClientManagementRateLimitError | 429                                        | application/json                           |
+| errors.ErrorResponse                       | 500                                        | application/json                           |
 | errors.PipeshubDefaultError                | 4XX, 5XX                                   | \*/\*                                      |
 
 ## revokeAllOAuthAppTokens
 
 Revokes every access and refresh token currently issued to an OAuth app, in a single operation. Use this for emergency credential rotation, suspected secret leaks, or as a follow-up to `POST /oauth-clients/{appId}/regenerate-secret` when you want existing sessions invalidated immediately rather than letting them expire naturally.
 
-The response `count` is the total number of tokens revoked across both types. Clients of this app must then obtain new tokens via the standard OAuth flow.
+The response carries only a confirmation `message`; it does not say how many tokens were revoked. Clients of this app must then obtain new tokens via the standard OAuth flow.
 
 Creator-only.
 
@@ -1003,6 +1015,7 @@ run();
 
 | Error Type                                 | Status Code                                | Content Type                               |
 | ------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
-| errors.ApplicationJsonErrorResponse        | 401, 403, 404                              | application/json                           |
+| errors.ApplicationJsonErrorResponse        | 400, 401, 403, 404                         | application/json                           |
 | errors.OAuthClientManagementRateLimitError | 429                                        | application/json                           |
+| errors.ErrorResponse                       | 500                                        | application/json                           |
 | errors.PipeshubDefaultError                | 4XX, 5XX                                   | \*/\*                                      |

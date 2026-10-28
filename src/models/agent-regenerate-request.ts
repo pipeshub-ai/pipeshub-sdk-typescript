@@ -33,6 +33,29 @@ export type AgentRegenerateRequestChatMode = ClosedEnum<
 >;
 
 /**
+ * Reasoning effort for this turn, for models that support it. Stored on
+ *
+ * @remarks
+ * the conversation's model info and forwarded to the AI backend.
+ */
+export const AgentRegenerateRequestReasoningEffort = {
+  None: "none",
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Max: "max",
+} as const;
+/**
+ * Reasoning effort for this turn, for models that support it. Stored on
+ *
+ * @remarks
+ * the conversation's model info and forwarded to the AI backend.
+ */
+export type AgentRegenerateRequestReasoningEffort = ClosedEnum<
+  typeof AgentRegenerateRequestReasoningEffort
+>;
+
+/**
  * AG-UI is the only supported wire protocol. When present must be
  *
  * @remarks
@@ -124,9 +147,11 @@ export type AgentRegenerateRequest = {
    * the app sends them (`User selections:` followed by one
    * `N. "question" → answer` line each). When present, the turn is
    * re-run with these answers instead of the saved ones, and they are
-   * saved in their place. Rejected with 400 when the reply being
-   * regenerated did not follow a question card, or when the request
-   * also edits the question (`query` or `attachments`).
+   * saved in their place. Over 8000 characters, or text not starting with
+   * `User selections:`, is refused with `400 VALIDATION_ERROR`. A reply
+   * that did not follow a question card, or a request that also edits
+   * the question (`query` or `attachments`), is refused after the stream
+   * opens: a 200 stream ending in a `RUN_ERROR` (see the operation).
    */
   answers?: string | undefined;
   /**
@@ -146,6 +171,13 @@ export type AgentRegenerateRequest = {
    */
   modelFriendlyName?: string | undefined;
   chatMode: AgentRegenerateRequestChatMode;
+  /**
+   * Reasoning effort for this turn, for models that support it. Stored on
+   *
+   * @remarks
+   * the conversation's model info and forwarded to the AI backend.
+   */
+  reasoningEffort?: AgentRegenerateRequestReasoningEffort | undefined;
   /**
    * IANA timezone identifier from the client. Used to provide
    *
@@ -220,6 +252,12 @@ export const AgentRegenerateRequestChatMode$outboundSchema: z.ZodMiniEnum<
 > = z.enum(AgentRegenerateRequestChatMode);
 
 /** @internal */
+export const AgentRegenerateRequestReasoningEffort$outboundSchema:
+  z.ZodMiniEnum<typeof AgentRegenerateRequestReasoningEffort> = z.enum(
+    AgentRegenerateRequestReasoningEffort,
+  );
+
+/** @internal */
 export const AgentRegenerateRequestProtocol$outboundSchema: z.ZodMiniEnum<
   typeof AgentRegenerateRequestProtocol
 > = z.enum(AgentRegenerateRequestProtocol);
@@ -234,6 +272,7 @@ export type AgentRegenerateRequest$Outbound = {
   modelName?: string | undefined;
   modelFriendlyName?: string | undefined;
   chatMode: string;
+  reasoningEffort?: string | undefined;
   timezone?: string | undefined;
   currentTime?: string | undefined;
   tools?: Array<string> | undefined;
@@ -256,6 +295,9 @@ export const AgentRegenerateRequest$outboundSchema: z.ZodMiniType<
   modelName: z.optional(z.string()),
   modelFriendlyName: z.optional(z.string()),
   chatMode: AgentRegenerateRequestChatMode$outboundSchema,
+  reasoningEffort: z.optional(
+    AgentRegenerateRequestReasoningEffort$outboundSchema,
+  ),
   timezone: z.optional(z.string()),
   currentTime: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
   tools: z.optional(z.array(z.string())),

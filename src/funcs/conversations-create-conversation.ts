@@ -60,10 +60,11 @@ import { Result } from "../types/fp.js";
  *
  * **Modes**
  *
- * `chatMode: agent` (or `agent:<mode>`) runs the universal agent and
- * honours `tools` / `agentCapabilities`; `internal_search` and
- * `web_search` run the search assistant and ignore `tools`. Omitted,
- * it defaults to internal search.
+ * `chatMode: agent` runs the universal agent and honours `tools` /
+ * `agentCapabilities`; `internal_search` and `web_search` run the
+ * search assistant and ignore `tools`. The legacy values `deep`,
+ * `quick`, `verification` and `auto` are accepted and run as internal
+ * search. Omitted, it defaults to internal search.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -196,11 +197,13 @@ async function $do(
       hdrs: true,
       key: "Result",
     }),
-    M.jsonErr(400, errors.ErrorResponse$inboundSchema),
+    M.jsonErr([400, 401, 403, 404, 409], errors.ErrorResponse$inboundSchema),
     M.jsonErr(424, errors.ErrorResponse$inboundSchema, { hdrs: true }),
     M.fail([413, 422, 429]),
-    M.jsonErr(500, errors.ErrorResponse$inboundSchema, { hdrs: true }),
-    M.fail([401, 403, "4XX"]),
+    M.jsonErr([500, 503, 504], errors.ErrorResponse$inboundSchema, {
+      hdrs: true,
+    }),
+    M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });
   if (!result.ok) {

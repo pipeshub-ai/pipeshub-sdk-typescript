@@ -94,7 +94,15 @@ import { Result } from "../types/fp.js";
  *
  * Requires a valid bearer token. For OAuth tokens the `kb:read` scope
  * must be present; regular JWT bearer tokens pass through without scope
- * enforcement.
+ * enforcement. Only nodes the caller can access are listed.
+ *
+ * **Request checking**
+ *
+ * This route has no request validator of its own; the query is passed on and
+ * checked by the connector service. Query parameters not listed here are
+ * ignored. A wrong type for `page`, `limit`, `onlyContainers` or `flattened`
+ * (or `page` below 1 or `limit` outside 1-200, or either sent more than once) is answered
+ * `422`; a refused filter value is answered `400`.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  *
@@ -107,11 +115,8 @@ export function knowledgeBaseGetKnowledgeHubRootNodes(
 ): APIPromise<
   Result<
     operations.GetKnowledgeHubRootNodesResponse,
-    | errors.GetKnowledgeHubRootNodesBadRequestError
-    | errors.GetKnowledgeHubRootNodesUnauthorizedError
-    | errors.GetKnowledgeHubRootNodesForbiddenError
+    | errors.ErrorResponse
     | errors.GetKnowledgeHubRootNodesUnprocessableEntityError
-    | errors.GetKnowledgeHubRootNodesInternalServerError
     | errors.GetKnowledgeHubRootNodesServiceUnavailableError
     | PipeshubError
     | ResponseValidationError
@@ -138,11 +143,8 @@ async function $do(
   [
     Result<
       operations.GetKnowledgeHubRootNodesResponse,
-      | errors.GetKnowledgeHubRootNodesBadRequestError
-      | errors.GetKnowledgeHubRootNodesUnauthorizedError
-      | errors.GetKnowledgeHubRootNodesForbiddenError
+      | errors.ErrorResponse
       | errors.GetKnowledgeHubRootNodesUnprocessableEntityError
-      | errors.GetKnowledgeHubRootNodesInternalServerError
       | errors.GetKnowledgeHubRootNodesServiceUnavailableError
       | PipeshubError
       | ResponseValidationError
@@ -249,11 +251,8 @@ async function $do(
 
   const [result] = await M.match<
     operations.GetKnowledgeHubRootNodesResponse,
-    | errors.GetKnowledgeHubRootNodesBadRequestError
-    | errors.GetKnowledgeHubRootNodesUnauthorizedError
-    | errors.GetKnowledgeHubRootNodesForbiddenError
+    | errors.ErrorResponse
     | errors.GetKnowledgeHubRootNodesUnprocessableEntityError
-    | errors.GetKnowledgeHubRootNodesInternalServerError
     | errors.GetKnowledgeHubRootNodesServiceUnavailableError
     | PipeshubError
     | ResponseValidationError
@@ -267,23 +266,12 @@ async function $do(
     M.json(200, operations.GetKnowledgeHubRootNodesResponse$inboundSchema, {
       key: "Result",
     }),
-    M.jsonErr(
-      400,
-      errors.GetKnowledgeHubRootNodesBadRequestError$inboundSchema,
-    ),
-    M.jsonErr(
-      401,
-      errors.GetKnowledgeHubRootNodesUnauthorizedError$inboundSchema,
-    ),
-    M.jsonErr(403, errors.GetKnowledgeHubRootNodesForbiddenError$inboundSchema),
+    M.jsonErr([400, 401, 403], errors.ErrorResponse$inboundSchema),
     M.jsonErr(
       422,
       errors.GetKnowledgeHubRootNodesUnprocessableEntityError$inboundSchema,
     ),
-    M.jsonErr(
-      500,
-      errors.GetKnowledgeHubRootNodesInternalServerError$inboundSchema,
-    ),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.jsonErr(
       503,
       errors.GetKnowledgeHubRootNodesServiceUnavailableError$inboundSchema,

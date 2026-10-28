@@ -8,7 +8,11 @@ import { UpdateConnectorAuthConfigRequest } from "@pipeshub-ai/sdk/models/operat
 let value: UpdateConnectorAuthConfigRequest = {
   connectorId: "<id>",
   body: {
-    auth: {},
+    auth: {
+      "baseUrl": "https://mycompany.atlassian.net",
+      "email": "admin@mycompany.com",
+      "apiToken": "ATATT3x...",
+    },
   },
 };
 ```

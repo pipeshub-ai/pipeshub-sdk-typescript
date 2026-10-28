@@ -43,10 +43,19 @@ export type ListConnectorInstancesRequest = {
    * @remarks
    */
   scope?: ConnectorInstanceListScope | undefined;
+  /**
+   * Page number, 1-based
+   */
   page?: number | undefined;
+  /**
+   * Items per page
+   */
   limit?: number | undefined;
   /**
-   * Full-text search across instance name, type, and app group
+   * Full-text search across instance name, type, and app group. The term
+   *
+   * @remarks
+   * is not echoed back in <code>pagination</code>.
    */
   search?: string | undefined;
   /**
@@ -71,7 +80,8 @@ export type ListConnectorInstancesRequest = {
    * Filter by exact connector type string (e.g. <code>Confluence</code>,
    *
    * @remarks
-   * <code>GoogleDrive</code>). Case-sensitive.
+   * <code>GoogleDrive</code>). Case-sensitive. An empty or blank value
+   * is refused with `400` (the value is trimmed before it is checked).
    */
   connectorType?: string | undefined;
 };

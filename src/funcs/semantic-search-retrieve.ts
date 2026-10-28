@@ -38,8 +38,8 @@ import { Result } from "../types/fp.js";
  *
  * Unlike `POST /search`, nothing is stored: no search history and no
  * citation documents, so an application can call this on every request
- * it serves. The query is searched as sent unless `rewriteQuery` is
- * true.
+ * it serves. The query text is always searched; `rewriteQuery` adds the
+ * model's rewritten and expanded versions.
  *
  * Nothing to find (no match, no accessible records, nothing indexed
  * yet) is a `200` with an empty `chunks` list.
@@ -172,9 +172,10 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.RetrieveResponse$inboundSchema),
-    M.jsonErr([400, 404, 422], errors.ErrorResponse$inboundSchema),
-    M.fail([401, 403, "4XX"]),
-    M.fail([500, 503, "5XX"]),
+    M.jsonErr([400, 401, 403, 404, 422], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([500, 503, 504], errors.ErrorResponse$inboundSchema),
+    M.fail("4XX"),
+    M.fail("5XX"),
   )(response, req, { extraFields: responseFields });
   if (!result.ok) {
     return [result, { status: "complete", request: req, response }];

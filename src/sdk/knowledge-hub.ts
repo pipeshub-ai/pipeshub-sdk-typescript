@@ -76,7 +76,15 @@ export class KnowledgeHub extends ClientSDK {
    *
    * Requires a valid bearer token. For OAuth tokens the `kb:read` scope
    * must be present; regular JWT bearer tokens pass through without scope
-   * enforcement.
+   * enforcement. Only nodes the caller can access are listed.
+   *
+   * **Request checking**
+   *
+   * This route has no request validator of its own; the query is passed on and
+   * checked by the connector service. Query parameters not listed here are
+   * ignored. A wrong type for `page`, `limit`, `onlyContainers` or `flattened`
+   * (or `page` below 1 or `limit` outside 1-200, or either sent more than once) is answered
+   * `422`; a refused filter value is answered `400`.
    *
    * @deprecated method: Use the Knowledge Base API instead. This grouping will be removed in a future release.
    */
@@ -131,6 +139,18 @@ export class KnowledgeHub extends ClientSDK {
    * Requires a valid bearer token. For OAuth tokens the `kb:read` scope
    * must be present; regular JWT bearer tokens pass through without scope
    * enforcement.
+   *
+   * A parent the caller may not see, one in the trash, and one that does not
+   * exist are all answered `404` with the same body, so the route does not reveal
+   * whether the node exists.
+   *
+   * **Request checking**
+   *
+   * This route has no request validator of its own; the path values and the query
+   * are checked by the connector service. Query parameters not listed here are
+   * ignored. A wrong type for `page`, `limit`, `onlyContainers` or `flattened`
+   * (or `page` below 1 or `limit` outside 1-200) is answered `422`; other refusals,
+   * `page` above 50 and an unusable `cursor` included, are `400`.
    *
    * @deprecated method: Use the Knowledge Base API instead. This grouping will be removed in a future release.
    */

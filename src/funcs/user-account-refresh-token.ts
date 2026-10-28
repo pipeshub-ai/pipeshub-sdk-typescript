@@ -35,6 +35,7 @@ import { Result } from "../types/fp.js";
  *
  * - Pass the refresh token as a Bearer token in the Authorization header
  * - Returns a new access token and basic user information
+ * - The request body and query string are not read
  *
  * **Token Lifetimes:**
  *
@@ -167,7 +168,7 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.RefreshTokenResponse$inboundSchema),
-    M.jsonErr([400, 401, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([400, 401], errors.ErrorResponse$inboundSchema),
     M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

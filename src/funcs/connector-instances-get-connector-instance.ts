@@ -31,7 +31,16 @@ import { Result } from "../types/fp.js";
  * Get connector instance
  *
  * @remarks
- * Retrieve a specific connector instance by ID.
+ * Retrieve a specific connector instance by ID, together with the setup
+ * form of its connector type (<code>config</code>).<br><br>
+ * <b>Who can read an instance:</b><br>
+ * <ul>
+ * <li>Team scope: the creator and org admins. Other members get
+ * <code>404</code>, although the lists show them the instance.</li>
+ * <li>Personal scope: the creator only. An admin gets <code>404</code>.</li>
+ * </ul>
+ * The ID of a knowledge base is accepted too: a knowledge base is stored
+ * as a connector instance of type <code>KB</code>.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -168,6 +177,7 @@ async function $do(
   >(
     M.json(200, operations.GetConnectorInstanceResponse$inboundSchema),
     M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

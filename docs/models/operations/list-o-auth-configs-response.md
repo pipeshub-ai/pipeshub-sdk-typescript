@@ -10,7 +10,11 @@ import { ListOAuthConfigsResponse } from "@pipeshub-ai/sdk/models/operations";
 let value: ListOAuthConfigsResponse = {
   success: true,
   oauthConfigs: [
-    {},
+    {
+      connectorType: "Confluence",
+      iconPath: "/icons/connectors/confluence.svg",
+      appGroup: "Atlassian",
+    },
   ],
   pagination: {
     page: 126406,

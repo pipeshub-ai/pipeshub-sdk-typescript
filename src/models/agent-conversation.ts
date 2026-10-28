@@ -6,9 +6,13 @@ import * as z from "zod/v4-mini";
 import { remap as remap$ } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
 import * as openEnums from "../types/enums.js";
-import { OpenEnum } from "../types/enums.js";
+import { ClosedEnum, OpenEnum } from "../types/enums.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
+import {
+  ConversationModelInfo,
+  ConversationModelInfo$inboundSchema,
+} from "./conversation-model-info.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 import { Message, Message$inboundSchema } from "./message.js";
 
@@ -39,6 +43,32 @@ export type AgentConversationSharedWith = {
   userId?: string | undefined;
   accessLevel?: AgentConversationAccessLevel | undefined;
 };
+
+export type AgentConversationConversationError = {
+  id?: string | undefined;
+  message: string;
+  errorType?: string | undefined;
+  timestamp?: Date | undefined;
+  messageId?: string | undefined;
+  stack?: string | undefined;
+  /**
+   * Free-form map of error context values.
+   */
+  metadata?: { [k: string]: any } | undefined;
+};
+
+/**
+ * Always `agent_chat` for agent conversations.
+ */
+export const AgentConversationConversationSource = {
+  AgentChat: "agent_chat",
+} as const;
+/**
+ * Always `agent_chat` for agent conversations.
+ */
+export type AgentConversationConversationSource = ClosedEnum<
+  typeof AgentConversationConversationSource
+>;
 
 /**
  * Only meaningful when `projectId` is set. `project` exposes the
@@ -75,16 +105,79 @@ export type AgentConversation = {
   userId?: string | undefined;
   orgId?: string | undefined;
   title?: string | undefined;
+  /**
+   * User who started the conversation.
+   */
+  initiator?: string | undefined;
   messages?: Array<Message> | undefined;
   /**
    * Same values as `Conversation.status`.
    */
   status?: AgentConversationStatus | undefined;
+  /**
+   * Error description, populated only when `status` is `Failed`.
+   */
+  failReason?: string | undefined;
+  /**
+   * AI model configuration recorded against a conversation or message.
+   */
+  modelInfo?: ConversationModelInfo | undefined;
   isShared?: boolean | undefined;
+  /**
+   * Shareable link, present only when the conversation is shared.
+   */
+  shareLink?: string | undefined;
   sharedWith?: Array<AgentConversationSharedWith> | undefined;
+  /**
+   * Whether this conversation is archived.
+   */
+  isArchived?: boolean | undefined;
+  /**
+   * User who archived the conversation. Absent on rows that were never archived.
+   */
+  archivedBy?: string | null | undefined;
+  /**
+   * Whether this conversation has been soft-deleted.
+   */
+  isDeleted?: boolean | undefined;
+  /**
+   * User who soft-deleted the conversation. Absent on live rows.
+   */
+  deletedBy?: string | null | undefined;
+  /**
+   * Errors recorded against this conversation (e.g. failed message generations).
+   */
+  conversationErrors?: Array<AgentConversationConversationError> | undefined;
+  /**
+   * Free-form metadata map attached to the conversation.
+   */
+  metadata?: { [k: string]: any } | undefined;
+  /**
+   * Always `agent_chat` for agent conversations.
+   */
+  conversationSource?: AgentConversationConversationSource | undefined;
+  /**
+   * Summary of older turns, present only once the conversation has
+   *
+   * @remarks
+   * been compacted.
+   */
+  compactedSummary?: string | undefined;
+  /**
+   * Turn index up to which `compactedSummary` covers the conversation.
+   */
+  compactedAtTurnIndex?: number | undefined;
+  /**
+   * Unix timestamp (ms) of the last compaction.
+   */
+  compactedAtTimestamp?: number | undefined;
   lastActivityAt?: number | undefined;
   createdAt?: Date | undefined;
   updatedAt?: Date | undefined;
+  /**
+   * Document version counter of the backing store.
+   */
+  v?: number | undefined;
   /**
    * The project this agent conversation is linked to, if any.
    */
@@ -130,6 +223,43 @@ export function agentConversationSharedWithFromJSON(
 }
 
 /** @internal */
+export const AgentConversationConversationError$inboundSchema: z.ZodMiniType<
+  AgentConversationConversationError,
+  unknown
+> = z.pipe(
+  z.object({
+    _id: types.optional(types.string()),
+    message: types.string(),
+    errorType: types.optional(types.string()),
+    timestamp: types.optional(types.date()),
+    messageId: types.optional(types.string()),
+    stack: types.optional(types.string()),
+    metadata: types.optional(z.record(z.string(), z.any())),
+  }),
+  z.transform((v) => {
+    return remap$(v, {
+      "_id": "id",
+    });
+  }),
+);
+
+export function agentConversationConversationErrorFromJSON(
+  jsonString: string,
+): SafeParseResult<AgentConversationConversationError, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      AgentConversationConversationError$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'AgentConversationConversationError' from JSON`,
+  );
+}
+
+/** @internal */
+export const AgentConversationConversationSource$inboundSchema: z.ZodMiniEnum<
+  typeof AgentConversationConversationSource
+> = z.enum(AgentConversationConversationSource);
+
+/** @internal */
 export const AgentConversationProjectVisibility$inboundSchema: z.ZodMiniType<
   AgentConversationProjectVisibility,
   unknown
@@ -146,15 +276,34 @@ export const AgentConversation$inboundSchema: z.ZodMiniType<
     userId: types.optional(types.string()),
     orgId: types.optional(types.string()),
     title: types.optional(types.string()),
+    initiator: types.optional(types.string()),
     messages: types.optional(z.array(Message$inboundSchema)),
     status: types.optional(AgentConversationStatus$inboundSchema),
+    failReason: types.optional(types.string()),
+    modelInfo: types.optional(ConversationModelInfo$inboundSchema),
     isShared: types.optional(types.boolean()),
+    shareLink: types.optional(types.string()),
     sharedWith: types.optional(
       z.array(z.lazy(() => AgentConversationSharedWith$inboundSchema)),
     ),
+    isArchived: types.optional(types.boolean()),
+    archivedBy: z.optional(z.nullable(types.string())),
+    isDeleted: types.optional(types.boolean()),
+    deletedBy: z.optional(z.nullable(types.string())),
+    conversationErrors: types.optional(
+      z.array(z.lazy(() => AgentConversationConversationError$inboundSchema)),
+    ),
+    metadata: types.optional(z.record(z.string(), z.any())),
+    conversationSource: types.optional(
+      AgentConversationConversationSource$inboundSchema,
+    ),
+    compactedSummary: types.optional(types.string()),
+    compactedAtTurnIndex: types.optional(types.number()),
+    compactedAtTimestamp: types.optional(types.number()),
     lastActivityAt: types.optional(types.number()),
     createdAt: types.optional(types.date()),
     updatedAt: types.optional(types.date()),
+    __v: types.optional(types.number()),
     projectId: z.optional(z.nullable(types.string())),
     projectVisibility: z.optional(
       z.nullable(AgentConversationProjectVisibility$inboundSchema),
@@ -163,6 +312,7 @@ export const AgentConversation$inboundSchema: z.ZodMiniType<
   z.transform((v) => {
     return remap$(v, {
       "_id": "id",
+      "__v": "v",
     });
   }),
 );

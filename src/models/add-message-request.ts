@@ -34,18 +34,28 @@ import {
  * Optional execution mode for non-stream consumers of this shared
  *
  * @remarks
- * request schema.
+ * request schema. `deep`, `quick`, `verification` and `auto` are
+ * legacy values: still accepted, they run as `internal_search`.
+ * The streaming routes accept only `agent`, `internal_search` and
+ * `web_search`. `agent:<mode>` is refused.
  */
 export const AddMessageRequestChatMode = {
   Agent: "agent",
   InternalSearch: "internal_search",
   WebSearch: "web_search",
+  Deep: "deep",
+  Quick: "quick",
+  Verification: "verification",
+  Auto: "auto",
 } as const;
 /**
  * Optional execution mode for non-stream consumers of this shared
  *
  * @remarks
- * request schema.
+ * request schema. `deep`, `quick`, `verification` and `auto` are
+ * legacy values: still accepted, they run as `internal_search`.
+ * The streaming routes accept only `agent`, `internal_search` and
+ * `web_search`. `agent:<mode>` is refused.
  */
 export type AddMessageRequestChatMode = ClosedEnum<
   typeof AddMessageRequestChatMode
@@ -91,7 +101,33 @@ export type AddMessageRequestKeywordSearchBudget = ClosedEnum<
 >;
 
 /**
- * Request body for adding a message to an existing conversation
+ * How hard a reasoning model should think for this turn. Saved in
+ *
+ * @remarks
+ * the conversation's `modelInfo`.
+ */
+export const AddMessageRequestReasoningEffort = {
+  None: "none",
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Max: "max",
+} as const;
+/**
+ * How hard a reasoning model should think for this turn. Saved in
+ *
+ * @remarks
+ * the conversation's `modelInfo`.
+ */
+export type AddMessageRequestReasoningEffort = ClosedEnum<
+  typeof AddMessageRequestReasoningEffort
+>;
+
+/**
+ * Request body for adding a message to an existing conversation.
+ *
+ * @remarks
+ * Fields not listed here are dropped by the gateway's validator, not refused.
  */
 export type AddMessageRequest = {
   /**
@@ -163,7 +199,10 @@ export type AddMessageRequest = {
    * Optional execution mode for non-stream consumers of this shared
    *
    * @remarks
-   * request schema.
+   * request schema. `deep`, `quick`, `verification` and `auto` are
+   * legacy values: still accepted, they run as `internal_search`.
+   * The streaming routes accept only `agent`, `internal_search` and
+   * `web_search`. `agent:<mode>` is refused.
    */
   chatMode?: AddMessageRequestChatMode | undefined;
   /**
@@ -234,6 +273,13 @@ export type AddMessageRequest = {
    * stream is still generating.
    */
   runId?: string | undefined;
+  /**
+   * How hard a reasoning model should think for this turn. Saved in
+   *
+   * @remarks
+   * the conversation's `modelInfo`.
+   */
+  reasoningEffort?: AddMessageRequestReasoningEffort | undefined;
 };
 
 /** @internal */
@@ -250,6 +296,11 @@ export const AddMessageRequestProtocol$outboundSchema: z.ZodMiniEnum<
 export const AddMessageRequestKeywordSearchBudget$outboundSchema: z.ZodMiniEnum<
   typeof AddMessageRequestKeywordSearchBudget
 > = z.enum(AddMessageRequestKeywordSearchBudget);
+
+/** @internal */
+export const AddMessageRequestReasoningEffort$outboundSchema: z.ZodMiniEnum<
+  typeof AddMessageRequestReasoningEffort
+> = z.enum(AddMessageRequestReasoningEffort);
 
 /** @internal */
 export type AddMessageRequest$Outbound = {
@@ -270,6 +321,7 @@ export type AddMessageRequest$Outbound = {
   keywordSearchBudget?: string | undefined;
   toolApproval?: ToolApprovalAnswer$Outbound | undefined;
   runId?: string | undefined;
+  reasoningEffort?: string | undefined;
 };
 
 /** @internal */
@@ -296,6 +348,7 @@ export const AddMessageRequest$outboundSchema: z.ZodMiniType<
   ),
   toolApproval: z.optional(ToolApprovalAnswer$outboundSchema),
   runId: z.optional(z.string()),
+  reasoningEffort: z.optional(AddMessageRequestReasoningEffort$outboundSchema),
 });
 
 export function addMessageRequestToJSON(

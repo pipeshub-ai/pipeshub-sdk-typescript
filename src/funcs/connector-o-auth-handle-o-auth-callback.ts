@@ -175,6 +175,7 @@ async function $do(
   >(
     M.json(200, operations.HandleOAuthCallbackResponse$inboundSchema),
     M.jsonErr([400, 401, 403], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

@@ -16,8 +16,9 @@ import * as models from "../index.js";
  *
  * @remarks
  *
- * Must be one of: `app`, `recordGroup`, `folder`, `record`.
- * Any other value returns a 400 error.
+ * Must be one of: `app`, `recordGroup`, `folder`, `record` (case-sensitive).
+ * Any other value returns a 400 error, and so does a type that does not
+ * match what `parentId` is (for example `folder` with a knowledge base id).
  */
 export const ParentType = {
   App: "app",
@@ -30,8 +31,9 @@ export const ParentType = {
  *
  * @remarks
  *
- * Must be one of: `app`, `recordGroup`, `folder`, `record`.
- * Any other value returns a 400 error.
+ * Must be one of: `app`, `recordGroup`, `folder`, `record` (case-sensitive).
+ * Any other value returns a 400 error, and so does a type that does not
+ * match what `parentId` is (for example `folder` with a knowledge base id).
  */
 export type ParentType = ClosedEnum<typeof ParentType>;
 
@@ -39,7 +41,7 @@ export type ParentType = ClosedEnum<typeof ParentType>;
  * Field to sort results by. Omitted → default `updatedAt`.
  *
  * @remarks
- * Unknown value → silently falls back to `name`.
+ * Any other value is answered `400` ("Invalid sort_by: ...").
  */
 export const GetKnowledgeHubChildNodesSortBy = {
   Name: "name",
@@ -52,27 +54,27 @@ export const GetKnowledgeHubChildNodesSortBy = {
  * Field to sort results by. Omitted → default `updatedAt`.
  *
  * @remarks
- * Unknown value → silently falls back to `name`.
+ * Any other value is answered `400` ("Invalid sort_by: ...").
  */
 export type GetKnowledgeHubChildNodesSortBy = ClosedEnum<
   typeof GetKnowledgeHubChildNodesSortBy
 >;
 
 /**
- * Sort direction. Omitted → default `desc`.
+ * Sort direction. Omitted → default `desc`. Read case-insensitively;
  *
  * @remarks
- * Unknown value → silently falls back to `asc`.
+ * any other value is answered `400` ("Invalid sort_order: ...").
  */
 export const GetKnowledgeHubChildNodesSortOrder = {
   Asc: "asc",
   Desc: "desc",
 } as const;
 /**
- * Sort direction. Omitted → default `desc`.
+ * Sort direction. Omitted → default `desc`. Read case-insensitively;
  *
  * @remarks
- * Unknown value → silently falls back to `asc`.
+ * any other value is answered `400` ("Invalid sort_order: ...").
  */
 export type GetKnowledgeHubChildNodesSortOrder = ClosedEnum<
   typeof GetKnowledgeHubChildNodesSortOrder
@@ -84,8 +86,9 @@ export type GetKnowledgeHubChildNodesRequest = {
    *
    * @remarks
    *
-   * Must be one of: `app`, `recordGroup`, `folder`, `record`.
-   * Any other value returns a 400 error.
+   * Must be one of: `app`, `recordGroup`, `folder`, `record` (case-sensitive).
+   * Any other value returns a 400 error, and so does a type that does not
+   * match what `parentId` is (for example `folder` with a knowledge base id).
    */
   parentType: ParentType;
   /**
@@ -94,7 +97,9 @@ export type GetKnowledgeHubChildNodesRequest = {
    * @remarks
    * (e.g. `f3a4b5b6-5b6c-4e85-9097-3202cfe696fc`).
    *
-   * Any value that does not match this format returns a 400 error.
+   * Any value that does not match this format returns a 400 error. The format
+   * check ignores letter case but ids are stored in lower case, so an
+   * upper-case UUID passes the check and is answered 404.
    */
   parentId: string;
   /**
@@ -131,38 +136,41 @@ export type GetKnowledgeHubChildNodesRequest = {
    * Field to sort results by. Omitted → default `updatedAt`.
    *
    * @remarks
-   * Unknown value → silently falls back to `name`.
+   * Any other value is answered `400` ("Invalid sort_by: ...").
    */
   sortBy?: GetKnowledgeHubChildNodesSortBy | undefined;
   /**
-   * Sort direction. Omitted → default `desc`.
+   * Sort direction. Omitted → default `desc`. Read case-insensitively;
    *
    * @remarks
-   * Unknown value → silently falls back to `asc`.
+   * any other value is answered `400` ("Invalid sort_order: ...").
    */
   sortOrder?: GetKnowledgeHubChildNodesSortOrder | undefined;
   /**
    * Full-text search query. Must be between 2 and 500 characters
    *
    * @remarks
-   * (inclusive). When provided, the endpoint searches across all
+   * (inclusive) after surrounding whitespace is removed, otherwise `400`.
+   * When provided, the endpoint searches across all
    * descendants of the parent node.
+   * A repeated `q` is joined with commas into one query, and a `q` sent as an object
+   * (`q[a]=b`) is refused with `400` ("Search query must be text").
    */
   q?: string | undefined;
   /**
-   * Comma-separated list of node types to include. Invalid values are
+   * Comma-separated list of node types to include. An unknown value is
    *
    * @remarks
-   * silently ignored. Maximum 100 items.
+   * answered `400` ("Invalid node_types value(s): ..."). Maximum 100 items.
    *
    * Valid values: `folder`, `app`, `recordGroup`, `record`
    */
   nodeTypes?: string | undefined;
   /**
-   * Comma-separated list of record types to include. Invalid values are
+   * Comma-separated list of record types to include. An unknown value is
    *
    * @remarks
-   * silently ignored. Maximum 100 items.
+   * answered `400` ("Invalid record_types value(s): ..."). Maximum 100 items.
    *
    * Valid values: `FILE`, `DRIVE`, `WEBPAGE`, `DATABASE`, `DATASOURCE`,
    * `MESSAGE`, `MAIL`, `GROUP_MAIL`, `TICKET`, `COMMENT`,
@@ -174,10 +182,10 @@ export type GetKnowledgeHubChildNodesRequest = {
    */
   recordTypes?: string | undefined;
   /**
-   * Comma-separated list of origin types to include. Invalid values are
+   * Comma-separated list of origin types to include. An unknown value is
    *
    * @remarks
-   * silently ignored. Maximum 100 items.
+   * answered `400` ("Invalid origins value(s): ..."). Maximum 100 items.
    *
    * Valid values: `COLLECTION`, `CONNECTOR`
    */
@@ -191,14 +199,14 @@ export type GetKnowledgeHubChildNodesRequest = {
    */
   connectorIds?: string | undefined;
   /**
-   * Comma-separated list of indexing statuses to include. Invalid values
+   * Comma-separated list of indexing statuses to include. An unknown value
    *
    * @remarks
-   * are silently ignored. Maximum 100 items.
+   * is answered `400` ("Invalid indexing_status value(s): ..."). Maximum 100 items.
    *
    * Valid values: `NOT_STARTED`, `PAUSED`, `IN_PROGRESS`, `COMPLETED`,
    * `FAILED`, `FILE_TYPE_NOT_SUPPORTED`, `AUTO_INDEX_OFF`, `EMPTY`,
-   * `ENABLE_MULTIMODAL_MODELS`, `QUEUED`
+   * `ENABLE_MULTIMODAL_MODELS`, `QUEUED`, `SKIPPED`, `PASSWORD_PROTECTED`
    */
   indexingStatus?: string | undefined;
   /**
@@ -240,7 +248,8 @@ export type GetKnowledgeHubChildNodesRequest = {
    * Comma-separated list of additional response sections to include.
    *
    * @remarks
-   * Invalid values are silently ignored. Maximum 100 items.
+   * An unknown value is answered `400` ("Invalid include value(s): ...").
+   * Maximum 100 items.
    *
    * Valid values: `breadcrumbs`, `counts`, `availableFilters`, `permissions`
    */
@@ -260,18 +269,6 @@ export type GetKnowledgeHubChildNodesServiceUnavailableError = {
   requestId?: string | undefined;
 };
 
-export const GetKnowledgeHubChildNodesCodeHTTPInternalServerError = {
-  HttpInternalServerError: "HTTP_INTERNAL_SERVER_ERROR",
-} as const;
-export type GetKnowledgeHubChildNodesCodeHTTPInternalServerError = ClosedEnum<
-  typeof GetKnowledgeHubChildNodesCodeHTTPInternalServerError
->;
-
-export type GetKnowledgeHubChildNodesErrorHTTPInternalServerError = {
-  code: GetKnowledgeHubChildNodesCodeHTTPInternalServerError;
-  message: string;
-};
-
 export const GetKnowledgeHubChildNodesUnprocessableEntityCode = {
   HttpUnprocessableEntity: "HTTP_UNPROCESSABLE_ENTITY",
 } as const;
@@ -283,54 +280,6 @@ export type GetKnowledgeHubChildNodesUnprocessableEntityError = {
   code: GetKnowledgeHubChildNodesUnprocessableEntityCode;
   message: string;
   requestId?: string | undefined;
-};
-
-export const GetKnowledgeHubChildNodesNotFoundCode = {
-  HttpNotFound: "HTTP_NOT_FOUND",
-} as const;
-export type GetKnowledgeHubChildNodesNotFoundCode = ClosedEnum<
-  typeof GetKnowledgeHubChildNodesNotFoundCode
->;
-
-export type GetKnowledgeHubChildNodesNotFoundError = {
-  code: GetKnowledgeHubChildNodesNotFoundCode;
-  message: string;
-};
-
-export const GetKnowledgeHubChildNodesForbiddenCode = {
-  HttpForbidden: "HTTP_FORBIDDEN",
-} as const;
-export type GetKnowledgeHubChildNodesForbiddenCode = ClosedEnum<
-  typeof GetKnowledgeHubChildNodesForbiddenCode
->;
-
-export type GetKnowledgeHubChildNodesErrorHTTPForbidden = {
-  code: GetKnowledgeHubChildNodesForbiddenCode;
-  message: string;
-};
-
-export const GetKnowledgeHubChildNodesUnauthorizedCode = {
-  HttpUnauthorized: "HTTP_UNAUTHORIZED",
-} as const;
-export type GetKnowledgeHubChildNodesUnauthorizedCode = ClosedEnum<
-  typeof GetKnowledgeHubChildNodesUnauthorizedCode
->;
-
-export type GetKnowledgeHubChildNodesErrorHTTPUnauthorized = {
-  code: GetKnowledgeHubChildNodesUnauthorizedCode;
-  message: string;
-};
-
-export const GetKnowledgeHubChildNodesCodeHTTPBadRequest = {
-  HttpBadRequest: "HTTP_BAD_REQUEST",
-} as const;
-export type GetKnowledgeHubChildNodesCodeHTTPBadRequest = ClosedEnum<
-  typeof GetKnowledgeHubChildNodesCodeHTTPBadRequest
->;
-
-export type GetKnowledgeHubChildNodesErrorHTTPBadRequest = {
-  code: GetKnowledgeHubChildNodesCodeHTTPBadRequest;
-  message: string;
 };
 
 export type GetKnowledgeHubChildNodesResponse = {
@@ -448,37 +397,6 @@ export function getKnowledgeHubChildNodesServiceUnavailableErrorFromJSON(
 }
 
 /** @internal */
-export const GetKnowledgeHubChildNodesCodeHTTPInternalServerError$inboundSchema:
-  z.ZodMiniEnum<typeof GetKnowledgeHubChildNodesCodeHTTPInternalServerError> = z
-    .enum(GetKnowledgeHubChildNodesCodeHTTPInternalServerError);
-
-/** @internal */
-export const GetKnowledgeHubChildNodesErrorHTTPInternalServerError$inboundSchema:
-  z.ZodMiniType<
-    GetKnowledgeHubChildNodesErrorHTTPInternalServerError,
-    unknown
-  > = z.object({
-    code: GetKnowledgeHubChildNodesCodeHTTPInternalServerError$inboundSchema,
-    message: types.string(),
-  });
-
-export function getKnowledgeHubChildNodesErrorHTTPInternalServerErrorFromJSON(
-  jsonString: string,
-): SafeParseResult<
-  GetKnowledgeHubChildNodesErrorHTTPInternalServerError,
-  SDKValidationError
-> {
-  return safeParse(
-    jsonString,
-    (x) =>
-      GetKnowledgeHubChildNodesErrorHTTPInternalServerError$inboundSchema.parse(
-        JSON.parse(x),
-      ),
-    `Failed to parse 'GetKnowledgeHubChildNodesErrorHTTPInternalServerError' from JSON`,
-  );
-}
-
-/** @internal */
 export const GetKnowledgeHubChildNodesUnprocessableEntityCode$inboundSchema:
   z.ZodMiniEnum<typeof GetKnowledgeHubChildNodesUnprocessableEntityCode> = z
     .enum(GetKnowledgeHubChildNodesUnprocessableEntityCode);
@@ -505,119 +423,6 @@ export function getKnowledgeHubChildNodesUnprocessableEntityErrorFromJSON(
         JSON.parse(x),
       ),
     `Failed to parse 'GetKnowledgeHubChildNodesUnprocessableEntityError' from JSON`,
-  );
-}
-
-/** @internal */
-export const GetKnowledgeHubChildNodesNotFoundCode$inboundSchema: z.ZodMiniEnum<
-  typeof GetKnowledgeHubChildNodesNotFoundCode
-> = z.enum(GetKnowledgeHubChildNodesNotFoundCode);
-
-/** @internal */
-export const GetKnowledgeHubChildNodesNotFoundError$inboundSchema:
-  z.ZodMiniType<GetKnowledgeHubChildNodesNotFoundError, unknown> = z.object({
-    code: GetKnowledgeHubChildNodesNotFoundCode$inboundSchema,
-    message: types.string(),
-  });
-
-export function getKnowledgeHubChildNodesNotFoundErrorFromJSON(
-  jsonString: string,
-): SafeParseResult<GetKnowledgeHubChildNodesNotFoundError, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) =>
-      GetKnowledgeHubChildNodesNotFoundError$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetKnowledgeHubChildNodesNotFoundError' from JSON`,
-  );
-}
-
-/** @internal */
-export const GetKnowledgeHubChildNodesForbiddenCode$inboundSchema:
-  z.ZodMiniEnum<typeof GetKnowledgeHubChildNodesForbiddenCode> = z.enum(
-    GetKnowledgeHubChildNodesForbiddenCode,
-  );
-
-/** @internal */
-export const GetKnowledgeHubChildNodesErrorHTTPForbidden$inboundSchema:
-  z.ZodMiniType<GetKnowledgeHubChildNodesErrorHTTPForbidden, unknown> = z
-    .object({
-      code: GetKnowledgeHubChildNodesForbiddenCode$inboundSchema,
-      message: types.string(),
-    });
-
-export function getKnowledgeHubChildNodesErrorHTTPForbiddenFromJSON(
-  jsonString: string,
-): SafeParseResult<
-  GetKnowledgeHubChildNodesErrorHTTPForbidden,
-  SDKValidationError
-> {
-  return safeParse(
-    jsonString,
-    (x) =>
-      GetKnowledgeHubChildNodesErrorHTTPForbidden$inboundSchema.parse(
-        JSON.parse(x),
-      ),
-    `Failed to parse 'GetKnowledgeHubChildNodesErrorHTTPForbidden' from JSON`,
-  );
-}
-
-/** @internal */
-export const GetKnowledgeHubChildNodesUnauthorizedCode$inboundSchema:
-  z.ZodMiniEnum<typeof GetKnowledgeHubChildNodesUnauthorizedCode> = z.enum(
-    GetKnowledgeHubChildNodesUnauthorizedCode,
-  );
-
-/** @internal */
-export const GetKnowledgeHubChildNodesErrorHTTPUnauthorized$inboundSchema:
-  z.ZodMiniType<GetKnowledgeHubChildNodesErrorHTTPUnauthorized, unknown> = z
-    .object({
-      code: GetKnowledgeHubChildNodesUnauthorizedCode$inboundSchema,
-      message: types.string(),
-    });
-
-export function getKnowledgeHubChildNodesErrorHTTPUnauthorizedFromJSON(
-  jsonString: string,
-): SafeParseResult<
-  GetKnowledgeHubChildNodesErrorHTTPUnauthorized,
-  SDKValidationError
-> {
-  return safeParse(
-    jsonString,
-    (x) =>
-      GetKnowledgeHubChildNodesErrorHTTPUnauthorized$inboundSchema.parse(
-        JSON.parse(x),
-      ),
-    `Failed to parse 'GetKnowledgeHubChildNodesErrorHTTPUnauthorized' from JSON`,
-  );
-}
-
-/** @internal */
-export const GetKnowledgeHubChildNodesCodeHTTPBadRequest$inboundSchema:
-  z.ZodMiniEnum<typeof GetKnowledgeHubChildNodesCodeHTTPBadRequest> = z.enum(
-    GetKnowledgeHubChildNodesCodeHTTPBadRequest,
-  );
-
-/** @internal */
-export const GetKnowledgeHubChildNodesErrorHTTPBadRequest$inboundSchema:
-  z.ZodMiniType<GetKnowledgeHubChildNodesErrorHTTPBadRequest, unknown> = z
-    .object({
-      code: GetKnowledgeHubChildNodesCodeHTTPBadRequest$inboundSchema,
-      message: types.string(),
-    });
-
-export function getKnowledgeHubChildNodesErrorHTTPBadRequestFromJSON(
-  jsonString: string,
-): SafeParseResult<
-  GetKnowledgeHubChildNodesErrorHTTPBadRequest,
-  SDKValidationError
-> {
-  return safeParse(
-    jsonString,
-    (x) =>
-      GetKnowledgeHubChildNodesErrorHTTPBadRequest$inboundSchema.parse(
-        JSON.parse(x),
-      ),
-    `Failed to parse 'GetKnowledgeHubChildNodesErrorHTTPBadRequest' from JSON`,
   );
 }
 

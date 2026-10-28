@@ -9,7 +9,22 @@ import { GetConnectorSchemaResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: GetConnectorSchemaResponse = {
   success: false,
-  schema: {},
+  schema: {
+    documentationLinks: [
+      {
+        title: "Azure AD App Registration Setup",
+        type: "setup",
+      },
+    ],
+    sync: {
+      scheduledConfig: {
+        timezone: "UTC",
+      },
+      realtimeConfig: {
+        connectionType: "WEBSOCKET",
+      },
+    },
+  },
 };
 ```
 

@@ -21,6 +21,11 @@ export type ConnectorSyncConfigScheduledConfig = {
    * Epoch milliseconds
    */
   startTime?: number | undefined;
+  /**
+   * When the schedule starts, as the frontend sends it
+   */
+  startDateTime?: any | undefined;
+  [additionalProperties: string]: unknown;
 };
 
 export type ConnectorSyncConfigWebhookConfig = {
@@ -48,17 +53,23 @@ export type ConnectorSyncConfigScheduledConfig$Outbound = {
   intervalMinutes?: number | undefined;
   timezone: string;
   startTime?: number | undefined;
+  startDateTime?: any | undefined;
+  [additionalProperties: string]: unknown;
 };
 
 /** @internal */
 export const ConnectorSyncConfigScheduledConfig$outboundSchema: z.ZodMiniType<
   ConnectorSyncConfigScheduledConfig$Outbound,
   ConnectorSyncConfigScheduledConfig
-> = z.object({
-  intervalMinutes: z.optional(z.int()),
-  timezone: z._default(z.string(), "UTC"),
-  startTime: z.optional(z.int()),
-});
+> = z.catchall(
+  z.object({
+    intervalMinutes: z.optional(z.int()),
+    timezone: z._default(z.string(), "UTC"),
+    startTime: z.optional(z.int()),
+    startDateTime: z.optional(z.any()),
+  }),
+  z.any(),
+);
 
 export function connectorSyncConfigScheduledConfigToJSON(
   connectorSyncConfigScheduledConfig: ConnectorSyncConfigScheduledConfig,

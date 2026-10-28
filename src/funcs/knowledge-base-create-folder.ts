@@ -41,15 +41,27 @@ import { Result } from "../types/fp.js";
  * **Folder features:**
  *
  * - Organize records hierarchically
- * - Support nested subfolders (unlimited depth)
+ * - Support nested subfolders, up to 20 levels deep
  * - Inherit parent KB permissions
  *
  * **Naming rules:**
  *
- * - 1–255 characters
- * - XSS protection applied
+ * - Whitespace around the name is removed first; then 1–255 characters
+ * - A name holding an HTML tag, a `javascript:` URL or an inline event handler is
+ *   refused with `400` before authentication; one holding a printf-style format
+ *   specifier (`%s`, `%x`, `%n`, `%p`) is refused with `400` by the gateway controller
  * - Spaces and special characters allowed
- * - Duplicate names rejected within the same parent (`409`)
+ * - A name already used by a folder in the same parent is refused with `409`, ignoring
+ *   case (`Reports` and `rEPORTS` clash). A file of the same name, or a folder of the
+ *   same name under another parent, does not clash.
+ *
+ * **Request:** only `folderName` and the `folderId` query parameter are read; other body
+ * fields and query parameters are ignored, except a `folderId`, `parentId` or
+ * `parent_id` in the body and a `parentId` or `parent_id` query parameter, which are
+ * refused with `400`.
+ *
+ * **Access:** a caller with no role on the knowledge base gets `404`
+ * (`Knowledge base <kbId> not found`), a `READER` gets `403`.
  *
  * **Response:** Returns `id` and `name` for the created folder.
  *

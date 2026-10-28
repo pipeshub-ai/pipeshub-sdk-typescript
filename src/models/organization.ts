@@ -87,6 +87,14 @@ export type Organization = {
    * Last update timestamp (ISO 8601)
    */
   updatedAt: Date;
+  /**
+   * Where the signup came from: the `ref` tag it was made with, or `direct`. Absent on organizations created before it was recorded.
+   */
+  signupChannel?: string | undefined;
+  /**
+   * For a `direct` signup, the referring site's domain, when there was one.
+   */
+  signupReferrerDomain?: string | undefined;
 };
 
 /** @internal */
@@ -116,6 +124,8 @@ export const Organization$inboundSchema: z.ZodMiniType<Organization, unknown> =
       __v: types.number(),
       createdAt: types.date(),
       updatedAt: types.date(),
+      signupChannel: types.optional(types.string()),
+      signupReferrerDomain: types.optional(types.string()),
     }),
     z.transform((v) => {
       return remap$(v, {

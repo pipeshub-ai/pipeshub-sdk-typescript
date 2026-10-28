@@ -1,0 +1,23 @@
+// Update the sync strategy and filters of a connector. Turn the sync off first.
+// Needs PIPESHUB_CONNECTOR_ID.
+import "dotenv/config";
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  serverURL: `${process.env["PIPESHUB_BASE_URL"]}/api/v1`,
+  // A personal access token: admin operations must act as a user, not a service account.
+  security: { bearerAuth: process.env["PIPESHUB_BEARER_AUTH"] ?? "" },
+});
+
+const connectorId = process.env["PIPESHUB_CONNECTOR_ID"] ?? "";
+
+async function main() {
+  const result = await pipeshub.connectorConfiguration.updateConnectorFiltersSyncConfig({
+    connectorId,
+    body: { sync: { selectedStrategy: "MANUAL" } },
+  });
+
+  console.log(result);
+}
+
+main().catch(console.error);

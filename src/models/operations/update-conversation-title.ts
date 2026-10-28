@@ -17,7 +17,11 @@ import * as models from "../index.js";
  */
 export type UpdateConversationTitleRequestBody = {
   /**
-   * New conversation title
+   * New conversation title. Surrounding whitespace is trimmed before
+   *
+   * @remarks
+   * validation, so a title of only whitespace is refused with `400`
+   * `VALIDATION_ERROR` ("Title is required").
    */
   title: string;
 };
@@ -75,6 +79,10 @@ export type UpdateConversationTitleAccessLevel = OpenEnum<
 export type UpdateConversationTitleSharedWith = {
   userId: string;
   accessLevel: UpdateConversationTitleAccessLevel;
+  /**
+   * Subdocument identifier auto-assigned by MongoDB.
+   */
+  id?: string | undefined;
 };
 
 export type UpdateConversationTitleConversationError = {
@@ -318,13 +326,21 @@ export const UpdateConversationTitleAccessLevel$inboundSchema: z.ZodMiniType<
 export const UpdateConversationTitleSharedWith$inboundSchema: z.ZodMiniType<
   UpdateConversationTitleSharedWith,
   unknown
-> = z.object({
-  userId: types.string(),
-  accessLevel: z._default(
-    UpdateConversationTitleAccessLevel$inboundSchema,
-    "read",
-  ),
-});
+> = z.pipe(
+  z.object({
+    userId: types.string(),
+    accessLevel: z._default(
+      UpdateConversationTitleAccessLevel$inboundSchema,
+      "read",
+    ),
+    _id: types.optional(types.string()),
+  }),
+  z.transform((v) => {
+    return remap$(v, {
+      "_id": "id",
+    });
+  }),
+);
 
 export function updateConversationTitleSharedWithFromJSON(
   jsonString: string,

@@ -6,7 +6,7 @@ import * as z from "zod/v4-mini";
 import { ClosedEnum } from "../../types/enums.js";
 
 /**
- * Filter by status
+ * Filter by status. `revoked` always yields an empty page, because an app only becomes revoked by being deleted and deleted apps are never listed.
  */
 export const ListOAuthAppsStatus = {
   Active: "active",
@@ -14,7 +14,7 @@ export const ListOAuthAppsStatus = {
   Revoked: "revoked",
 } as const;
 /**
- * Filter by status
+ * Filter by status. `revoked` always yields an empty page, because an app only becomes revoked by being deleted and deleted apps are never listed.
  */
 export type ListOAuthAppsStatus = ClosedEnum<typeof ListOAuthAppsStatus>;
 
@@ -32,7 +32,7 @@ export type ListOAuthAppsRequest = {
    */
   limit?: number | undefined;
   /**
-   * Filter by status
+   * Filter by status. `revoked` always yields an empty page, because an app only becomes revoked by being deleted and deleted apps are never listed.
    */
   status?: ListOAuthAppsStatus | undefined;
   /**

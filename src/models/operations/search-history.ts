@@ -29,14 +29,22 @@ export const SearchHistorySortBy = {
 export type SearchHistorySortBy = ClosedEnum<typeof SearchHistorySortBy>;
 
 /**
- * Sort direction applied to `sortBy`.
+ * Sort direction applied to `sortBy`. Only the exact, case-sensitive value `asc` sorts
+ *
+ * @remarks
+ * ascending; any other value (`ASC`, `sideways`, ...) is accepted and sorts descending.
+ * The raw value is echoed in `filters.applied.values.sortOrder`.
  */
 export const SearchHistorySortOrder = {
   Asc: "asc",
   Desc: "desc",
 } as const;
 /**
- * Sort direction applied to `sortBy`.
+ * Sort direction applied to `sortBy`. Only the exact, case-sensitive value `asc` sorts
+ *
+ * @remarks
+ * ascending; any other value (`ASC`, `sideways`, ...) is accepted and sorts descending.
+ * The raw value is echoed in `filters.applied.values.sortOrder`.
  */
 export type SearchHistorySortOrder = ClosedEnum<typeof SearchHistorySortOrder>;
 
@@ -66,11 +74,20 @@ export type SearchHistoryShared = ClosedEnum<typeof SearchHistoryShared>;
 
 export type SearchHistoryRequest = {
   /**
-   * Page number to return. Must be within `[1, 1000]`.
+   * Page number to return, from 1. An empty value means `1`. The value is read with
+   *
+   * @remarks
+   * `parseInt`, so a fraction or trailing text is truncated (`2.5` reads as page `2`)
+   * instead of refused. `0`, a negative value, a value that is not a number, or one
+   * above 90071992547409 is refused with `400`.
    */
   page?: number | undefined;
   /**
-   * Number of items per page. Values are clamped to the range `[1, 100]`.
+   * Number of items per page. An empty value means `20`. Read with `parseInt` like
+   *
+   * @remarks
+   * `page`; a value outside `[1, 100]` or not a number is refused with `400`, not
+   * clamped.
    */
   limit?: number | undefined;
   /**
@@ -81,15 +98,20 @@ export type SearchHistoryRequest = {
    */
   sortBy?: SearchHistorySortBy | undefined;
   /**
-   * Sort direction applied to `sortBy`.
+   * Sort direction applied to `sortBy`. Only the exact, case-sensitive value `asc` sorts
+   *
+   * @remarks
+   * ascending; any other value (`ASC`, `sideways`, ...) is accepted and sorts descending.
+   * The raw value is echoed in `filters.applied.values.sortOrder`.
    */
   sortOrder?: SearchHistorySortOrder | undefined;
   /**
-   * Case-insensitive substring to match against a search's title and
+   * Meant as a case-insensitive substring filter on a search's title, but a stored
    *
    * @remarks
-   * message content. Regex metacharacters are escaped automatically.
-   * Values longer than 1000 characters are rejected with `400`.
+   * search has no title, so the filter is dropped and every search is still returned.
+   * The value is still checked: more than 1000 characters, or HTML markup, is refused
+   * with `400`.
    */
   search?: string | undefined;
   /**
@@ -102,19 +124,27 @@ export type SearchHistoryRequest = {
    */
   shared?: SearchHistoryShared | undefined;
   /**
-   * ISO 8601 timestamp used as the lower bound for a search's creation date.
+   * ISO 8601 date or date-time used as the inclusive lower bound for a search's creation
+   *
+   * @remarks
+   * date. A value JavaScript's `Date` cannot parse is refused with `400` ("Invalid start
+   * date format").
    */
-  startDate?: Date | undefined;
+  startDate?: string | undefined;
   /**
-   * ISO 8601 timestamp used as the upper bound for a search's creation date.
+   * ISO 8601 date or date-time used as the inclusive upper bound for a search's creation
+   *
+   * @remarks
+   * date. A value JavaScript's `Date` cannot parse is refused with `400` ("Invalid end
+   * date format").
    */
-  endDate?: Date | undefined;
+  endDate?: string | undefined;
 };
 
 /**
  * Error payload.
  */
-export type SearchHistoryInternalServerErrorError = {
+export type InternalServerErrorError = {
   /**
    * Identifier for this request, echoed so a bug report can quote it.
    *
@@ -141,7 +171,7 @@ export type SearchHistoryInternalServerErrorError = {
 /**
  * Error payload.
  */
-export type SearchHistoryForbiddenError = {
+export type ForbiddenError = {
   /**
    * Identifier for this request, echoed so a bug report can quote it.
    *
@@ -166,7 +196,7 @@ export type SearchHistoryForbiddenError = {
 /**
  * Error payload.
  */
-export type SearchHistoryUnauthorizedError = {
+export type UnauthorizedError = {
   /**
    * Identifier for this request, echoed so a bug report can quote it.
    *
@@ -192,7 +222,7 @@ export type SearchHistoryUnauthorizedError = {
 /**
  * Error payload.
  */
-export type SearchHistoryBadRequestError = {
+export type BadRequestError = {
   /**
    * Identifier for this request, echoed so a bug report can quote it.
    *
@@ -254,8 +284,8 @@ export const SearchHistoryRequest$outboundSchema: z.ZodMiniType<
   sortOrder: z._default(SearchHistorySortOrder$outboundSchema, "desc"),
   search: z.optional(z.string()),
   shared: z.optional(SearchHistoryShared$outboundSchema),
-  startDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
-  endDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
+  startDate: z.optional(z.string()),
+  endDate: z.optional(z.string()),
 });
 
 export function searchHistoryRequestToJSON(
@@ -267,8 +297,8 @@ export function searchHistoryRequestToJSON(
 }
 
 /** @internal */
-export const SearchHistoryInternalServerErrorError$inboundSchema: z.ZodMiniType<
-  SearchHistoryInternalServerErrorError,
+export const InternalServerErrorError$inboundSchema: z.ZodMiniType<
+  InternalServerErrorError,
   unknown
 > = z.object({
   requestId: types.optional(types.string()),
@@ -276,20 +306,19 @@ export const SearchHistoryInternalServerErrorError$inboundSchema: z.ZodMiniType<
   message: types.string(),
 });
 
-export function searchHistoryInternalServerErrorErrorFromJSON(
+export function internalServerErrorErrorFromJSON(
   jsonString: string,
-): SafeParseResult<SearchHistoryInternalServerErrorError, SDKValidationError> {
+): SafeParseResult<InternalServerErrorError, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) =>
-      SearchHistoryInternalServerErrorError$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'SearchHistoryInternalServerErrorError' from JSON`,
+    (x) => InternalServerErrorError$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'InternalServerErrorError' from JSON`,
   );
 }
 
 /** @internal */
-export const SearchHistoryForbiddenError$inboundSchema: z.ZodMiniType<
-  SearchHistoryForbiddenError,
+export const ForbiddenError$inboundSchema: z.ZodMiniType<
+  ForbiddenError,
   unknown
 > = z.object({
   requestId: types.optional(types.string()),
@@ -297,19 +326,19 @@ export const SearchHistoryForbiddenError$inboundSchema: z.ZodMiniType<
   message: types.string(),
 });
 
-export function searchHistoryForbiddenErrorFromJSON(
+export function forbiddenErrorFromJSON(
   jsonString: string,
-): SafeParseResult<SearchHistoryForbiddenError, SDKValidationError> {
+): SafeParseResult<ForbiddenError, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => SearchHistoryForbiddenError$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'SearchHistoryForbiddenError' from JSON`,
+    (x) => ForbiddenError$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ForbiddenError' from JSON`,
   );
 }
 
 /** @internal */
-export const SearchHistoryUnauthorizedError$inboundSchema: z.ZodMiniType<
-  SearchHistoryUnauthorizedError,
+export const UnauthorizedError$inboundSchema: z.ZodMiniType<
+  UnauthorizedError,
   unknown
 > = z.object({
   requestId: types.optional(types.string()),
@@ -317,19 +346,19 @@ export const SearchHistoryUnauthorizedError$inboundSchema: z.ZodMiniType<
   message: types.string(),
 });
 
-export function searchHistoryUnauthorizedErrorFromJSON(
+export function unauthorizedErrorFromJSON(
   jsonString: string,
-): SafeParseResult<SearchHistoryUnauthorizedError, SDKValidationError> {
+): SafeParseResult<UnauthorizedError, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => SearchHistoryUnauthorizedError$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'SearchHistoryUnauthorizedError' from JSON`,
+    (x) => UnauthorizedError$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'UnauthorizedError' from JSON`,
   );
 }
 
 /** @internal */
-export const SearchHistoryBadRequestError$inboundSchema: z.ZodMiniType<
-  SearchHistoryBadRequestError,
+export const BadRequestError$inboundSchema: z.ZodMiniType<
+  BadRequestError,
   unknown
 > = z.object({
   requestId: types.optional(types.string()),
@@ -337,12 +366,12 @@ export const SearchHistoryBadRequestError$inboundSchema: z.ZodMiniType<
   message: types.string(),
 });
 
-export function searchHistoryBadRequestErrorFromJSON(
+export function badRequestErrorFromJSON(
   jsonString: string,
-): SafeParseResult<SearchHistoryBadRequestError, SDKValidationError> {
+): SafeParseResult<BadRequestError, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => SearchHistoryBadRequestError$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'SearchHistoryBadRequestError' from JSON`,
+    (x) => BadRequestError$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'BadRequestError' from JSON`,
   );
 }

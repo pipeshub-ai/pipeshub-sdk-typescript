@@ -9,11 +9,65 @@ import { Result as SafeParseResult } from "../../types/fp.js";
 import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 
+/**
+ * Additional `isShared` filter. `'true'` / `'1'` and `'false'` / `'0'`,
+ *
+ * @remarks
+ * case-insensitive; anything else is refused with `400`. The search is only unarchived
+ * if it matches, otherwise `404`.
+ */
+export const UnarchiveSearchShared = {
+  True: "true",
+  False: "false",
+  One: "1",
+  Zero: "0",
+} as const;
+/**
+ * Additional `isShared` filter. `'true'` / `'1'` and `'false'` / `'0'`,
+ *
+ * @remarks
+ * case-insensitive; anything else is refused with `400`. The search is only unarchived
+ * if it matches, otherwise `404`.
+ */
+export type UnarchiveSearchShared = ClosedEnum<typeof UnarchiveSearchShared>;
+
 export type UnarchiveSearchRequest = {
   /**
    * Unique search identifier
    */
   searchId: string;
+  /**
+   * Validated, then dropped: a stored search has no title to match, so the search is
+   *
+   * @remarks
+   * unarchived whatever this says. More than 1000 characters, or HTML markup, is refused
+   * with `400`.
+   */
+  search?: string | undefined;
+  /**
+   * Additional `isShared` filter. `'true'` / `'1'` and `'false'` / `'0'`,
+   *
+   * @remarks
+   * case-insensitive; anything else is refused with `400`. The search is only unarchived
+   * if it matches, otherwise `404`.
+   */
+  shared?: UnarchiveSearchShared | undefined;
+  /**
+   * ISO 8601 date or date-time lower bound for `createdAt`. The search is only unarchived
+   *
+   * @remarks
+   * if it was created on or after it, otherwise `404`. A value JavaScript's `Date`
+   * cannot parse is refused with `400`.
+   */
+  startDate?: string | undefined;
+  /**
+   * ISO 8601 date or date-time upper bound for `createdAt`. The search is only unarchived
+   *
+   * @remarks
+   * if it was created on or before it, otherwise `404`. A value JavaScript's `Date`
+   * cannot parse is refused with `400`.
+   */
+  endDate?: string | undefined;
 };
 
 /**
@@ -66,8 +120,17 @@ export type UnarchiveSearchResponse = {
 };
 
 /** @internal */
+export const UnarchiveSearchShared$outboundSchema: z.ZodMiniEnum<
+  typeof UnarchiveSearchShared
+> = z.enum(UnarchiveSearchShared);
+
+/** @internal */
 export type UnarchiveSearchRequest$Outbound = {
   searchId: string;
+  search?: string | undefined;
+  shared?: string | undefined;
+  startDate?: string | undefined;
+  endDate?: string | undefined;
 };
 
 /** @internal */
@@ -76,6 +139,10 @@ export const UnarchiveSearchRequest$outboundSchema: z.ZodMiniType<
   UnarchiveSearchRequest
 > = z.object({
   searchId: z.string(),
+  search: z.optional(z.string()),
+  shared: z.optional(UnarchiveSearchShared$outboundSchema),
+  startDate: z.optional(z.string()),
+  endDate: z.optional(z.string()),
 });
 
 export function unarchiveSearchRequestToJSON(

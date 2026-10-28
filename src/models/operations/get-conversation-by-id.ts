@@ -42,7 +42,34 @@ export type GetConversationByIdSortOrderEnum = ClosedEnum<
 >;
 
 /**
- * Filter messages by type
+ * Filters on the conversation's `isShared`; a conversation that
+ *
+ * @remarks
+ * does not match is answered `404`. Read case-insensitively;
+ * any other value is refused with `400`.
+ */
+export const GetConversationByIdSharedEnum = {
+  True: "true",
+  False: "false",
+  One: "1",
+  Zero: "0",
+} as const;
+/**
+ * Filters on the conversation's `isShared`; a conversation that
+ *
+ * @remarks
+ * does not match is answered `404`. Read case-insensitively;
+ * any other value is refused with `400`.
+ */
+export type GetConversationByIdSharedEnum = ClosedEnum<
+  typeof GetConversationByIdSharedEnum
+>;
+
+/**
+ * Checked against the listed values (`400` otherwise) but not
+ *
+ * @remarks
+ * applied: every message type is returned.
  */
 export const GetConversationByIdQueryParamMessageType = {
   UserQuery: "user_query",
@@ -50,9 +77,13 @@ export const GetConversationByIdQueryParamMessageType = {
   Error: "error",
   Feedback: "feedback",
   System: "system",
+  ToolCall: "tool_call",
 } as const;
 /**
- * Filter messages by type
+ * Checked against the listed values (`400` otherwise) but not
+ *
+ * @remarks
+ * applied: every message type is returned.
  */
 export type GetConversationByIdQueryParamMessageType = ClosedEnum<
   typeof GetConversationByIdQueryParamMessageType
@@ -64,11 +95,17 @@ export type GetConversationByIdRequest = {
    */
   conversationId: string;
   /**
-   * Page number for message pagination
+   * Page number for message pagination. Read with `parseInt`, so a fraction such
+   *
+   * @remarks
+   * as `1.5` is tolerated and truncated (page 1).
    */
   page?: number | undefined;
   /**
-   * Number of messages per page
+   * Number of messages per page. Read with `parseInt`, so a fraction such as `5.5`
+   *
+   * @remarks
+   * is tolerated and truncated (5).
    */
   limit?: number | undefined;
   /**
@@ -80,23 +117,54 @@ export type GetConversationByIdRequest = {
    */
   sortOrder?: GetConversationByIdSortOrderEnum | undefined;
   /**
-   * Case-insensitive search across conversation title and message content
+   * Case-insensitive match against the conversation's title and its
+   *
+   * @remarks
+   * messages' content. Applies to the conversation, not its messages:
+   * when nothing matches the answer is `404`; when something matches
+   * every message is returned.
    */
   search?: string | undefined;
   /**
-   * Filter messages created on or after this date (ISO 8601)
+   * Applies to the conversation, not its messages: when the
+   *
+   * @remarks
+   * conversation was created before this instant the answer is `404`.
+   * Any value JavaScript's `Date` parses is accepted (an ISO 8601
+   * date or date-time is the documented form); a value it cannot
+   * parse is refused with `400`.
    */
-  startDate?: Date | undefined;
+  startDate?: string | undefined;
   /**
-   * Filter messages created on or before this date (ISO 8601)
+   * Applies to the conversation, not its messages: when the
+   *
+   * @remarks
+   * conversation was created after this instant the answer is `404`.
+   * Parsed like `startDate`.
    */
-  endDate?: Date | undefined;
+  endDate?: string | undefined;
   /**
-   * Filter by shared status of the conversation
+   * Filters on the conversation's `isShared`; a conversation that
+   *
+   * @remarks
+   * does not match is answered `404`. Read case-insensitively;
+   * any other value is refused with `400`.
    */
-  shared?: boolean | undefined;
+  shared?: GetConversationByIdSharedEnum | undefined;
   /**
-   * Filter messages by type
+   * `unassigned` matches only a conversation linked to no project; a
+   *
+   * @remarks
+   * 24-character ObjectId matches only a conversation linked to that
+   * project. A conversation that does not match is answered `404`.
+   * Any other value is ignored.
+   */
+  projectId?: string | undefined;
+  /**
+   * Checked against the listed values (`400` otherwise) but not
+   *
+   * @remarks
+   * applied: every message type is returned.
    */
   messageType?: GetConversationByIdQueryParamMessageType | undefined;
 };
@@ -112,6 +180,13 @@ export type GetConversationByIdSharedWithAccessLevel = OpenEnum<
 export type GetConversationByIdSharedWith = {
   userId?: string | undefined;
   accessLevel?: GetConversationByIdSharedWithAccessLevel | undefined;
+  /**
+   * Id of the share entry. The session schema asks for none,
+   *
+   * @remarks
+   * but Mongoose ignores that option and stores one.
+   */
+  id?: string | undefined;
 };
 
 export const GetConversationByIdStatus = {
@@ -123,6 +198,20 @@ export const GetConversationByIdStatus = {
 } as const;
 export type GetConversationByIdStatus = OpenEnum<
   typeof GetConversationByIdStatus
+>;
+
+/**
+ * Who in the project sees the conversation. Absent when never set.
+ */
+export const GetConversationByIdProjectVisibility = {
+  Private: "private",
+  Project: "project",
+} as const;
+/**
+ * Who in the project sees the conversation. Absent when never set.
+ */
+export type GetConversationByIdProjectVisibility = OpenEnum<
+  typeof GetConversationByIdProjectVisibility
 >;
 
 export const MessageMessageType = {
@@ -210,7 +299,7 @@ export type ReferenceDatum = {
   metadata?: { [k: string]: string } | undefined;
 };
 
-export type GetConversationByIdMetadata = {
+export type Metadata = {
   processingTimeMs?: number | undefined;
   modelVersion?: string | undefined;
   aiTransactionId?: string | undefined;
@@ -270,7 +359,7 @@ export type Message = {
    * Ordered agent-activity transcript for this turn.
    */
   parts?: Array<models.MessagePart> | undefined;
-  metadata?: GetConversationByIdMetadata | undefined;
+  metadata?: Metadata | undefined;
   createdAt?: Date | undefined;
   updatedAt?: Date | undefined;
 };
@@ -339,6 +428,14 @@ export type GetConversationByIdConversation = {
    */
   failReason?: string | undefined;
   /**
+   * Project the conversation is linked to. Absent when it is in none.
+   */
+  projectId?: string | undefined;
+  /**
+   * Who in the project sees the conversation. Absent when never set.
+   */
+  projectVisibility?: GetConversationByIdProjectVisibility | undefined;
+  /**
    * Page of messages, sliced by `pagination` and ordered by `sortingMessages`
    */
   messages?: Array<Message> | undefined;
@@ -375,7 +472,7 @@ export type GetConversationByIdApplied = {
   values?: { [k: string]: any } | undefined;
 };
 
-export type GetConversationByIdShared = {
+export type GetConversationByIdSharedResponse = {
   values?: Array<string> | undefined;
   description?: string | undefined;
   current?: string | null | undefined;
@@ -509,7 +606,7 @@ export type GetConversationByIdSortingMessages = {
 };
 
 export type GetConversationByIdAvailable = {
-  shared?: GetConversationByIdShared | undefined;
+  shared?: GetConversationByIdSharedResponse | undefined;
   /**
    * Advertised in the `available` catalog but not currently applied as a filter by the server.
    */
@@ -577,6 +674,11 @@ export const GetConversationByIdSortOrderEnum$outboundSchema: z.ZodMiniEnum<
 > = z.enum(GetConversationByIdSortOrderEnum);
 
 /** @internal */
+export const GetConversationByIdSharedEnum$outboundSchema: z.ZodMiniEnum<
+  typeof GetConversationByIdSharedEnum
+> = z.enum(GetConversationByIdSharedEnum);
+
+/** @internal */
 export const GetConversationByIdQueryParamMessageType$outboundSchema:
   z.ZodMiniEnum<typeof GetConversationByIdQueryParamMessageType> = z.enum(
     GetConversationByIdQueryParamMessageType,
@@ -592,7 +694,8 @@ export type GetConversationByIdRequest$Outbound = {
   search?: string | undefined;
   startDate?: string | undefined;
   endDate?: string | undefined;
-  shared?: boolean | undefined;
+  shared?: string | undefined;
+  projectId?: string | undefined;
   messageType?: string | undefined;
 };
 
@@ -610,9 +713,10 @@ export const GetConversationByIdRequest$outboundSchema: z.ZodMiniType<
     "desc",
   ),
   search: z.optional(z.string()),
-  startDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
-  endDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
-  shared: z.optional(z.boolean()),
+  startDate: z.optional(z.string()),
+  endDate: z.optional(z.string()),
+  shared: z.optional(GetConversationByIdSharedEnum$outboundSchema),
+  projectId: z.optional(z.string()),
   messageType: z.optional(
     GetConversationByIdQueryParamMessageType$outboundSchema,
   ),
@@ -635,12 +739,20 @@ export const GetConversationByIdSharedWithAccessLevel$inboundSchema:
 export const GetConversationByIdSharedWith$inboundSchema: z.ZodMiniType<
   GetConversationByIdSharedWith,
   unknown
-> = z.object({
-  userId: types.optional(types.string()),
-  accessLevel: types.optional(
-    GetConversationByIdSharedWithAccessLevel$inboundSchema,
-  ),
-});
+> = z.pipe(
+  z.object({
+    userId: types.optional(types.string()),
+    accessLevel: types.optional(
+      GetConversationByIdSharedWithAccessLevel$inboundSchema,
+    ),
+    _id: types.optional(types.string()),
+  }),
+  z.transform((v) => {
+    return remap$(v, {
+      "_id": "id",
+    });
+  }),
+);
 
 export function getConversationByIdSharedWithFromJSON(
   jsonString: string,
@@ -657,6 +769,12 @@ export const GetConversationByIdStatus$inboundSchema: z.ZodMiniType<
   GetConversationByIdStatus,
   unknown
 > = openEnums.inboundSchema(GetConversationByIdStatus);
+
+/** @internal */
+export const GetConversationByIdProjectVisibility$inboundSchema: z.ZodMiniType<
+  GetConversationByIdProjectVisibility,
+  unknown
+> = openEnums.inboundSchema(GetConversationByIdProjectVisibility);
 
 /** @internal */
 export const MessageMessageType$inboundSchema: z.ZodMiniType<
@@ -715,22 +833,20 @@ export function referenceDatumFromJSON(
 }
 
 /** @internal */
-export const GetConversationByIdMetadata$inboundSchema: z.ZodMiniType<
-  GetConversationByIdMetadata,
-  unknown
-> = z.object({
-  processingTimeMs: types.optional(types.number()),
-  modelVersion: types.optional(types.string()),
-  aiTransactionId: types.optional(types.string()),
-});
+export const Metadata$inboundSchema: z.ZodMiniType<Metadata, unknown> = z
+  .object({
+    processingTimeMs: types.optional(types.number()),
+    modelVersion: types.optional(types.string()),
+    aiTransactionId: types.optional(types.string()),
+  });
 
-export function getConversationByIdMetadataFromJSON(
+export function metadataFromJSON(
   jsonString: string,
-): SafeParseResult<GetConversationByIdMetadata, SDKValidationError> {
+): SafeParseResult<Metadata, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => GetConversationByIdMetadata$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetConversationByIdMetadata' from JSON`,
+    (x) => Metadata$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Metadata' from JSON`,
   );
 }
 
@@ -760,9 +876,7 @@ export const Message$inboundSchema: z.ZodMiniType<Message, unknown> = z.pipe(
       z.array(models.MessageReasoningTurn$inboundSchema),
     ),
     parts: types.optional(z.array(models.MessagePart$inboundSchema)),
-    metadata: types.optional(
-      z.lazy(() => GetConversationByIdMetadata$inboundSchema),
-    ),
+    metadata: types.optional(z.lazy(() => Metadata$inboundSchema)),
     createdAt: types.optional(types.date()),
     updatedAt: types.optional(types.date()),
   }),
@@ -861,6 +975,10 @@ export const GetConversationByIdConversation$inboundSchema: z.ZodMiniType<
   ),
   status: types.optional(GetConversationByIdStatus$inboundSchema),
   failReason: types.optional(types.string()),
+  projectId: types.optional(types.string()),
+  projectVisibility: types.optional(
+    GetConversationByIdProjectVisibility$inboundSchema,
+  ),
   messages: types.optional(z.array(z.lazy(() => Message$inboundSchema))),
   modelInfo: types.optional(models.ConversationModelInfo$inboundSchema),
   pagination: types.optional(
@@ -900,8 +1018,8 @@ export function getConversationByIdAppliedFromJSON(
 }
 
 /** @internal */
-export const GetConversationByIdShared$inboundSchema: z.ZodMiniType<
-  GetConversationByIdShared,
+export const GetConversationByIdSharedResponse$inboundSchema: z.ZodMiniType<
+  GetConversationByIdSharedResponse,
   unknown
 > = z.object({
   values: types.optional(z.array(types.string())),
@@ -910,13 +1028,13 @@ export const GetConversationByIdShared$inboundSchema: z.ZodMiniType<
   applied: types.optional(types.boolean()),
 });
 
-export function getConversationByIdSharedFromJSON(
+export function getConversationByIdSharedResponseFromJSON(
   jsonString: string,
-): SafeParseResult<GetConversationByIdShared, SDKValidationError> {
+): SafeParseResult<GetConversationByIdSharedResponse, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => GetConversationByIdShared$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetConversationByIdShared' from JSON`,
+    (x) => GetConversationByIdSharedResponse$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetConversationByIdSharedResponse' from JSON`,
   );
 }
 
@@ -1306,7 +1424,9 @@ export const GetConversationByIdAvailable$inboundSchema: z.ZodMiniType<
   GetConversationByIdAvailable,
   unknown
 > = z.object({
-  shared: types.optional(z.lazy(() => GetConversationByIdShared$inboundSchema)),
+  shared: types.optional(
+    z.lazy(() => GetConversationByIdSharedResponse$inboundSchema),
+  ),
   tags: types.optional(z.lazy(() => GetConversationByIdTags$inboundSchema)),
   minMessages: types.optional(
     z.lazy(() => GetConversationByIdMinMessages$inboundSchema),

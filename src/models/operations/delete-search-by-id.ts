@@ -10,20 +10,24 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 
 /**
- * Additional `isShared` filter (`'true'` / `'false'`). The row is
+ * Additional `isShared` filter. `'true'` / `'1'` and `'false'` / `'0'`,
  *
  * @remarks
- * only deleted if it also matches this value.
+ * case-insensitive; anything else is refused with `400`. The row is only deleted if
+ * it matches.
  */
 export const DeleteSearchByIdShared = {
   True: "true",
   False: "false",
+  One: "1",
+  Zero: "0",
 } as const;
 /**
- * Additional `isShared` filter (`'true'` / `'false'`). The row is
+ * Additional `isShared` filter. `'true'` / `'1'` and `'false'` / `'0'`,
  *
  * @remarks
- * only deleted if it also matches this value.
+ * case-insensitive; anything else is refused with `400`. The row is only deleted if
+ * it matches.
  */
 export type DeleteSearchByIdShared = ClosedEnum<typeof DeleteSearchByIdShared>;
 
@@ -33,35 +37,37 @@ export type DeleteSearchByIdRequest = {
    */
   searchId: string;
   /**
-   * Additional substring filter against `title` / `messages.content`.
+   * Validated, then dropped: a stored search has no title to match, so the row is
    *
    * @remarks
-   * The row is only deleted if the `searchId` row also matches this
-   * filter; otherwise `404`. Special regex characters are escaped;
-   * values over 1000 chars or tripping the XSS guard yield `400`.
+   * deleted whatever this says. More than 1000 characters, or HTML markup, is refused
+   * with `400`.
    */
   search?: string | undefined;
   /**
-   * Additional `isShared` filter (`'true'` / `'false'`). The row is
+   * Additional `isShared` filter. `'true'` / `'1'` and `'false'` / `'0'`,
    *
    * @remarks
-   * only deleted if it also matches this value.
+   * case-insensitive; anything else is refused with `400`. The row is only deleted if
+   * it matches.
    */
   shared?: DeleteSearchByIdShared | undefined;
   /**
-   * ISO 8601 lower bound for `createdAt`. The row is only deleted
+   * ISO 8601 date or date-time lower bound for `createdAt`. The row is only deleted if
    *
    * @remarks
-   * if its `createdAt` is on or after this value.
+   * it was created on or after it. A value JavaScript's `Date` cannot parse is refused
+   * with `400`.
    */
-  startDate?: Date | undefined;
+  startDate?: string | undefined;
   /**
-   * ISO 8601 upper bound for `createdAt`. The row is only deleted
+   * ISO 8601 date or date-time upper bound for `createdAt`. The row is only deleted if
    *
    * @remarks
-   * if its `createdAt` is on or before this value.
+   * it was created on or before it. A value JavaScript's `Date` cannot parse is refused
+   * with `400`.
    */
-  endDate?: Date | undefined;
+  endDate?: string | undefined;
 };
 
 /**
@@ -93,8 +99,8 @@ export const DeleteSearchByIdRequest$outboundSchema: z.ZodMiniType<
   searchId: z.string(),
   search: z.optional(z.string()),
   shared: z.optional(DeleteSearchByIdShared$outboundSchema),
-  startDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
-  endDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
+  startDate: z.optional(z.string()),
+  endDate: z.optional(z.string()),
 });
 
 export function deleteSearchByIdRequestToJSON(

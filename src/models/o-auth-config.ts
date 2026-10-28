@@ -28,17 +28,27 @@ export type OAuthConfig = {
   id?: string | undefined;
   oauthInstanceName?: string | undefined;
   connectorType?: string | undefined;
+  /**
+   * Icon of the connector type, copied from the OAuth registry when the configuration was created
+   */
   iconPath?: string | undefined;
+  /**
+   * Application group of the connector type (empty when the type is not in the OAuth registry)
+   */
   appGroup?: string | undefined;
+  /**
+   * Description of the connector type's OAuth application
+   */
   appDescription?: string | undefined;
+  /**
+   * Categories of the connector type
+   */
   appCategories?: Array<string> | undefined;
   /**
    * OAuth app credentials; keys follow the connector type's OAuth fields
    */
   config?: OAuthConfigConfig | undefined;
   userId?: string | undefined;
-  orgId?: string | undefined;
-  createdBy?: string | undefined;
   updatedBy?: string | undefined;
   /**
    * Epoch milliseconds
@@ -92,8 +102,6 @@ export const OAuthConfig$inboundSchema: z.ZodMiniType<OAuthConfig, unknown> = z
       appCategories: types.optional(z.array(types.string())),
       config: types.optional(z.lazy(() => OAuthConfigConfig$inboundSchema)),
       userId: types.optional(types.string()),
-      orgId: types.optional(types.string()),
-      createdBy: types.optional(types.string()),
       updatedBy: types.optional(types.string()),
       createdAtTimestamp: types.optional(types.number()),
       updatedAtTimestamp: types.optional(types.number()),

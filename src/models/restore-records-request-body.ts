@@ -4,7 +4,13 @@
 
 import * as z from "zod/v4-mini";
 
+/**
+ * Request body for POST /knowledgeBase/records/restore. Fields other than `recordIds` are dropped by the validator, not refused.
+ */
 export type RestoreRecordsRequestBody = {
+  /**
+   * Record ids to restore. An id listed more than once is restored, and answered, once.
+   */
   recordIds: Array<string>;
 };
 

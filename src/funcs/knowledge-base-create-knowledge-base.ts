@@ -48,9 +48,17 @@ import { Result } from "../types/fp.js";
  *
  * **Naming Rules:**
  *
- * - Name must be 1-255 characters
- * - Special characters and HTML tags are sanitized
+ * - Name must be 1-255 characters and hold at least one character that is not whitespace
+ * - Whitespace around the name is removed before it is stored
+ * - A name that contains an HTML tag, a `javascript:` URL or an inline event handler
+ *   (`onclick=` and the like) is refused with `400`; nothing is stripped out of it
  * - Names don't need to be unique within organization
+ *
+ * **Request body:**
+ *
+ * Only `kbName` is read. Any other field is dropped before the handler runs, so a
+ * knowledge base cannot be created hidden, or with another role or organization,
+ * through this endpoint.
  *
  * **Creator Permissions:**
  *

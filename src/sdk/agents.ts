@@ -52,6 +52,7 @@ export class Agents extends ClientSDK {
    *
    * The Python backend also understands `isDeleted`, but this gateway route
    * does not forward it, so it is not part of the public API contract here.
+   * Any other query parameter is ignored, not refused.
    */
   async listAgents(
     request?: operations.ListAgentsRequest | undefined,
@@ -106,7 +107,11 @@ export class Agents extends ClientSDK {
    * **Gateway not-found behavior:**
    * Unknown `agentKey`, lookup after soft-delete, and other AI-backend failures
    * that return 404 from the Python query service are surfaced by the Node
-   * gateway as **HTTP 404** with an `ErrorResponse` body.
+   * gateway as **HTTP 404** with an `ErrorResponse` body. An agent the caller
+   * has no access to (another user's agent that is not shared) is also a
+   * `404`, not a `403`.
+   *
+   * The route reads no query parameter; any that is sent is ignored.
    */
   async getAgent(
     request: operations.GetAgentRequest,
@@ -130,7 +135,9 @@ export class Agents extends ClientSDK {
    * The Node gateway validates the request body via Zod middleware before
    * forwarding to the Python agent service. The `agentKey` path param and
    * the request body are both validated. Query parameters are ignored by
-   * the controller.
+   * the controller, and body fields the validator does not know are dropped
+   * rather than refused. The body may be omitted: an empty update succeeds
+   * and changes nothing.
    *
    * **Update semantics**
    *
@@ -181,8 +188,11 @@ export class Agents extends ClientSDK {
    * All conversations with this agent will become inaccessible.
    *
    * **Gateway not-found behavior:**
-   * Unknown `agentKey`, deleting an already-deleted agent, and `GET /agents/{agentKey}`
+   * Unknown `agentKey`, deleting an already-deleted agent, deleting another
+   * user's agent that is not shared with the caller, and `GET /agents/{agentKey}`
    * after delete return **HTTP 404** with an `ErrorResponse` body.
+   *
+   * The route reads neither a query nor a body; anything sent is ignored.
    */
   async deleteAgent(
     request: operations.DeleteAgentRequest,
@@ -220,7 +230,12 @@ export class Agents extends ClientSDK {
    * List archived conversations for an agent
    *
    * @remarks
-   * Paginated list of archived conversations for the given agent key.
+   * Paginated list of the caller's archived conversations for the given agent
+   * key. The `agentKey` is matched against the stored conversations only; the
+   * agent itself is not looked up.
+   *
+   * The query is strict: a parameter not listed here is refused with `400`
+   * (`VALIDATION_ERROR` on `query`, "These fields aren't accepted here").
    */
   async listAgentConversationArchives(
     request: operations.ListAgentConversationArchivesRequest,
@@ -237,9 +252,9 @@ export class Agents extends ClientSDK {
    * Upload agent chat attachments
    *
    * @remarks
-   * Multipart upload of PDF, JPEG, or PNG files for agent chat. Same limits as assistant
-   * chat (`POST /conversations/attachments/upload`): up to 10 files, 5 MiB each. Proxies to
-   * the AI backend. Optional `conversationId` associates uploads with an existing agent thread.
+   * Multipart upload of chat attachment files (the MIME types listed on `files`) for
+   * agent chat: up to 10 files, 5 MiB each. Proxies to the AI backend. Optional
+   * `conversationId` associates uploads with an existing agent thread.
    */
   async uploadAgentConversationChatAttachments(
     request: operations.UploadAgentConversationChatAttachmentsRequest,
@@ -406,8 +421,16 @@ export class Agents extends ClientSDK {
    * Same synchronous JSON ack contract as the assistant
    * `POST /conversations/{conversationId}/cancel` — both forward to the
    * same backend cancellation endpoint, since the run registry is keyed
-   * by `runId` alone. `{ cancelled: false }` covers a `runId` that
-   * already finished or was never registered.
+   * by `runId` alone.
+   *
+   * `cancelled` reports whether a stop request was issued, not whether a
+   * run was actually stopped. With the default shared (key-value backed)
+   * run registry, a `runId` that the answering worker does not hold is
+   * published for whichever worker owns it, and the answer is
+   * `{ cancelled: true }` even when the run already finished or was
+   * never registered. `{ cancelled: false }` is returned for such a
+   * `runId` only when the registry is in-process, or when the stop
+   * request could not be published.
    *
    * `runId` must belong to a run started on THIS `conversationId` — a
    * `runId` that exists but was registered under a different
@@ -490,7 +513,8 @@ export class Agents extends ClientSDK {
    * Archive an agent conversation
    *
    * @remarks
-   * Marks the conversation as archived for the authenticated owner.
+   * Marks the conversation as archived for the authenticated owner. The route
+   * reads no query parameter and no body; anything sent is ignored.
    */
   async archiveAgentConversation(
     request: operations.ArchiveAgentConversationRequest,
@@ -507,7 +531,8 @@ export class Agents extends ClientSDK {
    * Unarchive an agent conversation
    *
    * @remarks
-   * Restores an archived agent conversation to the active list.
+   * Restores an archived agent conversation to the active list. The route
+   * reads no query parameter and no body; anything sent is ignored.
    */
   async unarchiveAgentConversation(
     request: operations.UnarchiveAgentConversationRequest,
@@ -529,10 +554,10 @@ export class Agents extends ClientSDK {
    * The controller looks up the conversation by `_id`, `orgId`, `userId`,
    * `agentKey`, and `isDeleted: false`.
    *
-   * The request body uses the shared title validator (`1..200` chars), and
-   * the controller trims the incoming title before saving it. A whitespace-only
-   * title can therefore still return HTTP 400 even if the raw string is
-   * non-empty.
+   * The request body uses the shared title validator (`1..200` chars) and the
+   * title is trimmed before it is saved; a whitespace-only title is refused
+   * with `400` (`VALIDATION_ERROR`). Unknown body fields are dropped and query
+   * parameters are ignored.
    */
   async updateAgentConversationTitle(
     request: operations.UpdateAgentConversationTitleRequest,

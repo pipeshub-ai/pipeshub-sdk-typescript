@@ -24,6 +24,9 @@ export type ConnectorStoredConfigAuth = {
    * How a connector instance signs in to its source. Each connector type supports a subset; see `supportedAuthTypes` in the registry.
    */
   authType?: ConnectorAuthType | undefined;
+  /**
+   * Set by the server to the instance's connector type
+   */
   connectorType?: string | undefined;
   /**
    * Scope determines visibility and access control for connectors:<br>
@@ -40,7 +43,44 @@ export type ConnectorStoredConfigAuth = {
    */
   oauthConfigId?: string | undefined;
   oauthInstanceName?: string | undefined;
+  /**
+   * OAuth redirect URI the server built for this instance
+   */
   redirectUri?: string | undefined;
+  [additionalProperties: string]: unknown;
+};
+
+/**
+ * Sync strategy plus connector-specific sync settings
+ */
+export type ConnectorStoredConfigSync = {
+  /**
+   * `MANUAL`, `SCHEDULED` or `WEBHOOK`
+   */
+  selectedStrategy?: string | undefined;
+  /**
+   * Schedule used when `selectedStrategy` is `SCHEDULED`
+   */
+  scheduledConfig?: { [k: string]: any } | undefined;
+  /**
+   * Values of the connector's own sync fields
+   */
+  customValues?: { [k: string]: any } | undefined;
+  [additionalProperties: string]: unknown;
+};
+
+/**
+ * Saved filter selections
+ */
+export type ConnectorStoredConfigFilters = {
+  /**
+   * What to fetch from the source. Selections are under `values`, keyed by filter name.
+   */
+  sync?: { [k: string]: any } | undefined;
+  /**
+   * Which fetched records to index. Selections are under `values`, keyed by filter name.
+   */
+  indexing?: { [k: string]: any } | undefined;
   [additionalProperties: string]: unknown;
 };
 
@@ -55,8 +95,11 @@ export type ConnectorStoredConfig = {
   /**
    * Sync strategy plus connector-specific sync settings
    */
-  sync?: { [k: string]: any } | undefined;
-  filters?: { [k: string]: any } | undefined;
+  sync?: ConnectorStoredConfigSync | undefined;
+  /**
+   * Saved filter selections
+   */
+  filters?: ConnectorStoredConfigFilters | undefined;
 };
 
 /** @internal */
@@ -86,13 +129,60 @@ export function connectorStoredConfigAuthFromJSON(
 }
 
 /** @internal */
+export const ConnectorStoredConfigSync$inboundSchema: z.ZodMiniType<
+  ConnectorStoredConfigSync,
+  unknown
+> = z.catchall(
+  z.object({
+    selectedStrategy: types.optional(types.string()),
+    scheduledConfig: types.optional(z.record(z.string(), z.any())),
+    customValues: types.optional(z.record(z.string(), z.any())),
+  }),
+  z.any(),
+);
+
+export function connectorStoredConfigSyncFromJSON(
+  jsonString: string,
+): SafeParseResult<ConnectorStoredConfigSync, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => ConnectorStoredConfigSync$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ConnectorStoredConfigSync' from JSON`,
+  );
+}
+
+/** @internal */
+export const ConnectorStoredConfigFilters$inboundSchema: z.ZodMiniType<
+  ConnectorStoredConfigFilters,
+  unknown
+> = z.catchall(
+  z.object({
+    sync: types.optional(z.record(z.string(), z.any())),
+    indexing: types.optional(z.record(z.string(), z.any())),
+  }),
+  z.any(),
+);
+
+export function connectorStoredConfigFiltersFromJSON(
+  jsonString: string,
+): SafeParseResult<ConnectorStoredConfigFilters, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => ConnectorStoredConfigFilters$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ConnectorStoredConfigFilters' from JSON`,
+  );
+}
+
+/** @internal */
 export const ConnectorStoredConfig$inboundSchema: z.ZodMiniType<
   ConnectorStoredConfig,
   unknown
 > = z.object({
   auth: types.optional(z.lazy(() => ConnectorStoredConfigAuth$inboundSchema)),
-  sync: types.optional(z.record(z.string(), z.any())),
-  filters: types.optional(z.record(z.string(), z.any())),
+  sync: types.optional(z.lazy(() => ConnectorStoredConfigSync$inboundSchema)),
+  filters: types.optional(
+    z.lazy(() => ConnectorStoredConfigFilters$inboundSchema),
+  ),
 });
 
 export function connectorStoredConfigFromJSON(

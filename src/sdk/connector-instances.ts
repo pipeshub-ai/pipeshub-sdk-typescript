@@ -23,7 +23,8 @@ export class ConnectorInstances extends ClientSDK {
    * <b>Overview:</b><br>
    * Returns instances created by users, filtered by scope and permissions.
    * Team-scope connectors are visible to all org users. Personal connectors
-   * are only visible to their creators.<br><br>
+   * are only visible to their creators, not even to admins. Knowledge bases
+   * (instances of type <code>KB</code>) are not listed here.<br><br>
    * <b>Instance States:</b><br>
    * <ul>
    * <li><b>isConfigured:</b> All required settings are complete</li>
@@ -84,7 +85,16 @@ export class ConnectorInstances extends ClientSDK {
    * Get connector instance
    *
    * @remarks
-   * Retrieve a specific connector instance by ID.
+   * Retrieve a specific connector instance by ID, together with the setup
+   * form of its connector type (<code>config</code>).<br><br>
+   * <b>Who can read an instance:</b><br>
+   * <ul>
+   * <li>Team scope: the creator and org admins. Other members get
+   * <code>404</code>, although the lists show them the instance.</li>
+   * <li>Personal scope: the creator only. An admin gets <code>404</code>.</li>
+   * </ul>
+   * The ID of a knowledge base is accepted too: a knowledge base is stored
+   * as a connector instance of type <code>KB</code>.
    */
   async getConnectorInstance(
     request: operations.GetConnectorInstanceRequest,
@@ -101,19 +111,21 @@ export class ConnectorInstances extends ClientSDK {
    * Delete connector instance
    *
    * @remarks
-   * Delete a connector instance and everything synced from it. The request
-   * answers `202` as soon as the deletion has started; the deletion itself
-   * runs in the background.<br><br>
-   * <b>Warning:</b><br>
-   * Deletion is permanent. The connector's records, record groups,
-   * permissions and relations are removed from the graph database, its
-   * embeddings are removed from the vector store, its stored configuration
-   * and credentials are deleted, and its stored files are deleted (content
-   * another connector still uses is kept). The records don't go to the
-   * trash and can't be restored. Its sync schedule is removed too.<br><br>
+   * Start the deletion of a connector instance and all associated data.<br><br>
+   * <b>Asynchronous:</b><br>
+   * The request is answered with <code>202</code> as soon as the instance is
+   * marked <code>DELETING</code>; its sync is stopped and its records,
+   * vectors and configuration are removed in the background.<br><br>
    * <b>Permissions:</b><br>
-   * The connector's creator or an admin, for either scope. An admin can
-   * delete a member's personal connector.
+   * <ul>
+   * <li>The creator can delete their own instance</li>
+   * <li>An org admin can delete any instance, including another user's
+   * personal one (which the admin cannot read)</li>
+   * <li>Anyone else gets <code>404</code></li>
+   * </ul>
+   * <b>In use:</b><br>
+   * Refused with <code>409</code> while an agent uses the instance as a
+   * knowledge source.
    */
   async deleteConnectorInstance(
     request: operations.DeleteConnectorInstanceRequest,
@@ -130,8 +142,18 @@ export class ConnectorInstances extends ClientSDK {
    * Get connector statistics
    *
    * @remarks
-   * Retrieve statistics for a specific connector instance including record counts,
-   * indexing status breakdown, and sync information.
+   * Retrieve record counts of a connector instance, in total and per record
+   * type, broken down by indexing status. The ID of a knowledge base is
+   * accepted too (a knowledge base is stored as a connector instance of type
+   * <code>KB</code>); its stats report <code>origin: COLLECTION</code>.<br><br>
+   * <b>Who can read them:</b> the creator of the instance and, for a team
+   * instance, org admins. Stats use the same read gate as
+   * <code>GET /connectors/{connectorId}</code>: anyone else, including an
+   * admin reading another user's personal instance, gets <code>404</code>
+   * ("This connector was removed, or you no longer have access. ..."), so
+   * the instance's existence is not confirmed.
+   *
+   * An OAuth token holding `kb:read` instead of `connector:read` passes the scope check too.
    */
   async getConnectorStats(
     request: operations.GetConnectorStatsRequest,
@@ -154,7 +176,16 @@ export class ConnectorInstances extends ClientSDK {
    *
    * Fetches content from the external source and updates local records. Use when you suspect data is out of sync.
    *
+   * Only a connector in the caller's list of active connectors
+   * (`GET /connectors/active`, knowledge bases included) can be resynced.
+   * Any other ID, including one that does not exist, is refused with `400`.
+   * The reply only acknowledges that the resync event was published.
+   *
+   * Fields of the body other than `connectorName` and `fullSync` are dropped without an error.
+   *
    * **Warning:** This can be resource-intensive for large connectors.
+   *
+   * The scope check also accepts `kb:write` in place of `connector:write`.
    */
   async resyncConnector(
     request: operations.ResyncConnectorRequest,

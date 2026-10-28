@@ -24,7 +24,7 @@ export type CancelConversationStreamRequest = {
  * Cancellation requested, or the run had already finished.
  */
 export type CancelConversationStreamResponse = {
-  cancelled?: boolean | undefined;
+  cancelled: boolean;
 };
 
 /** @internal */
@@ -80,7 +80,7 @@ export const CancelConversationStreamResponse$inboundSchema: z.ZodMiniType<
   CancelConversationStreamResponse,
   unknown
 > = z.object({
-  cancelled: types.optional(types.boolean()),
+  cancelled: types.boolean(),
 });
 
 export function cancelConversationStreamResponseFromJSON(

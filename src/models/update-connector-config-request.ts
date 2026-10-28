@@ -33,7 +33,10 @@ export type UpdateConnectorConfigRequest = {
   sync?: ConnectorSyncConfig | undefined;
   filters?: ConnectorFiltersConfig | undefined;
   /**
-   * Base URL for self-hosted instances
+   * Base URL for self-hosted instances. Any string is accepted; it is
+   *
+   * @remarks
+   * not checked to be a URL.
    */
   baseUrl?: string | undefined;
 };

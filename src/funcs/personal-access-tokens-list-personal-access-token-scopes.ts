@@ -32,7 +32,8 @@ import { Result } from "../types/fp.js";
  * definitions, for populating the create-token scope picker. Unlike
  * `GET /oauth-clients/scopes`, this is **not** grouped by category and
  * **not** role-aware — every org member sees the same set, since PAT
- * scope selection isn't gated by admin status.
+ * scope selection isn't gated by admin status. The handler reads no query
+ * parameters and ignores any that are sent.
  *
  * If set, this operation will use {@link Security.bearerAuth} from the global security.
  */
@@ -43,6 +44,7 @@ export function personalAccessTokensListPersonalAccessTokenScopes(
   Result<
     models.PatScopesListResponse,
     | errors.ApplicationJsonErrorResponse
+    | errors.ErrorResponse
     | errors.OAuthClientManagementRateLimitError
     | PipeshubError
     | ResponseValidationError
@@ -68,6 +70,7 @@ async function $do(
     Result<
       models.PatScopesListResponse,
       | errors.ApplicationJsonErrorResponse
+      | errors.ErrorResponse
       | errors.OAuthClientManagementRateLimitError
       | PipeshubError
       | ResponseValidationError
@@ -138,6 +141,7 @@ async function $do(
   const [result] = await M.match<
     models.PatScopesListResponse,
     | errors.ApplicationJsonErrorResponse
+    | errors.ErrorResponse
     | errors.OAuthClientManagementRateLimitError
     | PipeshubError
     | ResponseValidationError
@@ -150,7 +154,9 @@ async function $do(
   >(
     M.json(200, models.PatScopesListResponse$inboundSchema),
     M.jsonErr(401, errors.ApplicationJsonErrorResponse$inboundSchema),
+    M.jsonErr([400, 403], errors.ErrorResponse$inboundSchema),
     M.jsonErr(429, errors.OAuthClientManagementRateLimitError$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

@@ -10,21 +10,14 @@ import { GetOAuthRegistryResponse } from "@pipeshub-ai/sdk/models/operations";
 let value: GetOAuthRegistryResponse = {
   success: true,
   connectors: [],
-  pagination: {
-    page: 262836,
-    limit: 637093,
-    totalCount: 498161,
-    totalPages: 987333,
-    hasPrev: false,
-    hasNext: true,
-  },
+  pagination: {},
 };
 ```
 
 ## Fields
 
-| Field                                                                | Type                                                                 | Required                                                             | Description                                                          |
-| -------------------------------------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `success`                                                            | *boolean*                                                            | :heavy_check_mark:                                                   | N/A                                                                  |
-| `connectors`                                                         | [models.OAuthRegistryEntry](../../models/o-auth-registry-entry.md)[] | :heavy_check_mark:                                                   | N/A                                                                  |
-| `pagination`                                                         | [models.ConnectorPagination](../../models/connector-pagination.md)   | :heavy_check_mark:                                                   | N/A                                                                  |
+| Field                                                                        | Type                                                                         | Required                                                                     | Description                                                                  |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `success`                                                                    | *boolean*                                                                    | :heavy_check_mark:                                                           | N/A                                                                          |
+| `connectors`                                                                 | [models.OAuthRegistryEntry](../../models/o-auth-registry-entry.md)[]         | :heavy_check_mark:                                                           | N/A                                                                          |
+| `pagination`                                                                 | [models.OAuthRegistryPagination](../../models/o-auth-registry-pagination.md) | :heavy_check_mark:                                                           | Pagination block of `GET /oauth/registry` and `GET /oauth/{connectorType}`   |

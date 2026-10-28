@@ -25,6 +25,11 @@ import {
   AgentCreateWebSearchUnion$outboundSchema,
 } from "./agent-create-web-search-union.js";
 import {
+  AgentMcpServerRef,
+  AgentMcpServerRef$Outbound,
+  AgentMcpServerRef$outboundSchema,
+} from "./agent-mcp-server-ref.js";
+import {
   AgentSkillAssignment,
   AgentSkillAssignment$Outbound,
   AgentSkillAssignment$outboundSchema,
@@ -47,9 +52,20 @@ export type AgentCreateRequestDefaultReasoningEffort = ClosedEnum<
   typeof AgentCreateRequestDefaultReasoningEffort
 >;
 
+/**
+ * Body of `POST /agents/create`. Fields the gateway validator does not know
+ *
+ * @remarks
+ * (at the top level and inside `models[]`, `webSearch`, `knowledge[]`,
+ * `toolsets[]` and `mcpServers[]`) are dropped before the request reaches the
+ * AI backend; they are not refused.
+ */
 export type AgentCreateRequest = {
   /**
-   * Agent display name
+   * Agent display name. Surrounding whitespace is trimmed; a blank name is
+   *
+   * @remarks
+   * refused with `400` (`VALIDATION_ERROR`, "Name is required").
    */
   name: string;
   /**
@@ -73,10 +89,10 @@ export type AgentCreateRequest = {
    *
    * @remarks
    * any models (an empty array or an omitted field) uses the organization's
-   * default LLM at chat time. When at least one model entry IS provided, the
-   * gateway requires at least one object entry with `isReasoning: true`.
-   * String-only arrays are schema-valid but rejected at runtime with HTTP 400
-   * unless the array is empty.
+   * default LLM at chat time. A non-empty list must hold at least one object
+   * entry with `isReasoning: true`; otherwise the gateway answers `400`
+   * (`VALIDATION_ERROR` on `models`, "At least one reasoning model is
+   * required").
    */
   models?: Array<AgentCreateModelEntryUnion> | undefined;
   tags?: Array<string> | undefined;
@@ -97,6 +113,7 @@ export type AgentCreateRequest = {
    * is refused rather than ignored, so a request cannot quietly create
    * an agent that searches as its creator. Omit it and the agent
    * searches as its creator.
+   * Whitespace around it is removed first; 1-128 characters.
    */
   serviceAccountUserId?: string | undefined;
   /**
@@ -112,10 +129,20 @@ export type AgentCreateRequest = {
    */
   skills?: Array<AgentSkillAssignment> | undefined;
   /**
+   * MCP server instances attached to the agent. Two entries with the same
+   *
+   * @remarks
+   * `typeId` are refused with `400` (`VALIDATION_ERROR` on
+   * `mcpServers.<index>.typeId`); entries without a `typeId` are exempt.
+   * The instance is not looked up when the agent is saved.
+   */
+  mcpServers?: Array<AgentMcpServerRef> | undefined;
+  /**
    * Web-search attachment for an agent. Accepts a provider string, an object
    *
    * @remarks
-   * with at least a `provider` field, or `null`.
+   * with at least a `provider` field, or `null`. The provider string and
+   * `provider` are trimmed; an empty or blank value is refused with `400`.
    */
   webSearch?: AgentCreateWebSearchUnion | null | undefined;
   /**
@@ -164,6 +191,7 @@ export type AgentCreateRequest$Outbound = {
   toolsets?: Array<AgentCreateToolset$Outbound> | undefined;
   knowledge?: Array<AgentCreateKnowledge$Outbound> | undefined;
   skills?: Array<AgentSkillAssignment$Outbound> | undefined;
+  mcpServers?: Array<AgentMcpServerRef$Outbound> | undefined;
   webSearch?: AgentCreateWebSearchUnion$Outbound | null | undefined;
   defaultReasoningEffort?: string | null | undefined;
   apiToolsetTools?: Array<string> | undefined;
@@ -188,6 +216,7 @@ export const AgentCreateRequest$outboundSchema: z.ZodMiniType<
   toolsets: z.optional(z.array(AgentCreateToolset$outboundSchema)),
   knowledge: z.optional(z.array(AgentCreateKnowledge$outboundSchema)),
   skills: z.optional(z.array(AgentSkillAssignment$outboundSchema)),
+  mcpServers: z.optional(z.array(AgentMcpServerRef$outboundSchema)),
   webSearch: z.optional(z.nullable(AgentCreateWebSearchUnion$outboundSchema)),
   defaultReasoningEffort: z.optional(
     z.nullable(AgentCreateRequestDefaultReasoningEffort$outboundSchema),

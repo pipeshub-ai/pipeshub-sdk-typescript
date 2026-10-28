@@ -10,6 +10,13 @@ import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
 export type ApplicationJsonErrorResponseError = {
   /**
+   * Identifier for this request, echoed so a bug report can quote it.
+   *
+   * @remarks
+   * Absent when the request never reached the middleware that assigns one.
+   */
+  requestId?: string | undefined;
+  /**
    * Machine-readable code (e.g. `HTTP_UNAUTHORIZED`, `HTTP_FORBIDDEN`).
    */
   code: string;
@@ -25,6 +32,7 @@ export const ApplicationJsonErrorResponseError$inboundSchema: z.ZodMiniType<
   ApplicationJsonErrorResponseError,
   unknown
 > = z.object({
+  requestId: types.optional(types.string()),
   code: types.string(),
   message: types.string(),
   metadata: types.optional(z.record(z.string(), z.any())),

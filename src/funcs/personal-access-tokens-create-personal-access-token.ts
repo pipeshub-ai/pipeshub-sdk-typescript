@@ -64,6 +64,7 @@ export function personalAccessTokensCreatePersonalAccessToken(
     models.CreatePatResponse,
     | errors.ApplicationJsonErrorResponse
     | errors.OAuthClientManagementRateLimitError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -91,6 +92,7 @@ async function $do(
       models.CreatePatResponse,
       | errors.ApplicationJsonErrorResponse
       | errors.OAuthClientManagementRateLimitError
+      | errors.ErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -174,6 +176,7 @@ async function $do(
     models.CreatePatResponse,
     | errors.ApplicationJsonErrorResponse
     | errors.OAuthClientManagementRateLimitError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -189,6 +192,7 @@ async function $do(
       errors.ApplicationJsonErrorResponse$inboundSchema,
     ),
     M.jsonErr(429, errors.OAuthClientManagementRateLimitError$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

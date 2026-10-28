@@ -12,9 +12,9 @@ let value: AgentCreateModelEntry = {
 
 ## Fields
 
-| Field              | Type               | Required           | Description        |
-| ------------------ | ------------------ | ------------------ | ------------------ |
-| `modelKey`         | *string*           | :heavy_check_mark: | N/A                |
-| `modelName`        | *string*           | :heavy_minus_sign: | N/A                |
-| `provider`         | *string*           | :heavy_minus_sign: | N/A                |
-| `isReasoning`      | *boolean*          | :heavy_minus_sign: | N/A                |
+| Field                                                                 | Type                                                                  | Required                                                              | Description                                                           |
+| --------------------------------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `modelKey`                                                            | *string*                                                              | :heavy_check_mark:                                                    | Surrounding whitespace is trimmed; a blank key is refused with `400`. |
+| `modelName`                                                           | *string*                                                              | :heavy_minus_sign:                                                    | N/A                                                                   |
+| `provider`                                                            | *string*                                                              | :heavy_minus_sign:                                                    | N/A                                                                   |
+| `isReasoning`                                                         | *boolean*                                                             | :heavy_minus_sign:                                                    | N/A                                                                   |

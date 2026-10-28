@@ -59,10 +59,11 @@ export class Conversations extends ClientSDK {
    *
    * **Modes**
    *
-   * `chatMode: agent` (or `agent:<mode>`) runs the universal agent and
-   * honours `tools` / `agentCapabilities`; `internal_search` and
-   * `web_search` run the search assistant and ignore `tools`. Omitted,
-   * it defaults to internal search.
+   * `chatMode: agent` runs the universal agent and honours `tools` /
+   * `agentCapabilities`; `internal_search` and `web_search` run the
+   * search assistant and ignore `tools`. The legacy values `deep`,
+   * `quick`, `verification` and `auto` are accepted and run as internal
+   * search. Omitted, it defaults to internal search.
    */
   async createConversation(
     request: models.CreateConversationRequest,
@@ -150,6 +151,8 @@ export class Conversations extends ClientSDK {
    * With `source=owned`, conversations the caller pinned
    * (`PATCH /conversations/{conversationId}/pin`) come first, in the same order,
    * whatever `sortBy` is. `source=shared` is never pinned-first.
+   *
+   * Query parameters not listed here are ignored, not refused.
    */
   async getAllConversations(
     request?: operations.GetAllConversationsRequest | undefined,
@@ -172,13 +175,18 @@ export class Conversations extends ClientSDK {
    *
    * Archived conversations are hidden from the main list but preserved for reference.
    * This endpoint returns only conversations where `isArchived: true` and `archivedBy`
-   * is set. Results include conversations the caller owns and those shared with them.
+   * is set. Results include conversations the caller owns and those shared with them
+   * (`isShared` and the caller listed in `sharedWith`). Deleted and agent
+   * conversations are never listed. Each item carries its `messages`.
    *
    * **Filtering and sorting:**
    *
    * Results can be narrowed using `search`, `shared`, `startDate`, `endDate`, and
    * `conversationId`. Sorting is controlled by `sortBy` and `sortOrder`. Pagination
    * is controlled by `page` and `limit`.
+   *
+   * Query parameters not listed here are dropped by the validator and
+   * ignored, including `projectId`, which `GET /conversations` accepts.
    *
    * **Unarchiving:**
    *
@@ -210,8 +218,13 @@ export class Conversations extends ClientSDK {
    *
    * **Search parameter:**
    *
-   * The `search` query parameter is required, must be a non-empty string, and is capped at
-   * 1000 characters. Requests that omit it or exceed the cap return `400`.
+   * The `search` query parameter is required, must contain a non-space character, and is
+   * capped at 1000 characters; it is trimmed before use. Requests that omit it, send only
+   * spaces or exceed the cap return `400 VALIDATION_ERROR`. A value holding markup or a
+   * printf-style format specifier (such as `%s`) is refused by the controller with
+   * `400 HTTP_BAD_REQUEST`.
+   *
+   * Query parameters not listed here are dropped by the validator and ignored.
    *
    * **Pagination:**
    *
@@ -251,13 +264,15 @@ export class Conversations extends ClientSDK {
    * For conversations with many messages, use pagination parameters:
    *
    * - `page`: Page number (default: 1)
-   * - `limit`: Messages per page (default: 10)
+   * - `limit`: Messages per page (default: 20)
    * - `sortBy`: Sort field (default: createdAt)
    * - `sortOrder`: 'asc' or 'desc' (default: desc)
    *
    * **Access Control:**
    *
    * Users can access conversations they own or that have been shared with them.
+   *
+   * Query parameters not listed here are ignored, not refused.
    */
   async getConversationById(
     request: operations.GetConversationByIdRequest,
@@ -284,9 +299,10 @@ export class Conversations extends ClientSDK {
    *
    * **Permissions:**
    *
-   * The conversation initiator can always delete. Users the conversation has
-   * been shared with may delete it only when their `sharedWith.accessLevel`
-   * is `write`.
+   * Only the conversation's owner can delete it. The lookup also allows a
+   * user the conversation is shared with at `write` access, but it
+   * requires the caller to be the owner as well, so such a user is
+   * answered `404`.
    *
    * **Artifacts:** before the conversation is marked deleted, every artifact
    * the caller created in it is deleted for good (every version and stored
@@ -394,7 +410,12 @@ export class Conversations extends ClientSDK {
    * **Permissions:**
    *
    * The conversation must exist, belong to the calling user's organization,
-   * be owned by the caller (matched on `userId`), and not be soft-deleted.
+   * be owned by the caller (matched on `userId`), not be soft-deleted, and
+   * not be an agent conversation. A user it is shared with, even at
+   * `write` access, gets `404`.
+   *
+   * Body fields other than `title` are dropped by the validator, not
+   * refused.
    */
   async updateConversationTitle(
     request: operations.UpdateConversationTitleRequest,
@@ -420,8 +441,12 @@ export class Conversations extends ClientSDK {
    *
    * **Access:**
    *
-   * The caller must be the conversation's initiator, or be listed in `sharedWith`
-   * with `accessLevel: write`. Already-archived conversations return `400`.
+   * Only the conversation's owner can archive it: the lookup filters on
+   * the caller's `userId`. It also has a branch for users the
+   * conversation is shared with at `write` access, but that branch can
+   * never match, so such users get `404` (a known defect). A missing,
+   * deleted or agent conversation is `404` too.
+   * Already-archived conversations return `400`.
    *
    * **Retrieval:**
    *
@@ -448,6 +473,15 @@ export class Conversations extends ClientSDK {
    * - Path params: `conversationId`
    * - Query params: none
    * - Body: none
+   *
+   * **Access:**
+   *
+   * Only the conversation's owner can unarchive it: the lookup filters on
+   * the caller's `userId`. It also has a branch for users the
+   * conversation is shared with at `write` access, but that branch can
+   * never match, so such users get `404` (a known defect). A missing,
+   * deleted or agent conversation is `404` too.
+   * A conversation that is not archived returns `400`.
    */
   async unarchiveConversation(
     request: operations.UnarchiveConversationRequest,
@@ -614,9 +648,14 @@ export class Conversations extends ClientSDK {
    * frame with a `stopped` status and whatever partial answer had
    * already generated; nothing further is delivered here.
    *
-   * `{ cancelled: false }` — not an error — covers a `runId` that
-   * already finished or was never registered; the caller only needs to
-   * know the stream is not running anymore, not why.
+   * A `runId` that already finished or was never registered is not an
+   * error either, but it is answered `{ cancelled: true }`, not `false`:
+   * the query service's KV-backed run registry publishes the cancel for
+   * other workers and acknowledges it as cancelled (a known defect).
+   * `{ cancelled: false }` is only returned when that publish fails.
+   *
+   * Only the conversation's owner (matched on `userId`) can cancel; any
+   * other caller, or a missing, deleted or agent conversation, is `404`.
    *
    * `runId` must belong to a run started on THIS `conversationId` — a
    * `runId` that exists but was registered under a different
@@ -657,6 +696,16 @@ export class Conversations extends ClientSDK {
    *
    * Feedback can only be submitted on `bot_response` messages — user
    * queries and system messages are rejected with `400`.
+   *
+   * **Who can submit**
+   *
+   * The conversation's initiator, or any user it is shared with (at any
+   * access level) while `isShared` is `true`. Agent conversations are
+   * `404` here.
+   *
+   * Body fields other than `isHelpful`, `categories` and `comments` are
+   * dropped by the validator, not refused. `metrics` is always computed
+   * by the server.
    */
   async updateMessageFeedback(
     request: operations.UpdateMessageFeedbackRequest,

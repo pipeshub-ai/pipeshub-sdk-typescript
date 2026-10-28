@@ -47,58 +47,40 @@ export class GetKnowledgeHubRootNodesServiceUnavailableError
 }
 
 /**
- * An unexpected error occurred on the server.
- */
-export type GetKnowledgeHubRootNodesInternalServerErrorData = {
-  error: operations.GetKnowledgeHubRootNodesErrorHTTPInternalServerError;
-};
-
-/**
- * An unexpected error occurred on the server.
- */
-export class GetKnowledgeHubRootNodesInternalServerError extends PipeshubError {
-  error: operations.GetKnowledgeHubRootNodesErrorHTTPInternalServerError;
-
-  /** The original data that was passed to this error instance. */
-  data$: GetKnowledgeHubRootNodesInternalServerErrorData;
-
-  constructor(
-    err: GetKnowledgeHubRootNodesInternalServerErrorData,
-    httpMeta: { response: Response; request: Request; body: string },
-  ) {
-    const message = err.error?.message
-      || `API error occurred: ${JSON.stringify(err)}`;
-    super(message, httpMeta);
-    this.data$ = err;
-    this.error = err.error;
-
-    this.name = "GetKnowledgeHubRootNodesInternalServerError";
-  }
-}
-
-/**
- * A listing that spans a whole connector (a flattened listing, a search or a filter) was too large for the
+ * Either of:
  *
  * @remarks
- * database to hold in memory, so it was refused instead of cut short. No page is returned. Open a folder
- * (`GET /knowledgeBase/knowledge-hub/nodes/{parentType}/{parentId}`) to see its records, or add a search (`q`),
- * which keeps only matching records in memory. Choosing a connector, or a filter that keeps most records (such as
- * `nodeTypes`), does not help. Sorting by name with no filters is served from stored visibility where the
- * connector allows it and is not affected.
+ * - A typed query parameter could not be read: `page` or `limit` is not an
+ *   integer or is out of range (`page` below 1, `limit` outside 1-200),
+ *   `onlyContainers` or `flattened` is not a boolean, or `page`/`limit` was
+ *   sent more than once. `error.message` is the connector service's own
+ *   validation text.
+ * - A listing that spans a whole connector (a flattened listing, a search or a filter) was too large for the
+ *   database to hold in memory, so it was refused instead of cut short. No page is returned. Open a folder
+ *   (`GET /knowledgeBase/knowledge-hub/nodes/{parentType}/{parentId}`) to see its records, or add a search (`q`),
+ *   which keeps only matching records in memory. Choosing a connector, or a filter that keeps most records (such as
+ *   `nodeTypes`), does not help. Sorting by name with no filters is served from stored visibility where the
+ *   connector allows it and is not affected.
  */
 export type GetKnowledgeHubRootNodesUnprocessableEntityErrorData = {
   error: operations.GetKnowledgeHubRootNodesUnprocessableEntityError;
 };
 
 /**
- * A listing that spans a whole connector (a flattened listing, a search or a filter) was too large for the
+ * Either of:
  *
  * @remarks
- * database to hold in memory, so it was refused instead of cut short. No page is returned. Open a folder
- * (`GET /knowledgeBase/knowledge-hub/nodes/{parentType}/{parentId}`) to see its records, or add a search (`q`),
- * which keeps only matching records in memory. Choosing a connector, or a filter that keeps most records (such as
- * `nodeTypes`), does not help. Sorting by name with no filters is served from stored visibility where the
- * connector allows it and is not affected.
+ * - A typed query parameter could not be read: `page` or `limit` is not an
+ *   integer or is out of range (`page` below 1, `limit` outside 1-200),
+ *   `onlyContainers` or `flattened` is not a boolean, or `page`/`limit` was
+ *   sent more than once. `error.message` is the connector service's own
+ *   validation text.
+ * - A listing that spans a whole connector (a flattened listing, a search or a filter) was too large for the
+ *   database to hold in memory, so it was refused instead of cut short. No page is returned. Open a folder
+ *   (`GET /knowledgeBase/knowledge-hub/nodes/{parentType}/{parentId}`) to see its records, or add a search (`q`),
+ *   which keeps only matching records in memory. Choosing a connector, or a filter that keeps most records (such as
+ *   `nodeTypes`), does not help. Sorting by name with no filters is served from stored visibility where the
+ *   connector allows it and is not affected.
  */
 export class GetKnowledgeHubRootNodesUnprocessableEntityError
   extends PipeshubError
@@ -119,128 +101,6 @@ export class GetKnowledgeHubRootNodesUnprocessableEntityError
     this.error = err.error;
 
     this.name = "GetKnowledgeHubRootNodesUnprocessableEntityError";
-  }
-}
-
-/**
- * Insufficient OAuth scope.
- *
- * @remarks
- *
- * Only applies to OAuth tokens. The token did not carry the `kb:read`
- * scope required by this endpoint. Regular (non-OAuth) JWT bearer
- * tokens are not subject to scope enforcement and will not receive
- * this error.
- */
-export type GetKnowledgeHubRootNodesForbiddenErrorData = {
-  error: operations.GetKnowledgeHubRootNodesErrorHTTPForbidden;
-};
-
-/**
- * Insufficient OAuth scope.
- *
- * @remarks
- *
- * Only applies to OAuth tokens. The token did not carry the `kb:read`
- * scope required by this endpoint. Regular (non-OAuth) JWT bearer
- * tokens are not subject to scope enforcement and will not receive
- * this error.
- */
-export class GetKnowledgeHubRootNodesForbiddenError extends PipeshubError {
-  error: operations.GetKnowledgeHubRootNodesErrorHTTPForbidden;
-
-  /** The original data that was passed to this error instance. */
-  data$: GetKnowledgeHubRootNodesForbiddenErrorData;
-
-  constructor(
-    err: GetKnowledgeHubRootNodesForbiddenErrorData,
-    httpMeta: { response: Response; request: Request; body: string },
-  ) {
-    const message = err.error?.message
-      || `API error occurred: ${JSON.stringify(err)}`;
-    super(message, httpMeta);
-    this.data$ = err;
-    this.error = err.error;
-
-    this.name = "GetKnowledgeHubRootNodesForbiddenError";
-  }
-}
-
-/**
- * Missing or invalid authentication token.
- *
- * @remarks
- *
- * The bearer token was absent, expired, malformed, or could not be
- * verified by the auth middleware.
- */
-export type GetKnowledgeHubRootNodesUnauthorizedErrorData = {
-  error: operations.GetKnowledgeHubRootNodesErrorHTTPUnauthorized;
-};
-
-/**
- * Missing or invalid authentication token.
- *
- * @remarks
- *
- * The bearer token was absent, expired, malformed, or could not be
- * verified by the auth middleware.
- */
-export class GetKnowledgeHubRootNodesUnauthorizedError extends PipeshubError {
-  error: operations.GetKnowledgeHubRootNodesErrorHTTPUnauthorized;
-
-  /** The original data that was passed to this error instance. */
-  data$: GetKnowledgeHubRootNodesUnauthorizedErrorData;
-
-  constructor(
-    err: GetKnowledgeHubRootNodesUnauthorizedErrorData,
-    httpMeta: { response: Response; request: Request; body: string },
-  ) {
-    const message = err.error?.message
-      || `API error occurred: ${JSON.stringify(err)}`;
-    super(message, httpMeta);
-    this.data$ = err;
-    this.error = err.error;
-
-    this.name = "GetKnowledgeHubRootNodesUnauthorizedError";
-  }
-}
-
-/**
- * Invalid request parameters. The backend's validation message is
- *
- * @remarks
- * returned verbatim in `error.message`. See the examples below for
- * the common triggers.
- */
-export type GetKnowledgeHubRootNodesBadRequestErrorData = {
-  error: operations.GetKnowledgeHubRootNodesErrorHTTPBadRequest;
-};
-
-/**
- * Invalid request parameters. The backend's validation message is
- *
- * @remarks
- * returned verbatim in `error.message`. See the examples below for
- * the common triggers.
- */
-export class GetKnowledgeHubRootNodesBadRequestError extends PipeshubError {
-  error: operations.GetKnowledgeHubRootNodesErrorHTTPBadRequest;
-
-  /** The original data that was passed to this error instance. */
-  data$: GetKnowledgeHubRootNodesBadRequestErrorData;
-
-  constructor(
-    err: GetKnowledgeHubRootNodesBadRequestErrorData,
-    httpMeta: { response: Response; request: Request; body: string },
-  ) {
-    const message = err.error?.message
-      || `API error occurred: ${JSON.stringify(err)}`;
-    super(message, httpMeta);
-    this.data$ = err;
-    this.error = err.error;
-
-    this.name = "GetKnowledgeHubRootNodesBadRequestError";
   }
 }
 
@@ -267,27 +127,6 @@ export const GetKnowledgeHubRootNodesServiceUnavailableError$inboundSchema:
     );
 
 /** @internal */
-export const GetKnowledgeHubRootNodesInternalServerError$inboundSchema:
-  z.ZodMiniType<GetKnowledgeHubRootNodesInternalServerError, unknown> = z.pipe(
-    z.object({
-      error: z.lazy(() =>
-        operations
-          .GetKnowledgeHubRootNodesErrorHTTPInternalServerError$inboundSchema
-      ),
-      request$: z.custom<Request>(x => x instanceof Request),
-      response$: z.custom<Response>(x => x instanceof Response),
-      body$: z.string(),
-    }),
-    z.transform((v) => {
-      return new GetKnowledgeHubRootNodesInternalServerError(v, {
-        request: v.request$,
-        response: v.response$,
-        body: v.body$,
-      });
-    }),
-  );
-
-/** @internal */
 export const GetKnowledgeHubRootNodesUnprocessableEntityError$inboundSchema:
   z.ZodMiniType<GetKnowledgeHubRootNodesUnprocessableEntityError, unknown> = z
     .pipe(
@@ -308,63 +147,3 @@ export const GetKnowledgeHubRootNodesUnprocessableEntityError$inboundSchema:
         });
       }),
     );
-
-/** @internal */
-export const GetKnowledgeHubRootNodesForbiddenError$inboundSchema:
-  z.ZodMiniType<GetKnowledgeHubRootNodesForbiddenError, unknown> = z.pipe(
-    z.object({
-      error: z.lazy(() =>
-        operations.GetKnowledgeHubRootNodesErrorHTTPForbidden$inboundSchema
-      ),
-      request$: z.custom<Request>(x => x instanceof Request),
-      response$: z.custom<Response>(x => x instanceof Response),
-      body$: z.string(),
-    }),
-    z.transform((v) => {
-      return new GetKnowledgeHubRootNodesForbiddenError(v, {
-        request: v.request$,
-        response: v.response$,
-        body: v.body$,
-      });
-    }),
-  );
-
-/** @internal */
-export const GetKnowledgeHubRootNodesUnauthorizedError$inboundSchema:
-  z.ZodMiniType<GetKnowledgeHubRootNodesUnauthorizedError, unknown> = z.pipe(
-    z.object({
-      error: z.lazy(() =>
-        operations.GetKnowledgeHubRootNodesErrorHTTPUnauthorized$inboundSchema
-      ),
-      request$: z.custom<Request>(x => x instanceof Request),
-      response$: z.custom<Response>(x => x instanceof Response),
-      body$: z.string(),
-    }),
-    z.transform((v) => {
-      return new GetKnowledgeHubRootNodesUnauthorizedError(v, {
-        request: v.request$,
-        response: v.response$,
-        body: v.body$,
-      });
-    }),
-  );
-
-/** @internal */
-export const GetKnowledgeHubRootNodesBadRequestError$inboundSchema:
-  z.ZodMiniType<GetKnowledgeHubRootNodesBadRequestError, unknown> = z.pipe(
-    z.object({
-      error: z.lazy(() =>
-        operations.GetKnowledgeHubRootNodesErrorHTTPBadRequest$inboundSchema
-      ),
-      request$: z.custom<Request>(x => x instanceof Request),
-      response$: z.custom<Response>(x => x instanceof Response),
-      body$: z.string(),
-    }),
-    z.transform((v) => {
-      return new GetKnowledgeHubRootNodesBadRequestError(v, {
-        request: v.request$,
-        response: v.response$,
-        body: v.body$,
-      });
-    }),
-  );

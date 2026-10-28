@@ -110,11 +110,36 @@ export type AgentStreamCreateConversationRequestKeywordSearchBudget =
   ClosedEnum<typeof AgentStreamCreateConversationRequestKeywordSearchBudget>;
 
 /**
+ * Reasoning effort for this turn, for models that support it. Stored on
+ *
+ * @remarks
+ * the conversation's model info and forwarded to the AI backend.
+ */
+export const AgentStreamCreateConversationRequestReasoningEffort = {
+  None: "none",
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Max: "max",
+} as const;
+/**
+ * Reasoning effort for this turn, for models that support it. Stored on
+ *
+ * @remarks
+ * the conversation's model info and forwarded to the AI backend.
+ */
+export type AgentStreamCreateConversationRequestReasoningEffort = ClosedEnum<
+  typeof AgentStreamCreateConversationRequestReasoningEffort
+>;
+
+/**
  * Request body for `POST /agents/{agentKey}/conversations/stream`.
  *
  * @remarks
  * `query` and `chatMode: quick` are required; all other fields are
  * optional overrides. Unknown fields are stripped during validation.
+ * Unlike the non-streaming route, a `query` of only whitespace is
+ * accepted and starts a conversation.
  */
 export type AgentStreamCreateConversationRequest = {
   /**
@@ -160,6 +185,9 @@ export type AgentStreamCreateConversationRequest = {
    * least viewer access to. Same fallback/merge semantics as
    * `POST /conversations/create`. Ignored on follow-up turns — the
    * session row is the source of truth once the conversation exists.
+   * An OAuth token or PAT also needs `project:read`. An archived
+   * project answers `409`; a project the caller cannot see, `404`,
+   * before any stream opens.
    */
   projectId?: string | undefined;
   /**
@@ -183,7 +211,9 @@ export type AgentStreamCreateConversationRequest = {
    * AI model configuration id for this turn. Omit to use the agent's
    *
    * @remarks
-   * default model.
+   * default model. A key that names no configured model is not refused:
+   * the turn runs on the organization's default model and the unknown
+   * key is still stored in the conversation's `modelInfo`.
    */
   modelKey?: string | undefined;
   /**
@@ -266,6 +296,15 @@ export type AgentStreamCreateConversationRequest = {
    * {runId}` while the stream is still generating.
    */
   runId?: string | undefined;
+  /**
+   * Reasoning effort for this turn, for models that support it. Stored on
+   *
+   * @remarks
+   * the conversation's model info and forwarded to the AI backend.
+   */
+  reasoningEffort?:
+    | AgentStreamCreateConversationRequestReasoningEffort
+    | undefined;
 };
 
 /** @internal */
@@ -292,6 +331,11 @@ export const AgentStreamCreateConversationRequestKeywordSearchBudget$outboundSch
   > = z.enum(AgentStreamCreateConversationRequestKeywordSearchBudget);
 
 /** @internal */
+export const AgentStreamCreateConversationRequestReasoningEffort$outboundSchema:
+  z.ZodMiniEnum<typeof AgentStreamCreateConversationRequestReasoningEffort> = z
+    .enum(AgentStreamCreateConversationRequestReasoningEffort);
+
+/** @internal */
 export type AgentStreamCreateConversationRequest$Outbound = {
   query: string;
   recordIds?: Array<string> | undefined;
@@ -313,6 +357,7 @@ export type AgentStreamCreateConversationRequest$Outbound = {
   keywordSearchBudget?: string | undefined;
   toolApproval?: ToolApprovalAnswer$Outbound | undefined;
   runId?: string | undefined;
+  reasoningEffort?: string | undefined;
 };
 
 /** @internal */
@@ -346,6 +391,9 @@ export const AgentStreamCreateConversationRequest$outboundSchema: z.ZodMiniType<
   ),
   toolApproval: z.optional(ToolApprovalAnswer$outboundSchema),
   runId: z.optional(z.string()),
+  reasoningEffort: z.optional(
+    AgentStreamCreateConversationRequestReasoningEffort$outboundSchema,
+  ),
 });
 
 export function agentStreamCreateConversationRequestToJSON(

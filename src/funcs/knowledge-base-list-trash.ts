@@ -36,7 +36,11 @@ import { Result } from "../types/fp.js";
  * newest first. Each item is what one delete removed, as a restore brings it back
  * whole: a folder deleted with its contents is one item, and so is a multi-select
  * delete (`rootCount` items selected, some named in `otherRootNames`). `itemCount`
- * says how many records it holds.
+ * says how many records it holds, the folder included.
+ *
+ * A folder deleted with `DELETE /knowledgeBase/{kbId}/folder/{folderId}` takes its
+ * contents along. A folder deleted with `DELETE /knowledgeBase/record/{recordId}`
+ * goes to the trash alone (`itemCount` 1): the records inside it stay live.
  * Restore an item with `POST /knowledgeBase/record/{recordId}/restore`, using its `id`.
  *
  * Needs "Move Deleted Records to the Trash" on in Labs.
@@ -52,6 +56,9 @@ import { Result } from "../types/fp.js";
  *
  * An item whose folder is also in the trash (`parentInTrash`) can only be
  * restored after that folder.
+ *
+ * **Request:** query parameters other than `page` and `limit` are ignored. A page past
+ * the last one is answered `200` with no items.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */

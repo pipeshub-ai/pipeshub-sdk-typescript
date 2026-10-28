@@ -10,7 +10,10 @@ import { SDKValidationError } from "../errors/sdk-validation-error.js";
 
 export type CancelAgentConversationStreamRequestBody = {
   /**
-   * The `runId` sent when the stream was started.
+   * The `runId` sent when the stream was started. Anything but a
+   *
+   * @remarks
+   * UUID string is refused with `VALIDATION_ERROR`.
    */
   runId: string;
 };
@@ -31,7 +34,10 @@ export type CancelAgentConversationStreamRequest = {
  * Cancellation requested, or the run had already finished.
  */
 export type CancelAgentConversationStreamResponse = {
-  cancelled?: boolean | undefined;
+  /**
+   * `true` when a stop request was issued for `runId`; `false` when the run is unknown to an in-process registry or the request could not be published.
+   */
+  cancelled: boolean;
 };
 
 /** @internal */
@@ -91,7 +97,7 @@ export const CancelAgentConversationStreamResponse$inboundSchema: z.ZodMiniType<
   CancelAgentConversationStreamResponse,
   unknown
 > = z.object({
-  cancelled: types.optional(types.boolean()),
+  cancelled: types.boolean(),
 });
 
 export function cancelAgentConversationStreamResponseFromJSON(

@@ -19,11 +19,16 @@ import { SDKValidationError } from "./errors/sdk-validation-error.js";
  */
 export type AuthStep = {
   /**
-   * Order of the authentication step (1-3, must be unique across steps)
+   * Label of the step; must be unique across steps. Only checked to be a number: `0`,
+   *
+   * @remarks
+   * negative, fractional and values above 3 are accepted and stored as sent. Sign-in runs
+   * the steps in ascending `order`, and `GET /orgAuthConfig/authMethods` returns them
+   * renumbered 1, 2, 3 in that order.
    */
   order: number;
   /**
-   * List of allowed authentication methods for this step. User can choose any one method from this list.
+   * List of allowed authentication methods for this step. User can choose any one method from this list. A method may appear only once in the whole policy.
    */
   allowedMethods: Array<AuthMethod>;
 };
@@ -45,7 +50,7 @@ export const AuthStep$outboundSchema: z.ZodMiniType<
   AuthStep$Outbound,
   AuthStep
 > = z.object({
-  order: z.int(),
+  order: z.number(),
   allowedMethods: z.array(AuthMethod$outboundSchema),
 });
 

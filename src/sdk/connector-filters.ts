@@ -61,7 +61,6 @@ export class ConnectorFilters extends ClientSDK {
    * What this endpoint saves goes to <code>filters.values</code>, which sync does not read:
    * sync reads <code>filters.sync</code> and <code>filters.indexing</code>.<br><br>
    * Save the user's filter selections for a connector.<br><br>
-   * <b>Overview:</b><br>
    * <b>Request:</b><br>
    * <code>filters</code> must hold at least one entry: <code>{"filters": {}}</code> is
    * refused with <code>400</code>. The server stores whatever it is given under the
@@ -89,13 +88,16 @@ export class ConnectorFilters extends ClientSDK {
    * Get options for a dynamic filter field with pagination.<br><br>
    * <b>Overview:</b><br>
    * For filters with <code>optionSourceType: dynamic</code>, options are loaded
-   * from the connected service. This supports pagination and search.<br><br>
+   * from the connected service. This supports pagination and search. The
+   * connector is started on demand with its saved credentials, so the
+   * connected service must be reachable.<br><br>
    * <b>Scoped options (GitLab):</b><br>
    * When fetching options for the <code>project_ids</code> filter key, pass
    * one or more <code>contextGroupPath</code> query parameters to restrict
    * the returned repositories to those that belong to the specified GitLab
    * group namespace paths (e.g. <code>myorg/team</code>). This is used to
-   * populate the project filter after the user has selected groups.<br><br>
+   * populate the project filter after the user has selected groups. Other
+   * connectors accept and ignore both group path parameters.<br><br>
    * <b>Examples:</b><br>
    * <ul>
    * <li>Google Drive folders list</li>
@@ -104,6 +106,7 @@ export class ConnectorFilters extends ClientSDK {
    * <li>GitLab groups list (<code>filterKey=group_ids</code>)</li>
    * <li>GitLab projects scoped to groups (<code>filterKey=project_ids&amp;contextGroupPath=myorg/team</code>)</li>
    * </ul>
+   * Query parameters other than the six below are dropped without an error.
    */
   async getFilterFieldOptions(
     request: operations.GetFilterFieldOptionsRequest,

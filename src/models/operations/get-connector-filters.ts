@@ -10,11 +10,22 @@ import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
 export type GetConnectorFiltersRequest = {
+  /**
+   * Connector instance ID: 1-64 letters, digits, `_` or `-`
+   *
+   * @remarks
+   * (`400 VALIDATION_ERROR` otherwise). An ID that decodes to an unsafe
+   * path segment is refused with `400` before the token is checked.
+   */
   connectorId: string;
 };
 
 /**
- * Filter options retrieved
+ * Filter options retrieved. A connector whose auth type has no dynamic filter options
+ *
+ * @remarks
+ * (for example <code>NONE</code> or <code>BASIC_AUTH</code>) and has saved settings gets an
+ * empty <code>filterOptions</code> object.
  */
 export type GetConnectorFiltersResponse = {
   success: boolean;

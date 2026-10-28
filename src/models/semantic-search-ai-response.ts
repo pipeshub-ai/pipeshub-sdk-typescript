@@ -83,6 +83,15 @@ export type SemanticSearchAiResponse = {
    * `DATE_FILTER_SAFETY_NET` setting is `false` never sends this field.
    */
   outsideDates?: SemanticSearchOutsideDates | undefined;
+  /**
+   * Present only when part of the search index could not be searched, so the
+   *
+   * @remarks
+   * results may miss documents: says how many parts failed, for example
+   * `1 of 3 parts of the search index could not be searched, so this search may
+   * have missed documents.`
+   */
+  searchIncomplete?: string | undefined;
 };
 
 /** @internal */
@@ -103,6 +112,7 @@ export const SemanticSearchAiResponse$inboundSchema: z.ZodMiniType<
     ),
     timeline: types.optional(SemanticSearchTimeline$inboundSchema),
     outsideDates: types.optional(SemanticSearchOutsideDates$inboundSchema),
+    searchIncomplete: types.optional(types.string()),
   }),
   z.transform((v) => {
     return remap$(v, {

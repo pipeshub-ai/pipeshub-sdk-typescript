@@ -30,6 +30,26 @@ import {
 } from "./connector-sync-custom-field.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
+/**
+ * How records of this connector get their per-user visibility:
+ *
+ * @remarks
+ * `RECORD_LEVEL` (per-record permissions from the source) or
+ * `APP_LEVEL` (everyone who can reach the connector sees every record).
+ */
+export const PermissionModel = {
+  RecordLevel: "RECORD_LEVEL",
+  AppLevel: "APP_LEVEL",
+} as const;
+/**
+ * How records of this connector get their per-user visibility:
+ *
+ * @remarks
+ * `RECORD_LEVEL` (per-record permissions from the source) or
+ * `APP_LEVEL` (everyone who can reach the connector sees every record).
+ */
+export type PermissionModel = OpenEnum<typeof PermissionModel>;
+
 export type OauthConfigs = {
   authorizeUrl?: string | undefined;
   tokenUrl?: string | undefined;
@@ -37,15 +57,24 @@ export type OauthConfigs = {
   scopes?: Array<string> | undefined;
 };
 
+/**
+ * Authentication form
+ */
 export type ConnectorSchemaAuth = {
   supportedAuthTypes?: Array<ConnectorAuthType> | undefined;
   /**
    * Auth form per auth type, keyed by ConnectorAuthType
    */
   schemas?: { [k: string]: ConnectorAuthSchemaForType } | undefined;
+  /**
+   * Default values, keyed by field name
+   */
   values?: { [k: string]: any } | undefined;
   customFields?: Array<any> | undefined;
   customValues?: { [k: string]: any } | undefined;
+  /**
+   * Rules that show a field only when another field has a given value, keyed by the field they apply to
+   */
   conditionalDisplay?: { [k: string]: any } | undefined;
   /**
    * Instance reads only
@@ -68,11 +97,17 @@ export const SupportedStrategy = {
 } as const;
 export type SupportedStrategy = OpenEnum<typeof SupportedStrategy>;
 
+/**
+ * Strategy preselected in the form
+ */
 export const ConnectorSchemaSelectedStrategy = {
   Manual: "MANUAL",
   Scheduled: "SCHEDULED",
   Webhook: "WEBHOOK",
 } as const;
+/**
+ * Strategy preselected in the form
+ */
 export type ConnectorSchemaSelectedStrategy = OpenEnum<
   typeof ConnectorSchemaSelectedStrategy
 >;
@@ -101,8 +136,14 @@ export type RealtimeConfig = {
   connectionType?: string | undefined;
 };
 
+/**
+ * Sync options
+ */
 export type ConnectorSchemaSync = {
   supportedStrategies?: Array<SupportedStrategy> | undefined;
+  /**
+   * Strategy preselected in the form
+   */
   selectedStrategy?: ConnectorSchemaSelectedStrategy | undefined;
   webhookConfig?: ConnectorSchemaWebhookConfig | undefined;
   scheduledConfig?: ConnectorSchemaScheduledConfig | undefined;
@@ -112,6 +153,9 @@ export type ConnectorSchemaSync = {
   values?: { [k: string]: any } | undefined;
 };
 
+/**
+ * Filters the connector offers
+ */
 export type ConnectorSchemaFilters = {
   sync?: ConnectorFilterSection | undefined;
   indexing?: ConnectorFilterSection | undefined;
@@ -125,8 +169,18 @@ export type ConnectorSchema = {
   supportsRealtime?: boolean | undefined;
   supportsSync?: boolean | undefined;
   supportsAgent?: boolean | undefined;
+  /**
+   * Whether the type is hidden from the registry listing
+   */
   hideConnector?: boolean | undefined;
-  permissionModel?: string | undefined;
+  /**
+   * How records of this connector get their per-user visibility:
+   *
+   * @remarks
+   * `RECORD_LEVEL` (per-record permissions from the source) or
+   * `APP_LEVEL` (everyone who can reach the connector sees every record).
+   */
+  permissionModel?: PermissionModel | undefined;
   isAdminAccessRequired?: boolean | undefined;
   personalConnectorType?: string | null | undefined;
   /**
@@ -134,10 +188,25 @@ export type ConnectorSchema = {
    */
   supportsConnectionCheck?: boolean | undefined;
   documentationLinks?: Array<ConnectorDocumentationLink> | undefined;
+  /**
+   * Authentication form
+   */
   auth?: ConnectorSchemaAuth | undefined;
+  /**
+   * Sync options
+   */
   sync?: ConnectorSchemaSync | undefined;
+  /**
+   * Filters the connector offers
+   */
   filters?: ConnectorSchemaFilters | undefined;
 };
+
+/** @internal */
+export const PermissionModel$inboundSchema: z.ZodMiniType<
+  PermissionModel,
+  unknown
+> = openEnums.inboundSchema(PermissionModel);
 
 /** @internal */
 export const OauthConfigs$inboundSchema: z.ZodMiniType<OauthConfigs, unknown> =
@@ -326,7 +395,7 @@ export const ConnectorSchema$inboundSchema: z.ZodMiniType<
   supportsSync: types.optional(types.boolean()),
   supportsAgent: types.optional(types.boolean()),
   hideConnector: types.optional(types.boolean()),
-  permissionModel: types.optional(types.string()),
+  permissionModel: types.optional(PermissionModel$inboundSchema),
   isAdminAccessRequired: types.optional(types.boolean()),
   personalConnectorType: z.optional(z.nullable(types.string())),
   supportsConnectionCheck: types.optional(types.boolean()),

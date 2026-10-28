@@ -136,7 +136,7 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 401, 403, 422               | application/json            |
+| errors.ErrorResponse        | 400, 401, 403, 404, 422     | application/json            |
 | errors.ErrorResponse        | 500, 503                    | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
@@ -224,6 +224,14 @@ parent, epic, sub-task and linked-issue lines appear only for
 records inside the limit. `Web URL` is kept, though it can contain
 folder names.
 
+**Connector and knowledge base nodes:** opening the `id` of a
+connector instance the caller has no permission on in the graph (for
+example one that has never synced, even for its creator) returns the
+same empty view as a missing node. Opening a knowledge base at
+`depth` 1 lists nothing; its records appear from `depth` 2.
+
+An OAuth token holding `connector:read` instead of `kb:read` is accepted too.
+
 
 ### Example Usage
 
@@ -238,7 +246,12 @@ const pipeshub = new Pipeshub({
 });
 
 async function run() {
-  const result = await pipeshub.connector.navigateKnowledgeGraph({});
+  const result = await pipeshub.connector.navigateKnowledgeGraph({
+    createdAfter: "2026-01-15T08:00:00Z",
+    createdBefore: "2026-01-15T08:00:00Z",
+    modifiedAfter: "2026-01-15T08:00:00Z",
+    modifiedBefore: "2026-01-15T08:00:00Z",
+  });
 
   console.log(result);
 }
@@ -263,7 +276,12 @@ const pipeshub = new PipeshubCore({
 });
 
 async function run() {
-  const res = await connectorNavigateKnowledgeGraph(pipeshub, {});
+  const res = await connectorNavigateKnowledgeGraph(pipeshub, {
+    createdAfter: "2026-01-15T08:00:00Z",
+    createdBefore: "2026-01-15T08:00:00Z",
+    modifiedAfter: "2026-01-15T08:00:00Z",
+    modifiedBefore: "2026-01-15T08:00:00Z",
+  });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
@@ -358,6 +376,8 @@ records, related tables, a deal's orgs and products, and live Jira
 parent, epic, sub-task and linked-issue lines appear only for
 records inside the limit. `Web URL` is kept, though it can contain
 folder names.
+
+An OAuth token holding `connector:read` instead of `kb:read` is accepted too.
 
 
 ### Example Usage

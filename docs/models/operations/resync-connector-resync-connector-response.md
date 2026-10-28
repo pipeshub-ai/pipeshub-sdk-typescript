@@ -14,6 +14,6 @@ let value: ResyncConnectorResyncConnectorResponse = {
 
 ## Fields
 
-| Field              | Type               | Required           | Description        |
-| ------------------ | ------------------ | ------------------ | ------------------ |
-| `success`          | *boolean*          | :heavy_check_mark: | N/A                |
+| Field                                  | Type                                   | Required                               | Description                            |
+| -------------------------------------- | -------------------------------------- | -------------------------------------- | -------------------------------------- |
+| `success`                              | *boolean*                              | :heavy_check_mark:                     | Whether the resync event was published |

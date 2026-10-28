@@ -5,13 +5,13 @@
 import * as z from "zod/v4-mini";
 
 /**
- * Optional JSON body for `/userAccount/initAuth`. Valid shapes include: omitting the body entirely, sending `{}` (empty object), or `{ "email": "<address>" }`. Neither the body nor `email` is required. When `email` is omitted or empty, the session is still created and `allowedMethods` / `authProviders` are returned as usual; clients typically supply `email` later on `/userAccount/authenticate`. The `email` property remains supported mainly for legacy clients and backward compatibility.
+ * Optional JSON body for `/userAccount/initAuth`. Valid shapes include: omitting the body entirely, sending `{}` (empty object), or `{ "email": "<address>" }`. Neither the body nor `email` is required. When `email` is omitted, the session is still created and `allowedMethods` / `authProviders` are returned as usual; clients typically supply `email` later on `/userAccount/authenticate`. The `email` property remains supported mainly for legacy clients and backward compatibility. Fields other than `email` are dropped by the validator, not refused.
  *
  * @remarks
  */
 export type InitAuthRequest = {
   /**
-   * Optional; retained for legacy reasons. When set, stored on the auth session for correlation with later `/authenticate` calls (RFC 5321 compliant address).
+   * Optional; retained for legacy reasons. When set, stored on the auth session for correlation with later `/authenticate` calls (RFC 5321 compliant address). When the property is present it must be a well-formed address of at most 254 characters: an empty string, `null` or a malformed address is answered `400`.
    *
    * @remarks
    */

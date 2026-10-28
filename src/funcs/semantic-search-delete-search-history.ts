@@ -19,6 +19,7 @@ import {
   RequestTimeoutError,
   UnexpectedClientError,
 } from "../models/errors/http-client-errors.js";
+import * as errors from "../models/errors/index.js";
 import { PipeshubError } from "../models/errors/pipeshub-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { SDKValidationError } from "../models/errors/sdk-validation-error.js";
@@ -32,12 +33,16 @@ import { Result } from "../types/fp.js";
  * @remarks
  * Permanently delete every persisted search row owned by, or shared
  * with, the authenticated user, along with the citation rows those
- * searches reference. The action cannot be undone.
+ * searches reference. The action cannot be undone. Searches other
+ * users shared with the caller are deleted for their owners too, even
+ * when the caller only has `read` access.
  *
  * Scoped to the caller's org and limited to rows where
- * `isDeleted: false` and `isArchived: false`. If nothing matches
- * (including the case where every row is already archived), the
- * endpoint returns `404` rather than a successful no-op.
+ * `isArchived: false`. The optional `shared`, `startDate` and
+ * `endDate` query filters narrow what is deleted; `search` is
+ * validated but has no effect. If nothing matches (including the case
+ * where every row is already archived), the endpoint returns `404`
+ * rather than a successful no-op.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -48,6 +53,7 @@ export function semanticSearchDeleteSearchHistory(
 ): APIPromise<
   Result<
     operations.DeleteSearchHistoryResponse,
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -73,6 +79,7 @@ async function $do(
   [
     Result<
       operations.DeleteSearchHistoryResponse,
+      | errors.ErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -159,8 +166,13 @@ async function $do(
   }
   const response = doResult.value;
 
+  const responseFields = {
+    HttpMeta: { Response: response, Request: req },
+  };
+
   const [result] = await M.match<
     operations.DeleteSearchHistoryResponse,
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -171,9 +183,11 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, operations.DeleteSearchHistoryResponse$inboundSchema),
-    M.fail([400, 401, 403, 404, "4XX"]),
-    M.fail([500, "5XX"]),
-  )(response, req);
+    M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
+    M.fail("4XX"),
+    M.fail("5XX"),
+  )(response, req, { extraFields: responseFields });
   if (!result.ok) {
     return [result, { status: "complete", request: req, response }];
   }

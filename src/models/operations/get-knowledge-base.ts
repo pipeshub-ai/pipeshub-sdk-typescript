@@ -6,7 +6,10 @@ import * as z from "zod/v4-mini";
 
 export type GetKnowledgeBaseRequest = {
   /**
-   * Knowledge base ID (non-empty string)
+   * Knowledge base ID (non-empty string). It is not checked to be a UUID: any other
+   *
+   * @remarks
+   * value is looked up and answered `404`.
    */
   kbId: string;
 };

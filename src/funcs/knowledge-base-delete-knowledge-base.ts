@@ -47,6 +47,8 @@ import { Result } from "../types/fp.js";
  *
  * **Warning:** This action is irreversible. Consider exporting data before deletion.
  *
+ * **Request:** only the `kbId` path parameter is read; any query string or body is ignored.
+ *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
 export function knowledgeBaseDeleteKnowledgeBase(
@@ -181,7 +183,7 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.DeleteKnowledgeBaseById$inboundSchema),
-    M.jsonErr([401, 403, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
     M.jsonErr([500, 503], errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

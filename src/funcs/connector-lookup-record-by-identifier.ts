@@ -93,6 +93,8 @@ import { Result } from "../types/fp.js";
  * records inside the limit. `Web URL` is kept, though it can contain
  * folder names.
  *
+ * An OAuth token holding `connector:read` instead of `kb:read` is accepted too.
+ *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
 export function connectorLookupRecordByIdentifier(
@@ -171,7 +173,7 @@ async function $do(
     options: client._options,
     baseURL: options?.serverURL ?? client._baseURL ?? "",
     operationID: "lookupRecordByIdentifier",
-    oAuth2Scopes: ["connector:read"],
+    oAuth2Scopes: ["kb:read"],
 
     resolvedSecurity: requestSecurity,
 

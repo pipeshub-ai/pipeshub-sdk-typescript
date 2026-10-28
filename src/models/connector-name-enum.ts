@@ -36,6 +36,7 @@ export const ConnectorNameEnum = {
   ConfluenceDataCenterPersonal: "CONFLUENCE DATA CENTER PERSONAL",
   Jira: "JIRA",
   JiraPersonal: "JIRA PERSONAL",
+  JiraCloudPersonal: "JIRA CLOUD PERSONAL",
   JiraDataCenter: "JIRA DATA CENTER",
   JiraDataCenterPersonal: "JIRA DATA CENTER PERSONAL",
   Box: "BOX",
@@ -70,6 +71,9 @@ export const ConnectorNameEnum = {
   DatabaseSandbox: "DATABASE_SANDBOX",
   ImageGeneration: "IMAGE_GENERATION",
   Attachments: "ATTACHMENTS",
+  Demo: "DEMO",
+  Smb: "SMB",
+  Cifs: "CIFS",
 } as const;
 /**
  * Name of the source connector. Mirrors the values of the backend
@@ -86,8 +90,3 @@ export const ConnectorNameEnum$inboundSchema: z.ZodMiniType<
   ConnectorNameEnum,
   unknown
 > = openEnums.inboundSchema(ConnectorNameEnum);
-/** @internal */
-export const ConnectorNameEnum$outboundSchema: z.ZodMiniType<
-  string,
-  ConnectorNameEnum
-> = openEnums.outboundSchema(ConnectorNameEnum);

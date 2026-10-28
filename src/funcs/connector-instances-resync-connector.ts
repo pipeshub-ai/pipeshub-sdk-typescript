@@ -37,7 +37,16 @@ import { Result } from "../types/fp.js";
  *
  * Fetches content from the external source and updates local records. Use when you suspect data is out of sync.
  *
+ * Only a connector in the caller's list of active connectors
+ * (`GET /connectors/active`, knowledge bases included) can be resynced.
+ * Any other ID, including one that does not exist, is refused with `400`.
+ * The reply only acknowledges that the resync event was published.
+ *
+ * Fields of the body other than `connectorName` and `fullSync` are dropped without an error.
+ *
  * **Warning:** This can be resource-intensive for large connectors.
+ *
+ * The scope check also accepts `kb:write` in place of `connector:write`.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */

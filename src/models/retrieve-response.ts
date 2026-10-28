@@ -13,6 +13,9 @@ import {
 } from "./retrieve-chunk.js";
 
 export type RetrieveResponse = {
+  /**
+   * The request's id, as in the `x-request-id` response header.
+   */
   requestId?: string | undefined;
   chunks: Array<RetrieveChunk>;
   /**
@@ -20,9 +23,9 @@ export type RetrieveResponse = {
    */
   incomplete: boolean;
   /**
-   * Why `chunks` is empty, when it is.
+   * Why `chunks` is empty, when it is; `null` when the search gave no reason. Absent when `chunks` is not empty.
    */
-  message?: string | undefined;
+  message?: string | null | undefined;
 };
 
 /** @internal */
@@ -33,7 +36,7 @@ export const RetrieveResponse$inboundSchema: z.ZodMiniType<
   requestId: types.optional(types.string()),
   chunks: z.array(RetrieveChunk$inboundSchema),
   incomplete: types.boolean(),
-  message: types.optional(types.string()),
+  message: z.optional(z.nullable(types.string())),
 });
 
 export function retrieveResponseFromJSON(

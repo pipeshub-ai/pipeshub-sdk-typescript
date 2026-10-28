@@ -48,6 +48,23 @@ export const ConversationStatus = {
 export type ConversationStatus = OpenEnum<typeof ConversationStatus>;
 
 /**
+ * Reasoning effort requested for the turn, when one was set.
+ */
+export const ConversationReasoningEffort = {
+  None: "none",
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Max: "max",
+} as const;
+/**
+ * Reasoning effort requested for the turn, when one was set.
+ */
+export type ConversationReasoningEffort = OpenEnum<
+  typeof ConversationReasoningEffort
+>;
+
+/**
  * AI model configuration used
  */
 export type ConversationModelInfo1 = {
@@ -59,6 +76,10 @@ export type ConversationModelInfo1 = {
   modelFriendlyName?: string | undefined;
   modelProvider?: string | undefined;
   chatMode?: string | undefined;
+  /**
+   * Reasoning effort requested for the turn, when one was set.
+   */
+  reasoningEffort?: ConversationReasoningEffort | undefined;
 };
 
 export const ConversationSharedWithAccessLevel = {
@@ -72,9 +93,17 @@ export type ConversationSharedWithAccessLevel = OpenEnum<
 export type ConversationSharedWith = {
   userId?: string | undefined;
   accessLevel?: ConversationSharedWithAccessLevel | undefined;
+  /**
+   * Subdocument identifier auto-assigned by MongoDB.
+   */
+  id?: string | undefined;
 };
 
 export type ConversationConversationError = {
+  /**
+   * Sub-document identifier auto-assigned by MongoDB.
+   */
+  id?: string | undefined;
   message: string;
   errorType?: string | undefined;
   timestamp?: Date | undefined;
@@ -271,6 +300,10 @@ export type Conversation = {
    * them with `GET /agents/{agentKey}/conversations/{conversationId}`.
    */
   agentKey?: string | undefined;
+  /**
+   * Mongoose document version key.
+   */
+  v?: number | undefined;
 };
 
 /** @internal */
@@ -278,6 +311,12 @@ export const ConversationStatus$inboundSchema: z.ZodMiniType<
   ConversationStatus,
   unknown
 > = openEnums.inboundSchema(ConversationStatus);
+
+/** @internal */
+export const ConversationReasoningEffort$inboundSchema: z.ZodMiniType<
+  ConversationReasoningEffort,
+  unknown
+> = openEnums.inboundSchema(ConversationReasoningEffort);
 
 /** @internal */
 export const ConversationModelInfo1$inboundSchema: z.ZodMiniType<
@@ -289,6 +328,7 @@ export const ConversationModelInfo1$inboundSchema: z.ZodMiniType<
   modelFriendlyName: types.optional(types.string()),
   modelProvider: types.optional(types.string()),
   chatMode: types.optional(types.string()),
+  reasoningEffort: types.optional(ConversationReasoningEffort$inboundSchema),
 });
 
 export function conversationModelInfo1FromJSON(
@@ -311,10 +351,20 @@ export const ConversationSharedWithAccessLevel$inboundSchema: z.ZodMiniType<
 export const ConversationSharedWith$inboundSchema: z.ZodMiniType<
   ConversationSharedWith,
   unknown
-> = z.object({
-  userId: types.optional(types.string()),
-  accessLevel: types.optional(ConversationSharedWithAccessLevel$inboundSchema),
-});
+> = z.pipe(
+  z.object({
+    userId: types.optional(types.string()),
+    accessLevel: types.optional(
+      ConversationSharedWithAccessLevel$inboundSchema,
+    ),
+    _id: types.optional(types.string()),
+  }),
+  z.transform((v) => {
+    return remap$(v, {
+      "_id": "id",
+    });
+  }),
+);
 
 export function conversationSharedWithFromJSON(
   jsonString: string,
@@ -330,14 +380,22 @@ export function conversationSharedWithFromJSON(
 export const ConversationConversationError$inboundSchema: z.ZodMiniType<
   ConversationConversationError,
   unknown
-> = z.object({
-  message: types.string(),
-  errorType: types.optional(types.string()),
-  timestamp: types.optional(types.date()),
-  messageId: types.optional(types.string()),
-  stack: types.optional(types.string()),
-  metadata: types.optional(z.record(z.string(), z.any())),
-});
+> = z.pipe(
+  z.object({
+    _id: types.optional(types.string()),
+    message: types.string(),
+    errorType: types.optional(types.string()),
+    timestamp: types.optional(types.date()),
+    messageId: types.optional(types.string()),
+    stack: types.optional(types.string()),
+    metadata: types.optional(z.record(z.string(), z.any())),
+  }),
+  z.transform((v) => {
+    return remap$(v, {
+      "_id": "id",
+    });
+  }),
+);
 
 export function conversationConversationErrorFromJSON(
   jsonString: string,
@@ -400,10 +458,12 @@ export const Conversation$inboundSchema: z.ZodMiniType<Conversation, unknown> =
       ),
       sharedBy: types.optional(ConversationSharedBy$inboundSchema),
       agentKey: types.optional(types.string()),
+      __v: types.optional(types.number()),
     }),
     z.transform((v) => {
       return remap$(v, {
         "_id": "id",
+        "__v": "v",
       });
     }),
   );

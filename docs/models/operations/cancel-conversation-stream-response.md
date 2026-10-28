@@ -7,11 +7,13 @@ Cancellation requested, or the run had already finished.
 ```typescript
 import { CancelConversationStreamResponse } from "@pipeshub-ai/sdk/models/operations";
 
-let value: CancelConversationStreamResponse = {};
+let value: CancelConversationStreamResponse = {
+  cancelled: false,
+};
 ```
 
 ## Fields
 
 | Field              | Type               | Required           | Description        |
 | ------------------ | ------------------ | ------------------ | ------------------ |
-| `cancelled`        | *boolean*          | :heavy_minus_sign: | N/A                |
+| `cancelled`        | *boolean*          | :heavy_check_mark: | N/A                |

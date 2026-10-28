@@ -63,22 +63,28 @@ export type ListAgentConversationsRequest = {
    * Case-insensitive search term applied to conversation `title` and
    *
    * @remarks
-   * `messages.content`. Maximum length is 1000 characters. HTML/XSS
-   * payloads and format specifiers are rejected.
+   * `messages.content`. Maximum length is 1000 characters. A printf-style
+   * format specifier (`%s`, `%x`, ...) is refused with `VALIDATION_ERROR`;
+   * markup (HTML tags, `javascript:`, event handlers) is refused with
+   * `HTTP_BAD_REQUEST` by the sanitizer every route runs.
    */
   search?: string | undefined;
   /**
-   * Inclusive lower bound on `createdAt`. The handler accepts any
+   * Inclusive lower bound on `createdAt`, as an ISO 8601 date or
    *
    * @remarks
-   * JavaScript-parseable date string; invalid values return HTTP 400.
+   * date-time. The validator accepts any string JavaScript `Date` can
+   * parse (so also forms like `May 1 2026`); one it cannot parse returns
+   * HTTP 400.
    */
   startDate?: string | undefined;
   /**
-   * Inclusive upper bound on `createdAt`. The handler accepts any
+   * Inclusive upper bound on `createdAt`, as an ISO 8601 date or
    *
    * @remarks
-   * JavaScript-parseable date string; invalid values return HTTP 400.
+   * date-time. The validator accepts any string JavaScript `Date` can
+   * parse (so also forms like `May 1 2026`); one it cannot parse returns
+   * HTTP 400.
    */
   endDate?: string | undefined;
   /**
@@ -102,7 +108,7 @@ export type ListAgentConversationsRequest = {
    *
    * @remarks
    * the literal string `unassigned` to list agent conversations with
-   * no `projectId`.
+   * no `projectId`. Anything else is refused with HTTP 400.
    */
   projectId?: string | undefined;
 };

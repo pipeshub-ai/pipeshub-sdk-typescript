@@ -10,7 +10,7 @@ import * as models from "../index.js";
  */
 export type UpdateAuthMethodRequest = {
   /**
-   * Authentication steps to set for the organization (1-3 steps)
+   * Authentication steps to set for the organization (1-3 steps).
    */
   authMethod: Array<models.AuthStep>;
 };

@@ -37,7 +37,11 @@ import { Result } from "../types/fp.js";
  * **Gateway not-found behavior:**
  * Unknown `agentKey`, lookup after soft-delete, and other AI-backend failures
  * that return 404 from the Python query service are surfaced by the Node
- * gateway as **HTTP 404** with an `ErrorResponse` body.
+ * gateway as **HTTP 404** with an `ErrorResponse` body. An agent the caller
+ * has no access to (another user's agent that is not shared) is also a
+ * `404`, not a `403`.
+ *
+ * The route reads no query parameter; any that is sent is ignored.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */

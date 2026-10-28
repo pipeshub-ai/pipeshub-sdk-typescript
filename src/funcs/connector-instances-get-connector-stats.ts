@@ -32,8 +32,18 @@ import { Result } from "../types/fp.js";
  * Get connector statistics
  *
  * @remarks
- * Retrieve statistics for a specific connector instance including record counts,
- * indexing status breakdown, and sync information.
+ * Retrieve record counts of a connector instance, in total and per record
+ * type, broken down by indexing status. The ID of a knowledge base is
+ * accepted too (a knowledge base is stored as a connector instance of type
+ * <code>KB</code>); its stats report <code>origin: COLLECTION</code>.<br><br>
+ * <b>Who can read them:</b> the creator of the instance and, for a team
+ * instance, org admins. Stats use the same read gate as
+ * <code>GET /connectors/{connectorId}</code>: anyone else, including an
+ * admin reading another user's personal instance, gets <code>404</code>
+ * ("This connector was removed, or you no longer have access. ..."), so
+ * the instance's existence is not confirmed.
+ *
+ * An OAuth token holding `kb:read` instead of `connector:read` passes the scope check too.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -169,7 +179,8 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.ConnectorStats$inboundSchema),
-    M.jsonErr([401, 403, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

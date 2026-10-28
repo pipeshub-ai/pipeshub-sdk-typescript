@@ -7,6 +7,7 @@ import { remap as remap$ } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
+import { smartUnion } from "../types/smart-union.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 import {
   PersistedSemanticSearchCitation,
@@ -16,6 +17,12 @@ import {
   PersistedSemanticSearchSharedWithEntry,
   PersistedSemanticSearchSharedWithEntry$inboundSchema,
 } from "./persisted-semantic-search-shared-with-entry.js";
+import {
+  RedactedSource,
+  RedactedSource$inboundSchema,
+} from "./redacted-source.js";
+
+export type CitationId = PersistedSemanticSearchCitation | RedactedSource;
 
 /**
  * Persisted search document as returned to clients.
@@ -35,7 +42,13 @@ export type PersistedSemanticSearch = {
   limit: number;
   orgId: string;
   userId: string;
-  citationIds: Array<PersistedSemanticSearchCitation>;
+  /**
+   * For a search shared with the viewer, a hit the viewer cannot read is a
+   *
+   * @remarks
+   * `RedactedSource`.
+   */
+  citationIds: Array<PersistedSemanticSearchCitation | RedactedSource>;
   /**
    * Map of source-record id (or `_key`) to a JSON-stringified record object.
    *
@@ -64,6 +77,23 @@ export type PersistedSemanticSearch = {
 };
 
 /** @internal */
+export const CitationId$inboundSchema: z.ZodMiniType<CitationId, unknown> =
+  smartUnion([
+    PersistedSemanticSearchCitation$inboundSchema,
+    RedactedSource$inboundSchema,
+  ]);
+
+export function citationIdFromJSON(
+  jsonString: string,
+): SafeParseResult<CitationId, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => CitationId$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'CitationId' from JSON`,
+  );
+}
+
+/** @internal */
 export const PersistedSemanticSearch$inboundSchema: z.ZodMiniType<
   PersistedSemanticSearch,
   unknown
@@ -75,7 +105,12 @@ export const PersistedSemanticSearch$inboundSchema: z.ZodMiniType<
     limit: types.number(),
     orgId: types.string(),
     userId: types.string(),
-    citationIds: z.array(PersistedSemanticSearchCitation$inboundSchema),
+    citationIds: z.array(
+      smartUnion([
+        PersistedSemanticSearchCitation$inboundSchema,
+        RedactedSource$inboundSchema,
+      ]),
+    ),
     records: z.record(z.string(), types.string()),
     isShared: types.boolean(),
     shareLink: types.optional(types.string()),

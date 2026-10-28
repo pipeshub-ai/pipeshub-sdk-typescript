@@ -21,6 +21,10 @@ export type AuthProviderMicrosoftPublicConfig = {
    */
   clientId?: string | undefined;
   /**
+   * Sign-in authority URL, built on save as `https://login.microsoftonline.com/{tenantId}`
+   */
+  authority?: string | undefined;
+  /**
    * Whether just-in-time user provisioning is enabled for Microsoft
    */
   enableJit?: boolean | undefined;
@@ -33,6 +37,7 @@ export const AuthProviderMicrosoftPublicConfig$inboundSchema: z.ZodMiniType<
 > = z.object({
   tenantId: types.optional(types.string()),
   clientId: types.optional(types.string()),
+  authority: types.optional(types.string()),
   enableJit: types.optional(types.boolean()),
 });
 

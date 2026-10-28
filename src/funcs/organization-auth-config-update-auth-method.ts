@@ -37,11 +37,19 @@ import { Result } from "../types/fp.js";
  *
  * **Validation Rules:**
  * - Minimum 1 step, maximum 3 steps
- * - Each step must have a unique order (1, 2, or 3)
+ * - Each step must have a unique `order`. `order` is only checked to be a number and is
+ *   stored as sent; sign-in runs the steps in ascending `order`
  * - No duplicate methods within the same step
  * - No method can appear in multiple steps
  * - Each step must have at least one allowed method
  * - `samlSso` and `oauth` were removed in 1.0 and are refused; use `microsoft` in place of `azureAd`
+ *
+ * The two rules that compare steps with each other (unique `order`, a method in only one
+ * step) are not expressed in the request schema below; the API refuses a request that
+ * breaks them with `400 VALIDATION_ERROR` naming `body.authMethod`.
+ *
+ * Unknown fields, at any level of the body, and any query string are dropped by the
+ * validator, not refused.
  *
  * **Available Methods:**
  * - `password`: Email/password authentication
@@ -201,7 +209,7 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.UpdateAuthMethodResponse$inboundSchema),
-    M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([400, 403, 404], errors.ErrorResponse$inboundSchema),
     M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

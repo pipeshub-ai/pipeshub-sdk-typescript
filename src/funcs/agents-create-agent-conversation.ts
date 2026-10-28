@@ -194,11 +194,13 @@ async function $do(
       hdrs: true,
       key: "Result",
     }),
-    M.jsonErr(400, errors.ErrorResponse$inboundSchema),
-    M.jsonErr(424, errors.ErrorResponse$inboundSchema, { hdrs: true }),
+    M.jsonErr([400, 401, 403, 409], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([404, 424], errors.ErrorResponse$inboundSchema, { hdrs: true }),
     M.fail([413, 422, 429]),
-    M.jsonErr(500, errors.ErrorResponse$inboundSchema, { hdrs: true }),
-    M.fail([401, 403, "4XX"]),
+    M.jsonErr([500, 503, 504], errors.ErrorResponse$inboundSchema, {
+      hdrs: true,
+    }),
+    M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });
   if (!result.ok) {

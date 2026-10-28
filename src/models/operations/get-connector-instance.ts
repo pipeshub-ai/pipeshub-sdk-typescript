@@ -11,7 +11,7 @@ import * as models from "../index.js";
 
 export type GetConnectorInstanceRequest = {
   /**
-   * Connector instance ID
+   * Connector instance ID (`_key` of the instance)
    */
   connectorId: string;
 };

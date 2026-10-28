@@ -44,6 +44,7 @@ export function oAuthAppsListOAuthScopes(
 ): APIPromise<
   Result<
     models.OAuthScopesGroupedResponse,
+    | errors.ErrorResponse
     | errors.ApplicationJsonErrorResponse
     | errors.OAuthClientManagementRateLimitError
     | PipeshubError
@@ -69,6 +70,7 @@ async function $do(
   [
     Result<
       models.OAuthScopesGroupedResponse,
+      | errors.ErrorResponse
       | errors.ApplicationJsonErrorResponse
       | errors.OAuthClientManagementRateLimitError
       | PipeshubError
@@ -139,6 +141,7 @@ async function $do(
 
   const [result] = await M.match<
     models.OAuthScopesGroupedResponse,
+    | errors.ErrorResponse
     | errors.ApplicationJsonErrorResponse
     | errors.OAuthClientManagementRateLimitError
     | PipeshubError
@@ -151,8 +154,10 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.OAuthScopesGroupedResponse$inboundSchema),
+    M.jsonErr(400, errors.ErrorResponse$inboundSchema),
     M.jsonErr([401, 403], errors.ApplicationJsonErrorResponse$inboundSchema),
     M.jsonErr(429, errors.OAuthClientManagementRateLimitError$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

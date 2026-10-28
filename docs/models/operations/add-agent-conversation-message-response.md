@@ -6,17 +6,14 @@
 import { AddAgentConversationMessageResponse } from "@pipeshub-ai/sdk/models/operations";
 
 let value: AddAgentConversationMessageResponse = {
-  headers: {
-    "key": [],
-  },
+  headers: {},
   result: {
-    conversation: {
-      title: "Q4 Financial Report Discussion",
-    },
-    recordsUsed: 628106,
+    conversation: {},
+    recordsUsed: 274946,
     meta: {
-      timestamp: new Date("2024-01-14T20:18:19.034Z"),
-      duration: 547674,
+      timestamp: new Date("2024-06-25T17:34:13.119Z"),
+      duration: 866324,
+      recordsUsed: 850686,
     },
   },
 };
@@ -24,7 +21,7 @@ let value: AddAgentConversationMessageResponse = {
 
 ## Fields
 
-| Field                                                             | Type                                                              | Required                                                          | Description                                                       |
-| ----------------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------- |
-| `headers`                                                         | Record<string, *string*[]>                                        | :heavy_check_mark:                                                | N/A                                                               |
-| `result`                                                          | [models.AddMessageResponse](../../models/add-message-response.md) | :heavy_check_mark:                                                | N/A                                                               |
+| Field                                                                        | Type                                                                         | Required                                                                     | Description                                                                  |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `headers`                                                                    | Record<string, *string*[]>                                                   | :heavy_check_mark:                                                           | N/A                                                                          |
+| `result`                                                                     | [models.AgentAddMessageResponse](../../models/agent-add-message-response.md) | :heavy_check_mark:                                                           | N/A                                                                          |

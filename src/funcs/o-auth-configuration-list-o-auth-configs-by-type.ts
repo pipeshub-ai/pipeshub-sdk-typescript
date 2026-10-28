@@ -31,7 +31,13 @@ import { Result } from "../types/fp.js";
  * List OAuth configs for connector type
  *
  * @remarks
- * Get all OAuth configurations for a specific connector type.
+ * List the organization's OAuth configurations for one connector type.<br><br>
+ * <b>What comes back depends on the caller:</b><br>
+ * <ul>
+ * <li>An admin gets each stored record in full, including `config` with the client secret in clear text</li>
+ * <li>Any other caller gets only the credential-free fields</li>
+ * </ul>
+ * A connector type with no configurations, or one that does not exist, yields an empty list.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -177,6 +183,7 @@ async function $do(
   >(
     M.json(200, operations.ListOAuthConfigsByTypeResponse$inboundSchema),
     M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

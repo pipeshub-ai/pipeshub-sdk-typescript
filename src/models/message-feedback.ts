@@ -72,7 +72,7 @@ export type CitationFeedback = {
 /**
  * Origin of the feedback. Always present in responses (server applies the default `user`).
  */
-export const Source = {
+export const MessageFeedbackSource = {
   User: "user",
   System: "system",
   Admin: "admin",
@@ -81,7 +81,7 @@ export const Source = {
 /**
  * Origin of the feedback. Always present in responses (server applies the default `user`).
  */
-export type Source = OpenEnum<typeof Source>;
+export type MessageFeedbackSource = OpenEnum<typeof MessageFeedbackSource>;
 
 export type Revision = {
   /**
@@ -155,7 +155,7 @@ export type MessageFeedback = {
   /**
    * Origin of the feedback. Always present in responses (server applies the default `user`).
    */
-  source: Source;
+  source: MessageFeedbackSource;
   /**
    * User who submitted the feedback
    */
@@ -252,8 +252,10 @@ export function citationFeedbackFromJSON(
 }
 
 /** @internal */
-export const Source$inboundSchema: z.ZodMiniType<Source, unknown> = openEnums
-  .inboundSchema(Source);
+export const MessageFeedbackSource$inboundSchema: z.ZodMiniType<
+  MessageFeedbackSource,
+  unknown
+> = openEnums.inboundSchema(MessageFeedbackSource);
 
 /** @internal */
 export const Revision$inboundSchema: z.ZodMiniType<Revision, unknown> = z.pipe(
@@ -314,7 +316,7 @@ export const MessageFeedback$inboundSchema: z.ZodMiniType<
   ),
   followUpQuestionsHelpful: types.optional(types.boolean()),
   unusedFollowUpQuestions: types.optional(z.array(types.string())),
-  source: z._default(Source$inboundSchema, "user"),
+  source: z._default(MessageFeedbackSource$inboundSchema, "user"),
   feedbackProvider: types.optional(types.string()),
   timestamp: types.optional(types.number()),
   revisions: types.optional(z.array(z.lazy(() => Revision$inboundSchema))),

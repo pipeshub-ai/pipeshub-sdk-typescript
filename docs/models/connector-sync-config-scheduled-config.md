@@ -10,8 +10,10 @@ let value: ConnectorSyncConfigScheduledConfig = {};
 
 ## Fields
 
-| Field              | Type               | Required           | Description        |
-| ------------------ | ------------------ | ------------------ | ------------------ |
-| `intervalMinutes`  | *number*           | :heavy_minus_sign: | N/A                |
-| `timezone`         | *string*           | :heavy_minus_sign: | N/A                |
-| `startTime`        | *number*           | :heavy_minus_sign: | Epoch milliseconds |
+| Field                                              | Type                                               | Required                                           | Description                                        |
+| -------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------- |
+| `intervalMinutes`                                  | *number*                                           | :heavy_minus_sign:                                 | N/A                                                |
+| `timezone`                                         | *string*                                           | :heavy_minus_sign:                                 | N/A                                                |
+| `startTime`                                        | *number*                                           | :heavy_minus_sign:                                 | Epoch milliseconds                                 |
+| `startDateTime`                                    | *any*                                              | :heavy_minus_sign:                                 | When the schedule starts, as the frontend sends it |
+| `additionalProperties`                             | Record<string, *any*>                              | :heavy_minus_sign:                                 | N/A                                                |

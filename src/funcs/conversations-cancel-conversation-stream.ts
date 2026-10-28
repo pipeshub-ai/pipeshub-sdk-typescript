@@ -19,6 +19,7 @@ import {
   RequestTimeoutError,
   UnexpectedClientError,
 } from "../models/errors/http-client-errors.js";
+import * as errors from "../models/errors/index.js";
 import { PipeshubError } from "../models/errors/pipeshub-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { SDKValidationError } from "../models/errors/sdk-validation-error.js";
@@ -39,9 +40,14 @@ import { Result } from "../types/fp.js";
  * frame with a `stopped` status and whatever partial answer had
  * already generated; nothing further is delivered here.
  *
- * `{ cancelled: false }` — not an error — covers a `runId` that
- * already finished or was never registered; the caller only needs to
- * know the stream is not running anymore, not why.
+ * A `runId` that already finished or was never registered is not an
+ * error either, but it is answered `{ cancelled: true }`, not `false`:
+ * the query service's KV-backed run registry publishes the cancel for
+ * other workers and acknowledges it as cancelled (a known defect).
+ * `{ cancelled: false }` is only returned when that publish fails.
+ *
+ * Only the conversation's owner (matched on `userId`) can cancel; any
+ * other caller, or a missing, deleted or agent conversation, is `404`.
  *
  * `runId` must belong to a run started on THIS `conversationId` — a
  * `runId` that exists but was registered under a different
@@ -57,6 +63,7 @@ export function conversationsCancelConversationStream(
 ): APIPromise<
   Result<
     operations.CancelConversationStreamResponse,
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -82,6 +89,7 @@ async function $do(
   [
     Result<
       operations.CancelConversationStreamResponse,
+      | errors.ErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -164,8 +172,13 @@ async function $do(
   }
   const response = doResult.value;
 
+  const responseFields = {
+    HttpMeta: { Response: response, Request: req },
+  };
+
   const [result] = await M.match<
     operations.CancelConversationStreamResponse,
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -176,9 +189,11 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, operations.CancelConversationStreamResponse$inboundSchema),
-    M.fail([400, 401, 403, 404, "4XX"]),
+    M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
+    M.fail("4XX"),
     M.fail("5XX"),
-  )(response, req);
+  )(response, req, { extraFields: responseFields });
   if (!result.ok) {
     return [result, { status: "complete", request: req, response }];
   }

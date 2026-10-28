@@ -28,12 +28,12 @@ let value: KnowledgeHubNodesResponse = {
   },
   items: [],
   pagination: {
-    page: 714167,
-    limit: 834106,
-    totalItems: 649371,
-    totalPages: 34717,
-    hasNext: false,
-    hasPrev: true,
+    page: 834106,
+    limit: 649371,
+    totalItems: 34717,
+    totalPages: 7526,
+    hasNext: true,
+    hasPrev: false,
   },
   filters: {
     applied: {
@@ -95,23 +95,17 @@ let value: KnowledgeHubNodesResponse = {
       sortOrder: [],
     },
   },
-  breadcrumbs: [
-    {
-      id: "<id>",
-      name: "<value>",
-      nodeType: "<value>",
-    },
-  ],
+  breadcrumbs: [],
   counts: {
     items: [],
-    total: 777139,
+    total: 12362,
   },
   permissions: {
     role: "<value>",
-    canUpload: true,
-    canCreateFolders: false,
+    canUpload: false,
+    canCreateFolders: true,
     canEdit: false,
-    canDelete: true,
+    canDelete: false,
     canManagePermissions: false,
   },
 };
@@ -124,6 +118,8 @@ let value: KnowledgeHubNodesResponse = {
 | `maxFolderDepth`                                                                                                                                                                                              | *number*                                                                                                                                                                                                      | :heavy_check_mark:                                                                                                                                                                                            | Deepest a collection folder may be nested; a folder directly in the collection is depth 1.                                                                                                                    |
 | `success`                                                                                                                                                                                                     | *true*                                                                                                                                                                                                        | :heavy_check_mark:                                                                                                                                                                                            | Always `true` on HTTP 200. Failures use 4xx/5xx error envelopes, not this body shape.                                                                                                                         |
 | `error`                                                                                                                                                                                                       | *string*                                                                                                                                                                                                      | :heavy_check_mark:                                                                                                                                                                                            | Always `null` on HTTP 200.                                                                                                                                                                                    |
+| `errorCode`                                                                                                                                                                                                   | *number*                                                                                                                                                                                                      | :heavy_minus_sign:                                                                                                                                                                                            | Status the connector service turns a failed lookup into. Always `null` on HTTP 200:<br/>a failure is answered with that status and the error envelope instead of this body.<br/>                              |
+| `typedRecords`                                                                                                                                                                                                | Record<string, [models.SemanticSearchGraphRecord](../models/semantic-search-graph-record.md)>                                                                                                                 | :heavy_minus_sign:                                                                                                                                                                                            | Full record documents keyed by record ID. Filled only for in-process callers<br/>(the agent's knowledge navigator); always `null` over HTTP.<br/>                                                             |
 | `id`                                                                                                                                                                                                          | *string*                                                                                                                                                                                                      | :heavy_check_mark:                                                                                                                                                                                            | Current parent node ID when browsing children; `null` at root.                                                                                                                                                |
 | `currentNode`                                                                                                                                                                                                 | [models.CurrentNode](../models/current-node.md)                                                                                                                                                               | :heavy_check_mark:                                                                                                                                                                                            | Node being browsed when `parentId` is in the path; `null` at root.                                                                                                                                            |
 | `parentNode`                                                                                                                                                                                                  | [models.ParentNode](../models/parent-node.md)                                                                                                                                                                 | :heavy_check_mark:                                                                                                                                                                                            | Parent of `currentNode` when present; `null` when not applicable,<br/>and for a connected app whose limit leaves that parent out. For<br/>such an app, `breadcrumbs` likewise names only the nodes inside<br/>its limit.<br/> |

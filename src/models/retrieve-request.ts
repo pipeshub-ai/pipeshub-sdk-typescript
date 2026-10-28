@@ -11,11 +11,11 @@ import {
 
 export type RetrieveRequest = {
   /**
-   * What to find, searched as written unless `rewriteQuery` is true.
+   * What to find. This text is always searched.
    */
   query: string;
   /**
-   * Most chunks to return, best first.
+   * Most chunks to return, best first. Left out, the AI service uses 8.
    */
   limit?: number | undefined;
   /**
@@ -71,7 +71,10 @@ export type RetrieveRequest = {
    */
   maxChunksPerRecord?: number | undefined;
   /**
-   * Rewrite and expand the query with the org's model first (slower).
+   * Also search rewritten and expanded versions of the query, made by the
+   *
+   * @remarks
+   * org's model (slower). The original text is still searched.
    */
   rewriteQuery?: boolean | undefined;
 };

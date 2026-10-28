@@ -40,7 +40,11 @@ export type OAuthRevokeRequest = {
    */
   clientId: string;
   /**
-   * Client secret
+   * Client secret. Required for a confidential client (missing or empty: `401 invalid_client`);
+   *
+   * @remarks
+   * a public client, such as the first-party device app, is identified by `client_id` alone. A
+   * wrong secret is `401 invalid_client`.
    */
   clientSecret?: string | undefined;
 };

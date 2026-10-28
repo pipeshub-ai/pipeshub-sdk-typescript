@@ -26,6 +26,29 @@ import {
 } from "./tool-approval-answer.js";
 
 /**
+ * Reasoning effort for this turn, for models that support it. Stored on
+ *
+ * @remarks
+ * the conversation's model info and forwarded to the AI backend.
+ */
+export const RegenerateRequestReasoningEffort = {
+  None: "none",
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Max: "max",
+} as const;
+/**
+ * Reasoning effort for this turn, for models that support it. Stored on
+ *
+ * @remarks
+ * the conversation's model info and forwarded to the AI backend.
+ */
+export type RegenerateRequestReasoningEffort = ClosedEnum<
+  typeof RegenerateRequestReasoningEffort
+>;
+
+/**
  * AG-UI is the only supported wire protocol. When present must be
  *
  * @remarks
@@ -138,9 +161,11 @@ export type RegenerateRequest = {
    * the app sends them (`User selections:` followed by one
    * `N. "question" → answer` line each). When present, the turn is
    * re-run with these answers instead of the saved ones, and they are
-   * saved in their place. Rejected with 400 when the reply being
-   * regenerated did not follow a question card, or when the request
-   * also edits the question (`query` or `attachments`).
+   * saved in their place. Over 8000 characters, or text not starting with
+   * `User selections:`, is refused with `400 VALIDATION_ERROR`. A reply
+   * that did not follow a question card, or a request that also edits
+   * the question (`query` or `attachments`), is refused after the stream
+   * opens: a 200 stream ending in a `RUN_ERROR` (see the operation).
    */
   answers?: string | undefined;
   /**
@@ -166,6 +191,13 @@ export type RegenerateRequest = {
    * `web_search`, or the universal `agent` mode).
    */
   chatMode?: string | undefined;
+  /**
+   * Reasoning effort for this turn, for models that support it. Stored on
+   *
+   * @remarks
+   * the conversation's model info and forwarded to the AI backend.
+   */
+  reasoningEffort?: RegenerateRequestReasoningEffort | undefined;
   /**
    * IANA timezone identifier from the client. Used to provide
    *
@@ -235,6 +267,11 @@ export type RegenerateRequest = {
 };
 
 /** @internal */
+export const RegenerateRequestReasoningEffort$outboundSchema: z.ZodMiniEnum<
+  typeof RegenerateRequestReasoningEffort
+> = z.enum(RegenerateRequestReasoningEffort);
+
+/** @internal */
 export const RegenerateRequestProtocol$outboundSchema: z.ZodMiniEnum<
   typeof RegenerateRequestProtocol
 > = z.enum(RegenerateRequestProtocol);
@@ -249,6 +286,7 @@ export type RegenerateRequest$Outbound = {
   modelName?: string | undefined;
   modelFriendlyName?: string | undefined;
   chatMode?: string | undefined;
+  reasoningEffort?: string | undefined;
   timezone?: string | undefined;
   currentTime?: string | undefined;
   tools?: Array<string> | undefined;
@@ -271,6 +309,7 @@ export const RegenerateRequest$outboundSchema: z.ZodMiniType<
   modelName: z.optional(z.string()),
   modelFriendlyName: z.optional(z.string()),
   chatMode: z.optional(z.string()),
+  reasoningEffort: z.optional(RegenerateRequestReasoningEffort$outboundSchema),
   timezone: z.optional(z.string()),
   currentTime: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
   tools: z.optional(z.array(z.string())),

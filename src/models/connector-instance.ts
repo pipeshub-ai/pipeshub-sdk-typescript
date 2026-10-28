@@ -6,7 +6,7 @@ import * as z from "zod/v4-mini";
 import { remap as remap$ } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
 import * as openEnums from "../types/enums.js";
-import { OpenEnum } from "../types/enums.js";
+import { ClosedEnum, OpenEnum } from "../types/enums.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import {
@@ -41,6 +41,41 @@ export const LastSyncOutcome = {
  */
 export type LastSyncOutcome = OpenEnum<typeof LastSyncOutcome>;
 
+export const Severity = {
+  Warning: "warning",
+  Error: "error",
+} as const;
+export type Severity = OpenEnum<typeof Severity>;
+
+/**
+ * Where in the connector panel it is done; authenticate opens the Authenticate tab
+ */
+export const Action = {
+  Authenticate: "authenticate",
+} as const;
+/**
+ * Where in the connector panel it is done; authenticate opens the Authenticate tab
+ */
+export type Action = ClosedEnum<typeof Action>;
+
+export type ActionItem = {
+  /**
+   * Identifies the item for the connector, e.g. certificate_sign_in
+   */
+  code: string;
+  severity: Severity;
+  title: string;
+  message: string;
+  /**
+   * Where in the connector panel it is done; authenticate opens the Authenticate tab
+   */
+  action?: Action | null | undefined;
+  /**
+   * The setup steps for it, on the docs site
+   */
+  docsUrl?: string | null | undefined;
+};
+
 /**
  * A connector instance: its type's registry entry plus the instance's own state.
  */
@@ -57,10 +92,19 @@ export type ConnectorInstance = {
    * Connector type
    */
   type?: string | undefined;
+  /**
+   * Product family the connector belongs to
+   */
   appGroup?: string | undefined;
+  /**
+   * Authentication methods the connector type supports
+   */
   supportedAuthTypes?: Array<ConnectorAuthType> | undefined;
   appDescription?: string | undefined;
   appCategories?: Array<string> | undefined;
+  /**
+   * Path of the connector icon
+   */
   iconPath?: string | undefined;
   supportsRealtime?: boolean | undefined;
   supportsSync?: boolean | undefined;
@@ -76,9 +120,12 @@ export type ConnectorInstance = {
    */
   connectorInfo?: string | null | undefined;
   /**
-   * How a connector instance signs in to its source. Each connector type supports a subset; see `supportedAuthTypes` in the registry.
+   * Authentication method chosen when the instance was created, one of
+   *
+   * @remarks
+   * the type's `supportedAuthTypes`.
    */
-  authType?: ConnectorAuthType | undefined;
+  authType?: string | null | undefined;
   /**
    * Scope determines visibility and access control for connectors:<br>
    *
@@ -123,7 +170,7 @@ export type ConnectorInstance = {
    * Local FS only. Display name of the desktop device that owns this connector
    */
   ownerDeviceName?: string | null | undefined;
-  createdBy?: string | undefined;
+  createdBy?: string | null | undefined;
   /**
    * Null for an instance nobody has updated, for example the personal KB connector
    */
@@ -131,11 +178,11 @@ export type ConnectorInstance = {
   /**
    * Epoch milliseconds
    */
-  createdAtTimestamp?: number | undefined;
+  createdAtTimestamp?: number | null | undefined;
   /**
    * Epoch milliseconds
    */
-  updatedAtTimestamp?: number | undefined;
+  updatedAtTimestamp?: number | null | undefined;
   /**
    * Epoch ms when the last sync run started; absent before the first run
    */
@@ -153,6 +200,10 @@ export type ConnectorInstance = {
    */
   lastSyncSummary?: { [k: string]: any } | null | undefined;
   /**
+   * What the connector's admin has to do, shown as an action-needed badge on the instance card. Written by the connector at the end of each sync and when its auth settings are saved; empty when nothing is needed.
+   */
+  actionItems?: Array<ActionItem> | undefined;
+  /**
    * Configuration form for a connector type: the auth fields per auth type, the sync strategies and settings, and the sync and indexing filters.
    */
   config?: ConnectorSchema | undefined;
@@ -163,6 +214,36 @@ export const LastSyncOutcome$inboundSchema: z.ZodMiniType<
   LastSyncOutcome,
   unknown
 > = openEnums.inboundSchema(LastSyncOutcome);
+
+/** @internal */
+export const Severity$inboundSchema: z.ZodMiniType<Severity, unknown> =
+  openEnums.inboundSchema(Severity);
+
+/** @internal */
+export const Action$inboundSchema: z.ZodMiniEnum<typeof Action> = z.enum(
+  Action,
+);
+
+/** @internal */
+export const ActionItem$inboundSchema: z.ZodMiniType<ActionItem, unknown> = z
+  .object({
+    code: types.string(),
+    severity: Severity$inboundSchema,
+    title: types.string(),
+    message: types.string(),
+    action: z.optional(z.nullable(Action$inboundSchema)),
+    docsUrl: z.optional(z.nullable(types.string())),
+  });
+
+export function actionItemFromJSON(
+  jsonString: string,
+): SafeParseResult<ActionItem, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) => ActionItem$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'ActionItem' from JSON`,
+  );
+}
 
 /** @internal */
 export const ConnectorInstance$inboundSchema: z.ZodMiniType<
@@ -189,7 +270,7 @@ export const ConnectorInstance$inboundSchema: z.ZodMiniType<
     isAdminAccessRequired: types.optional(types.boolean()),
     personalConnectorType: z.optional(z.nullable(types.string())),
     connectorInfo: z.optional(z.nullable(types.string())),
-    authType: types.optional(ConnectorAuthType$inboundSchema),
+    authType: z.optional(z.nullable(types.string())),
     scope: types.optional(ConnectorScope$inboundSchema),
     isActive: types.optional(types.boolean()),
     isAgentActive: types.optional(types.boolean()),
@@ -201,14 +282,17 @@ export const ConnectorInstance$inboundSchema: z.ZodMiniType<
     desktopOnline: types.optional(types.boolean()),
     ownerDeviceId: z.optional(z.nullable(types.string())),
     ownerDeviceName: z.optional(z.nullable(types.string())),
-    createdBy: types.optional(types.string()),
+    createdBy: z.optional(z.nullable(types.string())),
     updatedBy: z.optional(z.nullable(types.string())),
-    createdAtTimestamp: types.optional(types.number()),
-    updatedAtTimestamp: types.optional(types.number()),
+    createdAtTimestamp: z.optional(z.nullable(types.number())),
+    updatedAtTimestamp: z.optional(z.nullable(types.number())),
     lastSyncStartedAtTimestamp: z.optional(z.nullable(types.number())),
     lastSyncFinishedAtTimestamp: z.optional(z.nullable(types.number())),
     lastSyncOutcome: z.optional(z.nullable(LastSyncOutcome$inboundSchema)),
     lastSyncSummary: z.optional(z.nullable(z.record(z.string(), z.any()))),
+    actionItems: types.optional(
+      z.array(z.lazy(() => ActionItem$inboundSchema)),
+    ),
     config: types.optional(ConnectorSchema$inboundSchema),
   }),
   z.transform((v) => {

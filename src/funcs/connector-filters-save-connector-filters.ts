@@ -40,7 +40,6 @@ import { Result } from "../types/fp.js";
  * What this endpoint saves goes to <code>filters.values</code>, which sync does not read:
  * sync reads <code>filters.sync</code> and <code>filters.indexing</code>.<br><br>
  * Save the user's filter selections for a connector.<br><br>
- * <b>Overview:</b><br>
  * <b>Request:</b><br>
  * <code>filters</code> must hold at least one entry: <code>{"filters": {}}</code> is
  * refused with <code>400</code>. The server stores whatever it is given under the
@@ -186,6 +185,7 @@ async function $do(
   >(
     M.json(200, operations.SaveConnectorFiltersResponse$inboundSchema),
     M.jsonErr([400, 401, 403, 404, 409], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

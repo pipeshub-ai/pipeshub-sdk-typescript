@@ -41,8 +41,14 @@ import { Result } from "../types/fp.js";
  * **Validation:**
  *
  * - `kbId` path parameter must be a valid UUID (`updateKBSchema`)
- * - When provided, `kbName` must be 1–255 characters
- * - XSS and format-specifier checks are applied to `kbName` in the gateway controller
+ * - `kbName` is trimmed first, then must be 1–255 characters
+ * - A `kbName` holding an HTML tag, a `javascript:` URL or an inline event handler is
+ *   refused with `400` before authentication; one holding a printf-style format
+ *   specifier (`%s`, `%n`, `%x`, `%p`, with flags and width such as `%08x`) is refused
+ *   with `400` by the gateway controller. A plain `%` (`50% off`) is accepted.
+ * - `kbName` is the only field read. Other body fields and any query parameter are
+ *   ignored, so a body without `kbName` (an empty object, no body, or only unknown
+ *   fields) is refused by the connector service with `400` `No fields to update`.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -179,7 +185,7 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.UpdateKnowledgeBaseById$inboundSchema),
-    M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([400, 401, 403, 404, 409], errors.ErrorResponse$inboundSchema),
     M.jsonErr([500, 503], errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

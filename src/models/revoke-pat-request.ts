@@ -13,6 +13,13 @@ import * as z from "zod/v4-mini";
  * auditing.
  */
 export type RevokePatRequest = {
+  /**
+   * Stored on the revocation for auditing. There is no body validator:
+   *
+   * @remarks
+   * a `reason` that is not a string is ignored rather than refused, and
+   * the revocation goes ahead with the default reason.
+   */
   reason?: string | undefined;
 };
 

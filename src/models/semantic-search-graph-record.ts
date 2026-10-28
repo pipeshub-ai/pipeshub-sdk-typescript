@@ -28,9 +28,6 @@ import {
  * covers that app whole; this applies to each hit's `metadata` too.
  */
 export type SemanticSearchGraphRecord = {
-  key?: string | null | undefined;
-  id?: string | null | undefined;
-  rev?: string | null | undefined;
   recordName?: string | null | undefined;
   externalRecordId?: string | null | undefined;
   recordType?: string | null | undefined;
@@ -109,6 +106,23 @@ export type SemanticSearchGraphRecord = {
   sourceTables?: Array<string> | null | undefined;
   rowCount?: number | null | undefined;
   /**
+   * `true` when the record is a stub parent created for an ancestor that
+   *
+   * @remarks
+   * is not yet synced or is out of scope; replaced when the real record syncs.
+   */
+  isPlaceholder?: boolean | undefined;
+  /**
+   * Where the record sits, from its source down to its parent, as
+   *
+   * @remarks
+   * `Name (App ID: id) -> Name (Record Group ID: id) -> Name (Record ID: id)`,
+   * resolved at retrieval time (not stored on the record).
+   * It names only the ancestors the caller can open; for a connected app
+   * with a limit, only those inside the limit. Absent when none is left.
+   */
+  location?: string | undefined;
+  /**
    * Where a ticket, pull request or project stands, in one short phrase, on
    *
    * @remarks
@@ -127,15 +141,9 @@ export type SemanticSearchGraphRecord = {
    * connected app with a limit, only records inside it. Absent when there are none.
    */
   linkedRecords?: Array<SemanticSearchLinkedRecord> | undefined;
-  /**
-   * Where the record sits, from its source down to its parent, as
-   *
-   * @remarks
-   * `Name (App ID: id) -> Name (Record Group ID: id) -> Name (Record ID: id)`.
-   * It names only the ancestors the caller can open; for a connected app
-   * with a limit, only those inside the limit. Absent when none is left.
-   */
-  location?: string | undefined;
+  key?: string | null | undefined;
+  id?: string | null | undefined;
+  rev?: string | null | undefined;
 };
 
 /** @internal */
@@ -144,9 +152,6 @@ export const SemanticSearchGraphRecord$inboundSchema: z.ZodMiniType<
   unknown
 > = z.pipe(
   z.object({
-    _key: z.optional(z.nullable(types.string())),
-    _id: z.optional(z.nullable(types.string())),
-    _rev: z.optional(z.nullable(types.string())),
     recordName: z.optional(z.nullable(types.string())),
     externalRecordId: z.optional(z.nullable(types.string())),
     recordType: z.optional(z.nullable(types.string())),
@@ -202,11 +207,15 @@ export const SemanticSearchGraphRecord$inboundSchema: z.ZodMiniType<
     definition: z.optional(z.nullable(types.string())),
     sourceTables: z.optional(z.nullable(z.array(types.string()))),
     rowCount: z.optional(z.nullable(types.number())),
+    isPlaceholder: types.optional(types.boolean()),
+    location: types.optional(types.string()),
     statusSummary: types.optional(types.string()),
     linkedRecords: types.optional(
       z.array(SemanticSearchLinkedRecord$inboundSchema),
     ),
-    location: types.optional(types.string()),
+    _key: z.optional(z.nullable(types.string())),
+    _id: z.optional(z.nullable(types.string())),
+    _rev: z.optional(z.nullable(types.string())),
   }),
   z.transform((v) => {
     return remap$(v, {

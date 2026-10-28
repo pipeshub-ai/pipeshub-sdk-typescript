@@ -15,7 +15,10 @@ import {
 
 export type AgentCreateToolset = {
   /**
-   * Registered toolset name (lowercase) accepted by the create-agent gateway.
+   * Toolset name. Surrounding whitespace is trimmed before the check, so
+   *
+   * @remarks
+   * `"  slack  "` is accepted.
    */
   name: AgentCreateToolsetName;
   displayName?: string | undefined;

@@ -4,6 +4,8 @@
 
 import * as z from "zod/v4-mini";
 import { safeParse } from "../lib/schemas.js";
+import * as openEnums from "../types/enums.js";
+import { OpenEnum } from "../types/enums.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import {
@@ -11,6 +13,18 @@ import {
   ConnectorIndexingStatusCounts$inboundSchema,
 } from "./connector-indexing-status-counts.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
+
+/**
+ * Where the records come from; `CONNECTOR` for a connector.
+ */
+export const ConnectorStatsOrigin = {
+  Connector: "CONNECTOR",
+  Collection: "COLLECTION",
+} as const;
+/**
+ * Where the records come from; `CONNECTOR` for a connector.
+ */
+export type ConnectorStatsOrigin = OpenEnum<typeof ConnectorStatsOrigin>;
 
 export type Stats = {
   /**
@@ -58,7 +72,7 @@ export type Data = {
   /**
    * Where the records come from; `CONNECTOR` for a connector.
    */
-  origin: string;
+  origin: ConnectorStatsOrigin;
   stats: Stats;
   /**
    * The same counts per record type; empty before the first sync.
@@ -73,6 +87,12 @@ export type ConnectorStats = {
   success: boolean;
   data: Data;
 };
+
+/** @internal */
+export const ConnectorStatsOrigin$inboundSchema: z.ZodMiniType<
+  ConnectorStatsOrigin,
+  unknown
+> = openEnums.inboundSchema(ConnectorStatsOrigin);
 
 /** @internal */
 export const Stats$inboundSchema: z.ZodMiniType<Stats, unknown> = z.object({
@@ -116,7 +136,7 @@ export function byRecordTypeFromJSON(
 export const Data$inboundSchema: z.ZodMiniType<Data, unknown> = z.object({
   orgId: types.string(),
   connectorId: types.string(),
-  origin: types.string(),
+  origin: ConnectorStatsOrigin$inboundSchema,
   stats: z.lazy(() => Stats$inboundSchema),
   byRecordType: z.array(z.lazy(() => ByRecordType$inboundSchema)),
 });

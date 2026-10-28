@@ -31,7 +31,8 @@ import { Result } from "../types/fp.js";
  * Lists the caller's own active (non-revoked, unexpired) personal
  * access tokens, newest first, capped at 100 rows server-side. Never
  * returns another user's tokens — see `GET /personal-access-tokens/admin`
- * for the org-admin, cross-user view.
+ * for the org-admin, cross-user view. The handler reads no query parameters
+ * and ignores any that are sent.
  *
  * Shares the same per-user rate limiter as `/oauth-clients/*`
  * (default 1000 req/min, `MAX_OAUTH_CLIENT_REQUESTS_PER_MINUTE`).
@@ -45,6 +46,7 @@ export function personalAccessTokensListPersonalAccessTokens(
   Result<
     models.ListPatResponse,
     | errors.ApplicationJsonErrorResponse
+    | errors.ErrorResponse
     | errors.OAuthClientManagementRateLimitError
     | PipeshubError
     | ResponseValidationError
@@ -70,6 +72,7 @@ async function $do(
     Result<
       models.ListPatResponse,
       | errors.ApplicationJsonErrorResponse
+      | errors.ErrorResponse
       | errors.OAuthClientManagementRateLimitError
       | PipeshubError
       | ResponseValidationError
@@ -140,6 +143,7 @@ async function $do(
   const [result] = await M.match<
     models.ListPatResponse,
     | errors.ApplicationJsonErrorResponse
+    | errors.ErrorResponse
     | errors.OAuthClientManagementRateLimitError
     | PipeshubError
     | ResponseValidationError
@@ -152,7 +156,9 @@ async function $do(
   >(
     M.json(200, models.ListPatResponse$inboundSchema),
     M.jsonErr(401, errors.ApplicationJsonErrorResponse$inboundSchema),
+    M.jsonErr([400, 403], errors.ErrorResponse$inboundSchema),
     M.jsonErr(429, errors.OAuthClientManagementRateLimitError$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

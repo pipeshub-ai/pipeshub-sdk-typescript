@@ -113,6 +113,9 @@ async function $do(
   const path = pathToFunc("/connectors/registry")();
 
   const query = encodeFormQuery({
+    "connectorType": payload?.connectorType,
+    "isActive": payload?.isActive,
+    "isAuthenticated": payload?.isAuthenticated,
     "limit": payload?.limit,
     "page": payload?.page,
     "scope": payload?.scope,
@@ -187,6 +190,7 @@ async function $do(
   >(
     M.json(200, operations.GetConnectorRegistryResponse$inboundSchema),
     M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

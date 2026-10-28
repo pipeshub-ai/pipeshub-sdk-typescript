@@ -9,24 +9,24 @@ import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
 export type RetrieveChunkRecord = {
-  recordId?: string | undefined;
-  name?: string | null | undefined;
-  connector?: string | null | undefined;
-  mimeType?: string | null | undefined;
-  updatedAt?: string | null | undefined;
+  recordId: string;
+  name: string | null;
+  connector: string | null;
+  mimeType: string | null;
+  updatedAt: string | null;
 };
 
 export type RetrieveChunkCitation = {
   /**
    * Deep link to the passage (a `#:~:text=` fragment where the source supports one).
    */
-  url?: string | null | undefined;
+  url: string | null;
   /**
    * Link to the record itself.
    */
-  recordUrl?: string | null | undefined;
-  pageNum?: Array<number> | null | undefined;
-  blockIndex?: number | null | undefined;
+  recordUrl: string | null;
+  pageNum: Array<number> | null;
+  blockIndex: number | null;
 };
 
 export type RetrieveChunk = {
@@ -45,11 +45,11 @@ export const RetrieveChunkRecord$inboundSchema: z.ZodMiniType<
   RetrieveChunkRecord,
   unknown
 > = z.object({
-  recordId: types.optional(types.string()),
-  name: z.optional(z.nullable(types.string())),
-  connector: z.optional(z.nullable(types.string())),
-  mimeType: z.optional(z.nullable(types.string())),
-  updatedAt: z.optional(z.nullable(types.string())),
+  recordId: types.string(),
+  name: types.nullable(types.string()),
+  connector: types.nullable(types.string()),
+  mimeType: types.nullable(types.string()),
+  updatedAt: types.nullable(types.string()),
 });
 
 export function retrieveChunkRecordFromJSON(
@@ -67,10 +67,10 @@ export const RetrieveChunkCitation$inboundSchema: z.ZodMiniType<
   RetrieveChunkCitation,
   unknown
 > = z.object({
-  url: z.optional(z.nullable(types.string())),
-  recordUrl: z.optional(z.nullable(types.string())),
-  pageNum: z.optional(z.nullable(z.array(types.number()))),
-  blockIndex: z.optional(z.nullable(types.number())),
+  url: types.nullable(types.string()),
+  recordUrl: types.nullable(types.string()),
+  pageNum: types.nullable(z.array(types.number())),
+  blockIndex: types.nullable(types.number()),
 });
 
 export function retrieveChunkCitationFromJSON(

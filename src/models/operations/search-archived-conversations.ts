@@ -18,11 +18,16 @@ export type SearchArchivedConversationsRequest = {
    */
   search: string;
   /**
-   * Page number (1-indexed)
+   * Page number (1-indexed). The validator accepts any number, so a fraction such
+   *
+   * @remarks
+   * as `1.5` is not refused; it is truncated (`1.5` reads as page 1).
    */
   page?: number | undefined;
   /**
-   * Items per page
+   * Items per page. A fraction is not refused; it is truncated (`5.5` reads as 5).
+   *
+   * @remarks
    */
   limit?: number | undefined;
 };
@@ -38,12 +43,33 @@ export type SearchArchivedConversationsStatus = OpenEnum<
   typeof SearchArchivedConversationsStatus
 >;
 
+/**
+ * Reasoning effort requested when the conversation was created, when one was set.
+ */
+export const SearchArchivedConversationsReasoningEffort = {
+  None: "none",
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Max: "max",
+} as const;
+/**
+ * Reasoning effort requested when the conversation was created, when one was set.
+ */
+export type SearchArchivedConversationsReasoningEffort = OpenEnum<
+  typeof SearchArchivedConversationsReasoningEffort
+>;
+
 export type SearchArchivedConversationsModelInfo = {
   modelKey?: string | undefined;
   modelName?: string | undefined;
   modelFriendlyName?: string | undefined;
   modelProvider?: string | undefined;
   chatMode?: string | undefined;
+  /**
+   * Reasoning effort requested when the conversation was created, when one was set.
+   */
+  reasoningEffort?: SearchArchivedConversationsReasoningEffort | undefined;
 };
 
 export const SearchArchivedConversationsSharedWithAccessLevel = {
@@ -57,9 +83,17 @@ export type SearchArchivedConversationsSharedWithAccessLevel = OpenEnum<
 export type SearchArchivedConversationsSharedWith = {
   userId?: string | undefined;
   accessLevel?: SearchArchivedConversationsSharedWithAccessLevel | undefined;
+  /**
+   * Subdocument identifier auto-assigned by MongoDB.
+   */
+  id?: string | undefined;
 };
 
 export type SearchArchivedConversationsConversationError = {
+  /**
+   * Sub-document identifier auto-assigned by MongoDB.
+   */
+  id?: string | undefined;
   message?: string | undefined;
   errorType?: string | undefined;
   timestamp?: Date | undefined;
@@ -290,8 +324,8 @@ export const SearchArchivedConversationsRequest$outboundSchema: z.ZodMiniType<
   SearchArchivedConversationsRequest
 > = z.object({
   search: z.string(),
-  page: z._default(z.int(), 1),
-  limit: z._default(z.int(), 20),
+  page: z._default(z.number(), 1),
+  limit: z._default(z.number(), 20),
 });
 
 export function searchArchivedConversationsRequestToJSON(
@@ -311,6 +345,11 @@ export const SearchArchivedConversationsStatus$inboundSchema: z.ZodMiniType<
 > = openEnums.inboundSchema(SearchArchivedConversationsStatus);
 
 /** @internal */
+export const SearchArchivedConversationsReasoningEffort$inboundSchema:
+  z.ZodMiniType<SearchArchivedConversationsReasoningEffort, unknown> = openEnums
+    .inboundSchema(SearchArchivedConversationsReasoningEffort);
+
+/** @internal */
 export const SearchArchivedConversationsModelInfo$inboundSchema: z.ZodMiniType<
   SearchArchivedConversationsModelInfo,
   unknown
@@ -320,6 +359,9 @@ export const SearchArchivedConversationsModelInfo$inboundSchema: z.ZodMiniType<
   modelFriendlyName: types.optional(types.string()),
   modelProvider: types.optional(types.string()),
   chatMode: types.optional(types.string()),
+  reasoningEffort: types.optional(
+    SearchArchivedConversationsReasoningEffort$inboundSchema,
+  ),
 });
 
 export function searchArchivedConversationsModelInfoFromJSON(
@@ -342,12 +384,20 @@ export const SearchArchivedConversationsSharedWithAccessLevel$inboundSchema:
 export const SearchArchivedConversationsSharedWith$inboundSchema: z.ZodMiniType<
   SearchArchivedConversationsSharedWith,
   unknown
-> = z.object({
-  userId: types.optional(types.string()),
-  accessLevel: types.optional(
-    SearchArchivedConversationsSharedWithAccessLevel$inboundSchema,
-  ),
-});
+> = z.pipe(
+  z.object({
+    userId: types.optional(types.string()),
+    accessLevel: types.optional(
+      SearchArchivedConversationsSharedWithAccessLevel$inboundSchema,
+    ),
+    _id: types.optional(types.string()),
+  }),
+  z.transform((v) => {
+    return remap$(v, {
+      "_id": "id",
+    });
+  }),
+);
 
 export function searchArchivedConversationsSharedWithFromJSON(
   jsonString: string,
@@ -362,15 +412,22 @@ export function searchArchivedConversationsSharedWithFromJSON(
 
 /** @internal */
 export const SearchArchivedConversationsConversationError$inboundSchema:
-  z.ZodMiniType<SearchArchivedConversationsConversationError, unknown> = z
-    .object({
+  z.ZodMiniType<SearchArchivedConversationsConversationError, unknown> = z.pipe(
+    z.object({
+      _id: types.optional(types.string()),
       message: types.optional(types.string()),
       errorType: types.optional(types.string()),
       timestamp: types.optional(types.date()),
       messageId: types.optional(types.string()),
       stack: types.optional(types.string()),
       metadata: types.optional(z.record(z.string(), z.any())),
-    });
+    }),
+    z.transform((v) => {
+      return remap$(v, {
+        "_id": "id",
+      });
+    }),
+  );
 
 export function searchArchivedConversationsConversationErrorFromJSON(
   jsonString: string,

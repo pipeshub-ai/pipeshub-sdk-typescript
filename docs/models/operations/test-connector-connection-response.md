@@ -15,7 +15,7 @@ let value: TestConnectorConnectionResponse = {
 
 ## Fields
 
-| Field                               | Type                                | Required                            | Description                         |
-| ----------------------------------- | ----------------------------------- | ----------------------------------- | ----------------------------------- |
-| `success`                           | *boolean*                           | :heavy_check_mark:                  | N/A                                 |
-| `message`                           | *string*                            | :heavy_check_mark:                  | What happened, written for the user |
+| Field                                                        | Type                                                         | Required                                                     | Description                                                  |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| `success`                                                    | *boolean*                                                    | :heavy_check_mark:                                           | Whether the connector reached the source with these settings |
+| `message`                                                    | *string*                                                     | :heavy_check_mark:                                           | What happened, written for the user                          |

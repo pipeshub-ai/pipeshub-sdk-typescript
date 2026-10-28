@@ -9,7 +9,10 @@ import * as z from "zod/v4-mini";
  */
 export type CreateKnowledgeBaseRequest = {
   /**
-   * Name of the knowledge base
+   * Name of the knowledge base. Leading and trailing whitespace is removed
+   *
+   * @remarks
+   * first, so a name made only of whitespace is refused as empty.
    */
   kbName: string;
 };

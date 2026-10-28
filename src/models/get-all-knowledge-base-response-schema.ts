@@ -20,6 +20,31 @@ export type GetAllKnowledgeBaseResponseSchemaUserRole = OpenEnum<
   typeof GetAllKnowledgeBaseResponseSchemaUserRole
 >;
 
+/**
+ * The knowledge base's processing state. `DELETING` while it is being deleted (writes are
+ *
+ * @remarks
+ * refused with 409). `IDLE`, `QUEUED`, `SYNCING` or `FULL_SYNCING` otherwise, or null on a
+ * knowledge base that has not been processed yet.
+ */
+export const GetAllKnowledgeBaseResponseSchemaStatus = {
+  Idle: "IDLE",
+  Queued: "QUEUED",
+  Syncing: "SYNCING",
+  FullSyncing: "FULL_SYNCING",
+  Deleting: "DELETING",
+} as const;
+/**
+ * The knowledge base's processing state. `DELETING` while it is being deleted (writes are
+ *
+ * @remarks
+ * refused with 409). `IDLE`, `QUEUED`, `SYNCING` or `FULL_SYNCING` otherwise, or null on a
+ * knowledge base that has not been processed yet.
+ */
+export type GetAllKnowledgeBaseResponseSchemaStatus = OpenEnum<
+  typeof GetAllKnowledgeBaseResponseSchemaStatus
+>;
+
 export type GetAllKnowledgeBaseResponseSchemaFolder = {
   id: string;
   name: string;
@@ -35,6 +60,14 @@ export type GetAllKnowledgeBaseResponseSchemaKnowledgeBase = {
   updatedAtTimestamp: number;
   createdBy: string;
   userRole: GetAllKnowledgeBaseResponseSchemaUserRole;
+  /**
+   * The knowledge base's processing state. `DELETING` while it is being deleted (writes are
+   *
+   * @remarks
+   * refused with 409). `IDLE`, `QUEUED`, `SYNCING` or `FULL_SYNCING` otherwise, or null on a
+   * knowledge base that has not been processed yet.
+   */
+  status?: GetAllKnowledgeBaseResponseSchemaStatus | null | undefined;
   folders: Array<GetAllKnowledgeBaseResponseSchemaFolder>;
 };
 
@@ -134,6 +167,11 @@ export const GetAllKnowledgeBaseResponseSchemaUserRole$inboundSchema:
     .inboundSchema(GetAllKnowledgeBaseResponseSchemaUserRole);
 
 /** @internal */
+export const GetAllKnowledgeBaseResponseSchemaStatus$inboundSchema:
+  z.ZodMiniType<GetAllKnowledgeBaseResponseSchemaStatus, unknown> = openEnums
+    .inboundSchema(GetAllKnowledgeBaseResponseSchemaStatus);
+
+/** @internal */
 export const GetAllKnowledgeBaseResponseSchemaFolder$inboundSchema:
   z.ZodMiniType<GetAllKnowledgeBaseResponseSchemaFolder, unknown> = z.object({
     id: types.string(),
@@ -169,6 +207,9 @@ export const GetAllKnowledgeBaseResponseSchemaKnowledgeBase$inboundSchema:
       updatedAtTimestamp: types.number(),
       createdBy: types.string(),
       userRole: GetAllKnowledgeBaseResponseSchemaUserRole$inboundSchema,
+      status: z.optional(
+        z.nullable(GetAllKnowledgeBaseResponseSchemaStatus$inboundSchema),
+      ),
       folders: z.array(
         z.lazy(() => GetAllKnowledgeBaseResponseSchemaFolder$inboundSchema),
       ),

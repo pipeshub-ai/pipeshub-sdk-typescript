@@ -24,7 +24,10 @@ export type GetOAuthRegistryRequest = {
 export type GetOAuthRegistryResponse = {
   success: boolean;
   connectors: Array<models.OAuthRegistryEntry>;
-  pagination: models.ConnectorPagination;
+  /**
+   * Pagination block of `GET /oauth/registry` and `GET /oauth/{connectorType}`
+   */
+  pagination: models.OAuthRegistryPagination;
 };
 
 /** @internal */
@@ -59,7 +62,7 @@ export const GetOAuthRegistryResponse$inboundSchema: z.ZodMiniType<
 > = z.object({
   success: types.boolean(),
   connectors: z.array(models.OAuthRegistryEntry$inboundSchema),
-  pagination: models.ConnectorPagination$inboundSchema,
+  pagination: models.OAuthRegistryPagination$inboundSchema,
 });
 
 export function getOAuthRegistryResponseFromJSON(

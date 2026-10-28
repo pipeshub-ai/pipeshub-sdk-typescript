@@ -3,32 +3,15 @@
  */
 
 import * as z from "zod/v4-mini";
-import { safeParse } from "../../lib/schemas.js";
-import { blobLikeSchema } from "../../types/blobs.js";
-import * as openEnums from "../../types/enums.js";
-import { OpenEnum } from "../../types/enums.js";
-import { Result as SafeParseResult } from "../../types/fp.js";
-import * as types from "../../types/primitives.js";
-import { SDKValidationError } from "../errors/sdk-validation-error.js";
-import * as models from "../index.js";
-
-export type UpdateRecordFile = {
-  fileName: string;
-  content: ReadableStream<Uint8Array> | Blob | ArrayBuffer | Uint8Array;
-};
 
 /**
- * Request payload
+ * Request payload. Optional: without one nothing changes.
  */
 export type UpdateRecordRequestBody = {
   /**
-   * New name for the record
+   * New name for the record (rename only; a file needs the multipart form).
    */
   recordName?: string | undefined;
-  /**
-   * Replacement file content
-   */
-  file?: UpdateRecordFile | Blob | undefined;
 };
 
 export type UpdateRecordRequest = {
@@ -37,83 +20,14 @@ export type UpdateRecordRequest = {
    */
   recordId: string;
   /**
-   * Request payload
+   * Request payload. Optional: without one nothing changes.
    */
   body?: UpdateRecordRequestBody | undefined;
 };
 
-export const Location = {
-  KbRoot: "kb_root",
-  Folder: "folder",
-} as const;
-export type Location = OpenEnum<typeof Location>;
-
-/**
- * Fields merged into successful record-update responses (Node gateway and Local KB connector).
- *
- * @remarks
- */
-export type UpdateRecordResponse = {
-  success?: boolean | undefined;
-  message?: string | undefined;
-  /**
-   * A record represents a single document, file, or content item within a knowledge base.
-   *
-   * @remarks
-   * Records can originate from file uploads or external connectors (Google Drive, OneDrive, etc.).
-   */
-  record?: models.RecordT | undefined;
-  /**
-   * Epoch milliseconds when the response was generated
-   */
-  timestamp?: number | undefined;
-  fileUpdated?: boolean | undefined;
-  location?: Location | undefined;
-  /**
-   * The collection the record is in, with its folders. For a
-   *
-   * @remarks
-   * connected app whose limit does not cover the whole collection,
-   * an empty object; under a limit that does, `folders` lists only
-   * the folders inside it. The updated record names no parent, and
-   * no source path, outside the limit.
-   */
-  kb?: { [k: string]: any } | undefined;
-  userPermission?: string | undefined;
-};
-
-/** @internal */
-export type UpdateRecordFile$Outbound = {
-  fileName: string;
-  content: ReadableStream<Uint8Array> | Blob | ArrayBuffer | Uint8Array;
-};
-
-/** @internal */
-export const UpdateRecordFile$outboundSchema: z.ZodMiniType<
-  UpdateRecordFile$Outbound,
-  UpdateRecordFile
-> = z.object({
-  fileName: z.string(),
-  content: z.union([
-    z.custom<ReadableStream<Uint8Array>>(x => x instanceof ReadableStream),
-    z.custom<Blob>(x => x instanceof Blob),
-    z.custom<ArrayBuffer>(x => x instanceof ArrayBuffer),
-    z.custom<Uint8Array>(x => x instanceof Uint8Array),
-  ]),
-});
-
-export function updateRecordFileToJSON(
-  updateRecordFile: UpdateRecordFile,
-): string {
-  return JSON.stringify(
-    UpdateRecordFile$outboundSchema.parse(updateRecordFile),
-  );
-}
-
 /** @internal */
 export type UpdateRecordRequestBody$Outbound = {
   recordName?: string | undefined;
-  file?: UpdateRecordFile$Outbound | Blob | undefined;
 };
 
 /** @internal */
@@ -122,9 +36,6 @@ export const UpdateRecordRequestBody$outboundSchema: z.ZodMiniType<
   UpdateRecordRequestBody
 > = z.object({
   recordName: z.optional(z.string()),
-  file: z.optional(
-    z.union([z.lazy(() => UpdateRecordFile$outboundSchema), blobLikeSchema]),
-  ),
 });
 
 export function updateRecordRequestBodyToJSON(
@@ -155,34 +66,5 @@ export function updateRecordRequestToJSON(
 ): string {
   return JSON.stringify(
     UpdateRecordRequest$outboundSchema.parse(updateRecordRequest),
-  );
-}
-
-/** @internal */
-export const Location$inboundSchema: z.ZodMiniType<Location, unknown> =
-  openEnums.inboundSchema(Location);
-
-/** @internal */
-export const UpdateRecordResponse$inboundSchema: z.ZodMiniType<
-  UpdateRecordResponse,
-  unknown
-> = z.object({
-  success: types.optional(types.boolean()),
-  message: types.optional(types.string()),
-  record: types.optional(models.RecordT$inboundSchema),
-  timestamp: types.optional(types.number()),
-  fileUpdated: types.optional(types.boolean()),
-  location: types.optional(Location$inboundSchema),
-  kb: types.optional(z.record(z.string(), z.any())),
-  userPermission: types.optional(types.string()),
-});
-
-export function updateRecordResponseFromJSON(
-  jsonString: string,
-): SafeParseResult<UpdateRecordResponse, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => UpdateRecordResponse$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'UpdateRecordResponse' from JSON`,
   );
 }

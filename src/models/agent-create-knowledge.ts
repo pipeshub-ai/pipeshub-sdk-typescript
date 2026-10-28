@@ -10,13 +10,32 @@ import {
   AgentKnowledgeFiltersParsed$outboundSchema,
 } from "./agent-knowledge-filters-parsed.js";
 
+/**
+ * The source's limit, as an object or its JSON text. An empty string or an empty
+ *
+ * @remarks
+ * array means no limit. A non-empty array, `null`, or text that is not the JSON of
+ * an object is refused with `400` (`VALIDATION_ERROR`, "Knowledge filters must be
+ * an object, with recordGroups and records as lists of ids").
+ */
 export type AgentCreateKnowledgeFilters =
   | AgentKnowledgeFiltersParsed
   | string
   | Array<any>;
 
 export type AgentCreateKnowledge = {
+  /**
+   * Surrounding whitespace is trimmed; a blank id is refused with `400`.
+   */
   connectorId: string;
+  /**
+   * The source's limit, as an object or its JSON text. An empty string or an empty
+   *
+   * @remarks
+   * array means no limit. A non-empty array, `null`, or text that is not the JSON of
+   * an object is refused with `400` (`VALIDATION_ERROR`, "Knowledge filters must be
+   * an object, with recordGroups and records as lists of ids").
+   */
   filters?: AgentKnowledgeFiltersParsed | string | Array<any> | undefined;
 };
 

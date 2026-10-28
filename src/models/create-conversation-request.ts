@@ -60,7 +60,10 @@ export type CreateConversationRequestProjectVisibility = ClosedEnum<
  * Optional execution mode for non-stream consumers of this shared
  *
  * @remarks
- * request schema.
+ * request schema. `deep`, `quick`, `verification` and `auto` are
+ * legacy values: still accepted, they run as `internal_search`.
+ * The streaming routes accept only `agent`, `internal_search` and
+ * `web_search`. `agent:<mode>` is refused.
  * `agent` uses the universal agent loop, while `internal_search`
  * and `web_search` use their corresponding assistant search paths.
  */
@@ -68,12 +71,19 @@ export const CreateConversationRequestChatMode = {
   Agent: "agent",
   InternalSearch: "internal_search",
   WebSearch: "web_search",
+  Deep: "deep",
+  Quick: "quick",
+  Verification: "verification",
+  Auto: "auto",
 } as const;
 /**
  * Optional execution mode for non-stream consumers of this shared
  *
  * @remarks
- * request schema.
+ * request schema. `deep`, `quick`, `verification` and `auto` are
+ * legacy values: still accepted, they run as `internal_search`.
+ * The streaming routes accept only `agent`, `internal_search` and
+ * `web_search`. `agent:<mode>` is refused.
  * `agent` uses the universal agent loop, while `internal_search`
  * and `web_search` use their corresponding assistant search paths.
  */
@@ -121,6 +131,29 @@ export type CreateConversationRequestKeywordSearchBudget = ClosedEnum<
 >;
 
 /**
+ * How hard a reasoning model should think for this turn. Saved in
+ *
+ * @remarks
+ * the conversation's `modelInfo`.
+ */
+export const CreateConversationRequestReasoningEffort = {
+  None: "none",
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Max: "max",
+} as const;
+/**
+ * How hard a reasoning model should think for this turn. Saved in
+ *
+ * @remarks
+ * the conversation's `modelInfo`.
+ */
+export type CreateConversationRequestReasoningEffort = ClosedEnum<
+  typeof CreateConversationRequestReasoningEffort
+>;
+
+/**
  * Request body for creating a new AI conversation.
  *
  * @remarks
@@ -135,11 +168,14 @@ export type CreateConversationRequestKeywordSearchBudget = ClosedEnum<
  * - Suggests follow-up questions based on the conversation
  *
  * **History:** a new conversation starts with no history, and
- * history is never accepted from the caller. A body carrying a
- * non-empty `previousConversations` is rejected with 400 (an empty
- * list is ignored). Send follow-up questions to
+ * history is never accepted from the caller. A body carrying
+ * `previousConversations` with any value but an empty list (`null`, a
+ * string or an object included) is rejected with 400; an empty list is
+ * dropped. Send follow-up questions to
  * `POST /conversations/{conversationId}/messages`; the server replays
  * the stored conversation.
+ *
+ * Fields not listed here are dropped by the gateway's validator, not refused.
  */
 export type CreateConversationRequest = {
   /**
@@ -207,6 +243,9 @@ export type CreateConversationRequest = {
    * `filters`/`attachments`, they are merged in as a fallback (the
    * request always wins). Ignored on follow-up turns — only
    * meaningful when creating a conversation.
+   * An OAuth token or PAT also needs `project:read`. An archived
+   * project answers `409`; a project the caller cannot see, `404`,
+   * before any stream opens.
    */
   projectId?: string | undefined;
   /**
@@ -226,6 +265,9 @@ export type CreateConversationRequest = {
    * Available models depend on organization settings. When neither
    * `modelKey` nor `modelName` is sent, the organization's default
    * model answers and is saved in the conversation's `modelInfo`.
+   * A key that matches no configured model is not refused: the
+   * default model answers, and the unknown key is still saved in
+   * `modelInfo`.
    */
   modelKey?: string | undefined;
   /**
@@ -240,7 +282,10 @@ export type CreateConversationRequest = {
    * Optional execution mode for non-stream consumers of this shared
    *
    * @remarks
-   * request schema.
+   * request schema. `deep`, `quick`, `verification` and `auto` are
+   * legacy values: still accepted, they run as `internal_search`.
+   * The streaming routes accept only `agent`, `internal_search` and
+   * `web_search`. `agent:<mode>` is refused.
    * `agent` uses the universal agent loop, while `internal_search`
    * and `web_search` use their corresponding assistant search paths.
    */
@@ -318,6 +363,13 @@ export type CreateConversationRequest = {
    * one just can't cooperatively cancel the run.
    */
   runId?: string | undefined;
+  /**
+   * How hard a reasoning model should think for this turn. Saved in
+   *
+   * @remarks
+   * the conversation's `modelInfo`.
+   */
+  reasoningEffort?: CreateConversationRequestReasoningEffort | undefined;
 };
 
 /** @internal */
@@ -343,6 +395,12 @@ export const CreateConversationRequestKeywordSearchBudget$outboundSchema:
   );
 
 /** @internal */
+export const CreateConversationRequestReasoningEffort$outboundSchema:
+  z.ZodMiniEnum<typeof CreateConversationRequestReasoningEffort> = z.enum(
+    CreateConversationRequestReasoningEffort,
+  );
+
+/** @internal */
 export type CreateConversationRequest$Outbound = {
   query: string;
   recordIds?: Array<string> | undefined;
@@ -364,6 +422,7 @@ export type CreateConversationRequest$Outbound = {
   keywordSearchBudget?: string | undefined;
   toolApproval?: ToolApprovalAnswer$Outbound | undefined;
   runId?: string | undefined;
+  reasoningEffort?: string | undefined;
 };
 
 /** @internal */
@@ -395,6 +454,9 @@ export const CreateConversationRequest$outboundSchema: z.ZodMiniType<
   ),
   toolApproval: z.optional(ToolApprovalAnswer$outboundSchema),
   runId: z.optional(z.string()),
+  reasoningEffort: z.optional(
+    CreateConversationRequestReasoningEffort$outboundSchema,
+  ),
 });
 
 export function createConversationRequestToJSON(

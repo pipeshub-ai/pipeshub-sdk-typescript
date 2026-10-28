@@ -50,9 +50,10 @@ import { Result } from "../types/fp.js";
  * - When no providers of the requested type are configured the endpoint still
  *   returns HTTP **200** with an empty `models` array — this is **not** an error.
  *
- * **Access control:** requires a valid bearer token. For OAuth tokens the
- * `config:read` scope must be present; regular JWT bearer tokens pass through
- * without scope enforcement.
+ * **Access control:** requires a valid bearer token, from any member of the
+ * organization (there is no admin check). For OAuth tokens the `config:read` scope
+ * must be present; regular JWT bearer tokens pass through without scope enforcement.
+ * The query string is not read.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -63,10 +64,7 @@ export function aiModelsProvidersGetAvailableModelsByType(
 ): APIPromise<
   Result<
     operations.GetAvailableModelsByTypeResponse,
-    | errors.GetAvailableModelsByTypeBadRequestError
-    | errors.GetAvailableModelsByTypeUnauthorizedError
-    | errors.GetAvailableModelsByTypeForbiddenError
-    | errors.GetAvailableModelsByTypeInternalServerError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -92,10 +90,7 @@ async function $do(
   [
     Result<
       operations.GetAvailableModelsByTypeResponse,
-      | errors.GetAvailableModelsByTypeBadRequestError
-      | errors.GetAvailableModelsByTypeUnauthorizedError
-      | errors.GetAvailableModelsByTypeForbiddenError
-      | errors.GetAvailableModelsByTypeInternalServerError
+      | errors.ErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -185,10 +180,7 @@ async function $do(
 
   const [result] = await M.match<
     operations.GetAvailableModelsByTypeResponse,
-    | errors.GetAvailableModelsByTypeBadRequestError
-    | errors.GetAvailableModelsByTypeUnauthorizedError
-    | errors.GetAvailableModelsByTypeForbiddenError
-    | errors.GetAvailableModelsByTypeInternalServerError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -199,19 +191,8 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, operations.GetAvailableModelsByTypeResponse$inboundSchema),
-    M.jsonErr(
-      400,
-      errors.GetAvailableModelsByTypeBadRequestError$inboundSchema,
-    ),
-    M.jsonErr(
-      401,
-      errors.GetAvailableModelsByTypeUnauthorizedError$inboundSchema,
-    ),
-    M.jsonErr(403, errors.GetAvailableModelsByTypeForbiddenError$inboundSchema),
-    M.jsonErr(
-      500,
-      errors.GetAvailableModelsByTypeInternalServerError$inboundSchema,
-    ),
+    M.jsonErr([400, 401, 403], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

@@ -19,10 +19,10 @@ export class OAuthConfiguration extends ClientSDK {
    * List OAuth-capable connector types
    *
    * @remarks
-   * Get all connector types that support OAuth authentication.<br><br>
-   * <b>Admin Use:</b><br>
-   * Admins use this to see which connector types need OAuth credentials
-   * to be configured before users can authenticate.
+   * List the connector and toolset types that support OAuth, from the OAuth registry.<br><br>
+   * Each entry carries the provider URLs, the scopes requested, and the `authFields`
+   * to collect when creating an OAuth configuration for that type.<br><br>
+   * Any authenticated user can call this; it is not limited to admins.
    */
   async getOAuthRegistry(
     request?: operations.GetOAuthRegistryRequest | undefined,
@@ -39,7 +39,8 @@ export class OAuthConfiguration extends ClientSDK {
    * Get OAuth connector type details
    *
    * @remarks
-   * Get details for a specific OAuth-capable connector type.
+   * Get the OAuth registry entry of one connector or toolset type.<br><br>
+   * `connectorType` is the registered name and is case-sensitive (e.g. `Confluence`).
    */
   async getOAuthConnectorType(
     request: operations.GetOAuthConnectorTypeRequest,
@@ -76,7 +77,13 @@ export class OAuthConfiguration extends ClientSDK {
    * List OAuth configs for connector type
    *
    * @remarks
-   * Get all OAuth configurations for a specific connector type.
+   * List the organization's OAuth configurations for one connector type.<br><br>
+   * <b>What comes back depends on the caller:</b><br>
+   * <ul>
+   * <li>An admin gets each stored record in full, including `config` with the client secret in clear text</li>
+   * <li>Any other caller gets only the credential-free fields</li>
+   * </ul>
+   * A connector type with no configurations, or one that does not exist, yields an empty list.
    */
   async listOAuthConfigsByType(
     request: operations.ListOAuthConfigsByTypeRequest,
@@ -100,7 +107,16 @@ export class OAuthConfiguration extends ClientSDK {
    * <b>Use Case:</b><br>
    * Before users can create Google Drive connectors with OAuth,
    * an admin must create an OAuth configuration with the Google
-   * OAuth client ID and secret.
+   * OAuth client ID and secret.<br><br>
+   * The response carries the credential-free view of the new configuration; the
+   * credentials are never echoed back. Success is reported as `200`, not `201`.<br><br>
+   * <b>The connector type is not checked.</b> `connectorType` is not compared with the OAuth
+   * registry, so a misspelled or wrongly-cased name (`confluence` for `Confluence`) does not
+   * fail: the configuration is stored under that name with the default icon and an empty
+   * group, description and category list. It is then returned by
+   * `GET /oauth/{connectorType}` for that same name but never by `GET /oauth`, which only
+   * walks the registered types.<br><br>
+   * Body fields other than `oauthInstanceName`, `config` and `baseUrl` are ignored.
    */
   async createOAuthConfig(
     request: operations.CreateOAuthConfigRequest,
@@ -117,7 +133,9 @@ export class OAuthConfiguration extends ClientSDK {
    * Get OAuth configuration
    *
    * @remarks
-   * Get a specific OAuth configuration by ID.
+   * Get a specific OAuth configuration by ID.<br><br>
+   * An admin gets `config` with the stored credentials, client secret in clear text.
+   * Any other caller gets the same object without `config`.
    */
   async getOAuthConfig(
     request: operations.GetOAuthConfigRequest,

@@ -24,4 +24,6 @@ let value: ConnectorIndexingStatusCounts = {};
 | `empty`                  | *number*                 | :heavy_minus_sign:       | N/A                      |
 | `enableMultimodalModels` | *number*                 | :heavy_minus_sign:       | N/A                      |
 | `queued`                 | *number*                 | :heavy_minus_sign:       | N/A                      |
+| `skipped`                | *number*                 | :heavy_minus_sign:       | N/A                      |
+| `passwordProtected`      | *number*                 | :heavy_minus_sign:       | N/A                      |
 | `additionalProperties`   | Record<string, *number*> | :heavy_minus_sign:       | N/A                      |

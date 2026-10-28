@@ -50,6 +50,7 @@ export function oAuthProviderOauthIntrospect(
 ): APIPromise<
   Result<
     models.OAuthIntrospectResponse,
+    | errors.ErrorResponse
     | errors.OAuthErrorResponse
     | errors.OAuthClientManagementRateLimitError
     | PipeshubError
@@ -77,6 +78,7 @@ async function $do(
   [
     Result<
       models.OAuthIntrospectResponse,
+      | errors.ErrorResponse
       | errors.OAuthErrorResponse
       | errors.OAuthClientManagementRateLimitError
       | PipeshubError
@@ -156,6 +158,7 @@ async function $do(
 
   const [result] = await M.match<
     models.OAuthIntrospectResponse,
+    | errors.ErrorResponse
     | errors.OAuthErrorResponse
     | errors.OAuthClientManagementRateLimitError
     | PipeshubError
@@ -168,8 +171,10 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.OAuthIntrospectResponse$inboundSchema),
+    M.jsonErr(400, errors.ErrorResponse$inboundSchema),
     M.jsonErr(401, errors.OAuthErrorResponse$inboundSchema),
     M.jsonErr(429, errors.OAuthClientManagementRateLimitError$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

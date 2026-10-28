@@ -16,12 +16,15 @@ export class OAuthProvider extends ClientSDK {
    * @remarks
    * OAuth 2.0 Token Endpoint (RFC 6749 Section 4.1.3).
    *
-   * Exchanges an authorization code, client credentials, refresh token, or
+   * Exchanges an authorization code, client credentials, refresh token, device code or
    * service token for access tokens.
+   * Successful responses carry `Cache-Control: no-store` and `Pragma: no-cache`.
    *
    * **Grant Types:**
    * - `authorization_code`: Exchange auth code for tokens (user-based)
    * - `client_credentials`: Get tokens for machine-to-machine auth
+   * - `urn:ietf:params:oauth:grant-type:device_code`: Poll for the tokens of a device authorization
+   *   (RFC 8628); answered `400` with `authorization_pending` until the user approves
    * - `refresh_token`: Get new access token using refresh token. The refresh token must have been issued to the presenting `client_id`; one issued to another client is rejected with `400 invalid_grant` and is left untouched (not rotated, not revoked).
    * - `urn:ietf:params:oauth:grant-type:token-exchange`: Service-account
    *   delegation (RFC 8693). A service account exchanges its own token for
@@ -35,7 +38,7 @@ export class OAuthProvider extends ClientSDK {
    *   the cause is recorded in the delegation log, which only an
    *   administrator can read.
    *
-   * For **`client_credentials`**, access tokens represent the **service account the app is pointed at** (`tokenIdentityUserId`), or the **OAuth app creator** for an app registered before that was required and never bound. The JWT may encode **`userId === client_id`**; the **Node API gateway** loads the application record and resolves the identity from it, treating the **`createdBy`** claim as a cross-check — see **OAuth Provider** tag.
+   * For **`client_credentials`**, access tokens represent the **service account the app is pointed at** (`tokenIdentityUserId`), or the **OAuth app creator** for an app registered before that was required and never bound. The JWT may encode **`userId === client_id`**; the **Node API gateway** loads the application record on every request and resolves the identity from it, treating the **`createdBy`** claim as a cross-check and refusing a token whose claim no longer matches it — see **OAuth Provider** tag.
    *
    * **Client Authentication:**
    * Can be provided via:

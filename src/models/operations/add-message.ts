@@ -12,7 +12,11 @@ import * as models from "../index.js";
 export type AddMessageRequest = {
   conversationId: string;
   /**
-   * The follow-up question, with optional scope and model overrides.
+   * The follow-up question, with optional scope and model overrides. A `query` of only
+   *
+   * @remarks
+   * whitespace is refused with `400` `HTTP_BAD_REQUEST` ("Query is required"), after the
+   * validator and before any model runs.
    */
   body: models.AddMessageRequest;
 };

@@ -15,7 +15,7 @@ import * as models from "../index.js";
  * Field to sort results by. Omitted → default `updatedAt`.
  *
  * @remarks
- * Unknown value → silently falls back to `name`.
+ * Any other value is answered `400` ("Invalid sort_by: ...").
  */
 export const GetKnowledgeHubRootNodesSortBy = {
   Name: "name",
@@ -28,27 +28,27 @@ export const GetKnowledgeHubRootNodesSortBy = {
  * Field to sort results by. Omitted → default `updatedAt`.
  *
  * @remarks
- * Unknown value → silently falls back to `name`.
+ * Any other value is answered `400` ("Invalid sort_by: ...").
  */
 export type GetKnowledgeHubRootNodesSortBy = ClosedEnum<
   typeof GetKnowledgeHubRootNodesSortBy
 >;
 
 /**
- * Sort direction. Omitted → default `desc`.
+ * Sort direction. Omitted → default `desc`. Read case-insensitively;
  *
  * @remarks
- * Unknown value → silently falls back to `asc`.
+ * any other value is answered `400` ("Invalid sort_order: ...").
  */
 export const GetKnowledgeHubRootNodesSortOrder = {
   Asc: "asc",
   Desc: "desc",
 } as const;
 /**
- * Sort direction. Omitted → default `desc`.
+ * Sort direction. Omitted → default `desc`. Read case-insensitively;
  *
  * @remarks
- * Unknown value → silently falls back to `asc`.
+ * any other value is answered `400` ("Invalid sort_order: ...").
  */
 export type GetKnowledgeHubRootNodesSortOrder = ClosedEnum<
   typeof GetKnowledgeHubRootNodesSortOrder
@@ -60,6 +60,8 @@ export type GetKnowledgeHubRootNodesRequest = {
    *
    * @remarks
    * building sidebar / tree navigation). Leaf nodes are excluded.
+   * `yes`/`no`, `on`/`off` and `1`/`0` are read as booleans too; anything
+   * else is answered `422`.
    */
   onlyContainers?: boolean | undefined;
   /**
@@ -91,38 +93,41 @@ export type GetKnowledgeHubRootNodesRequest = {
    * Field to sort results by. Omitted → default `updatedAt`.
    *
    * @remarks
-   * Unknown value → silently falls back to `name`.
+   * Any other value is answered `400` ("Invalid sort_by: ...").
    */
   sortBy?: GetKnowledgeHubRootNodesSortBy | undefined;
   /**
-   * Sort direction. Omitted → default `desc`.
+   * Sort direction. Omitted → default `desc`. Read case-insensitively;
    *
    * @remarks
-   * Unknown value → silently falls back to `asc`.
+   * any other value is answered `400` ("Invalid sort_order: ...").
    */
   sortOrder?: GetKnowledgeHubRootNodesSortOrder | undefined;
   /**
    * Full-text search query. Must be between 2 and 500 characters
    *
    * @remarks
-   * (inclusive). When provided, the endpoint searches across the entire
+   * (inclusive) after surrounding whitespace is removed, otherwise `400`.
+   * When provided, the endpoint searches across the entire
    * node tree regardless of the current browse level.
+   * A repeated `q` is joined with commas into one query, and a `q` sent as an object
+   * (`q[a]=b`) is refused with `400` ("Search query must be text").
    */
   q?: string | undefined;
   /**
-   * Comma-separated list of node types to include. Invalid values are
+   * Comma-separated list of node types to include. An unknown value is
    *
    * @remarks
-   * silently ignored. Maximum 100 items.
+   * answered `400` ("Invalid node_types value(s): ..."). Maximum 100 items.
    *
    * Valid values: `folder`, `app`, `recordGroup`, `record`
    */
   nodeTypes?: string | undefined;
   /**
-   * Comma-separated list of record types to include. Invalid values are
+   * Comma-separated list of record types to include. An unknown value is
    *
    * @remarks
-   * silently ignored. Maximum 100 items.
+   * answered `400` ("Invalid record_types value(s): ..."). Maximum 100 items.
    *
    * Valid values: `FILE`, `DRIVE`, `WEBPAGE`, `DATABASE`, `DATASOURCE`,
    * `MESSAGE`, `MAIL`, `GROUP_MAIL`, `TICKET`, `COMMENT`,
@@ -134,10 +139,10 @@ export type GetKnowledgeHubRootNodesRequest = {
    */
   recordTypes?: string | undefined;
   /**
-   * Comma-separated list of origin types to include. Invalid values are
+   * Comma-separated list of origin types to include. An unknown value is
    *
    * @remarks
-   * silently ignored. Maximum 100 items.
+   * answered `400` ("Invalid origins value(s): ..."). Maximum 100 items.
    *
    * Valid values: `COLLECTION`, `CONNECTOR`
    */
@@ -151,14 +156,14 @@ export type GetKnowledgeHubRootNodesRequest = {
    */
   connectorIds?: string | undefined;
   /**
-   * Comma-separated list of indexing statuses to include. Invalid values
+   * Comma-separated list of indexing statuses to include. An unknown value
    *
    * @remarks
-   * are silently ignored. Maximum 100 items.
+   * is answered `400` ("Invalid indexing_status value(s): ..."). Maximum 100 items.
    *
    * Valid values: `NOT_STARTED`, `PAUSED`, `IN_PROGRESS`, `COMPLETED`,
    * `FAILED`, `FILE_TYPE_NOT_SUPPORTED`, `AUTO_INDEX_OFF`, `EMPTY`,
-   * `ENABLE_MULTIMODAL_MODELS`, `QUEUED`
+   * `ENABLE_MULTIMODAL_MODELS`, `QUEUED`, `SKIPPED`, `PASSWORD_PROTECTED`
    */
   indexingStatus?: string | undefined;
   /**
@@ -167,7 +172,9 @@ export type GetKnowledgeHubRootNodesRequest = {
    * @remarks
    * Both bounds are optional (you may send just `gte:...` or just
    * `lte:...`). Timestamps must be in the range 0 to 9999999999999 and
-   * `gte` must be less than or equal to `lte` when both are present.
+   * `gte` must be less than or equal to `lte` when both are present;
+   * a bound that is not a whole number, is out of range, or an inverted
+   * range is answered `400`. A value with no `gte:`/`lte:` part is ignored.
    */
   createdAt?: string | undefined;
   /**
@@ -200,7 +207,8 @@ export type GetKnowledgeHubRootNodesRequest = {
    * Comma-separated list of additional response sections to include.
    *
    * @remarks
-   * Invalid values are silently ignored. Maximum 100 items.
+   * An unknown value is answered `400` ("Invalid include value(s): ...").
+   * Maximum 100 items.
    *
    * Valid values: `breadcrumbs`, `counts`, `availableFilters`, `permissions`
    */
@@ -220,18 +228,6 @@ export type GetKnowledgeHubRootNodesServiceUnavailableError = {
   requestId?: string | undefined;
 };
 
-export const GetKnowledgeHubRootNodesCodeHTTPInternalServerError = {
-  HttpInternalServerError: "HTTP_INTERNAL_SERVER_ERROR",
-} as const;
-export type GetKnowledgeHubRootNodesCodeHTTPInternalServerError = ClosedEnum<
-  typeof GetKnowledgeHubRootNodesCodeHTTPInternalServerError
->;
-
-export type GetKnowledgeHubRootNodesErrorHTTPInternalServerError = {
-  code: GetKnowledgeHubRootNodesCodeHTTPInternalServerError;
-  message: string;
-};
-
 export const GetKnowledgeHubRootNodesUnprocessableEntityCode = {
   HttpUnprocessableEntity: "HTTP_UNPROCESSABLE_ENTITY",
 } as const;
@@ -243,42 +239,6 @@ export type GetKnowledgeHubRootNodesUnprocessableEntityError = {
   code: GetKnowledgeHubRootNodesUnprocessableEntityCode;
   message: string;
   requestId?: string | undefined;
-};
-
-export const GetKnowledgeHubRootNodesForbiddenCode = {
-  HttpForbidden: "HTTP_FORBIDDEN",
-} as const;
-export type GetKnowledgeHubRootNodesForbiddenCode = ClosedEnum<
-  typeof GetKnowledgeHubRootNodesForbiddenCode
->;
-
-export type GetKnowledgeHubRootNodesErrorHTTPForbidden = {
-  code: GetKnowledgeHubRootNodesForbiddenCode;
-  message: string;
-};
-
-export const GetKnowledgeHubRootNodesUnauthorizedCode = {
-  HttpUnauthorized: "HTTP_UNAUTHORIZED",
-} as const;
-export type GetKnowledgeHubRootNodesUnauthorizedCode = ClosedEnum<
-  typeof GetKnowledgeHubRootNodesUnauthorizedCode
->;
-
-export type GetKnowledgeHubRootNodesErrorHTTPUnauthorized = {
-  code: GetKnowledgeHubRootNodesUnauthorizedCode;
-  message: string;
-};
-
-export const GetKnowledgeHubRootNodesCodeHTTPBadRequest = {
-  HttpBadRequest: "HTTP_BAD_REQUEST",
-} as const;
-export type GetKnowledgeHubRootNodesCodeHTTPBadRequest = ClosedEnum<
-  typeof GetKnowledgeHubRootNodesCodeHTTPBadRequest
->;
-
-export type GetKnowledgeHubRootNodesErrorHTTPBadRequest = {
-  code: GetKnowledgeHubRootNodesCodeHTTPBadRequest;
-  message: string;
 };
 
 export type GetKnowledgeHubRootNodesResponse = {
@@ -389,35 +349,6 @@ export function getKnowledgeHubRootNodesServiceUnavailableErrorFromJSON(
 }
 
 /** @internal */
-export const GetKnowledgeHubRootNodesCodeHTTPInternalServerError$inboundSchema:
-  z.ZodMiniEnum<typeof GetKnowledgeHubRootNodesCodeHTTPInternalServerError> = z
-    .enum(GetKnowledgeHubRootNodesCodeHTTPInternalServerError);
-
-/** @internal */
-export const GetKnowledgeHubRootNodesErrorHTTPInternalServerError$inboundSchema:
-  z.ZodMiniType<GetKnowledgeHubRootNodesErrorHTTPInternalServerError, unknown> =
-    z.object({
-      code: GetKnowledgeHubRootNodesCodeHTTPInternalServerError$inboundSchema,
-      message: types.string(),
-    });
-
-export function getKnowledgeHubRootNodesErrorHTTPInternalServerErrorFromJSON(
-  jsonString: string,
-): SafeParseResult<
-  GetKnowledgeHubRootNodesErrorHTTPInternalServerError,
-  SDKValidationError
-> {
-  return safeParse(
-    jsonString,
-    (x) =>
-      GetKnowledgeHubRootNodesErrorHTTPInternalServerError$inboundSchema.parse(
-        JSON.parse(x),
-      ),
-    `Failed to parse 'GetKnowledgeHubRootNodesErrorHTTPInternalServerError' from JSON`,
-  );
-}
-
-/** @internal */
 export const GetKnowledgeHubRootNodesUnprocessableEntityCode$inboundSchema:
   z.ZodMiniEnum<typeof GetKnowledgeHubRootNodesUnprocessableEntityCode> = z
     .enum(GetKnowledgeHubRootNodesUnprocessableEntityCode);
@@ -444,96 +375,6 @@ export function getKnowledgeHubRootNodesUnprocessableEntityErrorFromJSON(
         JSON.parse(x),
       ),
     `Failed to parse 'GetKnowledgeHubRootNodesUnprocessableEntityError' from JSON`,
-  );
-}
-
-/** @internal */
-export const GetKnowledgeHubRootNodesForbiddenCode$inboundSchema: z.ZodMiniEnum<
-  typeof GetKnowledgeHubRootNodesForbiddenCode
-> = z.enum(GetKnowledgeHubRootNodesForbiddenCode);
-
-/** @internal */
-export const GetKnowledgeHubRootNodesErrorHTTPForbidden$inboundSchema:
-  z.ZodMiniType<GetKnowledgeHubRootNodesErrorHTTPForbidden, unknown> = z.object(
-    {
-      code: GetKnowledgeHubRootNodesForbiddenCode$inboundSchema,
-      message: types.string(),
-    },
-  );
-
-export function getKnowledgeHubRootNodesErrorHTTPForbiddenFromJSON(
-  jsonString: string,
-): SafeParseResult<
-  GetKnowledgeHubRootNodesErrorHTTPForbidden,
-  SDKValidationError
-> {
-  return safeParse(
-    jsonString,
-    (x) =>
-      GetKnowledgeHubRootNodesErrorHTTPForbidden$inboundSchema.parse(
-        JSON.parse(x),
-      ),
-    `Failed to parse 'GetKnowledgeHubRootNodesErrorHTTPForbidden' from JSON`,
-  );
-}
-
-/** @internal */
-export const GetKnowledgeHubRootNodesUnauthorizedCode$inboundSchema:
-  z.ZodMiniEnum<typeof GetKnowledgeHubRootNodesUnauthorizedCode> = z.enum(
-    GetKnowledgeHubRootNodesUnauthorizedCode,
-  );
-
-/** @internal */
-export const GetKnowledgeHubRootNodesErrorHTTPUnauthorized$inboundSchema:
-  z.ZodMiniType<GetKnowledgeHubRootNodesErrorHTTPUnauthorized, unknown> = z
-    .object({
-      code: GetKnowledgeHubRootNodesUnauthorizedCode$inboundSchema,
-      message: types.string(),
-    });
-
-export function getKnowledgeHubRootNodesErrorHTTPUnauthorizedFromJSON(
-  jsonString: string,
-): SafeParseResult<
-  GetKnowledgeHubRootNodesErrorHTTPUnauthorized,
-  SDKValidationError
-> {
-  return safeParse(
-    jsonString,
-    (x) =>
-      GetKnowledgeHubRootNodesErrorHTTPUnauthorized$inboundSchema.parse(
-        JSON.parse(x),
-      ),
-    `Failed to parse 'GetKnowledgeHubRootNodesErrorHTTPUnauthorized' from JSON`,
-  );
-}
-
-/** @internal */
-export const GetKnowledgeHubRootNodesCodeHTTPBadRequest$inboundSchema:
-  z.ZodMiniEnum<typeof GetKnowledgeHubRootNodesCodeHTTPBadRequest> = z.enum(
-    GetKnowledgeHubRootNodesCodeHTTPBadRequest,
-  );
-
-/** @internal */
-export const GetKnowledgeHubRootNodesErrorHTTPBadRequest$inboundSchema:
-  z.ZodMiniType<GetKnowledgeHubRootNodesErrorHTTPBadRequest, unknown> = z
-    .object({
-      code: GetKnowledgeHubRootNodesCodeHTTPBadRequest$inboundSchema,
-      message: types.string(),
-    });
-
-export function getKnowledgeHubRootNodesErrorHTTPBadRequestFromJSON(
-  jsonString: string,
-): SafeParseResult<
-  GetKnowledgeHubRootNodesErrorHTTPBadRequest,
-  SDKValidationError
-> {
-  return safeParse(
-    jsonString,
-    (x) =>
-      GetKnowledgeHubRootNodesErrorHTTPBadRequest$inboundSchema.parse(
-        JSON.parse(x),
-      ),
-    `Failed to parse 'GetKnowledgeHubRootNodesErrorHTTPBadRequest' from JSON`,
   );
 }
 

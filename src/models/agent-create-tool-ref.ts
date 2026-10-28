@@ -5,7 +5,13 @@
 import * as z from "zod/v4-mini";
 
 export type AgentCreateToolRef = {
+  /**
+   * Surrounding whitespace is trimmed; a blank name is refused with `400`.
+   */
   name: string;
+  /**
+   * Surrounding whitespace is trimmed; a blank value is refused with `400`.
+   */
   fullName?: string | undefined;
   description?: string | undefined;
 };

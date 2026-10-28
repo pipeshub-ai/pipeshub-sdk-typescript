@@ -38,9 +38,17 @@ import { Result } from "../types/fp.js";
  *
  * Returns complete record metadata including name, type, indexing status, storage information, and version history.
  *
- * **File conversion:**
+ * **Query parameters:**
  *
- * Use the optional `convertTo` parameter to request file format conversion (e.g., PDF to text). Supported conversions include PPT to PDF and PPTX to PDF.
+ * `convertTo` and `version` are checked by the request validator but not used by this
+ * endpoint: the response is the same JSON metadata whatever they hold. They take effect
+ * on `GET /knowledgeBase/stream/record/{recordId}`, which shares the validator. Any other
+ * query parameter is ignored.
+ *
+ * **Not found:**
+ *
+ * A record that does not exist, one the caller has no access to and one that is in the
+ * trash all answer `404` with the same message, so a record's existence is not revealed.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -111,6 +119,7 @@ async function $do(
 
   const query = encodeFormQuery({
     "convertTo": payload.convertTo,
+    "version": payload.version,
   });
 
   const headers = new Headers(compactMap({

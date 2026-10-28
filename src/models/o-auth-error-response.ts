@@ -23,7 +23,7 @@ import { OpenEnum } from "../types/enums.js";
  *   service token cannot tell "no such person" from "not on your
  *   list". The real cause is in the delegation log.
  */
-export const ErrorEnum = {
+export const OAuthErrorResponseError = {
   InvalidRequest: "invalid_request",
   InvalidClient: "invalid_client",
   InvalidGrant: "invalid_grant",
@@ -33,6 +33,9 @@ export const ErrorEnum = {
   InvalidScope: "invalid_scope",
   AccessDenied: "access_denied",
   ServerError: "server_error",
+  AuthorizationPending: "authorization_pending",
+  SlowDown: "slow_down",
+  ExpiredToken: "expired_token",
 } as const;
 /**
  * Error code. Common values:
@@ -51,8 +54,10 @@ export const ErrorEnum = {
  *   service token cannot tell "no such person" from "not on your
  *   list". The real cause is in the delegation log.
  */
-export type ErrorEnum = OpenEnum<typeof ErrorEnum>;
+export type OAuthErrorResponseError = OpenEnum<typeof OAuthErrorResponseError>;
 
 /** @internal */
-export const ErrorEnum$inboundSchema: z.ZodMiniType<ErrorEnum, unknown> =
-  openEnums.inboundSchema(ErrorEnum);
+export const OAuthErrorResponseError$inboundSchema: z.ZodMiniType<
+  OAuthErrorResponseError,
+  unknown
+> = openEnums.inboundSchema(OAuthErrorResponseError);

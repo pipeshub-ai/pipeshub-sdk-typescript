@@ -17,6 +17,9 @@ export type ListOAuthConfigsByTypeRequest = {
   scope?: models.ConnectorScope | undefined;
   page?: number | undefined;
   limit?: number | undefined;
+  /**
+   * Space-separated terms; every term must appear in the name, connector type, group, description or categories
+   */
   search?: string | undefined;
   /**
    * Set to `true` to receive stored secrets instead of placeholders. Honoured only for an
@@ -33,8 +36,11 @@ export type ListOAuthConfigsByTypeRequest = {
  */
 export type ListOAuthConfigsByTypeResponse = {
   success: boolean;
-  oauthConfigs: Array<models.OAuthConfig>;
-  pagination?: models.ConnectorPagination | undefined;
+  oauthConfigs: Array<models.OAuthConfigRecord>;
+  /**
+   * Pagination block of `GET /oauth/registry` and `GET /oauth/{connectorType}`
+   */
+  pagination?: models.OAuthRegistryPagination | undefined;
 };
 
 /** @internal */
@@ -76,8 +82,8 @@ export const ListOAuthConfigsByTypeResponse$inboundSchema: z.ZodMiniType<
   unknown
 > = z.object({
   success: types.boolean(),
-  oauthConfigs: z.array(models.OAuthConfig$inboundSchema),
-  pagination: types.optional(models.ConnectorPagination$inboundSchema),
+  oauthConfigs: z.array(models.OAuthConfigRecord$inboundSchema),
+  pagination: types.optional(models.OAuthRegistryPagination$inboundSchema),
 });
 
 export function listOAuthConfigsByTypeResponseFromJSON(

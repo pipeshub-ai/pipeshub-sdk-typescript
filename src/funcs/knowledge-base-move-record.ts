@@ -34,9 +34,15 @@ import { Result } from "../types/fp.js";
  * @remarks
  * Move a file or folder record to a different location within the same knowledge base.
  *
- * Set `newParentId` to a folder ID to move the record into that folder, or `null` to move it to the knowledge base root.
+ * Set `newParentId` to a folder ID to move the record into that folder, or `null` (or an
+ * empty string) to move it to the knowledge base root. A folder moves with everything in
+ * it. Moving a record to where it already is answers `200` with the same body.
  *
- * **Required Permission:** OWNER or WRITER
+ * **Required Permission:** OWNER or WRITER. A `READER` gets `403`; a caller with no role
+ * on the knowledge base gets `404` (`Knowledge base not found`).
+ *
+ * **Request:** only `newParentId` is read; other body fields and any query parameter
+ * are ignored.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */

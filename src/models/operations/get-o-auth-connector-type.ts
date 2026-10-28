@@ -10,7 +10,22 @@ import { SDKValidationError } from "../errors/sdk-validation-error.js";
 import * as models from "../index.js";
 
 export type GetOAuthConnectorTypeRequest = {
+  /**
+   * Registered name of the type, case-sensitive
+   */
   connectorType: string;
+  /**
+   * Validated like the `page` of `GET /oauth/registry`, then ignored; the reply is the same with or without it.
+   */
+  page?: number | undefined;
+  /**
+   * Validated like the `limit` of `GET /oauth/registry`, then ignored.
+   */
+  limit?: number | undefined;
+  /**
+   * Validated as a single text value, then ignored.
+   */
+  search?: string | undefined;
 };
 
 /**
@@ -27,6 +42,9 @@ export type GetOAuthConnectorTypeResponse = {
 /** @internal */
 export type GetOAuthConnectorTypeRequest$Outbound = {
   connectorType: string;
+  page?: number | undefined;
+  limit?: number | undefined;
+  search?: string | undefined;
 };
 
 /** @internal */
@@ -35,6 +53,9 @@ export const GetOAuthConnectorTypeRequest$outboundSchema: z.ZodMiniType<
   GetOAuthConnectorTypeRequest
 > = z.object({
   connectorType: z.string(),
+  page: z.optional(z.int()),
+  limit: z.optional(z.int()),
+  search: z.optional(z.string()),
 });
 
 export function getOAuthConnectorTypeRequestToJSON(

@@ -4,12 +4,7 @@
 
 import * as z from "zod/v4-mini";
 import { PipeshubCore } from "../core.js";
-import { appendForm, encodeSimple, normalizeBlob } from "../lib/encodings.js";
-import {
-  bytesToBlob,
-  getContentTypeFromFileName,
-  readableStreamToArrayBuffer,
-} from "../lib/files.js";
+import { encodeJSON, encodeSimple } from "../lib/encodings.js";
 import { matchStatusCode } from "../lib/http.js";
 import * as M from "../lib/matchers.js";
 import { compactMap } from "../lib/primitives.js";
@@ -28,11 +23,10 @@ import * as errors from "../models/errors/index.js";
 import { PipeshubError } from "../models/errors/pipeshub-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { SDKValidationError } from "../models/errors/sdk-validation-error.js";
+import * as models from "../models/index.js";
 import * as operations from "../models/operations/index.js";
 import { APICall, APIPromise } from "../types/async.js";
-import { isBlobLike } from "../types/blobs.js";
 import { Result } from "../types/fp.js";
-import { isReadableStream } from "../types/streams.js";
 
 /**
  * Update record
@@ -46,17 +40,39 @@ import { isReadableStream } from "../types/streams.js";
  *
  * **Required permission:**
  *
- * WRITER or higher
+ * WRITER or higher on the record's knowledge base. A READER is answered `403`; a caller
+ * with no role is answered `404`.
+ *
+ * **Renaming:**
+ *
+ * Send `recordName` as a multipart field or in a JSON body. There is no length limit.
+ * A request with no body, an empty JSON object or an empty `recordName` changes nothing
+ * and still answers `200`. In a JSON body the name is trimmed first (so a blank name is
+ * read as empty and changes nothing); in a multipart form it is not, and a blank name
+ * is refused with `400`. Fields other than `recordName` and `file` are ignored.
  *
  * **Updating file content:**
  *
- * Include a new file in the request to replace the existing content. The file extension must match the original.
+ * Include a new file in a multipart request to replace the existing content. The file
+ * extension must match the original: a file with another extension is answered `500`,
+ * not `400`. When a file is sent, `recordName` is ignored and the record is named after
+ * the file (without its extension).
  *
  * **Side effects:**
  *
  * - Updates `updatedAtTimestamp`
- * - Increments version if file content changed
- * - Triggers re-indexing for content changes
+ * - A new file is stored as the next version of the record's storage document and the
+ *   record is queued for indexing again. The record's own `version` and `sizeInBytes`
+ *   are not updated by this call.
+ *
+ * **Known gaps:**
+ *
+ * - Renaming a record that is in the trash is not refused: the answer is `200` with the
+ *   success message, but nothing changes, and `record` is the trashed record (`isDeleted: true`,
+ *   with `deletedAtTimestamp`, `deleteBatchId` and `deleteSource`).
+ * - `fileBuffer` is an internal field filled by the upload parser. A JSON body that
+ *   supplies an object under that name (`buffer`, `originalname`, `mimetype`, `size`,
+ *   `lastModified`) is treated as an uploaded file and stored as the new version.
  *
  * **OAuth scopes:** `kb:write`, plus `kb:read`: replacing the file first reads the record and its knowledge base with the caller's token.
  *
@@ -68,7 +84,7 @@ export function knowledgeBaseUpdateRecord(
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    operations.UpdateRecordResponse,
+    models.UpdateRecordResponseSchema,
     | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
@@ -94,7 +110,7 @@ async function $do(
 ): Promise<
   [
     Result<
-      operations.UpdateRecordResponse,
+      models.UpdateRecordResponseSchema,
       | errors.ErrorResponse
       | PipeshubError
       | ResponseValidationError
@@ -117,43 +133,7 @@ async function $do(
     return [parsed, { status: "invalid" }];
   }
   const payload = parsed.value;
-  const body = new FormData();
-  if (payload.body != null) {
-    if (payload.body.file !== undefined) {
-      if (isBlobLike(payload.body.file)) {
-        const file = payload.body.file;
-        const blob = await normalizeBlob(file);
-        const name = "name" in file ? (file.name as string) : undefined;
-        appendForm(body, "file", blob, name);
-      } else if (isReadableStream(payload.body.file.content)) {
-        const buffer = await readableStreamToArrayBuffer(
-          payload.body.file.content,
-        );
-        const contentType =
-          getContentTypeFromFileName(payload.body.file.fileName)
-          || "application/octet-stream";
-        appendForm(
-          body,
-          "file",
-          bytesToBlob(buffer, contentType),
-          payload.body.file.fileName,
-        );
-      } else {
-        const contentType =
-          getContentTypeFromFileName(payload.body.file.fileName)
-          || "application/octet-stream";
-        appendForm(
-          body,
-          "file",
-          bytesToBlob(payload.body.file.content, contentType),
-          payload.body.file.fileName,
-        );
-      }
-    }
-    if (payload.body.recordName !== undefined) {
-      appendForm(body, "recordName", payload.body.recordName);
-    }
-  }
+  const body = encodeJSON("body", payload.body, { explode: true });
 
   const pathParams = {
     recordId: encodeSimple("recordId", payload.recordId, {
@@ -164,6 +144,7 @@ async function $do(
   const path = pathToFunc("/knowledgeBase/record/{recordId}")(pathParams);
 
   const headers = new Headers(compactMap({
+    "Content-Type": "application/json",
     Accept: "application/json",
   }));
 
@@ -217,7 +198,7 @@ async function $do(
   };
 
   const [result] = await M.match<
-    operations.UpdateRecordResponse,
+    models.UpdateRecordResponseSchema,
     | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
@@ -228,8 +209,8 @@ async function $do(
     | UnexpectedClientError
     | SDKValidationError
   >(
-    M.json(200, operations.UpdateRecordResponse$inboundSchema),
-    M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
+    M.json(200, models.UpdateRecordResponseSchema$inboundSchema),
+    M.jsonErr([400, 401, 403, 404, 409], errors.ErrorResponse$inboundSchema),
     M.jsonErr([500, 503], errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

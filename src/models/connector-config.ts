@@ -8,10 +8,6 @@ import { safeParse } from "../lib/schemas.js";
 import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import {
-  ConnectorAuthType,
-  ConnectorAuthType$inboundSchema,
-} from "./connector-auth-type.js";
-import {
   ConnectorScope,
   ConnectorScope$inboundSchema,
 } from "./connector-scope.js";
@@ -22,14 +18,23 @@ import {
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
 export type ConnectorConfig = {
+  /**
+   * Connector instance ID
+   */
   connectorId?: string | undefined;
+  /**
+   * Instance name
+   */
   name?: string | undefined;
+  /**
+   * Connector type
+   */
   type?: string | undefined;
   appGroup?: string | undefined;
   /**
-   * How a connector instance signs in to its source. Each connector type supports a subset; see `supportedAuthTypes` in the registry.
+   * Authentication method chosen when the instance was created
    */
-  authType?: ConnectorAuthType | undefined;
+  authType?: string | null | undefined;
   /**
    * Scope determines visibility and access control for connectors:<br>
    *
@@ -40,8 +45,14 @@ export type ConnectorConfig = {
    * </ul>
    */
   scope?: ConnectorScope | undefined;
-  createdBy?: string | undefined;
-  updatedBy?: string | undefined;
+  /**
+   * User ID who created this instance
+   */
+  createdBy?: string | null | undefined;
+  /**
+   * User ID who last changed this instance
+   */
+  updatedBy?: string | null | undefined;
   appDescription?: string | undefined;
   appCategories?: Array<string> | undefined;
   supportsRealtime?: boolean | undefined;
@@ -55,8 +66,14 @@ export type ConnectorConfig = {
   isActive?: boolean | undefined;
   isConfigured?: boolean | undefined;
   isAuthenticated?: boolean | undefined;
-  createdAtTimestamp?: number | undefined;
-  updatedAtTimestamp?: number | undefined;
+  /**
+   * Creation time, epoch milliseconds
+   */
+  createdAtTimestamp?: number | null | undefined;
+  /**
+   * Last update time, epoch milliseconds
+   */
+  updatedAtTimestamp?: number | null | undefined;
 };
 
 /** @internal */
@@ -69,10 +86,10 @@ export const ConnectorConfig$inboundSchema: z.ZodMiniType<
     name: types.optional(types.string()),
     type: types.optional(types.string()),
     appGroup: types.optional(types.string()),
-    authType: types.optional(ConnectorAuthType$inboundSchema),
+    authType: z.optional(z.nullable(types.string())),
     scope: types.optional(ConnectorScope$inboundSchema),
-    createdBy: types.optional(types.string()),
-    updatedBy: types.optional(types.string()),
+    createdBy: z.optional(z.nullable(types.string())),
+    updatedBy: z.optional(z.nullable(types.string())),
     appDescription: types.optional(types.string()),
     appCategories: types.optional(z.array(types.string())),
     supportsRealtime: types.optional(types.boolean()),
@@ -83,8 +100,8 @@ export const ConnectorConfig$inboundSchema: z.ZodMiniType<
     isActive: types.optional(types.boolean()),
     isConfigured: types.optional(types.boolean()),
     isAuthenticated: types.optional(types.boolean()),
-    createdAtTimestamp: types.optional(types.number()),
-    updatedAtTimestamp: types.optional(types.number()),
+    createdAtTimestamp: z.optional(z.nullable(types.number())),
+    updatedAtTimestamp: z.optional(z.nullable(types.number())),
   }),
   z.transform((v) => {
     return remap$(v, {

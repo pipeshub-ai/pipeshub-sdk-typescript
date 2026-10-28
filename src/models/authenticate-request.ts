@@ -7,10 +7,15 @@ import { remap as remap$ } from "../lib/primitives.js";
 import { ClosedEnum } from "../types/enums.js";
 import { smartUnion } from "../types/smart-union.js";
 import {
-  OAuthCredentials,
-  OAuthCredentials$Outbound,
-  OAuthCredentials$outboundSchema,
-} from "./o-auth-credentials.js";
+  GoogleCredentials,
+  GoogleCredentials$Outbound,
+  GoogleCredentials$outboundSchema,
+} from "./google-credentials.js";
+import {
+  MicrosoftCredentials,
+  MicrosoftCredentials$Outbound,
+  MicrosoftCredentials$outboundSchema,
+} from "./microsoft-credentials.js";
 import {
   OtpCredentials,
   OtpCredentials$Outbound,
@@ -23,7 +28,10 @@ import {
 } from "./password-credentials.js";
 
 /**
- * Authentication method to use
+ * Authentication method to use. It must be one the session's current step allows;
+ *
+ * @remarks
+ * any other value, known or not, is answered `400`.
  */
 export const Method = {
   Otp: "otp",
@@ -32,17 +40,29 @@ export const Method = {
   Microsoft: "microsoft",
 } as const;
 /**
- * Authentication method to use
+ * Authentication method to use. It must be one the session's current step allows;
+ *
+ * @remarks
+ * any other value, known or not, is answered `400`.
  */
 export type Method = ClosedEnum<typeof Method>;
 
 /**
- * Credentials based on the authentication method
+ * Credentials based on the authentication method; the shape each method needs is
+ *
+ * @remarks
+ * listed above. The validator only checks that this is a non-empty string or an
+ * object whose `password`, `otp`, `token`, `code`, `accessToken` and `idToken`,
+ * when present, are strings; other fields of the object are passed through. An
+ * object without the field its method needs is refused later as a failed sign-in,
+ * not as a validation error: `microsoft` without `idToken` answers `400`, and a Google
+ * token that is not a JWT answers `500`.
  */
 export type Credentials =
   | PasswordCredentials
   | OtpCredentials
-  | OAuthCredentials
+  | GoogleCredentials
+  | MicrosoftCredentials
   | string;
 
 /**
@@ -52,20 +72,46 @@ export type Credentials =
  * **Credential format varies by method:**
  * - `password`: `{ password: "string" }`
  * - `otp`: `{ otp: "123456" }` (6-digit code)
- * - `google`: `"google-id-token-string"`
- * - `microsoft`: `{ accessToken: "...", idToken: "..." }`
+ * - `google`: `"google-id-token-string"`, or `{ credential: "google-id-token-string" }`
+ * - `microsoft`: `{ idToken: "..." }`; an `accessToken` may be sent alongside but is not read
+ *
+ * SAML (`samlSso`), generic OAuth (`oauth`) and Azure AD (`azureAd`) sign-in were removed in 1.0
+ * and are answered `400`. Azure AD accounts sign in with `microsoft`.
+ *
+ * Any top-level field not listed here is refused with `400`.
  */
 export type AuthenticateRequest = {
   /**
-   * Authentication method to use
+   * Authentication method to use. It must be one the session's current step allows;
+   *
+   * @remarks
+   * any other value, known or not, is answered `400`.
    */
   method: Method;
   /**
-   * Credentials based on the authentication method
+   * Credentials based on the authentication method; the shape each method needs is
+   *
+   * @remarks
+   * listed above. The validator only checks that this is a non-empty string or an
+   * object whose `password`, `otp`, `token`, `code`, `accessToken` and `idToken`,
+   * when present, are strings; other fields of the object are passed through. An
+   * object without the field its method needs is refused later as a failed sign-in,
+   * not as a validation error: `microsoft` without `idToken` answers `400`, and a Google
+   * token that is not a JWT answers `500`.
    */
-  credentials: PasswordCredentials | OtpCredentials | OAuthCredentials | string;
+  credentials:
+    | PasswordCredentials
+    | OtpCredentials
+    | GoogleCredentials
+    | MicrosoftCredentials
+    | string;
   /**
-   * Optional email for verification (used with some OAuth methods)
+   * The account's email. Used when the session was started without one
+   *
+   * @remarks
+   * (`/initAuth` with no `email`); when neither carries an email, password and
+   * code sign-in answer `500`. Ignored by the external-provider methods, which
+   * take the email from the provider.
    */
   email?: string | undefined;
   /**
@@ -83,7 +129,8 @@ export const Method$outboundSchema: z.ZodMiniEnum<typeof Method> = z.enum(
 export type Credentials$Outbound =
   | PasswordCredentials$Outbound
   | OtpCredentials$Outbound
-  | OAuthCredentials$Outbound
+  | GoogleCredentials$Outbound
+  | MicrosoftCredentials$Outbound
   | string;
 
 /** @internal */
@@ -93,7 +140,8 @@ export const Credentials$outboundSchema: z.ZodMiniType<
 > = smartUnion([
   PasswordCredentials$outboundSchema,
   OtpCredentials$outboundSchema,
-  OAuthCredentials$outboundSchema,
+  GoogleCredentials$outboundSchema,
+  MicrosoftCredentials$outboundSchema,
   z.string(),
 ]);
 
@@ -107,7 +155,8 @@ export type AuthenticateRequest$Outbound = {
   credentials:
     | PasswordCredentials$Outbound
     | OtpCredentials$Outbound
-    | OAuthCredentials$Outbound
+    | GoogleCredentials$Outbound
+    | MicrosoftCredentials$Outbound
     | string;
   email?: string | undefined;
   "cf-turnstile-response"?: string | undefined;
@@ -123,7 +172,8 @@ export const AuthenticateRequest$outboundSchema: z.ZodMiniType<
     credentials: smartUnion([
       PasswordCredentials$outboundSchema,
       OtpCredentials$outboundSchema,
-      OAuthCredentials$outboundSchema,
+      GoogleCredentials$outboundSchema,
+      MicrosoftCredentials$outboundSchema,
       z.string(),
     ]),
     email: z.optional(z.string()),

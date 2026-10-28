@@ -1,5 +1,7 @@
 # ConnectorSchemaFilters
 
+Filters the connector offers
+
 ## Example Usage
 
 ```typescript

@@ -25,7 +25,7 @@ import {
  * bounds (`createdAfter` / `createdBefore`, or `modifiedAfter` / `modifiedBefore`);
  * with no start it covers the year before the end, or further back to the earliest
  * of the best matches. Bounds on the other date apply to every period. `limit` is the
- * number of matches each period's own search asks for (10 when left out); matches from
+ * number of matches each period's own search asks for; matches from
  * the search of the whole span (up to 50) are added to the periods their records are
  * dated in, so a period can hold more than `limit`. Each search applies the same permissions
  * and filters as a plain search.
@@ -56,7 +56,7 @@ export const Timeline = {
  * bounds (`createdAfter` / `createdBefore`, or `modifiedAfter` / `modifiedBefore`);
  * with no start it covers the year before the end, or further back to the earliest
  * of the best matches. Bounds on the other date apply to every period. `limit` is the
- * number of matches each period's own search asks for (10 when left out); matches from
+ * number of matches each period's own search asks for; matches from
  * the search of the whole span (up to 50) are added to the periods their records are
  * dated in, so a period can hold more than `limit`. Each search applies the same permissions
  * and filters as a plain search.
@@ -98,7 +98,9 @@ export type SemanticSearchRequest = {
    * Natural language search query. The system understands
    *
    * @remarks
-   * semantic meaning, not just keywords.
+   * semantic meaning, not just keywords. A query containing HTML
+   * markup or a printf-style format specifier (`%s`, `%x`, `%n`) is
+   * refused with `400` `HTTP_BAD_REQUEST`.
    */
   query: string;
   /**
@@ -138,6 +140,9 @@ export type SemanticSearchRequest = {
    * period's own search asks for, and a period can hold more (see `timeline`). When the
    * timeline was chosen automatically (`timeline` left out), each period asks for at most
    * 10, whatever `limit` is.
+   *
+   * Left out, it is `10`. A numeric string (`"2"`) is accepted and read as a number; a
+   * fractional number is refused with `400 VALIDATION_ERROR`.
    */
   limit?: number | undefined;
   /**
@@ -196,7 +201,7 @@ export type SemanticSearchRequest = {
    * bounds (`createdAfter` / `createdBefore`, or `modifiedAfter` / `modifiedBefore`);
    * with no start it covers the year before the end, or further back to the earliest
    * of the best matches. Bounds on the other date apply to every period. `limit` is the
-   * number of matches each period's own search asks for (10 when left out); matches from
+   * number of matches each period's own search asks for; matches from
    * the search of the whole span (up to 50) are added to the periods their records are
    * dated in, so a period can hold more than `limit`. Each search applies the same permissions
    * and filters as a plain search.
@@ -208,6 +213,16 @@ export type SemanticSearchRequest = {
    * `false` ignores the field and never runs a timeline.
    */
   timeline?: Timeline | undefined;
+  /**
+   * Whether the search is saved to the caller's search history (`GET /search`)
+   *
+   * @remarks
+   * with a citation for each match. Set it to `false` for searches that are not
+   * the user's own, such as an agent searching on their behalf: nothing is
+   * stored and the response has no `searchId`. A server older than this field
+   * ignores it and saves the search.
+   */
+  saveHistory?: boolean | undefined;
 };
 
 /** @internal */
@@ -226,6 +241,7 @@ export type SemanticSearchRequest$Outbound = {
   modifiedBefore?: string | undefined;
   rewriteQuery: boolean;
   timeline?: string | undefined;
+  saveHistory: boolean;
 };
 
 /** @internal */
@@ -242,6 +258,7 @@ export const SemanticSearchRequest$outboundSchema: z.ZodMiniType<
   modifiedBefore: z.optional(z.string()),
   rewriteQuery: z._default(z.boolean(), true),
   timeline: z.optional(Timeline$outboundSchema),
+  saveHistory: z._default(z.boolean(), true),
 });
 
 export function semanticSearchRequestToJSON(

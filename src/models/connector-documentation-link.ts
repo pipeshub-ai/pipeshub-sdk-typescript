@@ -8,9 +8,24 @@ import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
+/**
+ * A help link shown on a connector's setup page
+ */
 export type ConnectorDocumentationLink = {
+  /**
+   * Link text
+   */
   title?: string | undefined;
+  /**
+   * Link target
+   */
   url?: string | undefined;
+  /**
+   * Free-form link category set by the connector, for example
+   *
+   * @remarks
+   * `setup`, `pipeshub`, `api` or `docs`.
+   */
   type?: string | undefined;
 };
 

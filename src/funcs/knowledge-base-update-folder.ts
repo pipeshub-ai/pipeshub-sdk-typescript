@@ -32,9 +32,20 @@ import { Result } from "../types/fp.js";
  * Update folder
  *
  * @remarks
- * Rename a folder.
+ * Rename a folder, at the root or nested.
  *
- * **Required permission:** WRITER or higher
+ * **Required permission:** WRITER or higher. A `READER` gets `403`; a caller with no
+ * role on the knowledge base gets `404` (`Knowledge base not found`).
+ *
+ * **Naming rules:** the same as for creating a folder. Whitespace around the name is
+ * removed first; HTML is refused with `400` before authentication and a printf-style
+ * format specifier with `400` by the gateway controller. A name already used by another
+ * folder in the same parent is refused with `409`, ignoring case; renaming a folder to
+ * its own name, or to the name of a file, is allowed.
+ *
+ * **Request:** `kbId` and `folderId` are only checked to be non-empty (an id that is not
+ * a UUID is looked up and answered `404`). Only `folderName` is read; other body fields
+ * and any query parameter are ignored.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */

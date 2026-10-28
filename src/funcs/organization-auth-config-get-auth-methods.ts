@@ -33,7 +33,10 @@ import { Result } from "../types/fp.js";
  * **Response Structure:**
  *
  * Returns an array of authentication steps, each containing:
- * - `order`: Step number (1-3)
+ * - `order`: The step's position, 1, 2 or 3. Steps are returned in ascending order of the
+ *   `order` they were saved with and renumbered from 1. A method removed in 1.0 is left out
+ *   (`azureAd` reads as `microsoft`), a step left with no method is dropped, and when a
+ *   removed method was left out `password` is added to the first step
  * - `allowedMethods`: Array of methods allowed for that step
  *
  * **Example Response:**
@@ -47,7 +50,8 @@ import { Result } from "../types/fp.js";
  * }
  * ```
  *
- * **Admin Access Required:** Only organization admins can view auth configuration.
+ * **Admin Access Required:** Only organization admins can view auth configuration, with
+ * a session access token. The query string is not read.
  *
  * If set, this operation will use {@link Security.bearerAuth} from the global security.
  */
@@ -161,7 +165,7 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.AuthConfig$inboundSchema),
-    M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([400, 403, 404], errors.ErrorResponse$inboundSchema),
     M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

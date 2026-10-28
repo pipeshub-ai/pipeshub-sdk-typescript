@@ -32,7 +32,7 @@ export type OAuthErrorResponseData = {
    *   service token cannot tell "no such person" from "not on your
    *   list". The real cause is in the delegation log.
    */
-  error: models.ErrorEnum;
+  error: models.OAuthErrorResponseError;
   /**
    * Human-readable error description
    */
@@ -71,7 +71,7 @@ export class OAuthErrorResponse extends PipeshubError {
    *   service token cannot tell "no such person" from "not on your
    *   list". The real cause is in the delegation log.
    */
-  error: models.ErrorEnum;
+  error: models.OAuthErrorResponseError;
   /**
    * Human-readable error description
    */
@@ -114,7 +114,7 @@ export const OAuthErrorResponse$inboundSchema: z.ZodMiniType<
   unknown
 > = z.pipe(
   z.object({
-    error: models.ErrorEnum$inboundSchema,
+    error: models.OAuthErrorResponseError$inboundSchema,
     error_description: types.optional(types.string()),
     error_uri: types.optional(types.string()),
     state: types.optional(types.string()),

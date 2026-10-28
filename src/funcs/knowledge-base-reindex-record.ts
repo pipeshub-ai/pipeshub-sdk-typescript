@@ -45,7 +45,14 @@ import { Result } from "../types/fp.js";
  * **Status filters:**
  *
  * Optional `statusFilters` array limits reindex to records in matching indexing states
- * (e.g. `FAILED`, `AUTO_INDEX_OFF`).
+ * (e.g. `FAILED`, `AUTO_INDEX_OFF`, `PASSWORD_PROTECTED`). Any string is accepted.
+ *
+ * **Access:** any role on the record's knowledge base may reindex it, `READER` included.
+ * For a connector record, read access to the record is enough. A record of a disabled
+ * connector is refused with `409`, a record in the trash with `400`.
+ *
+ * **Request:** only `depth` and `statusFilters` are read; other body fields (`force`
+ * included) and any query parameter are ignored. The body is optional.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */

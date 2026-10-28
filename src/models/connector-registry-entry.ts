@@ -32,15 +32,42 @@ export type ConnectorRegistryEntry = {
    * Connector type: the value to pass as `connectorType`
    */
   type?: string | undefined;
+  /**
+   * Product family the connector belongs to
+   */
   appGroup?: string | undefined;
+  /**
+   * Authentication methods an instance of this type can be created with
+   */
   supportedAuthTypes?: Array<ConnectorAuthType> | undefined;
+  /**
+   * One-line description of what the connector syncs
+   */
   appDescription?: string | undefined;
+  /**
+   * Categories the connector is listed under
+   */
   appCategories?: Array<string> | undefined;
+  /**
+   * Path of the connector icon
+   */
   iconPath?: string | undefined;
+  /**
+   * Whether the connector can receive real-time updates
+   */
   supportsRealtime?: boolean | undefined;
+  /**
+   * Whether the connector syncs data into the knowledge base
+   */
   supportsSync?: boolean | undefined;
+  /**
+   * Whether the connector can be used by AI agents
+   */
   supportsAgent?: boolean | undefined;
   documentationLinks?: Array<ConnectorDocumentationLink> | undefined;
+  /**
+   * Whether setting the connector up needs admin rights in the source system
+   */
   isAdminAccessRequired?: boolean | undefined;
   /**
    * For a team connector type, its personal counterpart, if any

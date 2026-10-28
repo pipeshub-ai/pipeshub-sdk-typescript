@@ -7,11 +7,13 @@ Cancellation requested, or the run had already finished.
 ```typescript
 import { CancelAgentConversationStreamResponse } from "@pipeshub-ai/sdk/models/operations";
 
-let value: CancelAgentConversationStreamResponse = {};
+let value: CancelAgentConversationStreamResponse = {
+  cancelled: false,
+};
 ```
 
 ## Fields
 
-| Field              | Type               | Required           | Description        |
-| ------------------ | ------------------ | ------------------ | ------------------ |
-| `cancelled`        | *boolean*          | :heavy_minus_sign: | N/A                |
+| Field                                                                                                                                               | Type                                                                                                                                                | Required                                                                                                                                            | Description                                                                                                                                         |
+| --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `cancelled`                                                                                                                                         | *boolean*                                                                                                                                           | :heavy_check_mark:                                                                                                                                  | `true` when a stop request was issued for `runId`; `false` when the run is unknown to an in-process registry or the request could not be published. |

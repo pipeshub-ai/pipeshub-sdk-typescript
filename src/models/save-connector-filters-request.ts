@@ -5,7 +5,10 @@
 import * as z from "zod/v4-mini";
 
 /**
- * Request to save filter selections for a connector
+ * Request to save filter selections for a connector. Fields other than
+ *
+ * @remarks
+ * `filters` are dropped without an error.
  */
 export type SaveConnectorFiltersRequest = {
   /**

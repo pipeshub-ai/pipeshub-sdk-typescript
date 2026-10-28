@@ -15,11 +15,29 @@ export type ConnectorPagination = {
    * The search term the list was filtered by
    */
   search?: string | null | undefined;
+  /**
+   * Number of items matching the request across all pages
+   */
   totalCount: number;
+  /**
+   * Number of pages at the current `limit`
+   */
   totalPages: number;
+  /**
+   * Whether a page exists before this one
+   */
   hasPrev: boolean;
+  /**
+   * Whether a page exists after this one
+   */
   hasNext: boolean;
+  /**
+   * Previous page number, `null` on the first page
+   */
   prevPage?: number | null | undefined;
+  /**
+   * Next page number, `null` on the last page
+   */
   nextPage?: number | null | undefined;
 };
 

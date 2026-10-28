@@ -34,13 +34,19 @@ import { Result } from "../types/fp.js";
  * @remarks
  * Delete a folder and all its contents.
  *
- * **Required permission:** WRITER or higher
+ * **Required permission:** WRITER or higher. A `READER` gets `403`; a caller with no
+ * role on the knowledge base gets `404`.
  *
  * **Cascade delete:**
  *
- * All subfolders and records within will be permanently deleted.
+ * All subfolders and records within are deleted for good, unless "Move Deleted Records
+ * to the Trash" (Labs flag `ENABLE_SOFT_DELETE`) is on: then they all go to the trash and
+ * can be brought back with `POST /knowledgeBase/record/{folderId}/restore`. The response
+ * is the same in both cases. Known gap: while in the trash, the folder is still listed
+ * in `folders` by `GET /knowledgeBase/{kbId}`, although its records answer `404`.
  *
- * **Warning:** This action is irreversible.
+ * **Request:** `kbId` and `folderId` are only checked to be non-empty; any query string
+ * or body is ignored.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -181,7 +187,8 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.FolderDeleteResponseSchema$inboundSchema),
-    M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([400, 401, 403, 404, 409], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

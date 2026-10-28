@@ -10,6 +10,9 @@ import * as types from "../../types/primitives.js";
 import { SDKValidationError } from "../errors/sdk-validation-error.js";
 
 export type DeleteConnectorInstanceRequest = {
+  /**
+   * Connector instance ID (`_key` of the instance)
+   */
   connectorId: string;
 };
 
@@ -21,11 +24,17 @@ export type DeleteConnectorInstanceStatus = ClosedEnum<
 >;
 
 /**
- * Deletion started
+ * Deletion accepted. The connector is marked `DELETING` and removed in
+ *
+ * @remarks
+ * the background, so a `GET` shortly afterwards answers `404`.
  */
 export type DeleteConnectorInstanceResponse = {
   success: boolean;
   message: string;
+  /**
+   * ID of the connector being deleted
+   */
   connectorId: string;
   status: DeleteConnectorInstanceStatus;
 };

@@ -33,6 +33,12 @@ import { Result } from "../types/fp.js";
  * @remarks
  * Set up or initialize the organization's authentication configuration.
  *
+ * First-run only: when the deployment already has a sign-in configuration the answer is
+ * `200` with `Org config already done`, and the request body is not read at all (a missing
+ * body, missing or mistyped fields and unknown fields are all accepted). The route has no
+ * validator; the body fields below are the ones read when the organization is created.
+ * The query string is not read.
+ *
  * If set, this operation will use {@link Security.bearerAuth} from the global security.
  */
 export function organizationAuthConfigSetUpAuthConfig(
@@ -161,7 +167,7 @@ async function $do(
     | SDKValidationError
   >(
     M.json([200, 201], models.OrgAuthConfigSetupResponse$inboundSchema),
-    M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([400, 403, 404], errors.ErrorResponse$inboundSchema),
     M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

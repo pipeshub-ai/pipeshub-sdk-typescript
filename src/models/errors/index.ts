@@ -3,16 +3,16 @@
  */
 
 export * from "./application-json-error-response.js";
-export * from "./delete-agent-conversation-chat-attachment.js";
 export * from "./error-response.js";
-export * from "./get-available-models-by-type.js";
 export * from "./get-knowledge-hub-child-nodes.js";
 export * from "./get-knowledge-hub-root-nodes.js";
-export * from "./get-search-by-id.js";
 export * from "./http-client-errors.js";
 export * from "./local-fs-desktop-refusal-error.js";
+export * from "./o-auth-bearer-token-error.js";
 export * from "./o-auth-client-management-rate-limit-error.js";
 export * from "./o-auth-error-response.js";
+export * from "./oauth-token.js";
+export * from "./oauth-user-info.js";
 export * from "./pipeshub-default-error.js";
 export * from "./pipeshub-error.js";
 export * from "./rate-limit-error-response.js";
@@ -23,3 +23,4 @@ export * from "./search-history.js";
 export * from "./stream-record-buffer.js";
 export * from "./stream-record-error-response.js";
 export * from "./toggle-connector.js";
+export * from "./upload-agent-conversation-chat-attachments.js";

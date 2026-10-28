@@ -10,15 +10,20 @@ export type GetRecordByIdRequest = {
    */
   recordId: string;
   /**
-   * Optional format to convert the file to (e.g., PDF to text). Supported conversions include PPT to PDF and PPTX to PDF.
+   * Accepted as any single string and not used by this endpoint (no conversion happens here). Sending it more than once is rejected with `400`.
    */
   convertTo?: string | undefined;
+  /**
+   * Registry version number of an artifact record: digits only. Checked and then not used by this endpoint; a value that is not all digits (empty, negative or decimal included) is rejected with `400`.
+   */
+  version?: string | undefined;
 };
 
 /** @internal */
 export type GetRecordByIdRequest$Outbound = {
   recordId: string;
   convertTo?: string | undefined;
+  version?: string | undefined;
 };
 
 /** @internal */
@@ -28,6 +33,7 @@ export const GetRecordByIdRequest$outboundSchema: z.ZodMiniType<
 > = z.object({
   recordId: z.string(),
   convertTo: z.optional(z.string()),
+  version: z.optional(z.string()),
 });
 
 export function getRecordByIdRequestToJSON(

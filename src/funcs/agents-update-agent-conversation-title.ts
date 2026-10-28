@@ -37,10 +37,10 @@ import { Result } from "../types/fp.js";
  * The controller looks up the conversation by `_id`, `orgId`, `userId`,
  * `agentKey`, and `isDeleted: false`.
  *
- * The request body uses the shared title validator (`1..200` chars), and
- * the controller trims the incoming title before saving it. A whitespace-only
- * title can therefore still return HTTP 400 even if the raw string is
- * non-empty.
+ * The request body uses the shared title validator (`1..200` chars) and the
+ * title is trimmed before it is saved; a whitespace-only title is refused
+ * with `400` (`VALIDATION_ERROR`). Unknown body fields are dropped and query
+ * parameters are ignored.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -186,7 +186,8 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.AgentConversationTitleUpdateResponse$inboundSchema),
-    M.jsonErr([400, 401, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

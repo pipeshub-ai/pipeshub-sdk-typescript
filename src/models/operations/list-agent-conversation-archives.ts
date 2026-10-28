@@ -3,46 +3,67 @@
  */
 
 import * as z from "zod/v4-mini";
-import { ClosedEnum } from "../../types/enums.js";
-
-export const ListAgentConversationArchivesSortBy = {
-  CreatedAt: "createdAt",
-  LastActivityAt: "lastActivityAt",
-  Title: "title",
-} as const;
-export type ListAgentConversationArchivesSortBy = ClosedEnum<
-  typeof ListAgentConversationArchivesSortBy
->;
-
-export const ListAgentConversationArchivesSortOrder = {
-  Asc: "asc",
-  Desc: "desc",
-} as const;
-export type ListAgentConversationArchivesSortOrder = ClosedEnum<
-  typeof ListAgentConversationArchivesSortOrder
->;
 
 export type ListAgentConversationArchivesRequest = {
   agentKey: string;
+  /**
+   * 1-based page number. A value below 1 or one that is not a number is
+   *
+   * @remarks
+   * read as `1`; neither is refused.
+   */
   page?: number | undefined;
+  /**
+   * Page size. A value outside 1..100 or one that is not a number is read
+   *
+   * @remarks
+   * as `20`; neither is refused.
+   */
   limit?: number | undefined;
-  sortBy?: ListAgentConversationArchivesSortBy | undefined;
-  sortOrder?: ListAgentConversationArchivesSortOrder | undefined;
+  /**
+   * Sort field. Supported values are `createdAt`, `lastActivityAt` and
+   *
+   * @remarks
+   * `title`; any other value is accepted and ignored (the list is then
+   * sorted by `lastActivityAt`).
+   */
+  sortBy?: string | undefined;
+  /**
+   * Sort direction, `asc` or `desc`; any other value is accepted and
+   *
+   * @remarks
+   * ignored (descending order).
+   */
+  sortOrder?: string | undefined;
+  /**
+   * Case-insensitive search over the conversation title and message
+   *
+   * @remarks
+   * content. A printf-style format specifier (`%s`, `%x`, ...) is refused
+   * with `VALIDATION_ERROR`; markup (HTML tags, `javascript:`, event
+   * handlers) is refused with `HTTP_BAD_REQUEST` by the sanitizer every
+   * route runs.
+   */
   search?: string | undefined;
-  startDate?: Date | undefined;
-  endDate?: Date | undefined;
+  /**
+   * Inclusive lower bound on `createdAt`, as an ISO 8601 date or
+   *
+   * @remarks
+   * date-time. The validator accepts any string JavaScript `Date` can
+   * parse (so also forms like `May 1 2026` or `2026/05/01`); one it
+   * cannot parse returns HTTP 400. An empty value is read as not sent.
+   */
+  startDate?: string | undefined;
+  /**
+   * Inclusive upper bound on `createdAt`, as an ISO 8601 date or
+   *
+   * @remarks
+   * date-time. The validator accepts any string JavaScript `Date` can
+   * parse (so also forms like `May 1 2026` or `2026/05/01`); one it
+   * cannot parse returns HTTP 400. An empty value is read as not sent.
+   */
+  endDate?: string | undefined;
 };
-
-/** @internal */
-export const ListAgentConversationArchivesSortBy$outboundSchema: z.ZodMiniEnum<
-  typeof ListAgentConversationArchivesSortBy
-> = z.enum(ListAgentConversationArchivesSortBy);
-
-/** @internal */
-export const ListAgentConversationArchivesSortOrder$outboundSchema:
-  z.ZodMiniEnum<typeof ListAgentConversationArchivesSortOrder> = z.enum(
-    ListAgentConversationArchivesSortOrder,
-  );
 
 /** @internal */
 export type ListAgentConversationArchivesRequest$Outbound = {
@@ -64,11 +85,11 @@ export const ListAgentConversationArchivesRequest$outboundSchema: z.ZodMiniType<
   agentKey: z.string(),
   page: z._default(z.int(), 1),
   limit: z._default(z.int(), 20),
-  sortBy: z.optional(ListAgentConversationArchivesSortBy$outboundSchema),
-  sortOrder: z.optional(ListAgentConversationArchivesSortOrder$outboundSchema),
+  sortBy: z.optional(z.string()),
+  sortOrder: z.optional(z.string()),
   search: z.optional(z.string()),
-  startDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
-  endDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
+  startDate: z.optional(z.string()),
+  endDate: z.optional(z.string()),
 });
 
 export function listAgentConversationArchivesRequestToJSON(

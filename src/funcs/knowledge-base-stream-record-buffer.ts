@@ -35,7 +35,10 @@ import { Result } from "../types/fp.js";
  *
  * **Overview:**
  *
- * Returns the raw file content with appropriate `Content-Type` and `Content-Disposition` headers for download or inline viewing.
+ * Returns the stored file's bytes with the file's own `Content-Type` (for an uploaded
+ * file, the MIME type it was uploaded with, followed by `; charset=utf-8`, for example
+ * `text/plain; charset=utf-8` or `application/json; charset=utf-8`). No
+ * `Content-Disposition` header is sent for uploaded files.
  *
  * **Use cases:**
  *
@@ -45,7 +48,20 @@ import { Result } from "../types/fp.js";
  *
  * **Format conversion:**
  *
- * Use the `convertTo` parameter to convert between formats (e.g. DOCX to PDF).
+ * `convertTo=application/pdf` asks for a PDF rendering of documents that can be
+ * converted. Any other value, and the conversion request for a plain-text file, is
+ * ignored: the original file is returned.
+ *
+ * **Access:** the caller needs access to the record (any role on its knowledge base).
+ * Without it, and for a record in the trash, the answer is `403`. An unknown record, or
+ * an id that is not a record (a knowledge base id), is `404`. A folder has no content:
+ * the answer is `502`.
+ *
+ * **Errors** that come from the connector service are relayed with its status as
+ * `{"error": "<message>"}` (`StreamRecordErrorResponse`); errors raised by the gateway
+ * itself (`400`, `401`, scope `403`, malformed body `500`) use `ErrorResponse`.
+ *
+ * **Request:** unknown query parameters are ignored.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -59,6 +75,7 @@ export function knowledgeBaseStreamRecordBuffer(
     | errors.ErrorResponse
     | errors.Forbidden
     | errors.StreamRecordErrorResponse
+    | errors.StreamRecordBufferInternalServerError
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -87,6 +104,7 @@ async function $do(
       | errors.ErrorResponse
       | errors.Forbidden
       | errors.StreamRecordErrorResponse
+      | errors.StreamRecordBufferInternalServerError
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -185,6 +203,7 @@ async function $do(
     | errors.ErrorResponse
     | errors.Forbidden
     | errors.StreamRecordErrorResponse
+    | errors.StreamRecordBufferInternalServerError
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -202,7 +221,8 @@ async function $do(
     M.jsonErr([400, 401], errors.ErrorResponse$inboundSchema),
     M.jsonErr(403, errors.Forbidden$inboundSchema),
     M.jsonErr([404, 409], errors.StreamRecordErrorResponse$inboundSchema),
-    M.jsonErr(500, errors.StreamRecordErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.StreamRecordBufferInternalServerError$inboundSchema),
+    M.jsonErr(502, errors.StreamRecordErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

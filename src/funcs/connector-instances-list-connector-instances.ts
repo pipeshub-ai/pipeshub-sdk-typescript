@@ -35,7 +35,8 @@ import { Result } from "../types/fp.js";
  * <b>Overview:</b><br>
  * Returns instances created by users, filtered by scope and permissions.
  * Team-scope connectors are visible to all org users. Personal connectors
- * are only visible to their creators.<br><br>
+ * are only visible to their creators, not even to admins. Knowledge bases
+ * (instances of type <code>KB</code>) are not listed here.<br><br>
  * <b>Instance States:</b><br>
  * <ul>
  * <li><b>isConfigured:</b> All required settings are complete</li>
@@ -188,6 +189,7 @@ async function $do(
   >(
     M.json(200, operations.ListConnectorInstancesResponse$inboundSchema),
     M.jsonErr([400, 401, 403], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

@@ -42,6 +42,10 @@ import { Result } from "../types/fp.js";
  * Requires org-admin privileges (`userAdminCheck`): a non-admin caller
  * gets `403` (`ForbiddenError`, message
  * "You need admin access to do this. Ask an admin in your organisation.").
+ * The admin check runs before the query is validated, so a non-admin gets
+ * `403` even for an invalid `page` or `limit`. Query parameters other than
+ * `page` and `limit` are ignored. A page past the end answers `200` with an
+ * empty `data` array.
  *
  * If set, this operation will use {@link Security.bearerAuth} from the global security.
  */
@@ -54,6 +58,7 @@ export function personalAccessTokensAdminListPersonalAccessTokens(
     models.AdminPatListResponse,
     | errors.ApplicationJsonErrorResponse
     | errors.OAuthClientManagementRateLimitError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -81,6 +86,7 @@ async function $do(
       models.AdminPatListResponse,
       | errors.ApplicationJsonErrorResponse
       | errors.OAuthClientManagementRateLimitError
+      | errors.ErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -175,6 +181,7 @@ async function $do(
     models.AdminPatListResponse,
     | errors.ApplicationJsonErrorResponse
     | errors.OAuthClientManagementRateLimitError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -190,6 +197,7 @@ async function $do(
       errors.ApplicationJsonErrorResponse$inboundSchema,
     ),
     M.jsonErr(429, errors.OAuthClientManagementRateLimitError$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

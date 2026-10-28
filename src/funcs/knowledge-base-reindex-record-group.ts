@@ -32,15 +32,26 @@ import { Result } from "../types/fp.js";
  * Reindex record group
  *
  * @remarks
- * Trigger reindexing for all records in a folder or knowledge base.
+ * Trigger reindexing for all records in a record group.
  *
  * **Overview:**
  *
- * Batch reindex operation for entire containers. The `recordGroupId` can be a folder ID or KB ID.
+ * Batch reindex operation for a connector's container (a drive, a space, a channel, a
+ * crawled site). Record groups are written by connector syncs only: a knowledge base id
+ * or a knowledge base folder id is not a record group and is answered `404` (reindex
+ * those with `POST /knowledgeBase/reindex/record/{recordId}` and a depth).
  *
  * **Status filters:**
  *
- * Optional `statusFilters` limit which child records are queued (e.g. failed-only or manual-indexing).
+ * Optional `statusFilters` limit which child records are queued (e.g. failed-only or
+ * manual-indexing). Any string is accepted.
+ *
+ * **Access:** the caller needs access to the record group (an organization-wide
+ * connector gives it to every member; a personal one only to its owner); without it the
+ * answer is `403`. A record group of a disabled connector is refused with `409`.
+ *
+ * **Request:** only `depth` and `statusFilters` are read; other body fields (`force`
+ * included) and any query parameter are ignored. The body is optional.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */

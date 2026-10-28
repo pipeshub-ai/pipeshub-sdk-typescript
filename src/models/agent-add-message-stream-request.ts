@@ -91,6 +91,29 @@ export type AgentAddMessageStreamRequestKeywordSearchBudget = ClosedEnum<
 >;
 
 /**
+ * Reasoning effort for this turn, for models that support it. Stored on
+ *
+ * @remarks
+ * the conversation's model info and forwarded to the AI backend.
+ */
+export const AgentAddMessageStreamRequestReasoningEffort = {
+  None: "none",
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Max: "max",
+} as const;
+/**
+ * Reasoning effort for this turn, for models that support it. Stored on
+ *
+ * @remarks
+ * the conversation's model info and forwarded to the AI backend.
+ */
+export type AgentAddMessageStreamRequestReasoningEffort = ClosedEnum<
+  typeof AgentAddMessageStreamRequestReasoningEffort
+>;
+
+/**
  * Request body for `POST /agents/{agentKey}/conversations/{conversationId}/messages/stream`.
  *
  * @remarks
@@ -140,7 +163,8 @@ export type AgentAddMessageStreamRequest = {
    * AI model configuration id override for this turn. Omit to use the
    *
    * @remarks
-   * agent's default model.
+   * agent's default model. A key that names no configured model is not
+   * refused: the turn runs on the organization's default model.
    */
   modelKey?: string | undefined;
   /**
@@ -223,6 +247,13 @@ export type AgentAddMessageStreamRequest = {
    * {runId}` while the stream is still generating.
    */
   runId?: string | undefined;
+  /**
+   * Reasoning effort for this turn, for models that support it. Stored on
+   *
+   * @remarks
+   * the conversation's model info and forwarded to the AI backend.
+   */
+  reasoningEffort?: AgentAddMessageStreamRequestReasoningEffort | undefined;
 };
 
 /** @internal */
@@ -239,6 +270,12 @@ export const AgentAddMessageStreamRequestProtocol$outboundSchema: z.ZodMiniEnum<
 export const AgentAddMessageStreamRequestKeywordSearchBudget$outboundSchema:
   z.ZodMiniEnum<typeof AgentAddMessageStreamRequestKeywordSearchBudget> = z
     .enum(AgentAddMessageStreamRequestKeywordSearchBudget);
+
+/** @internal */
+export const AgentAddMessageStreamRequestReasoningEffort$outboundSchema:
+  z.ZodMiniEnum<typeof AgentAddMessageStreamRequestReasoningEffort> = z.enum(
+    AgentAddMessageStreamRequestReasoningEffort,
+  );
 
 /** @internal */
 export type AgentAddMessageStreamRequest$Outbound = {
@@ -259,6 +296,7 @@ export type AgentAddMessageStreamRequest$Outbound = {
   keywordSearchBudget?: string | undefined;
   toolApproval?: ToolApprovalAnswer$Outbound | undefined;
   runId?: string | undefined;
+  reasoningEffort?: string | undefined;
 };
 
 /** @internal */
@@ -285,6 +323,9 @@ export const AgentAddMessageStreamRequest$outboundSchema: z.ZodMiniType<
   ),
   toolApproval: z.optional(ToolApprovalAnswer$outboundSchema),
   runId: z.optional(z.string()),
+  reasoningEffort: z.optional(
+    AgentAddMessageStreamRequestReasoningEffort$outboundSchema,
+  ),
 });
 
 export function agentAddMessageStreamRequestToJSON(

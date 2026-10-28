@@ -17,12 +17,45 @@ import {
 } from "./stream-record-error-response.js";
 
 /**
- * Forbidden. Returned either when the OAuth token is missing the required
+ * Internal streaming failure, downstream conversion failure, or connector/backend
  *
  * @remarks
- * `kb:read` scope or when the authenticated user does not have access to the record.
+ * error proxied by the gateway.
+ *
+ * A JSON body larger than 10 MB, or a form-encoded body larger than 100 KB or with more than 1000 fields, is answered `413` by the app-wide body parsers instead, also before authentication.
+ */
+export type StreamRecordBufferInternalServerError =
+  | StreamRecordErrorResponse
+  | ErrorResponse;
+
+/**
+ * Forbidden. Returned when the OAuth token is missing the required `kb:read` scope
+ *
+ * @remarks
+ * (`ErrorResponse`), or as `{"error": "You do not have permission to access this record"}`
+ * when the caller has no access to the record or the record is in the trash.
  */
 export type Forbidden = ErrorResponse | StreamRecordErrorResponse;
+
+/** @internal */
+export const StreamRecordBufferInternalServerError$inboundSchema: z.ZodMiniType<
+  StreamRecordBufferInternalServerError,
+  unknown
+> = smartUnion([
+  StreamRecordErrorResponse$inboundSchema,
+  ErrorResponse$inboundSchema,
+]);
+
+export function streamRecordBufferInternalServerErrorFromJSON(
+  jsonString: string,
+): SafeParseResult<StreamRecordBufferInternalServerError, SDKValidationError> {
+  return safeParse(
+    jsonString,
+    (x) =>
+      StreamRecordBufferInternalServerError$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'StreamRecordBufferInternalServerError' from JSON`,
+  );
+}
 
 /** @internal */
 export const Forbidden$inboundSchema: z.ZodMiniType<Forbidden, unknown> =

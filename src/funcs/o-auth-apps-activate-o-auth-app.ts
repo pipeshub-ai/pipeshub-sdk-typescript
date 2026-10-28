@@ -34,7 +34,7 @@ import { Result } from "../types/fp.js";
  * @remarks
  * Moves a suspended OAuth app back to `status: "active"`, restoring its ability to authenticate and obtain new tokens via `POST /oauth2/token`.
  *
- * A revoked app cannot be reactivated (returns `400`); the only path back is to register a new app. Activating an app that is already active also returns `400`.
+ * Activating an app that is already active returns `400`. A deleted app (the only way an app becomes `revoked`) is hidden from every lookup, so activating it returns `404`, not the service's "Cannot activate a revoked app" `400`; the only path back is to register a new app.
  *
  * Creator-only.
  *
@@ -49,6 +49,7 @@ export function oAuthAppsActivateOAuthApp(
     models.ActivateOAuthAppResponse,
     | errors.ApplicationJsonErrorResponse
     | errors.OAuthClientManagementRateLimitError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -76,6 +77,7 @@ async function $do(
       models.ActivateOAuthAppResponse,
       | errors.ApplicationJsonErrorResponse
       | errors.OAuthClientManagementRateLimitError
+      | errors.ErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -165,6 +167,7 @@ async function $do(
     models.ActivateOAuthAppResponse,
     | errors.ApplicationJsonErrorResponse
     | errors.OAuthClientManagementRateLimitError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -180,6 +183,7 @@ async function $do(
       errors.ApplicationJsonErrorResponse$inboundSchema,
     ),
     M.jsonErr(429, errors.OAuthClientManagementRateLimitError$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

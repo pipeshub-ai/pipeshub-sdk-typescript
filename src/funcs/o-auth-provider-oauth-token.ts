@@ -32,12 +32,15 @@ import { Result } from "../types/fp.js";
  * @remarks
  * OAuth 2.0 Token Endpoint (RFC 6749 Section 4.1.3).
  *
- * Exchanges an authorization code, client credentials, refresh token, or
+ * Exchanges an authorization code, client credentials, refresh token, device code or
  * service token for access tokens.
+ * Successful responses carry `Cache-Control: no-store` and `Pragma: no-cache`.
  *
  * **Grant Types:**
  * - `authorization_code`: Exchange auth code for tokens (user-based)
  * - `client_credentials`: Get tokens for machine-to-machine auth
+ * - `urn:ietf:params:oauth:grant-type:device_code`: Poll for the tokens of a device authorization
+ *   (RFC 8628); answered `400` with `authorization_pending` until the user approves
  * - `refresh_token`: Get new access token using refresh token. The refresh token must have been issued to the presenting `client_id`; one issued to another client is rejected with `400 invalid_grant` and is left untouched (not rotated, not revoked).
  * - `urn:ietf:params:oauth:grant-type:token-exchange`: Service-account
  *   delegation (RFC 8693). A service account exchanges its own token for
@@ -51,7 +54,7 @@ import { Result } from "../types/fp.js";
  *   the cause is recorded in the delegation log, which only an
  *   administrator can read.
  *
- * For **`client_credentials`**, access tokens represent the **service account the app is pointed at** (`tokenIdentityUserId`), or the **OAuth app creator** for an app registered before that was required and never bound. The JWT may encode **`userId === client_id`**; the **Node API gateway** loads the application record and resolves the identity from it, treating the **`createdBy`** claim as a cross-check — see **OAuth Provider** tag.
+ * For **`client_credentials`**, access tokens represent the **service account the app is pointed at** (`tokenIdentityUserId`), or the **OAuth app creator** for an app registered before that was required and never bound. The JWT may encode **`userId === client_id`**; the **Node API gateway** loads the application record on every request and resolves the identity from it, treating the **`createdBy`** claim as a cross-check and refusing a token whose claim no longer matches it — see **OAuth Provider** tag.
  *
  * **Client Authentication:**
  * Can be provided via:
@@ -69,8 +72,10 @@ export function oAuthProviderOauthToken(
 ): APIPromise<
   Result<
     models.OAuthTokenResponse,
+    | errors.BadRequest
     | errors.OAuthErrorResponse
     | errors.OAuthClientManagementRateLimitError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -96,8 +101,10 @@ async function $do(
   [
     Result<
       models.OAuthTokenResponse,
+      | errors.BadRequest
       | errors.OAuthErrorResponse
       | errors.OAuthClientManagementRateLimitError
+      | errors.ErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -175,8 +182,10 @@ async function $do(
 
   const [result] = await M.match<
     models.OAuthTokenResponse,
+    | errors.BadRequest
     | errors.OAuthErrorResponse
     | errors.OAuthClientManagementRateLimitError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -187,8 +196,10 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.OAuthTokenResponse$inboundSchema),
-    M.jsonErr([400, 401], errors.OAuthErrorResponse$inboundSchema),
+    M.jsonErr(400, errors.BadRequest$inboundSchema),
+    M.jsonErr(401, errors.OAuthErrorResponse$inboundSchema),
     M.jsonErr(429, errors.OAuthClientManagementRateLimitError$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

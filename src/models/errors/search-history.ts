@@ -13,7 +13,7 @@ export type SearchHistoryInternalServerErrorData = {
   /**
    * Error payload.
    */
-  error: operations.SearchHistoryInternalServerErrorError;
+  error: operations.InternalServerErrorError;
 };
 
 /**
@@ -23,7 +23,7 @@ export class SearchHistoryInternalServerError extends PipeshubError {
   /**
    * Error payload.
    */
-  error: operations.SearchHistoryInternalServerErrorError;
+  error: operations.InternalServerErrorError;
 
   /** The original data that was passed to this error instance. */
   data$: SearchHistoryInternalServerErrorData;
@@ -45,27 +45,27 @@ export class SearchHistoryInternalServerError extends PipeshubError {
 /**
  * Error envelope for a failed request.
  */
-export type SearchHistoryForbiddenErrorData = {
+export type ForbiddenErrorData = {
   /**
    * Error payload.
    */
-  error: operations.SearchHistoryForbiddenError;
+  error: operations.ForbiddenError;
 };
 
 /**
  * Error envelope for a failed request.
  */
-export class SearchHistoryForbiddenError extends PipeshubError {
+export class ForbiddenError extends PipeshubError {
   /**
    * Error payload.
    */
-  error: operations.SearchHistoryForbiddenError;
+  error: operations.ForbiddenError;
 
   /** The original data that was passed to this error instance. */
-  data$: SearchHistoryForbiddenErrorData;
+  data$: ForbiddenErrorData;
 
   constructor(
-    err: SearchHistoryForbiddenErrorData,
+    err: ForbiddenErrorData,
     httpMeta: { response: Response; request: Request; body: string },
   ) {
     const message = err.error?.message
@@ -74,34 +74,34 @@ export class SearchHistoryForbiddenError extends PipeshubError {
     this.data$ = err;
     this.error = err.error;
 
-    this.name = "SearchHistoryForbiddenError";
+    this.name = "ForbiddenError";
   }
 }
 
 /**
  * Error envelope for a failed request.
  */
-export type SearchHistoryUnauthorizedErrorData = {
+export type UnauthorizedErrorData = {
   /**
    * Error payload.
    */
-  error: operations.SearchHistoryUnauthorizedError;
+  error: operations.UnauthorizedError;
 };
 
 /**
  * Error envelope for a failed request.
  */
-export class SearchHistoryUnauthorizedError extends PipeshubError {
+export class UnauthorizedError extends PipeshubError {
   /**
    * Error payload.
    */
-  error: operations.SearchHistoryUnauthorizedError;
+  error: operations.UnauthorizedError;
 
   /** The original data that was passed to this error instance. */
-  data$: SearchHistoryUnauthorizedErrorData;
+  data$: UnauthorizedErrorData;
 
   constructor(
-    err: SearchHistoryUnauthorizedErrorData,
+    err: UnauthorizedErrorData,
     httpMeta: { response: Response; request: Request; body: string },
   ) {
     const message = err.error?.message
@@ -110,34 +110,34 @@ export class SearchHistoryUnauthorizedError extends PipeshubError {
     this.data$ = err;
     this.error = err.error;
 
-    this.name = "SearchHistoryUnauthorizedError";
+    this.name = "UnauthorizedError";
   }
 }
 
 /**
  * Error envelope for a failed request.
  */
-export type SearchHistoryBadRequestErrorData = {
+export type BadRequestErrorData = {
   /**
    * Error payload.
    */
-  error: operations.SearchHistoryBadRequestError;
+  error: operations.BadRequestError;
 };
 
 /**
  * Error envelope for a failed request.
  */
-export class SearchHistoryBadRequestError extends PipeshubError {
+export class BadRequestError extends PipeshubError {
   /**
    * Error payload.
    */
-  error: operations.SearchHistoryBadRequestError;
+  error: operations.BadRequestError;
 
   /** The original data that was passed to this error instance. */
-  data$: SearchHistoryBadRequestErrorData;
+  data$: BadRequestErrorData;
 
   constructor(
-    err: SearchHistoryBadRequestErrorData,
+    err: BadRequestErrorData,
     httpMeta: { response: Response; request: Request; body: string },
   ) {
     const message = err.error?.message
@@ -146,7 +146,7 @@ export class SearchHistoryBadRequestError extends PipeshubError {
     this.data$ = err;
     this.error = err.error;
 
-    this.name = "SearchHistoryBadRequestError";
+    this.name = "BadRequestError";
   }
 }
 
@@ -156,9 +156,7 @@ export const SearchHistoryInternalServerError$inboundSchema: z.ZodMiniType<
   unknown
 > = z.pipe(
   z.object({
-    error: z.lazy(() =>
-      operations.SearchHistoryInternalServerErrorError$inboundSchema
-    ),
+    error: z.lazy(() => operations.InternalServerErrorError$inboundSchema),
     request$: z.custom<Request>(x => x instanceof Request),
     response$: z.custom<Response>(x => x instanceof Response),
     body$: z.string(),
@@ -173,18 +171,18 @@ export const SearchHistoryInternalServerError$inboundSchema: z.ZodMiniType<
 );
 
 /** @internal */
-export const SearchHistoryForbiddenError$inboundSchema: z.ZodMiniType<
-  SearchHistoryForbiddenError,
+export const ForbiddenError$inboundSchema: z.ZodMiniType<
+  ForbiddenError,
   unknown
 > = z.pipe(
   z.object({
-    error: z.lazy(() => operations.SearchHistoryForbiddenError$inboundSchema),
+    error: z.lazy(() => operations.ForbiddenError$inboundSchema),
     request$: z.custom<Request>(x => x instanceof Request),
     response$: z.custom<Response>(x => x instanceof Response),
     body$: z.string(),
   }),
   z.transform((v) => {
-    return new SearchHistoryForbiddenError(v, {
+    return new ForbiddenError(v, {
       request: v.request$,
       response: v.response$,
       body: v.body$,
@@ -193,20 +191,18 @@ export const SearchHistoryForbiddenError$inboundSchema: z.ZodMiniType<
 );
 
 /** @internal */
-export const SearchHistoryUnauthorizedError$inboundSchema: z.ZodMiniType<
-  SearchHistoryUnauthorizedError,
+export const UnauthorizedError$inboundSchema: z.ZodMiniType<
+  UnauthorizedError,
   unknown
 > = z.pipe(
   z.object({
-    error: z.lazy(() =>
-      operations.SearchHistoryUnauthorizedError$inboundSchema
-    ),
+    error: z.lazy(() => operations.UnauthorizedError$inboundSchema),
     request$: z.custom<Request>(x => x instanceof Request),
     response$: z.custom<Response>(x => x instanceof Response),
     body$: z.string(),
   }),
   z.transform((v) => {
-    return new SearchHistoryUnauthorizedError(v, {
+    return new UnauthorizedError(v, {
       request: v.request$,
       response: v.response$,
       body: v.body$,
@@ -215,18 +211,18 @@ export const SearchHistoryUnauthorizedError$inboundSchema: z.ZodMiniType<
 );
 
 /** @internal */
-export const SearchHistoryBadRequestError$inboundSchema: z.ZodMiniType<
-  SearchHistoryBadRequestError,
+export const BadRequestError$inboundSchema: z.ZodMiniType<
+  BadRequestError,
   unknown
 > = z.pipe(
   z.object({
-    error: z.lazy(() => operations.SearchHistoryBadRequestError$inboundSchema),
+    error: z.lazy(() => operations.BadRequestError$inboundSchema),
     request$: z.custom<Request>(x => x instanceof Request),
     response$: z.custom<Response>(x => x instanceof Response),
     body$: z.string(),
   }),
   z.transform((v) => {
-    return new SearchHistoryBadRequestError(v, {
+    return new BadRequestError(v, {
       request: v.request$,
       response: v.response$,
       body: v.body$,

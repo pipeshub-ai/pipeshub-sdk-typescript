@@ -24,6 +24,7 @@ import {
   RequestTimeoutError,
   UnexpectedClientError,
 } from "../models/errors/http-client-errors.js";
+import * as errors from "../models/errors/index.js";
 import { PipeshubError } from "../models/errors/pipeshub-error.js";
 import { ResponseValidationError } from "../models/errors/response-validation-error.js";
 import { SDKValidationError } from "../models/errors/sdk-validation-error.js";
@@ -38,9 +39,9 @@ import { isReadableStream } from "../types/streams.js";
  * Upload agent chat attachments
  *
  * @remarks
- * Multipart upload of PDF, JPEG, or PNG files for agent chat. Same limits as assistant
- * chat (`POST /conversations/attachments/upload`): up to 10 files, 5 MiB each. Proxies to
- * the AI backend. Optional `conversationId` associates uploads with an existing agent thread.
+ * Multipart upload of chat attachment files (the MIME types listed on `files`) for
+ * agent chat: up to 10 files, 5 MiB each. Proxies to the AI backend. Optional
+ * `conversationId` associates uploads with an existing agent thread.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -51,6 +52,8 @@ export function agentsUploadAgentConversationChatAttachments(
 ): APIPromise<
   Result<
     models.ChatAttachmentUploadResponse,
+    | errors.ErrorResponse
+    | errors.UploadAgentConversationChatAttachmentsUnprocessableEntityError
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -76,6 +79,8 @@ async function $do(
   [
     Result<
       models.ChatAttachmentUploadResponse,
+      | errors.ErrorResponse
+      | errors.UploadAgentConversationChatAttachmentsUnprocessableEntityError
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -193,8 +198,14 @@ async function $do(
   }
   const response = doResult.value;
 
+  const responseFields = {
+    HttpMeta: { Response: response, Request: req },
+  };
+
   const [result] = await M.match<
     models.ChatAttachmentUploadResponse,
+    | errors.ErrorResponse
+    | errors.UploadAgentConversationChatAttachmentsUnprocessableEntityError
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -205,9 +216,16 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.ChatAttachmentUploadResponse$inboundSchema),
-    M.fail([400, 401, 403, "4XX"]),
-    M.fail([500, "5XX"]),
-  )(response, req);
+    M.jsonErr([400, 401, 403], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(
+      422,
+      errors
+        .UploadAgentConversationChatAttachmentsUnprocessableEntityError$inboundSchema,
+    ),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
+    M.fail("4XX"),
+    M.fail("5XX"),
+  )(response, req, { extraFields: responseFields });
   if (!result.ok) {
     return [result, { status: "complete", request: req, response }];
   }

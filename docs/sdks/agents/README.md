@@ -48,6 +48,7 @@ The Node route supports only these query params: `page`, `limit`, `search`,
 
 The Python backend also understands `isDeleted`, but this gateway route
 does not forward it, so it is not part of the public API contract here.
+Any other query parameter is ignored, not refused.
 
 
 ### Example Usage
@@ -117,7 +118,8 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 400, 401                    | application/json            |
+| errors.ErrorResponse        | 400, 401, 403               | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## createAgent
@@ -212,6 +214,8 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 401, 403               | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## getAgent
@@ -221,7 +225,11 @@ Retrieve agent details by its unique key.
 **Gateway not-found behavior:**
 Unknown `agentKey`, lookup after soft-delete, and other AI-backend failures
 that return 404 from the Python query service are surfaced by the Node
-gateway as **HTTP 404** with an `ErrorResponse` body.
+gateway as **HTTP 404** with an `ErrorResponse` body. An agent the caller
+has no access to (another user's agent that is not shared) is also a
+`404`, not a `403`.
+
+The route reads no query parameter; any that is sent is ignored.
 
 
 ### Example Usage
@@ -308,7 +316,9 @@ Apply a partial update to an existing agent configuration.
 The Node gateway validates the request body via Zod middleware before
 forwarding to the Python agent service. The `agentKey` path param and
 the request body are both validated. Query parameters are ignored by
-the controller.
+the controller, and body fields the validator does not know are dropped
+rather than refused. The body may be omitted: an empty update succeeds
+and changes nothing.
 
 **Update semantics**
 
@@ -428,8 +438,11 @@ Only the agent owner may delete (`can_delete` on the permission check).
 All conversations with this agent will become inaccessible.
 
 **Gateway not-found behavior:**
-Unknown `agentKey`, deleting an already-deleted agent, and `GET /agents/{agentKey}`
+Unknown `agentKey`, deleting an already-deleted agent, deleting another
+user's agent that is not shared with the caller, and `GET /agents/{agentKey}`
 after delete return **HTTP 404** with an `ErrorResponse` body.
+
+The route reads neither a query nor a body; anything sent is ignored.
 
 
 ### Example Usage
@@ -503,7 +516,7 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 401, 404                    | application/json            |
+| errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
 | errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
@@ -581,11 +594,19 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 401, 403               | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## listAgentConversationArchives
 
-Paginated list of archived conversations for the given agent key.
+Paginated list of the caller's archived conversations for the given agent
+key. The `agentKey` is matched against the stored conversations only; the
+agent itself is not looked up.
+
+The query is strict: a parameter not listed here is refused with `400`
+(`VALIDATION_ERROR` on `query`, "These fields aren't accepted here").
+
 
 ### Example Usage
 
@@ -658,14 +679,15 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 400                         | application/json            |
+| errors.ErrorResponse        | 400, 401, 403               | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## uploadAgentConversationChatAttachments
 
-Multipart upload of PDF, JPEG, or PNG files for agent chat. Same limits as assistant
-chat (`POST /conversations/attachments/upload`): up to 10 files, 5 MiB each. Proxies to
-the AI backend. Optional `conversationId` associates uploads with an existing agent thread.
+Multipart upload of chat attachment files (the MIME types listed on `files`) for
+agent chat: up to 10 files, 5 MiB each. Proxies to the AI backend. Optional
+`conversationId` associates uploads with an existing agent thread.
 
 
 ### Example Usage
@@ -743,9 +765,12 @@ run();
 
 ### Errors
 
-| Error Type                  | Status Code                 | Content Type                |
-| --------------------------- | --------------------------- | --------------------------- |
-| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
+| Error Type                                                            | Status Code                                                           | Content Type                                                          |
+| --------------------------------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| errors.ErrorResponse                                                  | 400, 401, 403                                                         | application/json                                                      |
+| errors.UploadAgentConversationChatAttachmentsUnprocessableEntityError | 422                                                                   | application/json                                                      |
+| errors.ErrorResponse                                                  | 500                                                                   | application/json                                                      |
+| errors.PipeshubDefaultError                                           | 4XX, 5XX                                                              | \*/\*                                                                 |
 
 ## deleteAgentConversationChatAttachment
 
@@ -830,10 +855,11 @@ run();
 
 ### Errors
 
-| Error Type                                                  | Status Code                                                 | Content Type                                                |
-| ----------------------------------------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------- |
-| errors.DeleteAgentConversationChatAttachmentBadRequestError | 400                                                         | application/json                                            |
-| errors.PipeshubDefaultError                                 | 4XX, 5XX                                                    | \*/\*                                                       |
+| Error Type                  | Status Code                 | Content Type                |
+| --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 401, 403               | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
+| errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## streamAgentConversation
 
@@ -1021,6 +1047,8 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 401, 403, 404, 409     | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## streamAgentConversationMessage
@@ -1196,6 +1224,8 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 401, 403               | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## regenerateAgentConversationMessage
@@ -1344,6 +1374,8 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 401, 403               | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## forkAgentConversation
@@ -1430,6 +1462,8 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## cancelAgentConversationStream
@@ -1441,8 +1475,16 @@ or `.../messages/stream` run that is still generating, using the
 Same synchronous JSON ack contract as the assistant
 `POST /conversations/{conversationId}/cancel` — both forward to the
 same backend cancellation endpoint, since the run registry is keyed
-by `runId` alone. `{ cancelled: false }` covers a `runId` that
-already finished or was never registered.
+by `runId` alone.
+
+`cancelled` reports whether a stop request was issued, not whether a
+run was actually stopped. With the default shared (key-value backed)
+run registry, a `runId` that the answering worker does not hold is
+published for whichever worker owns it, and the answer is
+`{ cancelled: true }` even when the run already finished or was
+never registered. `{ cancelled: false }` is returned for such a
+`runId` only when the registry is in-process, or when the stop
+request could not be published.
 
 `runId` must belong to a run started on THIS `conversationId` — a
 `runId` that exists but was registered under a different
@@ -1529,6 +1571,8 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## updateAgentConversationMessageFeedback
@@ -1616,6 +1660,8 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## addAgentConversationMessage
@@ -1806,14 +1852,16 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 400, 404                    | application/json            |
-| errors.ErrorResponse        | 424                         | application/json            |
-| errors.ErrorResponse        | 500                         | application/json            |
+| errors.ErrorResponse        | 400, 401, 403               | application/json            |
+| errors.ErrorResponse        | 404, 424                    | application/json            |
+| errors.ErrorResponse        | 500, 503, 504               | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## archiveAgentConversation
 
-Marks the conversation as archived for the authenticated owner.
+Marks the conversation as archived for the authenticated owner. The route
+reads no query parameter and no body; anything sent is ignored.
+
 
 ### Example Usage
 
@@ -1888,12 +1936,15 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 400, 401, 404               | application/json            |
+| errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## unarchiveAgentConversation
 
-Restores an archived agent conversation to the active list.
+Restores an archived agent conversation to the active list. The route
+reads no query parameter and no body; anything sent is ignored.
+
 
 ### Example Usage
 
@@ -1968,7 +2019,8 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 400, 401, 404               | application/json            |
+| errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## updateAgentConversationTitle
@@ -1978,10 +2030,10 @@ Updates the display title for an agent conversation owned by the caller.
 The controller looks up the conversation by `_id`, `orgId`, `userId`,
 `agentKey`, and `isDeleted: false`.
 
-The request body uses the shared title validator (`1..200` chars), and
-the controller trims the incoming title before saving it. A whitespace-only
-title can therefore still return HTTP 400 even if the raw string is
-non-empty.
+The request body uses the shared title validator (`1..200` chars) and the
+title is trimmed before it is saved; a whitespace-only title is refused
+with `400` (`VALIDATION_ERROR`). Unknown body fields are dropped and query
+parameters are ignored.
 
 
 ### Example Usage
@@ -2063,7 +2115,8 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 400, 401, 404               | application/json            |
+| errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## deleteAgentConversationById
@@ -2160,7 +2213,7 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 400, 401                    | application/json            |
+| errors.ErrorResponse        | 400, 401, 403               | application/json            |
 | errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
@@ -2251,6 +2304,8 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
+| errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## listAgentConversations
@@ -2334,7 +2389,8 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 400, 401                    | application/json            |
+| errors.ErrorResponse        | 400, 401, 403               | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## createAgentConversation
@@ -2536,7 +2592,7 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 400                         | application/json            |
-| errors.ErrorResponse        | 424                         | application/json            |
-| errors.ErrorResponse        | 500                         | application/json            |
+| errors.ErrorResponse        | 400, 401, 403, 409          | application/json            |
+| errors.ErrorResponse        | 404, 424                    | application/json            |
+| errors.ErrorResponse        | 500, 503, 504               | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |

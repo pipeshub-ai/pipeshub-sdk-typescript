@@ -32,7 +32,12 @@ import { Result } from "../types/fp.js";
  * List archived conversations for an agent
  *
  * @remarks
- * Paginated list of archived conversations for the given agent key.
+ * Paginated list of the caller's archived conversations for the given agent
+ * key. The `agentKey` is matched against the stored conversations only; the
+ * agent itself is not looked up.
+ *
+ * The query is strict: a parameter not listed here is refused with `400`
+ * (`VALIDATION_ERROR` on `query`, "These fields aren't accepted here").
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -184,8 +189,9 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.AgentArchivedConversationListResponse$inboundSchema),
-    M.jsonErr(400, errors.ErrorResponse$inboundSchema),
-    M.fail([401, "4XX"]),
+    M.jsonErr([400, 401, 403], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
+    M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });
   if (!result.ok) {

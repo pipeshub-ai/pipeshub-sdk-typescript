@@ -11,7 +11,10 @@ import * as models from "../index.js";
 
 export type ResyncConnectorRequest = {
   /**
-   * Connector instance ID
+   * Connector instance ID. An ID that decodes to a path separator or
+   *
+   * @remarks
+   * another unsafe segment is refused with `400` before the token is checked.
    */
   connectorId: string;
   /**
@@ -24,6 +27,9 @@ export type ResyncConnectorRequest = {
  * Acknowledgement that the sync was queued.
  */
 export type ResyncConnectorResyncConnectorResponse = {
+  /**
+   * Whether the resync event was published
+   */
   success: boolean;
 };
 

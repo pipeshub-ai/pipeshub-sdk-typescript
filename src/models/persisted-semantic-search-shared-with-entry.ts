@@ -3,6 +3,7 @@
  */
 
 import * as z from "zod/v4-mini";
+import { remap as remap$ } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
 import * as openEnums from "../types/enums.js";
 import { OpenEnum } from "../types/enums.js";
@@ -10,22 +11,42 @@ import { Result as SafeParseResult } from "../types/fp.js";
 import * as types from "../types/primitives.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
+/**
+ * Access granted to that user.
+ */
 export const PersistedSemanticSearchSharedWithEntryAccessLevel = {
   Read: "read",
   Write: "write",
 } as const;
+/**
+ * Access granted to that user.
+ */
 export type PersistedSemanticSearchSharedWithEntryAccessLevel = OpenEnum<
   typeof PersistedSemanticSearchSharedWithEntryAccessLevel
 >;
 
 /**
- * Entry inside `sharedWith[]`. The schema sets `_id: false` on these
+ * Entry inside `sharedWith[]`: one user the search is shared with and
  *
  * @remarks
- * sub-docs, so no auto-injected `_id` is present.
+ * the access level they were given.
  */
 export type PersistedSemanticSearchSharedWithEntry = {
+  /**
+   * Identifier of this share entry, generated when the entry is
+   *
+   * @remarks
+   * stored. It identifies the entry, not the user — use `userId`
+   * for the user.
+   */
+  id?: string | undefined;
+  /**
+   * User the search is shared with.
+   */
   userId: string;
+  /**
+   * Access granted to that user.
+   */
   accessLevel: PersistedSemanticSearchSharedWithEntryAccessLevel;
 };
 
@@ -36,11 +57,19 @@ export const PersistedSemanticSearchSharedWithEntryAccessLevel$inboundSchema:
 
 /** @internal */
 export const PersistedSemanticSearchSharedWithEntry$inboundSchema:
-  z.ZodMiniType<PersistedSemanticSearchSharedWithEntry, unknown> = z.object({
-    userId: types.string(),
-    accessLevel:
-      PersistedSemanticSearchSharedWithEntryAccessLevel$inboundSchema,
-  });
+  z.ZodMiniType<PersistedSemanticSearchSharedWithEntry, unknown> = z.pipe(
+    z.object({
+      _id: types.optional(types.string()),
+      userId: types.string(),
+      accessLevel:
+        PersistedSemanticSearchSharedWithEntryAccessLevel$inboundSchema,
+    }),
+    z.transform((v) => {
+      return remap$(v, {
+        "_id": "id",
+      });
+    }),
+  );
 
 export function persistedSemanticSearchSharedWithEntryFromJSON(
   jsonString: string,

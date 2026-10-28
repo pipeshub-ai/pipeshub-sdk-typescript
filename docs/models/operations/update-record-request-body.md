@@ -1,18 +1,17 @@
 # UpdateRecordRequestBody
 
-Request payload
+Request payload. Optional: without one nothing changes.
 
 ## Example Usage
 
 ```typescript
 import { UpdateRecordRequestBody } from "@pipeshub-ai/sdk/models/operations";
 
-// No examples available for this model
+let value: UpdateRecordRequestBody = {};
 ```
 
 ## Fields
 
-| Field                                                                                                                                                                                                        | Type                                                                                                                                                                                                         | Required                                                                                                                                                                                                     | Description                                                                                                                                                                                                  |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `recordName`                                                                                                                                                                                                 | *string*                                                                                                                                                                                                     | :heavy_minus_sign:                                                                                                                                                                                           | New name for the record                                                                                                                                                                                      |
-| `file`                                                                                                                                                                                                       | [File](https://developer.mozilla.org/en-US/docs/Web/API/File) \| [Blob](https://developer.mozilla.org/en-US/docs/Web/API/Blob) \| [operations.UpdateRecordFile](../../models/operations/update-record-file.md) | :heavy_minus_sign:                                                                                                                                                                                           | Replacement file content                                                                                                                                                                                     |
+| Field                                                                   | Type                                                                    | Required                                                                | Description                                                             |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `recordName`                                                            | *string*                                                                | :heavy_minus_sign:                                                      | New name for the record (rename only; a file needs the multipart form). |

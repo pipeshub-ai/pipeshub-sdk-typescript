@@ -26,12 +26,33 @@ export type ConversationListItemStatus = OpenEnum<
   typeof ConversationListItemStatus
 >;
 
+/**
+ * Reasoning effort requested when the conversation was created, when one was set.
+ */
+export const ConversationListItemReasoningEffort = {
+  None: "none",
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Max: "max",
+} as const;
+/**
+ * Reasoning effort requested when the conversation was created, when one was set.
+ */
+export type ConversationListItemReasoningEffort = OpenEnum<
+  typeof ConversationListItemReasoningEffort
+>;
+
 export type ConversationListItemModelInfo = {
   modelKey?: string | undefined;
   modelName?: string | undefined;
   modelFriendlyName?: string | undefined;
   modelProvider?: string | undefined;
   chatMode?: string | undefined;
+  /**
+   * Reasoning effort requested when the conversation was created, when one was set.
+   */
+  reasoningEffort?: ConversationListItemReasoningEffort | undefined;
 };
 
 export const ConversationListItemSharedWithAccessLevel = {
@@ -45,9 +66,17 @@ export type ConversationListItemSharedWithAccessLevel = OpenEnum<
 export type ConversationListItemSharedWith = {
   userId?: string | undefined;
   accessLevel?: ConversationListItemSharedWithAccessLevel | undefined;
+  /**
+   * Subdocument identifier auto-assigned by MongoDB.
+   */
+  id?: string | undefined;
 };
 
 export type ConversationListItemConversationError = {
+  /**
+   * Sub-document identifier auto-assigned by MongoDB.
+   */
+  id?: string | undefined;
   message?: string | undefined;
   errorType?: string | undefined;
   timestamp?: Date | undefined;
@@ -174,6 +203,12 @@ export const ConversationListItemStatus$inboundSchema: z.ZodMiniType<
 > = openEnums.inboundSchema(ConversationListItemStatus);
 
 /** @internal */
+export const ConversationListItemReasoningEffort$inboundSchema: z.ZodMiniType<
+  ConversationListItemReasoningEffort,
+  unknown
+> = openEnums.inboundSchema(ConversationListItemReasoningEffort);
+
+/** @internal */
 export const ConversationListItemModelInfo$inboundSchema: z.ZodMiniType<
   ConversationListItemModelInfo,
   unknown
@@ -183,6 +218,9 @@ export const ConversationListItemModelInfo$inboundSchema: z.ZodMiniType<
   modelFriendlyName: types.optional(types.string()),
   modelProvider: types.optional(types.string()),
   chatMode: types.optional(types.string()),
+  reasoningEffort: types.optional(
+    ConversationListItemReasoningEffort$inboundSchema,
+  ),
 });
 
 export function conversationListItemModelInfoFromJSON(
@@ -204,12 +242,20 @@ export const ConversationListItemSharedWithAccessLevel$inboundSchema:
 export const ConversationListItemSharedWith$inboundSchema: z.ZodMiniType<
   ConversationListItemSharedWith,
   unknown
-> = z.object({
-  userId: types.optional(types.string()),
-  accessLevel: types.optional(
-    ConversationListItemSharedWithAccessLevel$inboundSchema,
-  ),
-});
+> = z.pipe(
+  z.object({
+    userId: types.optional(types.string()),
+    accessLevel: types.optional(
+      ConversationListItemSharedWithAccessLevel$inboundSchema,
+    ),
+    _id: types.optional(types.string()),
+  }),
+  z.transform((v) => {
+    return remap$(v, {
+      "_id": "id",
+    });
+  }),
+);
 
 export function conversationListItemSharedWithFromJSON(
   jsonString: string,
@@ -225,14 +271,22 @@ export function conversationListItemSharedWithFromJSON(
 export const ConversationListItemConversationError$inboundSchema: z.ZodMiniType<
   ConversationListItemConversationError,
   unknown
-> = z.object({
-  message: types.optional(types.string()),
-  errorType: types.optional(types.string()),
-  timestamp: types.optional(types.date()),
-  messageId: types.optional(types.string()),
-  stack: types.optional(types.string()),
-  metadata: types.optional(z.record(z.string(), z.any())),
-});
+> = z.pipe(
+  z.object({
+    _id: types.optional(types.string()),
+    message: types.optional(types.string()),
+    errorType: types.optional(types.string()),
+    timestamp: types.optional(types.date()),
+    messageId: types.optional(types.string()),
+    stack: types.optional(types.string()),
+    metadata: types.optional(z.record(z.string(), z.any())),
+  }),
+  z.transform((v) => {
+    return remap$(v, {
+      "_id": "id",
+    });
+  }),
+);
 
 export function conversationListItemConversationErrorFromJSON(
   jsonString: string,

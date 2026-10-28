@@ -31,9 +31,10 @@ export class AIModelsProviders extends ClientSDK {
    * - When no providers of the requested type are configured the endpoint still
    *   returns HTTP **200** with an empty `models` array — this is **not** an error.
    *
-   * **Access control:** requires a valid bearer token. For OAuth tokens the
-   * `config:read` scope must be present; regular JWT bearer tokens pass through
-   * without scope enforcement.
+   * **Access control:** requires a valid bearer token, from any member of the
+   * organization (there is no admin check). For OAuth tokens the `config:read` scope
+   * must be present; regular JWT bearer tokens pass through without scope enforcement.
+   * The query string is not read.
    */
   async getAvailableModelsByType(
     request: operations.GetAvailableModelsByTypeRequest,

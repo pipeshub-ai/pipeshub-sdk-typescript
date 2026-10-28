@@ -10,11 +10,14 @@ import { SDKValidationError } from "../errors/sdk-validation-error.js";
 
 export type HandleOAuthCallbackRequest = {
   /**
-   * Authorization code from provider
+   * Authorization code from provider. A missing, empty or blank value is
+   *
+   * @remarks
+   * refused with `400`, even when the provider only sent `error`.
    */
   code: string;
   /**
-   * State parameter (contains connector ID)
+   * State parameter (contains connector ID). A missing, empty or blank value is refused with `400`.
    */
   state: string;
   /**
@@ -22,7 +25,7 @@ export type HandleOAuthCallbackRequest = {
    */
   error?: string | undefined;
   /**
-   * Base URL for redirect
+   * Origin prefixed to the returned `redirectUrl`
    */
   baseUrl?: string | undefined;
 };
@@ -31,12 +34,26 @@ export type HandleOAuthCallbackRequest = {
  * Result of exchanging the code. `success` is false when the provider refused it.
  */
 export type HandleOAuthCallbackResponse = {
+  /**
+   * Whether tokens were stored and the connector is authenticated
+   */
   success: boolean;
   /**
    * Where the web app would send the user next
    */
   redirectUrl?: string | undefined;
+  /**
+   * Only when `success` is `false`. The provider's own code when
+   *
+   * @remarks
+   * it was passed in `error`, otherwise one of `invalid_state`,
+   * `instance_not_found`, `config_not_found`,
+   * `oauth_config_fetch_error`, `invalid_token` or `server_error`.
+   */
   error?: string | undefined;
+  /**
+   * Only when `error` is `server_error`. A readable reason for the failed token exchange.
+   */
   errorMessage?: string | undefined;
 };
 

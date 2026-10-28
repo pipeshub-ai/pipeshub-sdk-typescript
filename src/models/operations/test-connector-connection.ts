@@ -25,7 +25,10 @@ export type TestConnectorConnectionRequestBody = {
 
 export type TestConnectorConnectionRequest = {
   /**
-   * Connector type identifier
+   * Connector type as listed by `GET /connectors/registry` (its `type`),
+   *
+   * @remarks
+   * URL-encoded. The lookup is case-sensitive.
    */
   connectorType: string;
   body: TestConnectorConnectionRequestBody;
@@ -35,6 +38,9 @@ export type TestConnectorConnectionRequest = {
  * Check ran; see <code>success</code>
  */
 export type TestConnectorConnectionResponse = {
+  /**
+   * Whether the connector reached the source with these settings
+   */
   success: boolean;
   /**
    * What happened, written for the user

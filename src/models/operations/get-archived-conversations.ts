@@ -41,13 +41,40 @@ export type GetArchivedConversationsSortOrderEnum = ClosedEnum<
   typeof GetArchivedConversationsSortOrderEnum
 >;
 
+/**
+ * When set, filters by `isShared`. Accepts exactly `true`, `false`,
+ *
+ * @remarks
+ * `1` or `0`.
+ */
+export const GetArchivedConversationsSharedEnum = {
+  True: "true",
+  False: "false",
+  One: "1",
+  Zero: "0",
+} as const;
+/**
+ * When set, filters by `isShared`. Accepts exactly `true`, `false`,
+ *
+ * @remarks
+ * `1` or `0`.
+ */
+export type GetArchivedConversationsSharedEnum = ClosedEnum<
+  typeof GetArchivedConversationsSharedEnum
+>;
+
 export type GetArchivedConversationsRequest = {
   /**
-   * Page number (1-indexed)
+   * Page number (1-indexed). The validator accepts any number, so a fraction such
+   *
+   * @remarks
+   * as `1.5` is not refused; it is truncated (`1.5` reads as page 1).
    */
   page?: number | undefined;
   /**
-   * Items per page
+   * Items per page. A fraction is not refused; it is truncated (`5.5` reads as 5).
+   *
+   * @remarks
    */
   limit?: number | undefined;
   /**
@@ -59,19 +86,34 @@ export type GetArchivedConversationsRequest = {
    */
   sortOrder?: GetArchivedConversationsSortOrderEnum | undefined;
   /**
-   * Case-insensitive substring match against title and message content (max 1000 chars)
+   * Case-insensitive substring match against title and message content
+   *
+   * @remarks
+   * (max 1000 chars). A value holding markup is refused by the
+   * controller with `400 HTTP_BAD_REQUEST`.
    */
   search?: string | undefined;
   /**
-   * Filter by shared status
+   * When set, filters by `isShared`. Accepts exactly `true`, `false`,
+   *
+   * @remarks
+   * `1` or `0`.
    */
-  shared?: boolean | undefined;
+  shared?: GetArchivedConversationsSharedEnum | undefined;
   /**
-   * Include conversations created on or after this timestamp
+   * Include conversations created on or after this instant. Must be a
+   *
+   * @remarks
+   * full ISO 8601 date-time with `Z` or a numeric offset; a bare date
+   * is refused.
    */
   startDate?: Date | undefined;
   /**
-   * Include conversations created on or before this timestamp
+   * Include conversations created on or before this instant. Must be a
+   *
+   * @remarks
+   * full ISO 8601 date-time with `Z` or a numeric offset; a bare date
+   * is refused.
    */
   endDate?: Date | undefined;
   /**
@@ -114,6 +156,23 @@ export type GetArchivedConversationsStatus = OpenEnum<
 >;
 
 /**
+ * Reasoning effort requested for the turn, when one was set.
+ */
+export const GetArchivedConversationsReasoningEffort = {
+  None: "none",
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Max: "max",
+} as const;
+/**
+ * Reasoning effort requested for the turn, when one was set.
+ */
+export type GetArchivedConversationsReasoningEffort = OpenEnum<
+  typeof GetArchivedConversationsReasoningEffort
+>;
+
+/**
  * AI model configuration used
  */
 export type GetArchivedConversationsModelInfo = {
@@ -125,6 +184,10 @@ export type GetArchivedConversationsModelInfo = {
   modelFriendlyName?: string | undefined;
   modelProvider?: string | undefined;
   chatMode?: string | undefined;
+  /**
+   * Reasoning effort requested for the turn, when one was set.
+   */
+  reasoningEffort?: GetArchivedConversationsReasoningEffort | undefined;
 };
 
 export const GetArchivedConversationsSharedWithAccessLevel = {
@@ -138,9 +201,17 @@ export type GetArchivedConversationsSharedWithAccessLevel = OpenEnum<
 export type GetArchivedConversationsSharedWith = {
   userId?: string | undefined;
   accessLevel?: GetArchivedConversationsSharedWithAccessLevel | undefined;
+  /**
+   * Subdocument identifier auto-assigned by MongoDB.
+   */
+  id?: string | undefined;
 };
 
 export type GetArchivedConversationsConversationError = {
+  /**
+   * Sub-document identifier auto-assigned by MongoDB.
+   */
+  id?: string | undefined;
   message: string;
   errorType?: string | undefined;
   timestamp?: Date | undefined;
@@ -345,6 +416,10 @@ export type GetArchivedConversationsConversation = {
    */
   agentKey?: string | undefined;
   /**
+   * Mongoose document version key.
+   */
+  v?: number | undefined;
+  /**
    * Timestamp when the conversation was archived
    */
   archivedAt?: Date | undefined;
@@ -388,7 +463,7 @@ export type GetArchivedConversationsApplied = {
   values?: { [k: string]: any } | undefined;
 };
 
-export type GetArchivedConversationsShared = {
+export type GetArchivedConversationsSharedResponse = {
   /**
    * Allowed values for the `shared` filter
    */
@@ -564,7 +639,7 @@ export type GetArchivedConversationsSortingMessages = {
  * Describes filters supported by this endpoint and their current values
  */
 export type GetArchivedConversationsAvailable = {
-  shared?: GetArchivedConversationsShared | undefined;
+  shared?: GetArchivedConversationsSharedResponse | undefined;
   tags?: GetArchivedConversationsTags | undefined;
   minMessages?: GetArchivedConversationsMinMessages | undefined;
   search?: GetArchivedConversationsSearch | undefined;
@@ -645,13 +720,18 @@ export const GetArchivedConversationsSortOrderEnum$outboundSchema:
   );
 
 /** @internal */
+export const GetArchivedConversationsSharedEnum$outboundSchema: z.ZodMiniEnum<
+  typeof GetArchivedConversationsSharedEnum
+> = z.enum(GetArchivedConversationsSharedEnum);
+
+/** @internal */
 export type GetArchivedConversationsRequest$Outbound = {
   page: number;
   limit: number;
   sortBy: string;
   sortOrder: string;
   search?: string | undefined;
-  shared?: boolean | undefined;
+  shared?: string | undefined;
   startDate?: string | undefined;
   endDate?: string | undefined;
   conversationId?: string | undefined;
@@ -662,8 +742,8 @@ export const GetArchivedConversationsRequest$outboundSchema: z.ZodMiniType<
   GetArchivedConversationsRequest$Outbound,
   GetArchivedConversationsRequest
 > = z.object({
-  page: z._default(z.int(), 1),
-  limit: z._default(z.int(), 20),
+  page: z._default(z.number(), 1),
+  limit: z._default(z.number(), 20),
   sortBy: z._default(
     GetArchivedConversationsSortByEnum$outboundSchema,
     "lastActivityAt",
@@ -673,7 +753,7 @@ export const GetArchivedConversationsRequest$outboundSchema: z.ZodMiniType<
     "desc",
   ),
   search: z.optional(z.string()),
-  shared: z.optional(z.boolean()),
+  shared: z.optional(GetArchivedConversationsSharedEnum$outboundSchema),
   startDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
   endDate: z.optional(z.pipe(z.date(), z.transform(v => v.toISOString()))),
   conversationId: z.optional(z.string()),
@@ -696,6 +776,11 @@ export const GetArchivedConversationsStatus$inboundSchema: z.ZodMiniType<
 > = openEnums.inboundSchema(GetArchivedConversationsStatus);
 
 /** @internal */
+export const GetArchivedConversationsReasoningEffort$inboundSchema:
+  z.ZodMiniType<GetArchivedConversationsReasoningEffort, unknown> = openEnums
+    .inboundSchema(GetArchivedConversationsReasoningEffort);
+
+/** @internal */
 export const GetArchivedConversationsModelInfo$inboundSchema: z.ZodMiniType<
   GetArchivedConversationsModelInfo,
   unknown
@@ -705,6 +790,9 @@ export const GetArchivedConversationsModelInfo$inboundSchema: z.ZodMiniType<
   modelFriendlyName: types.optional(types.string()),
   modelProvider: types.optional(types.string()),
   chatMode: types.optional(types.string()),
+  reasoningEffort: types.optional(
+    GetArchivedConversationsReasoningEffort$inboundSchema,
+  ),
 });
 
 export function getArchivedConversationsModelInfoFromJSON(
@@ -726,12 +814,20 @@ export const GetArchivedConversationsSharedWithAccessLevel$inboundSchema:
 export const GetArchivedConversationsSharedWith$inboundSchema: z.ZodMiniType<
   GetArchivedConversationsSharedWith,
   unknown
-> = z.object({
-  userId: types.optional(types.string()),
-  accessLevel: types.optional(
-    GetArchivedConversationsSharedWithAccessLevel$inboundSchema,
-  ),
-});
+> = z.pipe(
+  z.object({
+    userId: types.optional(types.string()),
+    accessLevel: types.optional(
+      GetArchivedConversationsSharedWithAccessLevel$inboundSchema,
+    ),
+    _id: types.optional(types.string()),
+  }),
+  z.transform((v) => {
+    return remap$(v, {
+      "_id": "id",
+    });
+  }),
+);
 
 export function getArchivedConversationsSharedWithFromJSON(
   jsonString: string,
@@ -746,14 +842,22 @@ export function getArchivedConversationsSharedWithFromJSON(
 
 /** @internal */
 export const GetArchivedConversationsConversationError$inboundSchema:
-  z.ZodMiniType<GetArchivedConversationsConversationError, unknown> = z.object({
-    message: types.string(),
-    errorType: types.optional(types.string()),
-    timestamp: types.optional(types.date()),
-    messageId: types.optional(types.string()),
-    stack: types.optional(types.string()),
-    metadata: types.optional(z.record(z.string(), z.any())),
-  });
+  z.ZodMiniType<GetArchivedConversationsConversationError, unknown> = z.pipe(
+    z.object({
+      _id: types.optional(types.string()),
+      message: types.string(),
+      errorType: types.optional(types.string()),
+      timestamp: types.optional(types.date()),
+      messageId: types.optional(types.string()),
+      stack: types.optional(types.string()),
+      metadata: types.optional(z.record(z.string(), z.any())),
+    }),
+    z.transform((v) => {
+      return remap$(v, {
+        "_id": "id",
+      });
+    }),
+  );
 
 export function getArchivedConversationsConversationErrorFromJSON(
   jsonString: string,
@@ -825,11 +929,13 @@ export const GetArchivedConversationsConversation$inboundSchema: z.ZodMiniType<
     ),
     sharedBy: types.optional(models.ConversationSharedBy$inboundSchema),
     agentKey: types.optional(types.string()),
+    __v: types.optional(types.number()),
     archivedAt: types.optional(types.date()),
   }),
   z.transform((v) => {
     return remap$(v, {
       "_id": "id",
+      "__v": "v",
     });
   }),
 );
@@ -889,23 +995,22 @@ export function getArchivedConversationsAppliedFromJSON(
 }
 
 /** @internal */
-export const GetArchivedConversationsShared$inboundSchema: z.ZodMiniType<
-  GetArchivedConversationsShared,
-  unknown
-> = z.object({
-  values: types.optional(z.array(types.string())),
-  description: types.optional(types.string()),
-  current: z.optional(z.nullable(types.string())),
-  applied: types.optional(types.boolean()),
-});
+export const GetArchivedConversationsSharedResponse$inboundSchema:
+  z.ZodMiniType<GetArchivedConversationsSharedResponse, unknown> = z.object({
+    values: types.optional(z.array(types.string())),
+    description: types.optional(types.string()),
+    current: z.optional(z.nullable(types.string())),
+    applied: types.optional(types.boolean()),
+  });
 
-export function getArchivedConversationsSharedFromJSON(
+export function getArchivedConversationsSharedResponseFromJSON(
   jsonString: string,
-): SafeParseResult<GetArchivedConversationsShared, SDKValidationError> {
+): SafeParseResult<GetArchivedConversationsSharedResponse, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => GetArchivedConversationsShared$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'GetArchivedConversationsShared' from JSON`,
+    (x) =>
+      GetArchivedConversationsSharedResponse$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetArchivedConversationsSharedResponse' from JSON`,
   );
 }
 
@@ -1351,7 +1456,7 @@ export const GetArchivedConversationsAvailable$inboundSchema: z.ZodMiniType<
   unknown
 > = z.object({
   shared: types.optional(
-    z.lazy(() => GetArchivedConversationsShared$inboundSchema),
+    z.lazy(() => GetArchivedConversationsSharedResponse$inboundSchema),
   ),
   tags: types.optional(
     z.lazy(() => GetArchivedConversationsTags$inboundSchema),

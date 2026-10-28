@@ -36,11 +36,16 @@ import { Result } from "../types/fp.js";
  *
  * **Overview:**
  *
- * Returns complete KB metadata including name, timestamps, root-level folders, and the requesting user's role.
+ * Returns complete KB metadata including name, timestamps, every folder (nested ones
+ * included, without their parent), and the requesting user's role.
  *
  * **Access Control:**
  *
- * User must have at least READER permission to view KB details.
+ * User must have at least READER permission to view KB details. A knowledge base the
+ * caller holds no role on is answered `404` with the same message as an unknown id, so
+ * its existence is not revealed.
+ *
+ * **Request:** only the `kbId` path parameter is read; any query string or body is ignored.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -176,7 +181,7 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.GetKnowledgeBaseById$inboundSchema),
-    M.jsonErr([401, 403, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
     M.jsonErr([500, 503], errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),

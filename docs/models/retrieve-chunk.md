@@ -8,8 +8,21 @@ import { RetrieveChunk } from "@pipeshub-ai/sdk/models";
 let value: RetrieveChunk = {
   id: "<id>",
   text: "<value>",
-  record: {},
-  citation: {},
+  record: {
+    recordId: "<id>",
+    name: "<value>",
+    connector: "<value>",
+    mimeType: "<value>",
+    updatedAt: "1735625194107",
+  },
+  citation: {
+    url: "https://impish-sediment.org",
+    recordUrl: null,
+    pageNum: [
+      17493,
+    ],
+    blockIndex: 821668,
+  },
 };
 ```
 

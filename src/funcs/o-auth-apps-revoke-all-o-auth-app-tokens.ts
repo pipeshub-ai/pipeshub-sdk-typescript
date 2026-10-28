@@ -33,7 +33,7 @@ import { Result } from "../types/fp.js";
  * @remarks
  * Revokes every access and refresh token currently issued to an OAuth app, in a single operation. Use this for emergency credential rotation, suspected secret leaks, or as a follow-up to `POST /oauth-clients/{appId}/regenerate-secret` when you want existing sessions invalidated immediately rather than letting them expire naturally.
  *
- * The response `count` is the total number of tokens revoked across both types. Clients of this app must then obtain new tokens via the standard OAuth flow.
+ * The response carries only a confirmation `message`; it does not say how many tokens were revoked. Clients of this app must then obtain new tokens via the standard OAuth flow.
  *
  * Creator-only.
  *
@@ -48,6 +48,7 @@ export function oAuthAppsRevokeAllOAuthAppTokens(
     operations.RevokeAllOAuthAppTokensResponse,
     | errors.ApplicationJsonErrorResponse
     | errors.OAuthClientManagementRateLimitError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -75,6 +76,7 @@ async function $do(
       operations.RevokeAllOAuthAppTokensResponse,
       | errors.ApplicationJsonErrorResponse
       | errors.OAuthClientManagementRateLimitError
+      | errors.ErrorResponse
       | PipeshubError
       | ResponseValidationError
       | ConnectionError
@@ -166,6 +168,7 @@ async function $do(
     operations.RevokeAllOAuthAppTokensResponse,
     | errors.ApplicationJsonErrorResponse
     | errors.OAuthClientManagementRateLimitError
+    | errors.ErrorResponse
     | PipeshubError
     | ResponseValidationError
     | ConnectionError
@@ -177,10 +180,11 @@ async function $do(
   >(
     M.json(200, operations.RevokeAllOAuthAppTokensResponse$inboundSchema),
     M.jsonErr(
-      [401, 403, 404],
+      [400, 401, 403, 404],
       errors.ApplicationJsonErrorResponse$inboundSchema,
     ),
     M.jsonErr(429, errors.OAuthClientManagementRateLimitError$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

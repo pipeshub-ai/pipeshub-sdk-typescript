@@ -183,4 +183,24 @@ export type OAuth2Scope =
   /**
    * Create and manage crawling jobs
    */
-  | "crawl:write";
+  | "crawl:write"
+  /**
+   * Read custom agent skills
+   */
+  | "skill:read"
+  /**
+   * Create and manage custom agent skills
+   */
+  | "skill:write"
+  /**
+   * Read MCP servers and their tools
+   */
+  | "mcp:read"
+  /**
+   * Add, configure and authenticate MCP servers
+   */
+  | "mcp:write"
+  /**
+   * Remove MCP servers and their credentials
+   */
+  | "mcp:delete";

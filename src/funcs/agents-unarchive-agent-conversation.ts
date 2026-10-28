@@ -32,7 +32,8 @@ import { Result } from "../types/fp.js";
  * Unarchive an agent conversation
  *
  * @remarks
- * Restores an archived agent conversation to the active list.
+ * Restores an archived agent conversation to the active list. The route
+ * reads no query parameter and no body; anything sent is ignored.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -177,7 +178,8 @@ async function $do(
     | SDKValidationError
   >(
     M.json(200, models.AgentConversationUnarchiveResponse$inboundSchema),
-    M.jsonErr([400, 401, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

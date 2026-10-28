@@ -12,9 +12,21 @@ import {
 } from "./connector-scope.js";
 import { SDKValidationError } from "./errors/sdk-validation-error.js";
 
+/**
+ * Summary of a connector instance that was just created
+ */
 export type ConnectorCreated = {
+  /**
+   * ID of the new instance
+   */
   connectorId: string;
+  /**
+   * Connector type the instance was created from
+   */
   connectorType: string;
+  /**
+   * Instance name, trimmed
+   */
   instanceName: string;
   created?: boolean | undefined;
   /**
@@ -27,8 +39,17 @@ export type ConnectorCreated = {
    * </ul>
    */
   scope: ConnectorScope;
+  /**
+   * User ID who created the instance
+   */
   createdBy?: string | undefined;
+  /**
+   * Always `false` on creation
+   */
   isAuthenticated?: boolean | undefined;
+  /**
+   * Whether initial configuration was saved with the request
+   */
   isConfigured?: boolean | undefined;
 };
 

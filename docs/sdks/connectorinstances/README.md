@@ -20,7 +20,8 @@ Get all configured connector instances for your organization.<br><br>
 <b>Overview:</b><br>
 Returns instances created by users, filtered by scope and permissions.
 Team-scope connectors are visible to all org users. Personal connectors
-are only visible to their creators.<br><br>
+are only visible to their creators, not even to admins. Knowledge bases
+(instances of type <code>KB</code>) are not listed here.<br><br>
 <b>Instance States:</b><br>
 <ul>
 <li><b>isConfigured:</b> All required settings are complete</li>
@@ -99,6 +100,7 @@ run();
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.ErrorResponse        | 400, 401, 403               | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## createConnectorInstance
@@ -318,6 +320,65 @@ async function run() {
 
 run();
 ```
+### Example Usage: jiraPersonal
+
+<!-- UsageSnippet language="typescript" operationID="createConnectorInstance" method="post" path="/connectors" example="jiraPersonal" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.connectorInstances.createConnectorInstance({
+    connectorType: "Jira Cloud Personal",
+    instanceName: "My Jira",
+    scope: "personal",
+    authType: "API_TOKEN",
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { connectorInstancesCreateConnectorInstance } from "@pipeshub-ai/sdk/funcs/connector-instances-create-connector-instance.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const res = await connectorInstancesCreateConnectorInstance(pipeshub, {
+    connectorType: "Jira Cloud Personal",
+    instanceName: "My Jira",
+    scope: "personal",
+    authType: "API_TOKEN",
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("connectorInstancesCreateConnectorInstance failed:", res.error);
+  }
+}
+
+run();
+```
 ### Example Usage: jiraSavedOAuthApp
 
 <!-- UsageSnippet language="typescript" operationID="createConnectorInstance" method="post" path="/connectors" example="jiraSavedOAuthApp" -->
@@ -378,6 +439,65 @@ async function run() {
       },
     },
     baseUrl: "https://pipeshub.example.com",
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("connectorInstancesCreateConnectorInstance failed:", res.error);
+  }
+}
+
+run();
+```
+### Example Usage: oneDrive
+
+<!-- UsageSnippet language="typescript" operationID="createConnectorInstance" method="post" path="/connectors" example="oneDrive" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.connectorInstances.createConnectorInstance({
+    connectorType: "OneDrive",
+    instanceName: "Company OneDrive",
+    scope: "team",
+    authType: "OAUTH_ADMIN_CONSENT",
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { connectorInstancesCreateConnectorInstance } from "@pipeshub-ai/sdk/funcs/connector-instances-create-connector-instance.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const res = await connectorInstancesCreateConnectorInstance(pipeshub, {
+    connectorType: "OneDrive",
+    instanceName: "Company OneDrive",
+    scope: "team",
+    authType: "OAUTH_ADMIN_CONSENT",
   });
   if (res.ok) {
     const { value: result } = res;
@@ -559,7 +679,17 @@ run();
 
 ## getConnectorInstance
 
-Retrieve a specific connector instance by ID.
+Retrieve a specific connector instance by ID, together with the setup
+form of its connector type (<code>config</code>).<br><br>
+<b>Who can read an instance:</b><br>
+<ul>
+<li>Team scope: the creator and org admins. Other members get
+<code>404</code>, although the lists show them the instance.</li>
+<li>Personal scope: the creator only. An admin gets <code>404</code>.</li>
+</ul>
+The ID of a knowledge base is accepted too: a knowledge base is stored
+as a connector instance of type <code>KB</code>.
+
 
 ### Example Usage
 
@@ -633,23 +763,26 @@ run();
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
 | errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## deleteConnectorInstance
 
-Delete a connector instance and everything synced from it. The request
-answers `202` as soon as the deletion has started; the deletion itself
-runs in the background.<br><br>
-<b>Warning:</b><br>
-Deletion is permanent. The connector's records, record groups,
-permissions and relations are removed from the graph database, its
-embeddings are removed from the vector store, its stored configuration
-and credentials are deleted, and its stored files are deleted (content
-another connector still uses is kept). The records don't go to the
-trash and can't be restored. Its sync schedule is removed too.<br><br>
+Start the deletion of a connector instance and all associated data.<br><br>
+<b>Asynchronous:</b><br>
+The request is answered with <code>202</code> as soon as the instance is
+marked <code>DELETING</code>; its sync is stopped and its records,
+vectors and configuration are removed in the background.<br><br>
 <b>Permissions:</b><br>
-The connector's creator or an admin, for either scope. An admin can
-delete a member's personal connector.
+<ul>
+<li>The creator can delete their own instance</li>
+<li>An org admin can delete any instance, including another user's
+personal one (which the admin cannot read)</li>
+<li>Anyone else gets <code>404</code></li>
+</ul>
+<b>In use:</b><br>
+Refused with <code>409</code> while an agent uses the instance as a
+knowledge source.
 
 
 ### Example Usage
@@ -723,13 +856,24 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 401, 403, 404, 409          | application/json            |
+| errors.ErrorResponse        | 400, 401, 403, 404, 409     | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## getConnectorStats
 
-Retrieve statistics for a specific connector instance including record counts,
-indexing status breakdown, and sync information.
+Retrieve record counts of a connector instance, in total and per record
+type, broken down by indexing status. The ID of a knowledge base is
+accepted too (a knowledge base is stored as a connector instance of type
+<code>KB</code>); its stats report <code>origin: COLLECTION</code>.<br><br>
+<b>Who can read them:</b> the creator of the instance and, for a team
+instance, org admins. Stats use the same read gate as
+<code>GET /connectors/{connectorId}</code>: anyone else, including an
+admin reading another user's personal instance, gets <code>404</code>
+("This connector was removed, or you no longer have access. ..."), so
+the instance's existence is not confirmed.
+
+An OAuth token holding `kb:read` instead of `connector:read` passes the scope check too.
 
 
 ### Example Usage
@@ -803,7 +947,8 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 401, 403, 404               | application/json            |
+| errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |
 
 ## resyncConnector
@@ -814,7 +959,16 @@ Trigger a resync of records from a connector instance.
 
 Fetches content from the external source and updates local records. Use when you suspect data is out of sync.
 
+Only a connector in the caller's list of active connectors
+(`GET /connectors/active`, knowledge bases included) can be resynced.
+Any other ID, including one that does not exist, is refused with `400`.
+The reply only acknowledges that the resync event was published.
+
+Fields of the body other than `connectorName` and `fullSync` are dropped without an error.
+
 **Warning:** This can be resource-intensive for large connectors.
+
+The scope check also accepts `kb:write` in place of `connector:write`.
 
 
 ### Example Usage
@@ -990,5 +1144,6 @@ run();
 
 | Error Type                  | Status Code                 | Content Type                |
 | --------------------------- | --------------------------- | --------------------------- |
-| errors.ErrorResponse        | 401, 403, 404               | application/json            |
+| errors.ErrorResponse        | 400, 401, 403, 404          | application/json            |
+| errors.ErrorResponse        | 500                         | application/json            |
 | errors.PipeshubDefaultError | 4XX, 5XX                    | \*/\*                       |

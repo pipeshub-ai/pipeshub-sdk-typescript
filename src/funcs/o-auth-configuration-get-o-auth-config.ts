@@ -31,7 +31,9 @@ import { Result } from "../types/fp.js";
  * Get OAuth configuration
  *
  * @remarks
- * Get a specific OAuth configuration by ID.
+ * Get a specific OAuth configuration by ID.<br><br>
+ * An admin gets `config` with the stored credentials, client secret in clear text.
+ * Any other caller gets the same object without `config`.
  *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  */
@@ -176,6 +178,7 @@ async function $do(
   >(
     M.json(200, operations.GetOAuthConfigResponse$inboundSchema),
     M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.fail("4XX"),
     M.fail("5XX"),
   )(response, req, { extraFields: responseFields });

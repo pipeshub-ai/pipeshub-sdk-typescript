@@ -1,5 +1,7 @@
 # RestoreRecordsRequestBody
 
+Request body for POST /knowledgeBase/records/restore. Fields other than `recordIds` are dropped by the validator, not refused.
+
 ## Example Usage
 
 ```typescript
@@ -14,6 +16,6 @@ let value: RestoreRecordsRequestBody = {
 
 ## Fields
 
-| Field              | Type               | Required           | Description        |
-| ------------------ | ------------------ | ------------------ | ------------------ |
-| `recordIds`        | *string*[]         | :heavy_check_mark: | N/A                |
+| Field                                                                               | Type                                                                                | Required                                                                            | Description                                                                         |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `recordIds`                                                                         | *string*[]                                                                          | :heavy_check_mark:                                                                  | Record ids to restore. An id listed more than once is restored, and answered, once. |

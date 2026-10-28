@@ -32,6 +32,14 @@ export type ConnectorAuthField = {
    */
   isSecret?: boolean | undefined;
   options?: Array<any> | undefined;
+  /**
+   * Shown only on an instance that already has a value saved for it, never on a new one: a way of signing in kept for instances set up with it. Absent means false.
+   */
+  savedOnly?: boolean | undefined;
+  /**
+   * Name of another field: this field is required, except on an instance that has a value saved for that field. Absent means `required` alone applies.
+   */
+  requiredUnlessSaved?: string | undefined;
 };
 
 /** @internal */
@@ -50,6 +58,8 @@ export const ConnectorAuthField$inboundSchema: z.ZodMiniType<
   validation: types.optional(z.record(z.string(), z.any())),
   isSecret: types.optional(types.boolean()),
   options: types.optional(z.array(z.any())),
+  savedOnly: types.optional(types.boolean()),
+  requiredUnlessSaved: types.optional(types.string()),
 });
 
 export function connectorAuthFieldFromJSON(

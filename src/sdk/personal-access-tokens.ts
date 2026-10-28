@@ -21,7 +21,8 @@ export class PersonalAccessTokens extends ClientSDK {
    * Lists the caller's own active (non-revoked, unexpired) personal
    * access tokens, newest first, capped at 100 rows server-side. Never
    * returns another user's tokens — see `GET /personal-access-tokens/admin`
-   * for the org-admin, cross-user view.
+   * for the org-admin, cross-user view. The handler reads no query parameters
+   * and ignores any that are sent.
    *
    * Shares the same per-user rate limiter as `/oauth-clients/*`
    * (default 1000 req/min, `MAX_OAUTH_CLIENT_REQUESTS_PER_MINUTE`).
@@ -80,7 +81,8 @@ export class PersonalAccessTokens extends ClientSDK {
    * definitions, for populating the create-token scope picker. Unlike
    * `GET /oauth-clients/scopes`, this is **not** grouped by category and
    * **not** role-aware — every org member sees the same set, since PAT
-   * scope selection isn't gated by admin status.
+   * scope selection isn't gated by admin status. The handler reads no query
+   * parameters and ignores any that are sent.
    */
   async listPersonalAccessTokenScopes(
     options?: RequestOptions,
@@ -127,6 +129,10 @@ export class PersonalAccessTokens extends ClientSDK {
    * Requires org-admin privileges (`userAdminCheck`): a non-admin caller
    * gets `403` (`ForbiddenError`, message
    * "You need admin access to do this. Ask an admin in your organisation.").
+   * The admin check runs before the query is validated, so a non-admin gets
+   * `403` even for an invalid `page` or `limit`. Query parameters other than
+   * `page` and `limit` are ignored. A page past the end answers `200` with an
+   * empty `data` array.
    */
   async adminListPersonalAccessTokens(
     request?: operations.AdminListPersonalAccessTokensRequest | undefined,

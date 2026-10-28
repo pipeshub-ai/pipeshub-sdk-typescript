@@ -68,6 +68,18 @@ import { Result } from "../types/fp.js";
  * must be present; regular JWT bearer tokens pass through without scope
  * enforcement.
  *
+ * A parent the caller may not see, one in the trash, and one that does not
+ * exist are all answered `404` with the same body, so the route does not reveal
+ * whether the node exists.
+ *
+ * **Request checking**
+ *
+ * This route has no request validator of its own; the path values and the query
+ * are checked by the connector service. Query parameters not listed here are
+ * ignored. A wrong type for `page`, `limit`, `onlyContainers` or `flattened`
+ * (or `page` below 1 or `limit` outside 1-200) is answered `422`; other refusals,
+ * `page` above 50 and an unusable `cursor` included, are `400`.
+ *
  * If set, this operation will use either {@link Security.bearerAuth} or {@link Security.oauth2} from the global security.
  *
  * @deprecated method: Use the Knowledge Base API instead. This grouping will be removed in a future release.
@@ -79,12 +91,8 @@ export function knowledgeBaseGetKnowledgeHubChildNodes(
 ): APIPromise<
   Result<
     operations.GetKnowledgeHubChildNodesResponse,
-    | errors.GetKnowledgeHubChildNodesBadRequestError
-    | errors.GetKnowledgeHubChildNodesUnauthorizedError
-    | errors.GetKnowledgeHubChildNodesForbiddenError
-    | errors.GetKnowledgeHubChildNodesNotFoundError
+    | errors.ErrorResponse
     | errors.GetKnowledgeHubChildNodesUnprocessableEntityError
-    | errors.GetKnowledgeHubChildNodesInternalServerError
     | errors.GetKnowledgeHubChildNodesServiceUnavailableError
     | PipeshubError
     | ResponseValidationError
@@ -111,12 +119,8 @@ async function $do(
   [
     Result<
       operations.GetKnowledgeHubChildNodesResponse,
-      | errors.GetKnowledgeHubChildNodesBadRequestError
-      | errors.GetKnowledgeHubChildNodesUnauthorizedError
-      | errors.GetKnowledgeHubChildNodesForbiddenError
-      | errors.GetKnowledgeHubChildNodesNotFoundError
+      | errors.ErrorResponse
       | errors.GetKnowledgeHubChildNodesUnprocessableEntityError
-      | errors.GetKnowledgeHubChildNodesInternalServerError
       | errors.GetKnowledgeHubChildNodesServiceUnavailableError
       | PipeshubError
       | ResponseValidationError
@@ -235,12 +239,8 @@ async function $do(
 
   const [result] = await M.match<
     operations.GetKnowledgeHubChildNodesResponse,
-    | errors.GetKnowledgeHubChildNodesBadRequestError
-    | errors.GetKnowledgeHubChildNodesUnauthorizedError
-    | errors.GetKnowledgeHubChildNodesForbiddenError
-    | errors.GetKnowledgeHubChildNodesNotFoundError
+    | errors.ErrorResponse
     | errors.GetKnowledgeHubChildNodesUnprocessableEntityError
-    | errors.GetKnowledgeHubChildNodesInternalServerError
     | errors.GetKnowledgeHubChildNodesServiceUnavailableError
     | PipeshubError
     | ResponseValidationError
@@ -254,27 +254,12 @@ async function $do(
     M.json(200, operations.GetKnowledgeHubChildNodesResponse$inboundSchema, {
       key: "Result",
     }),
-    M.jsonErr(
-      400,
-      errors.GetKnowledgeHubChildNodesBadRequestError$inboundSchema,
-    ),
-    M.jsonErr(
-      401,
-      errors.GetKnowledgeHubChildNodesUnauthorizedError$inboundSchema,
-    ),
-    M.jsonErr(
-      403,
-      errors.GetKnowledgeHubChildNodesForbiddenError$inboundSchema,
-    ),
-    M.jsonErr(404, errors.GetKnowledgeHubChildNodesNotFoundError$inboundSchema),
+    M.jsonErr([400, 401, 403, 404], errors.ErrorResponse$inboundSchema),
     M.jsonErr(
       422,
       errors.GetKnowledgeHubChildNodesUnprocessableEntityError$inboundSchema,
     ),
-    M.jsonErr(
-      500,
-      errors.GetKnowledgeHubChildNodesInternalServerError$inboundSchema,
-    ),
+    M.jsonErr(500, errors.ErrorResponse$inboundSchema),
     M.jsonErr(
       503,
       errors.GetKnowledgeHubChildNodesServiceUnavailableError$inboundSchema,

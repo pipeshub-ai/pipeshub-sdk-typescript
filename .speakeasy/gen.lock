@@ -1,17 +1,19 @@
 lockVersion: 2.0.0
 id: 2e00d980-2e17-4d30-a7ac-0536b402cbc9
 management:
-  docChecksum: caae7eb2327e6df06a27766de8bf23dd
+  docChecksum: 82040a15fc78b5c965fb8ef82b168cd3
   docVersion: 1.0.0
   speakeasyVersion: 1.801.0
   generationVersion: 2.946.0
   releaseVersion: 2.0.0
-  configChecksum: 06a143c83f5ba74a2c14277008258e15
+  configChecksum: 6977a7dd33b12f7c6f8ba5f0bd604ee0
+  repoURL: https://github.com/pipeshub-ai/pipeshub-sdk-typescript
+  installationURL: https://github.com/pipeshub-ai/pipeshub-sdk-typescript
   published: true
 persistentEdits:
-  generation_id: dce22400-2066-4008-a24b-7125a82245db
-  pristine_commit_hash: de325ffe2425bd884356fce3343786b10960f7c7
-  pristine_tree_hash: 9ffdeb8e86b986a41bd1a27e78f143d158fb832c
+  generation_id: 4084ca24-25ca-48c0-bd53-3a964ec6f2e5
+  pristine_commit_hash: 82f8ca99c70a2f00eccb4d275104692e3af712ae
+  pristine_tree_hash: 883d8da87da9b6a266f50c70b2bd75b1c0400730
 features:
   typescript:
     additionalDependencies: 0.1.0
@@ -4183,8 +4185,8 @@ trackedFiles:
     pristine_git_object: 4dd4a6fd34c3e17a33d23279ced5552b995f22e2
   package.json:
     id: 7030d0b2f71b
-    last_write_checksum: sha1:5c682d644f2c0f9ae37eed619dc7fd3cd78b06ee
-    pristine_git_object: c86416a91962e572b033f4660f924ef1be68e303
+    last_write_checksum: sha1:d12ae9584eb2543162ae9623e275d6a4ec5a9eb9
+    pristine_git_object: 167174d3d2d26ba917f1b14fd2b1bf0e3fe5c9bd
   src/__tests__/assertions.ts:
     id: 23e6ed08eb14
     last_write_checksum: sha1:f89afdb1173560667909423fa438e55e3f9ed1aa

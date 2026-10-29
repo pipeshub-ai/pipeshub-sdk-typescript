@@ -2,6 +2,8 @@
   "name": "@pipeshub-ai/sdk",
   "version": "2.0.0",
   "author": "Pipeshub",
+  "description": "Official TypeScript SDK for the PipesHub API. Search and chat over your company's knowledge.",
+  "homepage": "https://pipeshub.com",
   "type": "module",
   "tshy": {
     "sourceDialects": [
@@ -19,6 +21,10 @@
     }
   },
   "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pipeshub-ai/pipeshub-sdk-typescript"
+  },
   "scripts": {
     "test": "vitest run src --reporter=junit --outputFile=.speakeasy/reports/tests.xml --reporter=default",
     "check": "npm run test && npm run lint",

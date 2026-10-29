@@ -46,11 +46,6 @@ const pipeshub = new Pipeshub({
 async function run() {
   const result = await pipeshub.semanticSearch.retrieve({
     query: "how do we roll back a canary?",
-    filters: {
-      kb: [
-        "3f2a9c1e-5b7d-4e8a-9c21-7d4e5f6a8b90",
-      ],
-    },
   });
 
   console.log(result);
@@ -78,11 +73,6 @@ const pipeshub = new PipeshubCore({
 async function run() {
   const res = await semanticSearchRetrieve(pipeshub, {
     query: "how do we roll back a canary?",
-    filters: {
-      kb: [
-        "3f2a9c1e-5b7d-4e8a-9c21-7d4e5f6a8b90",
-      ],
-    },
   });
   if (res.ok) {
     const { value: result } = res;

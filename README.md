@@ -1,28 +1,37 @@
-# pipeshub-sdk-typescript
+# PipesHub TypeScript SDK
 
-**Compatibility:** SDK version 1.7.0 is compatible with PipesHub [v0.9.1](https://github.com/pipeshub-ai/pipeshub-ai/releases/tag/v0.9.1).
+[![npm version](https://img.shields.io/npm/v/@pipeshub-ai/sdk.svg)](https://www.npmjs.com/package/@pipeshub-ai/sdk)
+[![License](https://img.shields.io/github/license/pipeshub-ai/pipeshub-sdk-typescript.svg)](https://github.com/pipeshub-ai/pipeshub-sdk-typescript/blob/main/LICENSE)
 
-<!-- Start Summary [summary] -->
-## Summary
+The PipesHub TypeScript SDK provides access to the [PipesHub](https://pipeshub.com) API from TypeScript and JavaScript, in Node.js, Bun, Deno and the browser. PipesHub connects workplace apps such as Google Drive, Slack, Confluence and Jira, indexes their content, and answers questions with citations to the source. With this SDK you can search and chat over that knowledge, run agents, and manage knowledge bases and connectors.
 
-PipesHub API: Search and chat over your company's knowledge from your own code.
+The SDK has types for every request and response, and its methods are also available as standalone functions for smaller bundles. It is generated with [Speakeasy](https://www.speakeasy.com) from the [PipesHub OpenAPI spec](https://github.com/pipeshub-ai/open-api).
 
-PipesHub connects workplace apps such as Google Drive, Slack, Confluence and Jira, indexes their content, and answers questions with citations to the source. Use this SDK to search, chat with assistants and agents, manage knowledge bases and connectors, and sign in with OAuth 2.0 or a personal access token.
+**Compatibility:** SDK version 2.0.0 is compatible with PipesHub [v1.0.0](https://github.com/pipeshub-ai/pipeshub-ai/releases/tag/v1.0.0).
 
-API reference: https://docs.pipeshub.com/developer/api-reference
-<!-- End Summary [summary] -->
+## Documentation
+
+- [Personal access tokens](https://docs.pipeshub.com/developer/personal-access-tokens): create the token the SDK signs in with.
+- [Retrieval API](https://docs.pipeshub.com/developer/retrieval-api): permission-filtered passages with citations, for your own RAG or agent.
+- [API reference](https://docs.pipeshub.com/developer/api-reference): the PipesHub HTTP API.
+- [Available methods](#available-resources-and-operations): every SDK method, linked to its parameters, response and errors.
+- [Examples](examples/): runnable programs for search, chat, agents, knowledge bases and connectors.
+- [Changelog](CHANGELOG.md)
+
+The client connects to PipesHub Cloud (`https://app.pipeshub.com`) by default. For a self-hosted instance, pass `serverURL: "https://<your-instance>/api/v1"` (see [Server Selection](#server-selection)).
+
+<!-- No Summary [summary] -->
 
 <!-- Start Table of Contents [toc] -->
 ## Table of Contents
 <!-- $toc-max-depth=2 -->
-* [pipeshub-sdk-typescript](#pipeshub-sdk-typescript)
+* [PipesHub TypeScript SDK](#pipeshub-typescript-sdk)
+  * [Documentation](#documentation)
   * [SDK Installation](#sdk-installation)
   * [Requirements](#requirements)
   * [SDK Example Usage](#sdk-example-usage)
   * [Retrieval for RAG and the Vercel AI SDK](#retrieval-for-rag-and-the-vercel-ai-sdk)
   * [Authentication](#authentication)
-  * [Available Resources and Operations](#available-resources-and-operations)
-  * [Standalone functions](#standalone-functions)
   * [Server-sent event streaming](#server-sent-event-streaming)
   * [File uploads](#file-uploads)
   * [Retries](#retries)
@@ -30,6 +39,11 @@ API reference: https://docs.pipeshub.com/developer/api-reference
   * [Server Selection](#server-selection)
   * [Custom HTTP Client](#custom-http-client)
   * [Debugging](#debugging)
+  * [Available Resources and Operations](#available-resources-and-operations)
+  * [Standalone functions](#standalone-functions)
+  * [Support](#support)
+  * [Contributing](#contributing)
+  * [License](#license)
 
 <!-- End Table of Contents [toc] -->
 
@@ -75,16 +89,20 @@ For supported JavaScript runtimes, please consult [RUNTIMES.md](RUNTIMES.md).
 <!-- Start SDK Example Usage [usage] -->
 ## SDK Example Usage
 
-### Example
+### Retrieve passages with citations
 
 ```typescript
 import { Pipeshub } from "@pipeshub-ai/sdk";
 
-const pipeshub = new Pipeshub();
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
 
 async function run() {
-  const result = await pipeshub.oAuthProvider.oauthToken({
-    grantType: "client_credentials",
+  const result = await pipeshub.semanticSearch.retrieve({
+    query: "how do we roll back a canary?",
   });
 
   console.log(result);
@@ -174,6 +192,373 @@ run();
 
 ```
 <!-- End Authentication [security] -->
+
+<!-- Start Server-sent event streaming [eventstream] -->
+## Server-sent event streaming
+
+[Server-sent events][mdn-sse] are used to stream content from certain
+operations. These operations will expose the stream as an async iterable that
+can be consumed using a [`for await...of`][mdn-for-await-of] loop. The loop will
+terminate when the server no longer has any events to send and closes the
+underlying connection.
+
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.knowledgeBase.uploadRecords({
+    kbId: "<id>",
+    body: {
+      files: [],
+      filesMetadata: [
+        {
+          filePath: "/docs/report.pdf",
+          lastModified: 2024,
+        },
+      ],
+    },
+  });
+
+  for await (const event of result) {
+    console.log(event);
+  }
+}
+
+run();
+
+```
+
+[mdn-sse]: https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events
+[mdn-for-await-of]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for-await...of
+<!-- End Server-sent event streaming [eventstream] -->
+
+<!-- Start File uploads [file-upload] -->
+## File uploads
+
+Certain SDK methods accept files as part of a multi-part request. It is possible and typically recommended to upload files as a stream rather than reading the entire contents into memory. This avoids excessive memory consumption and potentially crashing with out-of-memory errors when working with very large files. The following example demonstrates how to attach a file stream to a request.
+
+> [!TIP]
+>
+> Depending on your JavaScript runtime, there are convenient utilities that return a handle to a file without reading the entire contents into memory:
+>
+> - **Node.js v20+:** Since v20, Node.js comes with a native `openAsBlob` function in [`node:fs`](https://nodejs.org/docs/latest-v20.x/api/fs.html#fsopenasblobpath-options).
+> - **Bun:** The native [`Bun.file`](https://bun.sh/docs/api/file-io#reading-files-bun-file) function produces a file handle that can be used for streaming file uploads.
+> - **Browsers:** All supported browsers return an instance to a [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) when reading the value from an `<input type="file">` element.
+> - **Node.js v18:** A file stream can be created using the `fileFrom` helper from [`fetch-blob/from.js`](https://www.npmjs.com/package/fetch-blob).
+
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.knowledgeBase.updateRecordMultipart({
+    recordId: "<id>",
+  });
+
+  console.log(result);
+}
+
+run();
+
+```
+<!-- End File uploads [file-upload] -->
+
+<!-- Start Retries [retries] -->
+## Retries
+
+Some of the endpoints in this SDK support retries.  If you use the SDK without any configuration, it will fall back to the default retry strategy provided by the API.  However, the default retry strategy can be overridden on a per-operation basis, or across the entire SDK.
+
+To change the default retry strategy for a single API call, simply provide a retryConfig object to the call:
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub();
+
+async function run() {
+  const result = await pipeshub.oAuthProvider.oauthToken({
+    grantType: "client_credentials",
+  }, {
+    retries: {
+      strategy: "backoff",
+      backoff: {
+        initialInterval: 1,
+        maxInterval: 50,
+        exponent: 1.1,
+        maxElapsedTime: 100,
+      },
+      retryConnectionErrors: false,
+    },
+  });
+
+  console.log(result);
+}
+
+run();
+
+```
+
+If you'd like to override the default retry strategy for all operations that support retries, you can provide a retryConfig at SDK initialization:
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  retryConfig: {
+    strategy: "backoff",
+    backoff: {
+      initialInterval: 1,
+      maxInterval: 50,
+      exponent: 1.1,
+      maxElapsedTime: 100,
+    },
+    retryConnectionErrors: false,
+  },
+});
+
+async function run() {
+  const result = await pipeshub.oAuthProvider.oauthToken({
+    grantType: "client_credentials",
+  });
+
+  console.log(result);
+}
+
+run();
+
+```
+<!-- End Retries [retries] -->
+
+<!-- Start Error Handling [errors] -->
+## Error Handling
+
+[`PipeshubError`](./src/models/errors/pipeshub-error.ts) is the base class for all HTTP error responses. It has the following properties:
+
+| Property            | Type       | Description                                                                             |
+| ------------------- | ---------- | --------------------------------------------------------------------------------------- |
+| `error.message`     | `string`   | Error message                                                                           |
+| `error.statusCode`  | `number`   | HTTP response status code eg `404`                                                      |
+| `error.headers`     | `Headers`  | HTTP response headers                                                                   |
+| `error.body`        | `string`   | HTTP body. Can be empty string if no body is returned.                                  |
+| `error.rawResponse` | `Response` | Raw HTTP response                                                                       |
+| `error.data$`       |            | Optional. Some errors may contain structured data. [See Error Classes](#error-classes). |
+
+### Example
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+import * as errors from "@pipeshub-ai/sdk/models/errors";
+
+const pipeshub = new Pipeshub();
+
+async function run() {
+  try {
+    const result = await pipeshub.oAuthProvider.oauthToken({
+      grantType: "client_credentials",
+    });
+
+    console.log(result);
+  } catch (error) {
+    // The base class for HTTP error responses
+    if (error instanceof errors.PipeshubError) {
+      console.log(error.message);
+      console.log(error.statusCode);
+      console.log(error.body);
+      console.log(error.headers);
+
+      // Depending on the method different errors may be thrown
+      if (error instanceof errors.ErrorResponse) {
+        console.log(error.data$.error); // models.ErrorResponseError
+      }
+    }
+  }
+}
+
+run();
+
+```
+
+### Error Classes
+**Primary errors:**
+* [`PipeshubError`](./src/models/errors/pipeshub-error.ts): The base class for HTTP error responses.
+  * [`ErrorResponse`](./src/models/errors/error-response.ts): Standard error envelope returned by all errors routed through `ErrorMiddleware`. Applies to all `BaseError` subclasses including `HttpError`, `ValidationError`, and others. The `code` field is a machine-readable string identifying the error type (e.g. `HTTP_UNAUTHORIZED`, `HTTP_NOT_FOUND`, `VALIDATION_ERROR`, `INTERNAL_ERROR`). *
+
+<details><summary>Less common errors (22)</summary>
+
+<br />
+
+**Network errors:**
+* [`ConnectionError`](./src/models/errors/http-client-errors.ts): HTTP client was unable to make a request to a server.
+* [`RequestTimeoutError`](./src/models/errors/http-client-errors.ts): HTTP request timed out due to an AbortSignal signal.
+* [`RequestAbortedError`](./src/models/errors/http-client-errors.ts): HTTP request was aborted by the client.
+* [`InvalidRequestError`](./src/models/errors/http-client-errors.ts): Any input used to create a request is invalid.
+* [`UnexpectedClientError`](./src/models/errors/http-client-errors.ts): Unrecognised or unexpected error.
+
+
+**Inherit from [`PipeshubError`](./src/models/errors/pipeshub-error.ts)**:
+* [`OAuthClientManagementRateLimitError`](./src/models/errors/o-auth-client-management-rate-limit-error.ts): JSON body when OAuth client management routes exceed the per-minute rate limit (same limiter as other `/oauth-clients/*` routes). Status code `429`. Applicable to 20 of 141 methods.*
+* [`ApplicationJsonErrorResponse`](./src/models/errors/application-json-error-response.ts): Standard JSON error envelope from `ErrorMiddleware` for `BaseError` subclasses (`error.middleware.ts`). Returned for most API 4xx errors (unauthorized, forbidden, not found, validation failures, etc.). Applicable to 17 of 141 methods.*
+* [`OAuthErrorResponse`](./src/models/errors/o-auth-error-response.ts): OAuth 2.0 Error Response (RFC 6749 Section 5.2). Standard error format for OAuth endpoints. Applicable to 3 of 141 methods.*
+* [`RateLimitErrorResponse`](./src/models/errors/rate-limit-error-response.ts): Rate-limit error payload (shape differs from standard error responses). Status code `429`. Applicable to 3 of 141 methods.*
+* [`LocalFsDesktopRefusalError`](./src/models/errors/local-fs-desktop-refusal-error.ts): 409 body returned when a Local FS connector cannot sync because of its owner device. Status code `409`. Applicable to 2 of 141 methods.*
+* [`BadRequestError`](./src/models/errors/bad-request-error.ts): Error envelope for a failed request. Status code `400`. Applicable to 1 of 141 methods.*
+* [`UnauthorizedError`](./src/models/errors/unauthorized-error.ts): Error envelope for a failed request. Status code `401`. Applicable to 1 of 141 methods.*
+* [`OAuthBearerTokenError`](./src/models/errors/o-auth-bearer-token-error.ts): Error body written by the OAuth bearer-token middleware (RFC 6750 Section 3.1) on routes that accept only an OAuth access token, such as `GET /oauth2/userinfo`. The same `error`, `error_description` and `scope` values are repeated in the `WWW-Authenticate` response header. This is not the standard `ErrorResponse` envelope: `error` is a string. Applicable to 1 of 141 methods.*
+* [`ForbiddenError`](./src/models/errors/forbidden-error.ts): Error envelope for a failed request. Status code `403`. Applicable to 1 of 141 methods.*
+* [`StreamRecordErrorResponse`](./src/models/errors/stream-record-error-response.ts): Error payload returned by the legacy record-stream proxy when the downstream streaming request fails after route middleware has passed. Applicable to 1 of 141 methods.*
+* [`GetKnowledgeHubRootNodesUnprocessableEntityError`](./src/models/errors/get-knowledge-hub-root-nodes-unprocessable-entity-error.ts): Either of: - A typed query parameter could not be read: `page` or `limit` is not an   integer or is out of range (`page` below 1, `limit` outside 1-200),   `onlyContainers` or `flattened` is not a boolean, or `page`/`limit` was   sent more than once. `error.message` is the connector service's own   validation text. - A listing that spans a whole connector (a flattened listing, a search or a filter) was too large for the   database to hold in memory, so it was refused instead of cut short. No page is returned. Open a folder   (`GET /knowledgeBase/knowledge-hub/nodes/{parentType}/{parentId}`) to see its records, or add a search (`q`),   which keeps only matching records in memory. Choosing a connector, or a filter that keeps most records (such as   `nodeTypes`), does not help. Sorting by name with no filters is served from stored visibility where the   connector allows it and is not affected. Status code `422`. Applicable to 1 of 141 methods.*
+* [`GetKnowledgeHubChildNodesUnprocessableEntityError`](./src/models/errors/get-knowledge-hub-child-nodes-unprocessable-entity-error.ts): Either of: - A typed query parameter could not be read: `page` or `limit` is not an   integer or is out of range (`page` below 1, `limit` outside 1-200), or   `onlyContainers` or `flattened` is not a boolean. `error.message` is the   connector service's own validation text. - A listing that spans a whole connector (a flattened listing, a search or a filter) was too large for the   database to hold in memory, so it was refused instead of cut short. No page is returned. Open a folder   (`GET /knowledgeBase/knowledge-hub/nodes/{parentType}/{parentId}`) to see its records, or add a search (`q`),   which keeps only matching records in memory. Choosing a connector, or a filter that keeps most records (such as   `nodeTypes`), does not help. Sorting by name with no filters is served from stored visibility where the   connector allows it and is not affected. Status code `422`. Applicable to 1 of 141 methods.*
+* [`UploadAgentConversationChatAttachmentsUnprocessableEntityError`](./src/models/errors/upload-agent-conversation-chat-attachments-unprocessable-entity-error.ts): A PDF that could not be read within the upload's 50-second budget, or whose parse ran out of memory, is not attached (`<name> is too large or complex to read right now, so it wasn't attached. ...`). Only that upload fails. Status code `422`. Applicable to 1 of 141 methods.*
+* [`SearchHistoryInternalServerError`](./src/models/errors/search-history-internal-server-error.ts): Error envelope for a failed request. Status code `500`. Applicable to 1 of 141 methods.*
+* [`GetKnowledgeHubRootNodesServiceUnavailableError`](./src/models/errors/get-knowledge-hub-root-nodes-service-unavailable-error.ts): The database could not give this listing the memory it needs right now, because other requests were using it (nothing is wrong with the request). Retry after `Retry-After` seconds; the web app retries by itself. The body is the gateway's own busy message, not the service's wording. Status code `503`. Applicable to 1 of 141 methods.*
+* [`GetKnowledgeHubChildNodesServiceUnavailableError`](./src/models/errors/get-knowledge-hub-child-nodes-service-unavailable-error.ts): The database could not give this listing the memory it needs right now, because other requests were using it (nothing is wrong with the request). Retry after `Retry-After` seconds; the web app retries by itself. The body is the gateway's own busy message, not the service's wording. Status code `503`. Applicable to 1 of 141 methods.*
+* [`ResponseValidationError`](./src/models/errors/response-validation-error.ts): Type mismatch between the data returned from the server and the structure expected by the SDK. See `error.rawValue` for the raw value and `error.pretty()` for a nicely formatted multi-line string.
+
+</details>
+
+\* Check [the method documentation](#available-resources-and-operations) to see if the error is applicable.
+<!-- End Error Handling [errors] -->
+
+<!-- Start Server Selection [server] -->
+## Server Selection
+
+### Select Server by Index
+
+You can override the default server globally by passing a server index to the `serverIdx: number` optional parameter when initializing the SDK client instance. The selected server will then be used as the default on the operations that use it. This table lists the indexes associated with the available servers:
+
+| #   | Server                          | Variables      | Description                                       |
+| --- | ------------------------------- | -------------- | ------------------------------------------------- |
+| 0   | `https://{instance_url}/api/v1` | `instance_url` | Base API URL                                      |
+| 1   | `https://{instance_url}`        | `instance_url` | Root URL (used for MCP endpoints mounted at /mcp) |
+
+If the selected server has variables, you may override its default values through the additional parameters made available in the SDK constructor:
+
+| Variable       | Parameter             | Default              | Description                                                                                                                                                  |
+| -------------- | --------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `instance_url` | `instanceUrl: string` | `"app.pipeshub.com"` | Host name, with an optional port, of a PipesHub instance served over HTTPS. For a plain-HTTP instance, such as a local one, set the full server URL instead. |
+
+#### Example
+
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  serverIdx: 0,
+  instanceUrl: "app.pipeshub.com",
+});
+
+async function run() {
+  const result = await pipeshub.oAuthProvider.oauthToken({
+    grantType: "client_credentials",
+  });
+
+  console.log(result);
+}
+
+run();
+
+```
+
+### Override Server URL Per-Client
+
+The default server can also be overridden globally by passing a URL to the `serverURL: string` optional parameter when initializing the SDK client instance. For example:
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  serverURL: "https://app.pipeshub.com",
+});
+
+async function run() {
+  const result = await pipeshub.oAuthProvider.oauthToken({
+    grantType: "client_credentials",
+  });
+
+  console.log(result);
+}
+
+run();
+
+```
+<!-- End Server Selection [server] -->
+
+<!-- Start Custom HTTP Client [http-client] -->
+## Custom HTTP Client
+
+The TypeScript SDK makes API calls using an `HTTPClient` that wraps the native
+[Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API). This
+client is a thin wrapper around `fetch` and provides the ability to attach hooks
+around the request lifecycle that can be used to modify the request or handle
+errors and response.
+
+The `HTTPClient` constructor takes an optional `fetcher` argument that can be
+used to integrate a third-party HTTP client or when writing tests to mock out
+the HTTP client and feed in fixtures.
+
+The following example shows how to:
+- route requests through a proxy server using [undici](https://www.npmjs.com/package/undici)'s ProxyAgent
+- use the `"beforeRequest"` hook to add a custom header and a timeout to requests
+- use the `"requestError"` hook to log errors
+
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+import { ProxyAgent } from "undici";
+import { HTTPClient } from "@pipeshub-ai/sdk/lib/http";
+
+const dispatcher = new ProxyAgent("http://proxy.example.com:8080");
+
+const httpClient = new HTTPClient({
+  // 'fetcher' takes a function that has the same signature as native 'fetch'.
+  fetcher: (input, init) =>
+    // 'dispatcher' is specific to undici and not part of the standard Fetch API.
+    fetch(input, { ...init, dispatcher } as RequestInit),
+});
+
+httpClient.addHook("beforeRequest", (request) => {
+  const nextRequest = new Request(request, {
+    signal: request.signal || AbortSignal.timeout(5000)
+  });
+
+  nextRequest.headers.set("x-custom-header", "custom value");
+
+  return nextRequest;
+});
+
+httpClient.addHook("requestError", (error, request) => {
+  console.group("Request Error");
+  console.log("Reason:", `${error}`);
+  console.log("Endpoint:", `${request.method} ${request.url}`);
+  console.groupEnd();
+});
+
+const sdk = new Pipeshub({ httpClient: httpClient });
+```
+<!-- End Custom HTTP Client [http-client] -->
+
+<!-- Start Debugging [debug] -->
+## Debugging
+
+You can setup your SDK to emit debug logs for SDK requests and responses.
+
+You can pass a logger that matches `console`'s interface as an SDK option.
+
+> [!WARNING]
+> Beware that debug logging will reveal secrets, like API tokens in headers, in log messages printed to a console or files. It's recommended to use this feature only during local development and not in production.
+
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const sdk = new Pipeshub({ debugLogger: console });
+```
+<!-- End Debugging [debug] -->
 
 <!-- Start Available Resources and Operations [operations] -->
 ## Available Resources and Operations
@@ -551,371 +936,18 @@ To read more about standalone functions, check [FUNCTIONS.md](./FUNCTIONS.md).
 </details>
 <!-- End Standalone functions [standalone-funcs] -->
 
-<!-- Start Server-sent event streaming [eventstream] -->
-## Server-sent event streaming
-
-[Server-sent events][mdn-sse] are used to stream content from certain
-operations. These operations will expose the stream as an async iterable that
-can be consumed using a [`for await...of`][mdn-for-await-of] loop. The loop will
-terminate when the server no longer has any events to send and closes the
-underlying connection.
-
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-
-const pipeshub = new Pipeshub({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const result = await pipeshub.knowledgeBase.uploadRecords({
-    kbId: "<id>",
-    body: {
-      files: [],
-      filesMetadata: [
-        {
-          filePath: "/docs/report.pdf",
-          lastModified: 2024,
-        },
-      ],
-    },
-  });
-
-  for await (const event of result) {
-    console.log(event);
-  }
-}
-
-run();
-
-```
-
-[mdn-sse]: https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events
-[mdn-for-await-of]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for-await...of
-<!-- End Server-sent event streaming [eventstream] -->
-
-<!-- Start File uploads [file-upload] -->
-## File uploads
-
-Certain SDK methods accept files as part of a multi-part request. It is possible and typically recommended to upload files as a stream rather than reading the entire contents into memory. This avoids excessive memory consumption and potentially crashing with out-of-memory errors when working with very large files. The following example demonstrates how to attach a file stream to a request.
-
-> [!TIP]
->
-> Depending on your JavaScript runtime, there are convenient utilities that return a handle to a file without reading the entire contents into memory:
->
-> - **Node.js v20+:** Since v20, Node.js comes with a native `openAsBlob` function in [`node:fs`](https://nodejs.org/docs/latest-v20.x/api/fs.html#fsopenasblobpath-options).
-> - **Bun:** The native [`Bun.file`](https://bun.sh/docs/api/file-io#reading-files-bun-file) function produces a file handle that can be used for streaming file uploads.
-> - **Browsers:** All supported browsers return an instance to a [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) when reading the value from an `<input type="file">` element.
-> - **Node.js v18:** A file stream can be created using the `fileFrom` helper from [`fetch-blob/from.js`](https://www.npmjs.com/package/fetch-blob).
-
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-
-const pipeshub = new Pipeshub({
-  security: {
-    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
-  },
-});
-
-async function run() {
-  const result = await pipeshub.knowledgeBase.updateRecordMultipart({
-    recordId: "<id>",
-  });
-
-  console.log(result);
-}
-
-run();
-
-```
-<!-- End File uploads [file-upload] -->
-
-<!-- Start Retries [retries] -->
-## Retries
-
-Some of the endpoints in this SDK support retries.  If you use the SDK without any configuration, it will fall back to the default retry strategy provided by the API.  However, the default retry strategy can be overridden on a per-operation basis, or across the entire SDK.
-
-To change the default retry strategy for a single API call, simply provide a retryConfig object to the call:
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-
-const pipeshub = new Pipeshub();
-
-async function run() {
-  const result = await pipeshub.oAuthProvider.oauthToken({
-    grantType: "client_credentials",
-  }, {
-    retries: {
-      strategy: "backoff",
-      backoff: {
-        initialInterval: 1,
-        maxInterval: 50,
-        exponent: 1.1,
-        maxElapsedTime: 100,
-      },
-      retryConnectionErrors: false,
-    },
-  });
-
-  console.log(result);
-}
-
-run();
-
-```
-
-If you'd like to override the default retry strategy for all operations that support retries, you can provide a retryConfig at SDK initialization:
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-
-const pipeshub = new Pipeshub({
-  retryConfig: {
-    strategy: "backoff",
-    backoff: {
-      initialInterval: 1,
-      maxInterval: 50,
-      exponent: 1.1,
-      maxElapsedTime: 100,
-    },
-    retryConnectionErrors: false,
-  },
-});
-
-async function run() {
-  const result = await pipeshub.oAuthProvider.oauthToken({
-    grantType: "client_credentials",
-  });
-
-  console.log(result);
-}
-
-run();
-
-```
-<!-- End Retries [retries] -->
-
-<!-- Start Error Handling [errors] -->
-## Error Handling
-
-[`PipeshubError`](./src/models/errors/pipeshub-error.ts) is the base class for all HTTP error responses. It has the following properties:
-
-| Property            | Type       | Description                                                                             |
-| ------------------- | ---------- | --------------------------------------------------------------------------------------- |
-| `error.message`     | `string`   | Error message                                                                           |
-| `error.statusCode`  | `number`   | HTTP response status code eg `404`                                                      |
-| `error.headers`     | `Headers`  | HTTP response headers                                                                   |
-| `error.body`        | `string`   | HTTP body. Can be empty string if no body is returned.                                  |
-| `error.rawResponse` | `Response` | Raw HTTP response                                                                       |
-| `error.data$`       |            | Optional. Some errors may contain structured data. [See Error Classes](#error-classes). |
-
-### Example
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-import * as errors from "@pipeshub-ai/sdk/models/errors";
-
-const pipeshub = new Pipeshub();
-
-async function run() {
-  try {
-    const result = await pipeshub.oAuthProvider.oauthToken({
-      grantType: "client_credentials",
-    });
-
-    console.log(result);
-  } catch (error) {
-    // The base class for HTTP error responses
-    if (error instanceof errors.PipeshubError) {
-      console.log(error.message);
-      console.log(error.statusCode);
-      console.log(error.body);
-      console.log(error.headers);
-
-      // Depending on the method different errors may be thrown
-      if (error instanceof errors.ErrorResponse) {
-        console.log(error.data$.error); // models.ErrorResponseError
-      }
-    }
-  }
-}
-
-run();
-
-```
-
-### Error Classes
-**Primary errors:**
-* [`PipeshubError`](./src/models/errors/pipeshub-error.ts): The base class for HTTP error responses.
-  * [`ErrorResponse`](./src/models/errors/error-response.ts): Standard error envelope returned by all errors routed through `ErrorMiddleware`. Applies to all `BaseError` subclasses including `HttpError`, `ValidationError`, and others. The `code` field is a machine-readable string identifying the error type (e.g. `HTTP_UNAUTHORIZED`, `HTTP_NOT_FOUND`, `VALIDATION_ERROR`, `INTERNAL_ERROR`). *
-
-<details><summary>Less common errors (22)</summary>
-
-<br />
-
-**Network errors:**
-* [`ConnectionError`](./src/models/errors/http-client-errors.ts): HTTP client was unable to make a request to a server.
-* [`RequestTimeoutError`](./src/models/errors/http-client-errors.ts): HTTP request timed out due to an AbortSignal signal.
-* [`RequestAbortedError`](./src/models/errors/http-client-errors.ts): HTTP request was aborted by the client.
-* [`InvalidRequestError`](./src/models/errors/http-client-errors.ts): Any input used to create a request is invalid.
-* [`UnexpectedClientError`](./src/models/errors/http-client-errors.ts): Unrecognised or unexpected error.
-
-
-**Inherit from [`PipeshubError`](./src/models/errors/pipeshub-error.ts)**:
-* [`OAuthClientManagementRateLimitError`](./src/models/errors/o-auth-client-management-rate-limit-error.ts): JSON body when OAuth client management routes exceed the per-minute rate limit (same limiter as other `/oauth-clients/*` routes). Status code `429`. Applicable to 20 of 141 methods.*
-* [`ApplicationJsonErrorResponse`](./src/models/errors/application-json-error-response.ts): Standard JSON error envelope from `ErrorMiddleware` for `BaseError` subclasses (`error.middleware.ts`). Returned for most API 4xx errors (unauthorized, forbidden, not found, validation failures, etc.). Applicable to 17 of 141 methods.*
-* [`OAuthErrorResponse`](./src/models/errors/o-auth-error-response.ts): OAuth 2.0 Error Response (RFC 6749 Section 5.2). Standard error format for OAuth endpoints. Applicable to 3 of 141 methods.*
-* [`RateLimitErrorResponse`](./src/models/errors/rate-limit-error-response.ts): Rate-limit error payload (shape differs from standard error responses). Status code `429`. Applicable to 3 of 141 methods.*
-* [`LocalFsDesktopRefusalError`](./src/models/errors/local-fs-desktop-refusal-error.ts): 409 body returned when a Local FS connector cannot sync because of its owner device. Status code `409`. Applicable to 2 of 141 methods.*
-* [`BadRequestError`](./src/models/errors/bad-request-error.ts): Error envelope for a failed request. Status code `400`. Applicable to 1 of 141 methods.*
-* [`UnauthorizedError`](./src/models/errors/unauthorized-error.ts): Error envelope for a failed request. Status code `401`. Applicable to 1 of 141 methods.*
-* [`OAuthBearerTokenError`](./src/models/errors/o-auth-bearer-token-error.ts): Error body written by the OAuth bearer-token middleware (RFC 6750 Section 3.1) on routes that accept only an OAuth access token, such as `GET /oauth2/userinfo`. The same `error`, `error_description` and `scope` values are repeated in the `WWW-Authenticate` response header. This is not the standard `ErrorResponse` envelope: `error` is a string. Applicable to 1 of 141 methods.*
-* [`ForbiddenError`](./src/models/errors/forbidden-error.ts): Error envelope for a failed request. Status code `403`. Applicable to 1 of 141 methods.*
-* [`StreamRecordErrorResponse`](./src/models/errors/stream-record-error-response.ts): Error payload returned by the legacy record-stream proxy when the downstream streaming request fails after route middleware has passed. Applicable to 1 of 141 methods.*
-* [`GetKnowledgeHubRootNodesUnprocessableEntityError`](./src/models/errors/get-knowledge-hub-root-nodes-unprocessable-entity-error.ts): Either of: - A typed query parameter could not be read: `page` or `limit` is not an   integer or is out of range (`page` below 1, `limit` outside 1-200),   `onlyContainers` or `flattened` is not a boolean, or `page`/`limit` was   sent more than once. `error.message` is the connector service's own   validation text. - A listing that spans a whole connector (a flattened listing, a search or a filter) was too large for the   database to hold in memory, so it was refused instead of cut short. No page is returned. Open a folder   (`GET /knowledgeBase/knowledge-hub/nodes/{parentType}/{parentId}`) to see its records, or add a search (`q`),   which keeps only matching records in memory. Choosing a connector, or a filter that keeps most records (such as   `nodeTypes`), does not help. Sorting by name with no filters is served from stored visibility where the   connector allows it and is not affected. Status code `422`. Applicable to 1 of 141 methods.*
-* [`GetKnowledgeHubChildNodesUnprocessableEntityError`](./src/models/errors/get-knowledge-hub-child-nodes-unprocessable-entity-error.ts): Either of: - A typed query parameter could not be read: `page` or `limit` is not an   integer or is out of range (`page` below 1, `limit` outside 1-200), or   `onlyContainers` or `flattened` is not a boolean. `error.message` is the   connector service's own validation text. - A listing that spans a whole connector (a flattened listing, a search or a filter) was too large for the   database to hold in memory, so it was refused instead of cut short. No page is returned. Open a folder   (`GET /knowledgeBase/knowledge-hub/nodes/{parentType}/{parentId}`) to see its records, or add a search (`q`),   which keeps only matching records in memory. Choosing a connector, or a filter that keeps most records (such as   `nodeTypes`), does not help. Sorting by name with no filters is served from stored visibility where the   connector allows it and is not affected. Status code `422`. Applicable to 1 of 141 methods.*
-* [`UploadAgentConversationChatAttachmentsUnprocessableEntityError`](./src/models/errors/upload-agent-conversation-chat-attachments-unprocessable-entity-error.ts): A PDF that could not be read within the upload's 50-second budget, or whose parse ran out of memory, is not attached (`<name> is too large or complex to read right now, so it wasn't attached. ...`). Only that upload fails. Status code `422`. Applicable to 1 of 141 methods.*
-* [`SearchHistoryInternalServerError`](./src/models/errors/search-history-internal-server-error.ts): Error envelope for a failed request. Status code `500`. Applicable to 1 of 141 methods.*
-* [`GetKnowledgeHubRootNodesServiceUnavailableError`](./src/models/errors/get-knowledge-hub-root-nodes-service-unavailable-error.ts): The database could not give this listing the memory it needs right now, because other requests were using it (nothing is wrong with the request). Retry after `Retry-After` seconds; the web app retries by itself. The body is the gateway's own busy message, not the service's wording. Status code `503`. Applicable to 1 of 141 methods.*
-* [`GetKnowledgeHubChildNodesServiceUnavailableError`](./src/models/errors/get-knowledge-hub-child-nodes-service-unavailable-error.ts): The database could not give this listing the memory it needs right now, because other requests were using it (nothing is wrong with the request). Retry after `Retry-After` seconds; the web app retries by itself. The body is the gateway's own busy message, not the service's wording. Status code `503`. Applicable to 1 of 141 methods.*
-* [`ResponseValidationError`](./src/models/errors/response-validation-error.ts): Type mismatch between the data returned from the server and the structure expected by the SDK. See `error.rawValue` for the raw value and `error.pretty()` for a nicely formatted multi-line string.
-
-</details>
-
-\* Check [the method documentation](#available-resources-and-operations) to see if the error is applicable.
-<!-- End Error Handling [errors] -->
-
-<!-- Start Server Selection [server] -->
-## Server Selection
-
-### Select Server by Index
-
-You can override the default server globally by passing a server index to the `serverIdx: number` optional parameter when initializing the SDK client instance. The selected server will then be used as the default on the operations that use it. This table lists the indexes associated with the available servers:
-
-| #   | Server                          | Variables      | Description                                       |
-| --- | ------------------------------- | -------------- | ------------------------------------------------- |
-| 0   | `https://{instance_url}/api/v1` | `instance_url` | Base API URL                                      |
-| 1   | `https://{instance_url}`        | `instance_url` | Root URL (used for MCP endpoints mounted at /mcp) |
-
-If the selected server has variables, you may override its default values through the additional parameters made available in the SDK constructor:
-
-| Variable       | Parameter             | Default                      | Description     |
-| -------------- | --------------------- | ---------------------------- | --------------- |
-| `instance_url` | `instanceUrl: string` | `"https://app.pipeshub.com"` | Base server URL |
-
-#### Example
-
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-
-const pipeshub = new Pipeshub({
-  serverIdx: 0,
-  instanceUrl: "https://app.pipeshub.com",
-});
-
-async function run() {
-  const result = await pipeshub.oAuthProvider.oauthToken({
-    grantType: "client_credentials",
-  });
-
-  console.log(result);
-}
-
-run();
-
-```
-
-### Override Server URL Per-Client
-
-The default server can also be overridden globally by passing a URL to the `serverURL: string` optional parameter when initializing the SDK client instance. For example:
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-
-const pipeshub = new Pipeshub({
-  serverURL: "https://https://app.pipeshub.com",
-});
-
-async function run() {
-  const result = await pipeshub.oAuthProvider.oauthToken({
-    grantType: "client_credentials",
-  });
-
-  console.log(result);
-}
-
-run();
-
-```
-<!-- End Server Selection [server] -->
-
-<!-- Start Custom HTTP Client [http-client] -->
-## Custom HTTP Client
-
-The TypeScript SDK makes API calls using an `HTTPClient` that wraps the native
-[Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API). This
-client is a thin wrapper around `fetch` and provides the ability to attach hooks
-around the request lifecycle that can be used to modify the request or handle
-errors and response.
-
-The `HTTPClient` constructor takes an optional `fetcher` argument that can be
-used to integrate a third-party HTTP client or when writing tests to mock out
-the HTTP client and feed in fixtures.
-
-The following example shows how to:
-- route requests through a proxy server using [undici](https://www.npmjs.com/package/undici)'s ProxyAgent
-- use the `"beforeRequest"` hook to add a custom header and a timeout to requests
-- use the `"requestError"` hook to log errors
-
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-import { ProxyAgent } from "undici";
-import { HTTPClient } from "@pipeshub-ai/sdk/lib/http";
-
-const dispatcher = new ProxyAgent("http://proxy.example.com:8080");
-
-const httpClient = new HTTPClient({
-  // 'fetcher' takes a function that has the same signature as native 'fetch'.
-  fetcher: (input, init) =>
-    // 'dispatcher' is specific to undici and not part of the standard Fetch API.
-    fetch(input, { ...init, dispatcher } as RequestInit),
-});
-
-httpClient.addHook("beforeRequest", (request) => {
-  const nextRequest = new Request(request, {
-    signal: request.signal || AbortSignal.timeout(5000)
-  });
-
-  nextRequest.headers.set("x-custom-header", "custom value");
-
-  return nextRequest;
-});
-
-httpClient.addHook("requestError", (error, request) => {
-  console.group("Request Error");
-  console.log("Reason:", `${error}`);
-  console.log("Endpoint:", `${request.method} ${request.url}`);
-  console.groupEnd();
-});
-
-const sdk = new Pipeshub({ httpClient: httpClient });
-```
-<!-- End Custom HTTP Client [http-client] -->
-
-<!-- Start Debugging [debug] -->
-## Debugging
-
-You can setup your SDK to emit debug logs for SDK requests and responses.
-
-You can pass a logger that matches `console`'s interface as an SDK option.
-
-> [!WARNING]
-> Beware that debug logging will reveal secrets, like API tokens in headers, in log messages printed to a console or files. It's recommended to use this feature only during local development and not in production.
-
-```typescript
-import { Pipeshub } from "@pipeshub-ai/sdk";
-
-const sdk = new Pipeshub({ debugLogger: console });
-```
-<!-- End Debugging [debug] -->
-
 <!-- Placeholder for Future Speakeasy SDK Sections -->
+
+## Support
+
+- Bugs and feature requests: [open an issue](https://github.com/pipeshub-ai/pipeshub-sdk-typescript/issues).
+- Questions: the [PipesHub Discord](https://discord.com/invite/K5RskzJBm2).
+- PipesHub itself: [pipeshub-ai/pipeshub-ai](https://github.com/pipeshub-ai/pipeshub-ai).
+
+## Contributing
+
+Most of this SDK is generated, so direct changes to generated files are overwritten by the next release. Please open an issue instead. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+Licensed under the [Apache License 2.0](LICENSE).

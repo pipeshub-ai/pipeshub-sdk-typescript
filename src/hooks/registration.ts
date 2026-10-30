@@ -1,5 +1,6 @@
 import { RequestIDHook } from "./requestid.js";
 import { Hooks } from "./types.js";
+import { VersionCheckHook } from "./version-check.js";
 
 /*
  * This file is only ever generated once on the first generation and then is free to be modified.
@@ -12,4 +13,5 @@ export function initHooks(hooks: Hooks) {
   // with an instance of a hook that implements that specific Hook interface
   // Hooks are registered per SDK instance, and are valid for the lifetime of the SDK instance
   hooks.registerBeforeRequestHook(new RequestIDHook());
+  hooks.registerBeforeRequestHook(new VersionCheckHook());
 }

@@ -3,11 +3,9 @@
 [![npm version](https://img.shields.io/npm/v/@pipeshub-ai/sdk.svg)](https://www.npmjs.com/package/@pipeshub-ai/sdk)
 [![License](https://img.shields.io/github/license/pipeshub-ai/pipeshub-sdk-typescript.svg)](https://github.com/pipeshub-ai/pipeshub-sdk-typescript/blob/main/LICENSE)
 
-The PipesHub TypeScript SDK provides access to the [PipesHub](https://pipeshub.com) API from TypeScript and JavaScript, in Node.js, Bun, Deno and the browser. PipesHub connects workplace apps such as Google Drive, Slack, Confluence and Jira, indexes their content, and answers questions with citations to the source. With this SDK you can search and chat over that knowledge, run agents, and manage knowledge bases and connectors.
+The official TypeScript SDK for [PipesHub](https://pipeshub.com). Search your company's knowledge and get answers with citations, run agents, and manage knowledge bases and connectors, all from your TypeScript or JavaScript code.
 
-The SDK has types for every request and response, and its methods are also available as standalone functions for smaller bundles. It is generated with [Speakeasy](https://www.speakeasy.com) from the [PipesHub OpenAPI spec](https://github.com/pipeshub-ai/open-api).
-
-**Compatibility:** SDK version 2.0.0 is compatible with PipesHub [v1.0.0](https://github.com/pipeshub-ai/pipeshub-ai/releases/tag/v1.0.0).
+PipesHub connects workplace apps such as Google Drive, Slack, Confluence and Jira and indexes their content. The SDK runs in Node.js, Bun, Deno and the browser, has types for every request and response, and its methods are also available as standalone functions for smaller bundles. It is generated with [Speakeasy](https://www.speakeasy.com) from the [PipesHub OpenAPI spec](https://github.com/pipeshub-ai/open-api).
 
 ## Documentation
 

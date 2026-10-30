@@ -5,6 +5,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   release:
@@ -48,3 +49,21 @@ jobs:
           tag_name: v${{ steps.version.outputs.VERSION }}
           name: v${{ steps.version.outputs.VERSION }}
           generate_release_notes: true
+
+      - name: Set up Node for GitHub Packages
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://npm.pkg.github.com
+          scope: '@pipeshub-ai'
+
+      # Workflow-only: links the GitHub Packages copy to the main repo without changing the Speakeasy-generated package.json or the npmjs.com metadata.
+      - name: Point package repository at the main repo
+        run: |
+          npm pkg set repository.type=git
+          npm pkg set repository.url=git+https://github.com/pipeshub-ai/pipeshub-ai.git
+
+      - name: Publish to GitHub Packages
+        run: npm publish --registry https://npm.pkg.github.com
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

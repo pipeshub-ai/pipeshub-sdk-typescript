@@ -1,7 +1,7 @@
 lockVersion: 2.0.0
 id: 2e00d980-2e17-4d30-a7ac-0536b402cbc9
 management:
-  docChecksum: 4e64bf7934257a5119986bb2008e9e51
+  docChecksum: 33d1bafce6edf89acc5e973b9581bbaf
   docVersion: 1.0.0
   speakeasyVersion: 1.801.0
   generationVersion: 2.946.0
@@ -11,9 +11,9 @@ management:
   installationURL: https://github.com/pipeshub-ai/pipeshub-sdk-typescript
   published: true
 persistentEdits:
-  generation_id: 43ea1ecf-8c50-408e-a9d7-4ead138c57f8
-  pristine_commit_hash: 6bdcd0b09f115dc0d4599b976c998fff141038f3
-  pristine_tree_hash: 9038f3ef8364fddc7c5c515c84c2fd9213b7a84f
+  generation_id: 313cec97-399a-49b3-9cd1-06bb1cbe8e3c
+  pristine_commit_hash: c012f2aba9a3d5e91e4732444f33472a192540e1
+  pristine_tree_hash: dcb38e06d37e5441d39017eb9c04baf0fea6b489
 features:
   typescript:
     additionalDependencies: 0.1.0
@@ -4162,8 +4162,8 @@ trackedFiles:
     pristine_git_object: 87323e68b1dccee9654830a988507b3f244ab255
   docs/sdks/semanticsearch/README.md:
     id: dcaf2a437dec
-    last_write_checksum: sha1:b87e73129ec3ad0b4be66e5419f55d7f8e36dc3a
-    pristine_git_object: 768cde2187fbba992831a5c297433703e3b2ab6d
+    last_write_checksum: sha1:3a51622fa3e7abe0ae684374fe0c07f4382d36a7
+    pristine_git_object: d074e41538b5b4ffefa7fd401fc57bf40d522136
   docs/sdks/useraccount/README.md:
     id: 442d2e5df2cd
     last_write_checksum: sha1:aa7f936c0cb08846527c366aa8a6e42f4c843141
@@ -11206,10 +11206,10 @@ examples:
   retrieve:
     simple:
       requestBody:
-        application/json: {"query": "how do we roll back a canary?", "limit": 8, "rewriteQuery": false}
+        application/json: {"query": "how do we roll back a canary?", "limit": 8, "filters": {"kb": ["3f2a9c1e-5b7d-4e8a-9c21-7d4e5f6a8b90"]}, "rewriteQuery": false}
       responses:
         "200":
-          application/json: {"chunks": [{"id": "<id>", "text": "<value>", "record": {"recordId": "<id>", "name": "<value>", "connector": "<value>", "mimeType": "<value>", "updatedAt": "1735674666672"}, "citation": {"url": "https://crazy-horde.net/", "recordUrl": "https://pure-detective.org/", "pageNum": null, "blockIndex": 533417}}], "incomplete": true}
+          application/json: {"chunks": [{"id": "<id>", "text": "<value>", "record": {"recordId": "<id>", "name": "<value>", "connector": "<value>", "mimeType": "<value>", "updatedAt": "1735683497228"}, "citation": {"url": "https://interesting-sauerkraut.name/", "recordUrl": "https://excitable-tenant.com", "pageNum": [309685, 213678], "blockIndex": 458991}}], "incomplete": true}
         "400":
           application/json: {"error": {"code": "HTTP_FORBIDDEN", "message": "You need admin access to do this. Ask an admin in your organisation."}}
         "500":
@@ -11219,7 +11219,17 @@ examples:
         application/json: {"query": "<value>", "limit": 8, "rewriteQuery": false}
       responses:
         "200":
-          application/json: {"chunks": [{"id": "<id>", "text": "<value>", "record": {"recordId": "<id>", "name": "<value>", "connector": "<value>", "mimeType": "<value>", "updatedAt": "1735674666672"}, "citation": {"url": "https://crazy-horde.net/", "recordUrl": "https://pure-detective.org/", "pageNum": null, "blockIndex": 533417}}], "incomplete": true}
+          application/json: {"chunks": [{"id": "<id>", "text": "<value>", "record": {"recordId": "<id>", "name": "<value>", "connector": "<value>", "mimeType": "<value>", "updatedAt": "1735683497228"}, "citation": {"url": "https://interesting-sauerkraut.name/", "recordUrl": "https://excitable-tenant.com", "pageNum": [309685, 213678], "blockIndex": 458991}}], "incomplete": true}
+        "400":
+          application/json: {"error": {"code": "HTTP_FORBIDDEN", "message": "You need admin access to do this. Ask an admin in your organisation."}}
+        "500":
+          application/json: {"error": {"code": "HTTP_FORBIDDEN", "message": "You need admin access to do this. Ask an admin in your organisation."}}
+    basic:
+      requestBody:
+        application/json: {"query": "how do we roll back a canary?", "limit": 8, "rewriteQuery": false}
+      responses:
+        "200":
+          application/json: {"chunks": [{"id": "<id>", "text": "<value>", "record": {"recordId": "<id>", "name": "<value>", "connector": "<value>", "mimeType": "<value>", "updatedAt": "1735683497228"}, "citation": {"url": "https://interesting-sauerkraut.name/", "recordUrl": "https://excitable-tenant.com", "pageNum": [309685, 213678], "blockIndex": 458991}}], "incomplete": true}
         "400":
           application/json: {"error": {"code": "HTTP_FORBIDDEN", "message": "You need admin access to do this. Ask an admin in your organisation."}}
         "500":

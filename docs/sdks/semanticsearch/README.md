@@ -31,9 +31,9 @@ Nothing to find (no match, no accessible records, nothing indexed
 yet) is a `200` with an empty `chunks` list.
 
 
-### Example Usage
+### Example Usage: basic
 
-<!-- UsageSnippet language="typescript" operationID="retrieve" method="post" path="/retrieve" example="simple" -->
+<!-- UsageSnippet language="typescript" operationID="retrieve" method="post" path="/retrieve" example="basic" -->
 ```typescript
 import { Pipeshub } from "@pipeshub-ai/sdk";
 
@@ -73,6 +73,69 @@ const pipeshub = new PipeshubCore({
 async function run() {
   const res = await semanticSearchRetrieve(pipeshub, {
     query: "how do we roll back a canary?",
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("semanticSearchRetrieve failed:", res.error);
+  }
+}
+
+run();
+```
+### Example Usage: simple
+
+<!-- UsageSnippet language="typescript" operationID="retrieve" method="post" path="/retrieve" example="simple" -->
+```typescript
+import { Pipeshub } from "@pipeshub-ai/sdk";
+
+const pipeshub = new Pipeshub({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const result = await pipeshub.semanticSearch.retrieve({
+    query: "how do we roll back a canary?",
+    filters: {
+      kb: [
+        "3f2a9c1e-5b7d-4e8a-9c21-7d4e5f6a8b90",
+      ],
+    },
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
+import { semanticSearchRetrieve } from "@pipeshub-ai/sdk/funcs/semantic-search-retrieve.js";
+
+// Use `PipeshubCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
+
+async function run() {
+  const res = await semanticSearchRetrieve(pipeshub, {
+    query: "how do we roll back a canary?",
+    filters: {
+      kb: [
+        "3f2a9c1e-5b7d-4e8a-9c21-7d4e5f6a8b90",
+      ],
+    },
   });
   if (res.ok) {
     const { value: result } = res;

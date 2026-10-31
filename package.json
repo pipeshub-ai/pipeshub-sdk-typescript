@@ -1,6 +1,6 @@
 {
   "name": "@pipeshub-ai/sdk",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "author": "Pipeshub",
   "description": "Official TypeScript SDK for the PipesHub API. Search and chat over your company's knowledge.",
   "homepage": "https://pipeshub.com",

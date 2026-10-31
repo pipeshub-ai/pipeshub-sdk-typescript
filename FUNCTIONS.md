@@ -20,21 +20,25 @@ specific category of applications.
 
 ```typescript
 import { PipeshubCore } from "@pipeshub-ai/sdk/core.js";
-import { oAuthProviderOauthToken } from "@pipeshub-ai/sdk/funcs/o-auth-provider-oauth-token.js";
+import { semanticSearchRetrieve } from "@pipeshub-ai/sdk/funcs/semantic-search-retrieve.js";
 
 // Use `PipeshubCore` for best tree-shaking performance.
 // You can create one instance of it to use across an application.
-const pipeshub = new PipeshubCore();
+const pipeshub = new PipeshubCore({
+  security: {
+    bearerAuth: "<YOUR_BEARER_TOKEN_HERE>",
+  },
+});
 
 async function run() {
-  const res = await oAuthProviderOauthToken(pipeshub, {
-    grantType: "client_credentials",
+  const res = await semanticSearchRetrieve(pipeshub, {
+    query: "how do we roll back a canary?",
   });
   if (res.ok) {
     const { value: result } = res;
     console.log(result);
   } else {
-    console.log("oAuthProviderOauthToken failed:", res.error);
+    console.log("semanticSearchRetrieve failed:", res.error);
   }
 }
 

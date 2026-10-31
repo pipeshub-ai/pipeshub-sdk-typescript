@@ -58,10 +58,10 @@ export function serverURLFromOptions(options: SDKOptions): URL | null {
 
   const serverParams: Params[] = [
     {
-      "instance_url": options.instanceUrl ?? "https://app.pipeshub.com",
+      "instance_url": options.instanceUrl ?? "app.pipeshub.com",
     },
     {
-      "instance_url": options.instanceUrl ?? "https://app.pipeshub.com",
+      "instance_url": options.instanceUrl ?? "app.pipeshub.com",
     },
   ];
   let params: Params = {};
